@@ -1,7 +1,21 @@
 # Rama `refactor`: PAM por módulos y Mi PJ como agente mínimo
 
 Esta rama es para preparar una versión reorganizada de PAM y de «Mi PJ» sin tocar la que está en uso.
-**Nada de lo que hay aquí se publica:** GitHub Pages sigue sirviendo solo `main`, y `main` no cambia.
+**Nada de lo que hay aquí se publica en tu web:** GitHub Pages sigue sirviendo solo `main`, y `main` no cambia.
+
+## Las tres ramas
+
+| Rama | Qué es | ¿Se toca? |
+|---|---|---|
+| `main` | **La web de verdad** (jesleytherabbit-prog.github.io/PAM). Lo que entra aquí lo ven todos al momento. | Como siempre: tú subes archivos aquí. El refactor solo entra con un pull request que tú aceptes. |
+| `antigua` | Copia de cómo estaba `main` el 2 de noviembre de 2026, antes de empezar el refactor. | **No.** Es solo para consultar o para volver atrás si hiciera falta. |
+| `refactor` | Donde se va haciendo la versión nueva. | Sí, aquí se trabaja. No se publica en tu web. |
+
+## Dónde se prueba (staging)
+
+La rama `refactor` se publica en una copia aparte: **https://claudilahozbosch.github.io/PAM/** (fork en la cuenta de Claudi). Las pruebas del foro se hacen en el foro de pruebas test-forito.
+
+Tiene que ser en otra cuenta. En GitHub Pages, todas las webs de una misma cuenta comparten dominio (`jesleytherabbit-prog.github.io`) y, por tanto, comparten los datos guardados en el navegador. Una versión de pruebas en tu cuenta vería, y podría estropear, las fichas que los jugadores tienen guardadas en PAM. En otra cuenta, los datos quedan totalmente separados.
 
 ## Qué hay ahora en la rama
 
@@ -44,7 +58,7 @@ tests/            pruebas automáticas con node + jsdom
 
 ## Prueba de concepto (`poc-agente/`)
 
-- `agente/pam-agente-poc.user.js`: el agente (solo en el foro de pruebas test-forito).
+- `agente/pam-agente-poc.user.js`: el agente «PAM · Agente (staging)». Solo funciona en test-forito y en el staging; no se mezcla con tu «Mi PJ».
 - `web/index.html`: hace de PAM abierto normal.
 - `web/panel.html`: el panel dentro del foro.
 - Pruebas locales: `cd poc-agente/tests && npm install && npm test` (30 de 30 correctas).
@@ -59,7 +73,7 @@ La duda principal es de Chrome. Un iframe de otro dominio guarda sus datos apart
 
 ## Cómo se publicaría
 
-1. **Probar sin afectar a nadie.** Una copia de prueba en una carpeta de `main` (p. ej. `/PAM/beta/`) se publica en su propia dirección y el `index.html` actual sigue igual. Ojo: comparte dominio con PAM, así que **ve los mismos datos guardados**. La beta solo puede leer los datos antiguos y guardar los suyos con otro nombre; nunca debe borrar ni reescribir los de la versión en uso.
+1. **Probar sin afectar a nadie.** Todo se prueba antes en el staging (otra cuenta, otros datos) y en test-forito. Lo que no está probado ahí no se propone para `main`.
 2. **Publicar.** Un pull request de `refactor` a `main`. Al aceptarlo, GitHub Pages actualiza la web en uno o dos minutos. El script nuevo va en la misma dirección (`pam-mi-pj.user.js`), con el mismo `@name` y `@namespace` y un `@version` mayor. Así Tampermonkey lo actualiza solo (por defecto lo comprueba una vez al día) y conserva los datos del jugador.
 3. **Transición.** Durante ese día habrá gente con PAM nuevo y script viejo. PAM detecta la versión del agente y avisa «actualiza el script». Mientras tanto, mantiene el receptor antiguo del foro.
 4. **Marcha atrás.** Se revierte el pull request con el botón «Revert» de GitHub y la web vuelve a la versión anterior en un minuto. Como la migración no borra los datos antiguos, nadie pierde nada.

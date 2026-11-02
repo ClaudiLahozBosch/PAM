@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         PAM · Agente (prueba de concepto)
-// @namespace    https://claudilahozbosch.github.io/pam-poc/
+// @name         PAM · Agente (staging)
+// @namespace    https://claudilahozbosch.github.io/PAM/staging
 // @version      0.1.0
 // @description  Prueba: el script solo lee el foro, publica tras tu «Aceptar» y muestra el panel de PAM. Toda la lógica vive en PAM.
 // @match        https://test-forito.foroactivo.com/*
-// @match        https://claudilahozbosch.github.io/pam-poc/*
+// @match        https://claudilahozbosch.github.io/PAM/*
 // @noframes
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -25,7 +25,8 @@
 
   var VERSION = '0.1.0';
   var PROTOCOLO = 1;
-  var PAM = { origen: 'https://claudilahozbosch.github.io', ruta: '/pam-poc/' };
+  // Staging: el fork de pruebas (otro dominio que PAM real, así no ve los datos de los jugadores).
+  var PAM = { origen: 'https://claudilahozbosch.github.io', ruta: '/PAM/poc-agente/web/' };
   var FOROS = ['test-forito.foroactivo.com'];
 
   var enForo = FOROS.indexOf(location.host) !== -1;

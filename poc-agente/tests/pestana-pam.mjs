@@ -8,7 +8,7 @@ const raiz = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 let fallos = 0;
 const comprobar = (n, c, x = '') => { if (!c) fallos++; console.log((c ? 'OK  ' : 'FALLA ') + n + (x ? '  · ' + x : '')); };
 
-const dom = new JSDOM('<!doctype html><body></body>', { url: 'https://claudilahozbosch.github.io/pam-poc/', runScripts: 'outside-only' });
+const dom = new JSDOM('<!doctype html><body></body>', { url: 'https://claudilahozbosch.github.io/PAM/poc-agente/web/', runScripts: 'outside-only' });
 const W = dom.window;
 const gm = {};
 W.GM_getValue = (k, d) => (k in gm ? JSON.parse(gm[k]) : d);

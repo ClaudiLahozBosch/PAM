@@ -62,7 +62,7 @@ const boton = txt => [...sombra().querySelectorAll('.fondo button')].find(b => b
 // 0 · hola
 const h = await agente.hola();
 comprobar('hola devuelve versión, protocolo y cuenta', h.agente === '0.1.0' && h.protocolo === 1 && h.cuenta?.nombre === 'TEST' && h.cuenta?.id === 7, JSON.stringify(h));
-comprobar('el iframe apunta al panel de PAM', sombra().querySelector('iframe').getAttribute('src') === PAM + '/pam-poc/panel.html?foro=' + encodeURIComponent(FORO));
+comprobar('el iframe apunta al panel de PAM', sombra().querySelector('iframe').getAttribute('src') === PAM + '/PAM/poc-agente/web/panel.html?foro=' + encodeURIComponent(FORO));
 
 // 1 · leer
 const doc = await agente.leer('/');
