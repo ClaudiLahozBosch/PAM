@@ -26,7 +26,7 @@ Tiene que ser en otra cuenta. En GitHub Pages, todas las webs de una misma cuent
 ## La idea
 
 1. **PAM pasa a ser varios archivos (módulos de JavaScript)** en vez de uno de 9.500 líneas. Sin herramientas ni compilación: GitHub Pages los sirve tal cual y se pueden seguir subiendo desde la web.
-2. **Todo lo que se pueda pasa del script a PAM.** El script que instalan los jugadores queda como un «agente» que solo hace lo que PAM no puede hacer desde su dominio:
+2. **Todo lo que se pueda pasa de los scripts a PAM.** El script que instalan los jugadores (y también el del Inspector) queda como un «agente» que solo hace lo que PAM no puede hacer desde su dominio:
    - leer páginas del foro con la sesión del jugador (solo rutas del propio foro);
    - publicar o editar, siempre después de su propia ventana Aceptar / Modificar / Denegar;
    - guardar datos compartidos entre el foro y PAM (almacén de Tampermonkey);
@@ -45,7 +45,7 @@ Algunos ejemplos de lo que motiva el cambio:
 ```
 index.html        PAM completo        panel.html   panel de Mi PJ dentro del foro
 css/              estilos por página
-data/             sistema.js (atributos, habilidades, precios… una sola vez), arcanos.json
+data/             sistema.json (atributos, habilidades, precios… una sola vez), arcanos.json
 js/core/          router, eventos, almacén con versión y migración, utilidades de DOM y texto
 js/modelos/       Personaje, Arcano, Trasfondo, Canje, Boveda, Empleo
 js/reglas/        Precios, Combate, Requisitos (lógica pura, con pruebas)
@@ -55,6 +55,36 @@ js/paginas/       una clase por pantalla: Inicio, MiFicha, TablaCanjes, Compendi
 agente/           el script mínimo para Tampermonkey
 tests/            pruebas automáticas con node + jsdom
 ```
+
+## Lo que añade la auditoría del 2/11/2026
+
+La auditoría técnica (17 hallazgos, todos comprobados contra el código) coincide con esta propuesta y la completa. La lista de errores y cuándo se arregla cada uno está en [`PENDIENTES.md`](PENDIENTES.md). De la auditoría se adopta:
+
+- **El Inspector de Canjes entra también en el refactor.** Usará el mismo lector de fichas y las mismas reglas que PAM, a través del mismo agente; no tendrá un lector propio.
+- **Los datos del sistema, en JSON** (`data/sistema.json`): el Inspector y cualquier herramienta los leen sin ejecutar código.
+- **Reglas del núcleo:**
+  1. Un personaje se identifica por **foro + número de tema** de su ficha; el nombre es solo lo que se muestra.
+  2. Una ficha tiene **una o varias partes** (mensajes). De cada una se guarda el número de mensaje, la sección, el BBCode original y una huella para saber si alguien la cambió.
+  3. Lo que no se entiende **se conserva y se marca para revisar**; nunca desaparece ni se convierte en «nivel 0».
+  4. Un canje es una lista de operaciones con identificador. Un reintento no duplica mensajes, gastos ni avisos.
+  5. Cada edición va **al mensaje concreto** que contiene el dato, con vista previa de los cambios. Se cancela si el mensaje cambió desde que se leyó.
+- **No se adopta (por ahora): Vite y TypeScript con compilación.** Obligarían a compilar antes de publicar y a usar GitHub Actions, y ya no se podría subir desde la web como ahora. Los módulos sin compilar y los tipos en comentarios (JSDoc) dan casi lo mismo sin ese coste. Si más adelante hace falta, se puede añadir sin rehacer nada.
+
+## Fases
+
+Cada fase se prueba en el staging y en test-forito, y solo entonces se propone para `main`.
+
+| Fase | Contenido |
+|---|---|
+| 0 | Pruebas automáticas con fichas reales recortadas (Irvin, Mortimer, Mark…), sin datos de sesión. |
+| 1 | Datos del sistema en JSON y núcleo: almacén con copia de seguridad, guardado inmediato y fechas locales. |
+| 2 | Modelos: Personaje (id foro + tema), ficha por partes, trasfondo con identidad, bóveda dentro del personaje. |
+| 3 | Lectores del foro dentro de PAM, uno solo para Mi PJ y el Inspector: fichas de varios mensajes, trasfondos, puntos de destino, historial. |
+| 4 | Editor de BBCode por bloques y por mensaje (el «Personalizada» nuevo). |
+| 5 | Agente y panel de Mi PJ servido por PAM. |
+| 6 | Flujo de canjes: petición, aprobación, aplicar; reanudable y sin duplicados. |
+| 7 | Sincronización con la nube con control de versiones. |
+| 8 | Resto de páginas, estilos y dependencias. |
 
 ## Prueba de concepto (`poc-agente/`)
 
