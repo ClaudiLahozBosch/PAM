@@ -31,7 +31,7 @@ Todo lo marcado como «comprobado» se ha verificado contra el código de `main`
 | F12 | El Inspector descarga `index.html` y ejecuta trozos con `new Function()` para leer precios y requisitos. Frágil: cualquier cambio de formato lo rompe. | comprobado | 1 · ✔ datos en `data/sistema.json`; falta que el Inspector los use (fase 3) |
 | F13 | Mi PJ maneja PAM pulsando botones y leyendo su pantalla (`#f-parse`, `#dlg-ta`, `#bovForm`…). | comprobado | 5 · agente y protocolo (prueba de concepto ya hecha) |
 | F14 | El Registro de Roles guarda con 700 ms de retraso y no guarda al cerrar la página. | comprobado | ✔ fase 1 · `Almacen.guardarLuego()` + `vigilarSalida()`, con prueba |
-| F15 | `fechaISO()` usa la fecha UTC: entre medianoche y la 1-2 h (hora de Madrid) da el día anterior. | comprobado | ✔ fase 1 · `core/fechas.js`, con prueba en hora de Madrid |
+| F15 | `fechaISO()` usa la fecha UTC: entre medianoche y la 1-2 h (hora de Madrid) da el día anterior. | comprobado | ✔ fase 1 · `core/fechas.js`: día local de cada usuario (pruebas con hora de Madrid y de Buenos Aires) |
 | F16 | `renderAll()` vuelve a pintar toda la Tabla de Canjes por cualquier cambio. | comprobado | 8 · páginas |
 | F17 | Versiones distintas en un mismo script (`@version 1.7.1` y `mipj-1.7.2`), CSS repetido y `leerSaldos()` copiado en Mi PJ y en el Inspector. | comprobado | 8 · se resuelve al ordenar |
 | R01 | Editor personalizado: una línea nueva detrás de la última de una lista (`…[/spoiler]`) queda fuera del desplegable; sin `[b]`, o en trasfondos, duplica el `[/spoiler]` y rompe todo lo que viene detrás. | comprobado (Mortimer) | 4 |
