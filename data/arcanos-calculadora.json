@@ -1,0 +1,2092 @@
+{
+ "hechizo": {
+  "dom": [
+   {
+    "nombre": "Accio",
+    "requisitos": []
+   },
+   {
+    "nombre": "Aguamenti",
+    "requisitos": []
+   },
+   {
+    "nombre": "Arresto Momentum",
+    "requisitos": []
+   },
+   {
+    "nombre": "Ascendio",
+    "requisitos": []
+   },
+   {
+    "nombre": "Bauleo",
+    "requisitos": []
+   },
+   {
+    "nombre": "Calidum",
+    "requisitos": []
+   },
+   {
+    "nombre": "Colovaria",
+    "requisitos": []
+   },
+   {
+    "nombre": "Crinus Muto",
+    "requisitos": []
+   },
+   {
+    "nombre": "Depulso",
+    "requisitos": []
+   },
+   {
+    "nombre": "Descendo",
+    "requisitos": []
+   },
+   {
+    "nombre": "Fregotego",
+    "requisitos": []
+   },
+   {
+    "nombre": "Lumos",
+    "requisitos": []
+   },
+   {
+    "nombre": "Nox",
+    "requisitos": []
+   },
+   {
+    "nombre": "Sonorus",
+    "requisitos": []
+   },
+   {
+    "nombre": "Tergeo",
+    "requisitos": []
+   },
+   {
+    "nombre": "Waddiwasi",
+    "requisitos": []
+   },
+   {
+    "nombre": "Wingardium Leviosa",
+    "requisitos": []
+   }
+  ],
+  "bas": [
+   {
+    "nombre": "Adoleret",
+    "requisitos": [
+     "Ordenista Novato"
+    ]
+   },
+   {
+    "nombre": "Agmen",
+    "requisitos": [
+     "Hechicero 1"
+    ]
+   },
+   {
+    "nombre": "Alarte Ascendere",
+    "requisitos": []
+   },
+   {
+    "nombre": "Alchimia Incantatio Mínima",
+    "requisitos": []
+   },
+   {
+    "nombre": "Alohomora",
+    "requisitos": []
+   },
+   {
+    "nombre": "Alset",
+    "requisitos": [
+     "Encantador 2"
+    ]
+   },
+   {
+    "nombre": "Amica Plantae",
+    "requisitos": []
+   },
+   {
+    "nombre": "Aparecium",
+    "requisitos": [
+     "Hechicero 2"
+    ]
+   },
+   {
+    "nombre": "Aquaeructo",
+    "requisitos": []
+   },
+   {
+    "nombre": "Atabraquium",
+    "requisitos": []
+   },
+   {
+    "nombre": "Avis",
+    "requisitos": []
+   },
+   {
+    "nombre": "Bombarda",
+    "requisitos": []
+   },
+   {
+    "nombre": "Calvorio",
+    "requisitos": []
+   },
+   {
+    "nombre": "Carpe Retractum",
+    "requisitos": []
+   },
+   {
+    "nombre": "Claustra Terrae",
+    "requisitos": []
+   },
+   {
+    "nombre": "Defodio",
+    "requisitos": []
+   },
+   {
+    "nombre": "Diffindo",
+    "requisitos": []
+   },
+   {
+    "nombre": "Dissendium",
+    "requisitos": []
+   },
+   {
+    "nombre": "Ennervate",
+    "requisitos": [
+     "Hechicero 1"
+    ]
+   },
+   {
+    "nombre": "Episkey",
+    "requisitos": [
+     "Medimago 1"
+    ]
+   },
+   {
+    "nombre": "Expulso",
+    "requisitos": []
+   },
+   {
+    "nombre": "Ferula",
+    "requisitos": [
+     "Medimago 1"
+    ]
+   },
+   {
+    "nombre": "Fett",
+    "requisitos": [
+     "Ordenista Novato"
+    ]
+   },
+   {
+    "nombre": "Fiendlock",
+    "requisitos": [
+     "Hechicero 1"
+    ]
+   },
+   {
+    "nombre": "Finestra",
+    "requisitos": []
+   },
+   {
+    "nombre": "Flipendo",
+    "requisitos": []
+   },
+   {
+    "nombre": "Fluctus Mínima",
+    "requisitos": []
+   },
+   {
+    "nombre": "Frigus",
+    "requisitos": []
+   },
+   {
+    "nombre": "Homorphus",
+    "requisitos": [
+     "Hechicero 3"
+    ]
+   },
+   {
+    "nombre": "Jaulio",
+    "requisitos": [
+     "Claustra Terrae"
+    ]
+   },
+   {
+    "nombre": "Lacarnum Inflamarae",
+    "requisitos": []
+   },
+   {
+    "nombre": "Legeremens Minoris",
+    "requisitos": [
+     "Mago Oscuro 1"
+    ]
+   },
+   {
+    "nombre": "Liberacorpus",
+    "requisitos": [
+     "Hechicero 1"
+    ]
+   },
+   {
+    "nombre": "Locomotor Mortis",
+    "requisitos": []
+   },
+   {
+    "nombre": "Meteoloembrujo Recanto",
+    "requisitos": [
+     "Hechicero 1"
+    ]
+   },
+   {
+    "nombre": "Morslauter",
+    "requisitos": [
+     "Mortífago Novato"
+    ]
+   },
+   {
+    "nombre": "Nuntius Minoris",
+    "requisitos": [
+     "Legeremens Minoris"
+    ]
+   },
+   {
+    "nombre": "Obscuro",
+    "requisitos": []
+   },
+   {
+    "nombre": "Oclumens Minoris",
+    "requisitos": [
+     "Mago Oscuro 1"
+    ]
+   },
+   {
+    "nombre": "Oppugno",
+    "requisitos": []
+   },
+   {
+    "nombre": "Parasitus Mínima",
+    "requisitos": [
+     "Mago Oscuro 2"
+    ]
+   },
+   {
+    "nombre": "Petrificus Totalus",
+    "requisitos": []
+   },
+   {
+    "nombre": "Prior Incantato",
+    "requisitos": [
+     "Hechicero 1"
+    ]
+   },
+   {
+    "nombre": "Protego",
+    "requisitos": []
+   },
+   {
+    "nombre": "Rayo",
+    "requisitos": []
+   },
+   {
+    "nombre": "Relashio",
+    "requisitos": [
+     "Hechicero 1"
+    ]
+   },
+   {
+    "nombre": "Reparo Mínima",
+    "requisitos": [
+     "Encantador 2"
+    ]
+   },
+   {
+    "nombre": "Repelium Mínima",
+    "requisitos": [
+     "Combatiente 1"
+    ]
+   },
+   {
+    "nombre": "Rictumsempra",
+    "requisitos": []
+   },
+   {
+    "nombre": "Riddikulus",
+    "requisitos": []
+   },
+   {
+    "nombre": "Sensus Animal",
+    "requisitos": [
+     "Magizoólogo 1 (según la criatura)"
+    ]
+   },
+   {
+    "nombre": "Surgito",
+    "requisitos": [
+     "Hechicero 1"
+    ]
+   },
+   {
+    "nombre": "Tragababosas",
+    "requisitos": []
+   },
+   {
+    "nombre": "Ventus",
+    "requisitos": []
+   }
+  ],
+  "int": [
+   {
+    "nombre": "Aberto",
+    "requisitos": [
+     "Alohomora"
+    ]
+   },
+   {
+    "nombre": "Alchimia Incantatio",
+    "requisitos": [
+     "Alchimia Incantatio Mínima"
+    ]
+   },
+   {
+    "nombre": "Andacht",
+    "requisitos": [
+     "Ordenista Competente"
+    ]
+   },
+   {
+    "nombre": "Antus",
+    "requisitos": [
+     "Alset"
+    ]
+   },
+   {
+    "nombre": "Aqua Volatem",
+    "requisitos": [
+     "Jaulio",
+     "Fianto Duri"
+    ]
+   },
+   {
+    "nombre": "Aquacaudalis",
+    "requisitos": [
+     "Aquaeructo"
+    ]
+   },
+   {
+    "nombre": "Arania Exumai",
+    "requisitos": [
+     "Magizoólogo 1"
+    ]
+   },
+   {
+    "nombre": "Audire Plantae",
+    "requisitos": []
+   },
+   {
+    "nombre": "Avium Grex",
+    "requisitos": [
+     "Avis"
+    ]
+   },
+   {
+    "nombre": "Cohortis",
+    "requisitos": [
+     "Obscuro"
+    ]
+   },
+   {
+    "nombre": "Confringo",
+    "requisitos": [
+     "Bombarda"
+    ]
+   },
+   {
+    "nombre": "Delictum",
+    "requisitos": [
+     "Aparecium"
+    ]
+   },
+   {
+    "nombre": "Densaugeo",
+    "requisitos": []
+   },
+   {
+    "nombre": "Deprimo",
+    "requisitos": [
+     "Defodio"
+    ]
+   },
+   {
+    "nombre": "Diluculum",
+    "requisitos": []
+   },
+   {
+    "nombre": "Dispergam",
+    "requisitos": [
+     "Expulso"
+    ]
+   },
+   {
+    "nombre": "Dual Potens",
+    "requisitos": [
+     "Agmen"
+    ]
+   },
+   {
+    "nombre": "Everte Statum",
+    "requisitos": [
+     "Flipendo"
+    ]
+   },
+   {
+    "nombre": "Expelliarmus",
+    "requisitos": []
+   },
+   {
+    "nombre": "Fianto Duri",
+    "requisitos": [
+     "Claustra Terrae"
+    ]
+   },
+   {
+    "nombre": "Finite",
+    "requisitos": [
+     "Hechicero 3"
+    ]
+   },
+   {
+    "nombre": "Fluctus",
+    "requisitos": [
+     "Fluctus Mínima"
+    ]
+   },
+   {
+    "nombre": "Furunculus",
+    "requisitos": []
+   },
+   {
+    "nombre": "Glacius",
+    "requisitos": [
+     "Frigus"
+    ]
+   },
+   {
+    "nombre": "Impedimenta",
+    "requisitos": [
+     "Petrificus Totalus"
+    ]
+   },
+   {
+    "nombre": "Impetus Plantae",
+    "requisitos": [
+     "Amica Plantae"
+    ]
+   },
+   {
+    "nombre": "Incarcerous",
+    "requisitos": [
+     "Atabraquium"
+    ]
+   },
+   {
+    "nombre": "Incendio",
+    "requisitos": [
+     "Lacarnum Inflamarae"
+    ]
+   },
+   {
+    "nombre": "Infulgurum",
+    "requisitos": [
+     "Rayo"
+    ]
+   },
+   {
+    "nombre": "Legeremens Media",
+    "requisitos": [
+     "Legeremens Minoris"
+    ]
+   },
+   {
+    "nombre": "Levicorpus",
+    "requisitos": [
+     "Alarte Ascendere"
+    ]
+   },
+   {
+    "nombre": "Locomotor Terminus",
+    "requisitos": [
+     "Locomotor Mortis"
+    ]
+   },
+   {
+    "nombre": "Loqui Animal",
+    "requisitos": [
+     "Sensus Animal"
+    ]
+   },
+   {
+    "nombre": "Mobilicorpus",
+    "requisitos": []
+   },
+   {
+    "nombre": "Morsequor",
+    "requisitos": [
+     "Mortífago Competente"
+    ]
+   },
+   {
+    "nombre": "Nuntius Media",
+    "requisitos": [
+     "Nuntius Minoris"
+    ]
+   },
+   {
+    "nombre": "Obliviate",
+    "requisitos": [
+     "Mago Oscuro 1"
+    ]
+   },
+   {
+    "nombre": "Oclumens Media",
+    "requisitos": [
+     "Oclumens Minoris"
+    ]
+   },
+   {
+    "nombre": "Onerarios",
+    "requisitos": [
+     "Ordenista Competente"
+    ]
+   },
+   {
+    "nombre": "Parasitus",
+    "requisitos": [
+     "Parasitus Mínima"
+    ]
+   },
+   {
+    "nombre": "Protego Máxima",
+    "requisitos": [
+     "Protego"
+    ]
+   },
+   {
+    "nombre": "Reducto",
+    "requisitos": []
+   },
+   {
+    "nombre": "Remedium",
+    "requisitos": [
+     "Episkey"
+    ]
+   },
+   {
+    "nombre": "Reparifors",
+    "requisitos": [
+     "Ferula"
+    ]
+   },
+   {
+    "nombre": "Reparo",
+    "requisitos": [
+     "Reparo Mínima"
+    ]
+   },
+   {
+    "nombre": "Repelium",
+    "requisitos": [
+     "Repelium Mínima"
+    ]
+   },
+   {
+    "nombre": "Revelio",
+    "requisitos": [
+     "Aparecium"
+    ]
+   },
+   {
+    "nombre": "Ruptis",
+    "requisitos": [
+     "Ventus"
+    ]
+   },
+   {
+    "nombre": "Sectum",
+    "requisitos": [
+     "Diffindo"
+    ]
+   },
+   {
+    "nombre": "Tarantallegra",
+    "requisitos": [
+     "Rictumsempra"
+    ]
+   },
+   {
+    "nombre": "Tirmelo Plantae",
+    "requisitos": [
+     "Audire Plantae"
+    ]
+   },
+   {
+    "nombre": "Vespertilliomuci",
+    "requisitos": [
+     "Tragababosas"
+    ]
+   },
+   {
+    "nombre": "Vulneructum",
+    "requisitos": [
+     "Medimago 1"
+    ]
+   }
+  ],
+  "ava": [
+   {
+    "nombre": "Alchimia Incantatio Máxima",
+    "requisitos": [
+     "Alchimia Incantatio"
+    ]
+   },
+   {
+    "nombre": "Anteoculatia",
+    "requisitos": [
+     "Locomotor Terminus"
+    ]
+   },
+   {
+    "nombre": "Ardoribus Sempiternis",
+    "requisitos": [
+     "Ordenista Experto"
+    ]
+   },
+   {
+    "nombre": "Arctis",
+    "requisitos": [
+     "Glacius"
+    ]
+   },
+   {
+    "nombre": "Arovlop",
+    "requisitos": [
+     "Antus"
+    ]
+   },
+   {
+    "nombre": "Artivestringo",
+    "requisitos": [
+     "Cohortis"
+    ]
+   },
+   {
+    "nombre": "Avada Kedavra",
+    "requisitos": [
+     "Mago Oscuro 3"
+    ]
+   },
+   {
+    "nombre": "Avium Legio",
+    "requisitos": [
+     "Avium Grex"
+    ]
+   },
+   {
+    "nombre": "Bombarda Máxima",
+    "requisitos": [
+     "Confringo"
+    ]
+   },
+   {
+    "nombre": "Brackium Emendo",
+    "requisitos": [
+     "Reparifors"
+    ]
+   },
+   {
+    "nombre": "Confundo",
+    "requisitos": [
+     "Mago Oscuro 1"
+    ]
+   },
+   {
+    "nombre": "Consumo Diabolica",
+    "requisitos": [
+     "Incendio Diabolica"
+    ]
+   },
+   {
+    "nombre": "Crucio",
+    "requisitos": [
+     "Mago Oscuro 3"
+    ]
+   },
+   {
+    "nombre": "Desmaius",
+    "requisitos": [
+     "Impedimenta"
+    ]
+   },
+   {
+    "nombre": "Exorcismo",
+    "requisitos": [
+     "Mago Oscuro 2"
+    ]
+   },
+   {
+    "nombre": "Expecto Patronum",
+    "requisitos": []
+   },
+   {
+    "nombre": "Fiendfyre",
+    "requisitos": [
+     "Incendio"
+    ]
+   },
+   {
+    "nombre": "Finite Incantatem",
+    "requisitos": [
+     "Finite"
+    ]
+   },
+   {
+    "nombre": "Fluctus Máxima",
+    "requisitos": [
+     "Fluctus"
+    ]
+   },
+   {
+    "nombre": "Fulgari",
+    "requisitos": [
+     "Incarcerous"
+    ]
+   },
+   {
+    "nombre": "Furia Plantae",
+    "requisitos": [
+     "Impetus Plantae"
+    ]
+   },
+   {
+    "nombre": "Gubraith",
+    "requisitos": [
+     "Poder 7"
+    ]
+   },
+   {
+    "nombre": "Harmonia Nectere Passus",
+    "requisitos": [
+     "Reparo"
+    ]
+   },
+   {
+    "nombre": "Illuminas Pluviam",
+    "requisitos": [
+     "Infulgurum"
+    ]
+   },
+   {
+    "nombre": "Imperio",
+    "requisitos": [
+     "Mago Oscuro 3"
+    ]
+   },
+   {
+    "nombre": "Impulso Fractus",
+    "requisitos": [
+     "Everte Statum"
+    ]
+   },
+   {
+    "nombre": "Incendio Diabolica",
+    "requisitos": [
+     "Protego Diabólica"
+    ]
+   },
+   {
+    "nombre": "Legeremens",
+    "requisitos": [
+     "Legeremens Media"
+    ]
+   },
+   {
+    "nombre": "Levinsana",
+    "requisitos": [
+     "Levicorpus"
+    ]
+   },
+   {
+    "nombre": "Lingualoopsia",
+    "requisitos": [
+     "Tarantallegra"
+    ]
+   },
+   {
+    "nombre": "Locomotor Finalis",
+    "requisitos": [
+     "Locomotor Terminus"
+    ]
+   },
+   {
+    "nombre": "Macrocranio",
+    "requisitos": [
+     "Dispergam"
+    ]
+   },
+   {
+    "nombre": "Morswunde",
+    "requisitos": [
+     "Mortífago Experto"
+    ]
+   },
+   {
+    "nombre": "Nebula Alchimia",
+    "requisitos": [
+     "Alchimia Incantatio Máxima"
+    ]
+   },
+   {
+    "nombre": "Nuntius",
+    "requisitos": [
+     "Nuntius Media"
+    ]
+   },
+   {
+    "nombre": "Oclumens",
+    "requisitos": [
+     "Oclumens Media"
+    ]
+   },
+   {
+    "nombre": "Parasitus Máxima",
+    "requisitos": [
+     "Parasitus"
+    ]
+   },
+   {
+    "nombre": "Paries Ignis",
+    "requisitos": [
+     "Aqua Volatem",
+     "Partis Temporus"
+    ]
+   },
+   {
+    "nombre": "Partis Temporus",
+    "requisitos": [
+     "Fianto Duri"
+    ]
+   },
+   {
+    "nombre": "Portaberto",
+    "requisitos": [
+     "Aberto"
+    ]
+   },
+   {
+    "nombre": "Potentiae Actus",
+    "requisitos": [
+     "Dual Potens"
+    ]
+   },
+   {
+    "nombre": "Repelium Máxima",
+    "requisitos": [
+     "Repelium"
+    ]
+   },
+   {
+    "nombre": "Rupturum",
+    "requisitos": [
+     "Mago Oscuro 2"
+    ]
+   },
+   {
+    "nombre": "Salvio Hexia",
+    "requisitos": [
+     "Protego Máxima"
+    ]
+   },
+   {
+    "nombre": "Sectumsempra",
+    "requisitos": [
+     "Sectum"
+    ]
+   },
+   {
+    "nombre": "Specialis Revelio",
+    "requisitos": [
+     "Revelio"
+    ]
+   },
+   {
+    "nombre": "Turbinis",
+    "requisitos": [
+     "Ruptis"
+    ]
+   },
+   {
+    "nombre": "Vulnera Sanentur",
+    "requisitos": [
+     "Remedium"
+    ]
+   }
+  ]
+ },
+ "pocion": {
+  "bas": [
+   {
+    "nombre": "Antídoto contra Veritaserum",
+    "requisitos": []
+   },
+   {
+    "nombre": "Chuchería para mascotas",
+    "requisitos": []
+   },
+   {
+    "nombre": "Concentrado de brugmansia",
+    "requisitos": []
+   },
+   {
+    "nombre": "Filtro de Upsala",
+    "requisitos": []
+   },
+   {
+    "nombre": "Fluido explosivo",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción agudizadora de ingenio",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción calmante",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción de actividad",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción de aliento de perro",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción de fuerza de culturista",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción de la memoria",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción de Quasimodo",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción de reanimación",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción embellecedora",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción herbicida",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción incorpórea",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción olvidadiza",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción pimentónica",
+    "requisitos": [
+     "Medimago 1"
+    ]
+   },
+   {
+    "nombre": "Poción vigorizante",
+    "requisitos": [
+     "Medimago 2"
+    ]
+   },
+   {
+    "nombre": "Poción Wiggenweld",
+    "requisitos": []
+   },
+   {
+    "nombre": "Preparado de mandrágora",
+    "requisitos": []
+   },
+   {
+    "nombre": "Reactivo de Descurainia sophia",
+    "requisitos": [
+     "Medimago 2"
+    ]
+   },
+   {
+    "nombre": "Retardante alquímico",
+    "requisitos": []
+   },
+   {
+    "nombre": "Solución animadora",
+    "requisitos": []
+   },
+   {
+    "nombre": "Test de Saberhagen",
+    "requisitos": []
+   }
+  ],
+  "int": [
+   {
+    "nombre": "Antídoto",
+    "requisitos": [
+     "Poción pimentónica"
+    ]
+   },
+   {
+    "nombre": "Chuchería para animales",
+    "requisitos": [
+     "Chuchería para mascotas"
+    ]
+   },
+   {
+    "nombre": "Coles masticadoras chinas",
+    "requisitos": []
+   },
+   {
+    "nombre": "Concentrado de Centinodia",
+    "requisitos": [
+     "Reactivo de Descurainia sophia"
+    ]
+   },
+   {
+    "nombre": "Concentrado de erumpent",
+    "requisitos": [
+     "Fluido explosivo"
+    ]
+   },
+   {
+    "nombre": "Esencia de Díctamo",
+    "requisitos": [
+     "Poción vigorizante"
+    ]
+   },
+   {
+    "nombre": "Filtro corrosivo",
+    "requisitos": []
+   },
+   {
+    "nombre": "Obfuscate mortem",
+    "requisitos": [
+     "Mago Oscuro 2"
+    ]
+   },
+   {
+    "nombre": "Poción crecepelo",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción de Ataraxia",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción de Babel",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción de Berserker",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción de fuerza de semigigante",
+    "requisitos": [
+     "Poción de fuerza de culturista"
+    ]
+   },
+   {
+    "nombre": "Poción de Gregory el Zalamero",
+    "requisitos": [
+     "Poción embellecedora"
+    ]
+   },
+   {
+    "nombre": "Poción de piel ignífuga",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción de raíces sangrientas",
+    "requisitos": [
+     "Concentrado de brugmansia"
+    ]
+   },
+   {
+    "nombre": "Poción de sentido animal",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción debilitante",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción envejecedora",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción multijugos",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción rejuvenecedora",
+    "requisitos": []
+   },
+   {
+    "nombre": "Preparado del árbol de las hienas",
+    "requisitos": [
+     "Poción de aliento de perro"
+    ]
+   },
+   {
+    "nombre": "Solución del estilista trágico",
+    "requisitos": []
+   },
+   {
+    "nombre": "Solución del ritualista",
+    "requisitos": []
+   },
+   {
+    "nombre": "Vapores de Dharamsala",
+    "requisitos": [
+     "Filtro de Upsala"
+    ]
+   }
+  ],
+  "ava": [
+   {
+    "nombre": "Aliento de dragón",
+    "requisitos": [
+     "Concentrado de erumpent"
+    ]
+   },
+   {
+    "nombre": "Amortentia",
+    "requisitos": []
+   },
+   {
+    "nombre": "Chuchería para bestias",
+    "requisitos": [
+     "Chuchería para animales"
+    ]
+   },
+   {
+    "nombre": "Destilado de Asfodelo",
+    "requisitos": [
+     "Concentrado de Centinodia"
+    ]
+   },
+   {
+    "nombre": "Elixir de Insignificancia",
+    "requisitos": []
+   },
+   {
+    "nombre": "Elixir dorado",
+    "requisitos": [
+     "Antídoto"
+    ]
+   },
+   {
+    "nombre": "Elixir Vitalis",
+    "requisitos": [
+     "Esencia de Díctamo"
+    ]
+   },
+   {
+    "nombre": "Felix Felicis",
+    "requisitos": []
+   },
+   {
+    "nombre": "Filtro de insensibilidad",
+    "requisitos": []
+   },
+   {
+    "nombre": "Filtro de muertos en vida",
+    "requisitos": []
+   },
+   {
+    "nombre": "Filtro de precognición",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción de fuerza de gigante",
+    "requisitos": [
+     "Poción de fuerza de semigigante"
+    ]
+   },
+   {
+    "nombre": "Poción de Helena de Troya",
+    "requisitos": [
+     "Poción de Gregory el Zalamero"
+    ]
+   },
+   {
+    "nombre": "Poción de la desesperación",
+    "requisitos": []
+   },
+   {
+    "nombre": "Poción Matalobos",
+    "requisitos": []
+   },
+   {
+    "nombre": "Vahos de Delfos",
+    "requisitos": [
+     "Vapores de Dharamsala"
+    ]
+   },
+   {
+    "nombre": "Veritaserum",
+    "requisitos": []
+   },
+   {
+    "nombre": "Zumo de tentácula venenosa",
+    "requisitos": [
+     "Poción de raíces sangrientas"
+    ]
+   }
+  ]
+ },
+ "ritual": {
+  "bas": [
+   {
+    "nombre": "Avencompedium",
+    "requisitos": [
+     "Mago Oscuro 2"
+    ]
+   },
+   {
+    "nombre": "Avensegium",
+    "requisitos": []
+   },
+   {
+    "nombre": "Bullapetasum",
+    "requisitos": []
+   },
+   {
+    "nombre": "Cave Inimicum",
+    "requisitos": []
+   },
+   {
+    "nombre": "Crescemultum",
+    "requisitos": [
+     "Encantador 1"
+    ]
+   },
+   {
+    "nombre": "Deletrius",
+    "requisitos": []
+   },
+   {
+    "nombre": "Dimminuendo",
+    "requisitos": [
+     "Encantador 1"
+    ]
+   },
+   {
+    "nombre": "Duro",
+    "requisitos": [
+     "Encantador 1"
+    ]
+   },
+   {
+    "nombre": "Epoximise",
+    "requisitos": []
+   },
+   {
+    "nombre": "Fermaportus",
+    "requisitos": []
+   },
+   {
+    "nombre": "Flagrate",
+    "requisitos": []
+   },
+   {
+    "nombre": "Gamexarum",
+    "requisitos": []
+   },
+   {
+    "nombre": "Herbivicus",
+    "requisitos": []
+   },
+   {
+    "nombre": "Illusia Minoris",
+    "requisitos": []
+   },
+   {
+    "nombre": "Locomotor",
+    "requisitos": [
+     "Encantador 2"
+    ]
+   },
+   {
+    "nombre": "Mimble Wimble",
+    "requisitos": []
+   },
+   {
+    "nombre": "Morsmordre",
+    "requisitos": [
+     "Mortífago Novato"
+    ]
+   },
+   {
+    "nombre": "Nebulus",
+    "requisitos": []
+   },
+   {
+    "nombre": "Oriéntame",
+    "requisitos": []
+   },
+   {
+    "nombre": "Pericullum",
+    "requisitos": []
+   },
+   {
+    "nombre": "Repello Inimicum",
+    "requisitos": []
+   },
+   {
+    "nombre": "Repello Muggletum",
+    "requisitos": []
+   },
+   {
+    "nombre": "Sanatore Mínima",
+    "requisitos": [
+     "Medimago 1"
+    ]
+   },
+   {
+    "nombre": "Sbond",
+    "requisitos": [
+     "Ordenista Novato"
+    ]
+   },
+   {
+    "nombre": "Serpensortia",
+    "requisitos": []
+   },
+   {
+    "nombre": "Spongify",
+    "requisitos": [
+     "Encantador 1"
+    ]
+   },
+   {
+    "nombre": "Ritual antiaparición (Captus)",
+    "requisitos": []
+   },
+   {
+    "nombre": "Ritual de castigo menor (Damnum Minoris)",
+    "requisitos": []
+   },
+   {
+    "nombre": "Ritual de codificación (Encriptio)",
+    "requisitos": []
+   },
+   {
+    "nombre": "Ritual de comunicación (Loquitur)",
+    "requisitos": []
+   },
+   {
+    "nombre": "Ritual de convocación de criatura (Vocatfera)",
+    "requisitos": [
+     "Magizoólogo 1"
+    ]
+   },
+   {
+    "nombre": "Ritual de encantamiento (Malleator)",
+    "requisitos": [
+     "Encantador 1"
+    ]
+   },
+   {
+    "nombre": "Ritual de la Autopsia (Autopsius)",
+    "requisitos": [
+     "Medimago 1"
+    ]
+   },
+   {
+    "nombre": "Ritual de llamada espiritual (Vocantus)",
+    "requisitos": [
+     "Mago Oscuro 2"
+    ]
+   },
+   {
+    "nombre": "Ritual de los ojos de la bestia menor (Animalis Oculus Minoris)",
+    "requisitos": [
+     "Magizoólogo 2"
+    ]
+   },
+   {
+    "nombre": "Ritual de modificación mental menor (Mutatio Mentis Minoris)",
+    "requisitos": [
+     "Legeremens",
+     "Obliviate"
+    ]
+   },
+   {
+    "nombre": "Ritual de ofuscación menor (Celaris Minoris)",
+    "requisitos": []
+   },
+   {
+    "nombre": "Ritual de permanencia (Permanentia)",
+    "requisitos": []
+   },
+   {
+    "nombre": "Ritual de tramitación de expediente (Ex Libris)",
+    "requisitos": []
+   },
+   {
+    "nombre": "Ritual de trampa arcana menor (Laqueus Minoris)",
+    "requisitos": []
+   },
+   {
+    "nombre": "Los ojos del muerto (Oculi Morti)",
+    "requisitos": [
+     "Mago Oscuro 2"
+    ]
+   },
+   {
+    "nombre": "Transfiguración de objetos a animales menor (Diversium Animalis Minoris)",
+    "requisitos": []
+   },
+   {
+    "nombre": "Transformación de objetos menor (Mutatio Minoris)",
+    "requisitos": []
+   },
+   {
+    "nombre": "Transfiguración humana menor (Transfiguratio Minoris)",
+    "requisitos": []
+   }
+  ],
+  "int": [
+   {
+    "nombre": "Appare Vestigium",
+    "requisitos": []
+   },
+   {
+    "nombre": "Caeca Temporalis",
+    "requisitos": []
+   },
+   {
+    "nombre": "Climatus",
+    "requisitos": [
+     "Nebulus"
+    ]
+   },
+   {
+    "nombre": "Engorgio",
+    "requisitos": [
+     "Crescemultum"
+    ]
+   },
+   {
+    "nombre": "Evanesco",
+    "requisitos": []
+   },
+   {
+    "nombre": "Geminio",
+    "requisitos": []
+   },
+   {
+    "nombre": "Homonculous",
+    "requisitos": [
+     "Encantador 2"
+    ]
+   },
+   {
+    "nombre": "Illusia",
+    "requisitos": [
+     "Illusia Minoris"
+    ]
+   },
+   {
+    "nombre": "Juramento Inquebrantable",
+    "requisitos": []
+   },
+   {
+    "nombre": "Morsdicit",
+    "requisitos": [
+     "Mortífago Experto"
+    ]
+   },
+   {
+    "nombre": "Muffliato",
+    "requisitos": []
+   },
+   {
+    "nombre": "Planta Vitae",
+    "requisitos": []
+   },
+   {
+    "nombre": "Portus Mínima",
+    "requisitos": [
+     "Encantador 2"
+    ]
+   },
+   {
+    "nombre": "Proteico",
+    "requisitos": [
+     "Encantador 1"
+    ]
+   },
+   {
+    "nombre": "Reducio",
+    "requisitos": [
+     "Dimminuendo"
+    ]
+   },
+   {
+    "nombre": "Sanatore",
+    "requisitos": [
+     "Sanatore Mínima"
+    ]
+   },
+   {
+    "nombre": "Tabú",
+    "requisitos": []
+   },
+   {
+    "nombre": "Ritual clarividencia (Procul Visio)",
+    "requisitos": []
+   },
+   {
+    "nombre": "Ritual de castigo (Damnum)",
+    "requisitos": [
+     "Ritual de castigo menor (Damnum Minoris)"
+    ]
+   },
+   {
+    "nombre": "Ritual de cerradura arcana (Fermaportus Máxima)",
+    "requisitos": [
+     "Encantador 2",
+     "Fermaportus",
+     "Reparo"
+    ]
+   },
+   {
+    "nombre": "Ritual de comunicación mental (Loquitur Máxima)",
+    "requisitos": [
+     "Ritual de comunicación (Loquitur)"
+    ]
+   },
+   {
+    "nombre": "Ritual de encierro de criatura (Custotfera)",
+    "requisitos": [
+     "Magizoólogo 1"
+    ]
+   },
+   {
+    "nombre": "Ritual de encierro espiritual (Custontus)",
+    "requisitos": [
+     "Mago Oscuro 2"
+    ]
+   },
+   {
+    "nombre": "Ritual de infortunio (Infortunii)",
+    "requisitos": []
+   },
+   {
+    "nombre": "Ritual de ofuscación intermedio (Celaris)",
+    "requisitos": [
+     "Ritual de ofuscación menor (Celaris Minoris)"
+    ]
+   },
+   {
+    "nombre": "Ritual de los ojos de la bestia (Animalis Oculis)",
+    "requisitos": [
+     "Ritual de los ojos de la bestia menor (Animalis Oculus Minoris)"
+    ]
+   },
+   {
+    "nombre": "Ritual de modificación mental (Mutatio Mentis)",
+    "requisitos": [
+     "Ritual de modificación mental menor (Mutatio Mentis Minoris)"
+    ]
+   },
+   {
+    "nombre": "Ritual de trampa arcana (Laqueus)",
+    "requisitos": [
+     "Ritual de trampa arcana menor (Laqueus Minoris)"
+    ]
+   },
+   {
+    "nombre": "Ritual simple de extensión indetectable (Magnus Interna)",
+    "requisitos": [
+     "Encantador 2"
+    ]
+   },
+   {
+    "nombre": "Transfiguración de objetos a animales medianos (Diversium Animalis)",
+    "requisitos": [
+     "Transfiguración de objetos a animales menor (Diversium Animalis Minoris)"
+    ]
+   },
+   {
+    "nombre": "Transformación de objetos medianos (Mutatio)",
+    "requisitos": [
+     "Transformación de objetos menor (Mutatio Minoris)"
+    ]
+   },
+   {
+    "nombre": "Transfiguración humana intermedia (Transfiguratio)",
+    "requisitos": [
+     "Transfiguración humana menor (Transfiguratio Minoris)"
+    ]
+   }
+  ],
+  "ava": [
+   {
+    "nombre": "Artus Argentum",
+    "requisitos": [
+     "Poder 5"
+    ]
+   },
+   {
+    "nombre": "Aurorium",
+    "requisitos": [
+     "Poder 7"
+    ]
+   },
+   {
+    "nombre": "Fidelio",
+    "requisitos": [
+     "Encantador 2"
+    ]
+   },
+   {
+    "nombre": "Illusia Máxima",
+    "requisitos": [
+     "Illusia"
+    ]
+   },
+   {
+    "nombre": "Inferi",
+    "requisitos": [
+     "Mago Oscuro 2"
+    ]
+   },
+   {
+    "nombre": "Locomotor Máxima",
+    "requisitos": [
+     "Locomotor"
+    ]
+   },
+   {
+    "nombre": "Maldición",
+    "requisitos": [
+     "Poder 7"
+    ]
+   },
+   {
+    "nombre": "Portus",
+    "requisitos": [
+     "Portus Mínima"
+    ]
+   },
+   {
+    "nombre": "Protego Diabólica",
+    "requisitos": [
+     "Poder 7",
+     "Fiendfyre"
+    ]
+   },
+   {
+    "nombre": "Sanatore Máxima",
+    "requisitos": [
+     "Sanatore"
+    ]
+   },
+   {
+    "nombre": "Ritual de castigo mayor (Damnum Mayoris)",
+    "requisitos": [
+     "Ritual de castigo (Damnum)"
+    ]
+   },
+   {
+    "nombre": "Ritual de la forja duendigozna (Malleator Máxima)",
+    "requisitos": [
+     "Encantador 3",
+     "Ritual de encantamiento (Malleator)"
+    ]
+   },
+   {
+    "nombre": "Ritual de modificación mental mayor (Mutatio Mentis Mayoris)",
+    "requisitos": [
+     "Ritual de modificación mental (Mutatio Mentis)"
+    ]
+   },
+   {
+    "nombre": "Ritual de los ojos de la bestia mayor (Animalis Oculis Mayoris)",
+    "requisitos": [
+     "Ritual de los ojos de la bestia (Animalis Oculis)"
+    ]
+   },
+   {
+    "nombre": "Ritual de ofuscación mayor (Celaris Mayoris)",
+    "requisitos": [
+     "Ritual de ofuscación intermedio (Celaris)"
+    ]
+   },
+   {
+    "nombre": "Ritual de paso limitado (Transitus Prohibere)",
+    "requisitos": [
+     "Hechicero 3"
+    ]
+   },
+   {
+    "nombre": "Ritual de profanación (Regio Desecrate)",
+    "requisitos": [
+     "Mago Oscuro 2"
+    ]
+   },
+   {
+    "nombre": "Ritual de protección (Pacislocum)",
+    "requisitos": []
+   },
+   {
+    "nombre": "Ritual de trampa arcana mayor (Laqueus Mayoris)",
+    "requisitos": [
+     "Ritual de trampa arcana (Laqueus)"
+    ]
+   },
+   {
+    "nombre": "Ritual del arcanista (Arcanistus)",
+    "requisitos": [
+     "Delictum",
+     "Prior Incantato",
+     "Specialis Revelio"
+    ]
+   },
+   {
+    "nombre": "Ritual del esclavo fantasmal (Servuntus)",
+    "requisitos": [
+     "Exorcismo"
+    ]
+   },
+   {
+    "nombre": "Ritual de protección frente al mal",
+    "requisitos": []
+   },
+   {
+    "nombre": "Transfiguración de objetos a animales grandes (Diversium Animalis Mayoris)",
+    "requisitos": [
+     "Magizoólogo 2",
+     "Transfiguración de objetos a animales medianos (Diversium Animalis)"
+    ]
+   },
+   {
+    "nombre": "Transformación de objetos grandes (Mutatio Mayoris)",
+    "requisitos": [
+     "Encantador 2",
+     "Transformación de objetos medianos (Mutatio)"
+    ]
+   },
+   {
+    "nombre": "Transfiguración humana avanzada (Transfiguratio Mayoris)",
+    "requisitos": [
+     "Magizoólogo 2",
+     "Transfiguración humana intermedia (Transfiguratio)"
+    ]
+   },
+   {
+    "nombre": "Transfiguración humana absoluta (Alter Humanus)",
+    "requisitos": [
+     "Transfiguración humana avanzada (Transfiguratio Mayoris)"
+    ]
+   }
+  ]
+ },
+ "objeto": {
+  "bas": [
+   {
+    "nombre": "Alfombra voladora Alasdy",
+    "requisitos": []
+   },
+   {
+    "nombre": "Baúl de viaje Alasdy",
+    "requisitos": []
+   },
+   {
+    "nombre": "Botas de viaje",
+    "requisitos": []
+   },
+   {
+    "nombre": "Botella del genio",
+    "requisitos": []
+   },
+   {
+    "nombre": "Brújula de Godric",
+    "requisitos": []
+   },
+   {
+    "nombre": "Camilla plegable levitante de primeros auxilios",
+    "requisitos": []
+   },
+   {
+    "nombre": "Campana de llamada",
+    "requisitos": []
+   },
+   {
+    "nombre": "Chivatoscopio",
+    "requisitos": []
+   },
+   {
+    "nombre": "Colmillo de peligro",
+    "requisitos": []
+   },
+   {
+    "nombre": "Conjunto de Flavio el Engreído",
+    "requisitos": []
+   },
+   {
+    "nombre": "Cruz de plata",
+    "requisitos": []
+   },
+   {
+    "nombre": "Espectrogafas",
+    "requisitos": []
+   },
+   {
+    "nombre": "Instrumento musical encantado",
+    "requisitos": []
+   },
+   {
+    "nombre": "La Mano de la Gloria",
+    "requisitos": []
+   },
+   {
+    "nombre": "Lechuza mecánica",
+    "requisitos": []
+   },
+   {
+    "nombre": "Libro Infinito",
+    "requisitos": []
+   },
+   {
+    "nombre": "Medallón de Lucidez Extrema",
+    "requisitos": []
+   },
+   {
+    "nombre": "Monóculo Áurico",
+    "requisitos": []
+   },
+   {
+    "nombre": "Morsseum",
+    "requisitos": [
+     "Mortífago Novato"
+    ]
+   },
+   {
+    "nombre": "PARA (Peonza Antiapariciones de Rápida Actuación)",
+    "requisitos": []
+   },
+   {
+    "nombre": "Pensadero",
+    "requisitos": []
+   },
+   {
+    "nombre": "Polvo peruano de oscuridad instantánea",
+    "requisitos": []
+   },
+   {
+    "nombre": "Puertas de Larga Distancia",
+    "requisitos": []
+   },
+   {
+    "nombre": "Recordadora",
+    "requisitos": []
+   },
+   {
+    "nombre": "Reloj Lunar",
+    "requisitos": []
+   },
+   {
+    "nombre": "S.C.R.O.L.L.",
+    "requisitos": []
+   },
+   {
+    "nombre": "Saquito de habichuelas mágicas",
+    "requisitos": []
+   },
+   {
+    "nombre": "Tienda adaptable, rápidamente desplegable, ingeniosamente segura",
+    "requisitos": []
+   },
+   {
+    "nombre": "Tinta de Veracidad",
+    "requisitos": []
+   }
+  ],
+  "int": [
+   {
+    "nombre": "Amuleto del guardián",
+    "requisitos": []
+   },
+   {
+    "nombre": "Ancla del expedicionista",
+    "requisitos": []
+   },
+   {
+    "nombre": "Anillo de los Carstein",
+    "requisitos": []
+   },
+   {
+    "nombre": "Anillo de Moebius",
+    "requisitos": []
+   },
+   {
+    "nombre": "Armadura de Warlock",
+    "requisitos": []
+   },
+   {
+    "nombre": "Bisutería Arcana",
+    "requisitos": []
+   },
+   {
+    "nombre": "Bola de cristal",
+    "requisitos": []
+   },
+   {
+    "nombre": "Bufanda de Babel",
+    "requisitos": []
+   },
+   {
+    "nombre": "Capa del líder de la manada",
+    "requisitos": []
+   },
+   {
+    "nombre": "Dado del destino",
+    "requisitos": []
+   },
+   {
+    "nombre": "El Mapa Rojo",
+    "requisitos": []
+   },
+   {
+    "nombre": "Instrumento de Hamelín",
+    "requisitos": []
+   },
+   {
+    "nombre": "La lengua de Crucasma",
+    "requisitos": []
+   },
+   {
+    "nombre": "La nariz de Crucasma",
+    "requisitos": []
+   },
+   {
+    "nombre": "Los oídos de Crucasma",
+    "requisitos": []
+   },
+   {
+    "nombre": "Los ojos de Crucasma",
+    "requisitos": []
+   },
+   {
+    "nombre": "Los dedos de Crucasma",
+    "requisitos": []
+   },
+   {
+    "nombre": "Llave de las Mil Puertas",
+    "requisitos": []
+   },
+   {
+    "nombre": "Máscara mortuoria",
+    "requisitos": []
+   },
+   {
+    "nombre": "Monóculo del tasador",
+    "requisitos": []
+   },
+   {
+    "nombre": "Papel psíquico",
+    "requisitos": []
+   },
+   {
+    "nombre": "Petardes",
+    "requisitos": []
+   },
+   {
+    "nombre": "Polvo fantasmal",
+    "requisitos": []
+   },
+   {
+    "nombre": "Polvo fúnebre",
+    "requisitos": []
+   },
+   {
+    "nombre": "Prótesis mágica",
+    "requisitos": []
+   },
+   {
+    "nombre": "Reloj de Parada",
+    "requisitos": []
+   },
+   {
+    "nombre": "Saco de piel de Moke",
+    "requisitos": []
+   },
+   {
+    "nombre": "Tatuaje arcano",
+    "requisitos": []
+   },
+   {
+    "nombre": "Tercer brazo",
+    "requisitos": []
+   },
+   {
+    "nombre": "Trampa onírica",
+    "requisitos": []
+   },
+   {
+    "nombre": "Vehículo volador",
+    "requisitos": [
+     "Cultura Muggle 2"
+    ]
+   }
+  ],
+  "ava": [
+   {
+    "nombre": "Altar del ritualista",
+    "requisitos": []
+   },
+   {
+    "nombre": "Capa de Invisibilidad",
+    "requisitos": []
+   },
+   {
+    "nombre": "Cinturón del Herbalista",
+    "requisitos": []
+   },
+   {
+    "nombre": "Magnífico Magnificador del Arcanista",
+    "requisitos": []
+   },
+   {
+    "nombre": "Maleta de los mil acres",
+    "requisitos": []
+   },
+   {
+    "nombre": "Maletín del pocionista inquieto",
+    "requisitos": []
+   },
+   {
+    "nombre": "Máscara de las Mil Caras",
+    "requisitos": []
+   }
+  ]
+ }
+}

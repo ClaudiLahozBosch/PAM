@@ -1,0 +1,2581 @@
+
+@ Genéricos
+! CELADOR | Muy Bajo | Puesto único por institución
+d Se encarga de la limpieza y la vigilancia de todo el centro de trabajo asignado y en algunos casos cierta autoridad, como en Hogwarts donde puede castigar a los alumnos. En otros puestos son además los manitas, los encargados de arreglar lo que se rompe.
+A Vigor 00112
+A Percepción 11122
+S Atletismo 01223
+S Intimidación 00002
+S Alerta 12233
+B Informantes|*| 01223
+B Informantes|*|* 00012
+B Informantes|*|* 00012
+B Informantes|*|* 00002
+B Informantes|*|* 00002
+n Informantes * y ** relacionados de forma directa con su empleo. Hogwarts: Fauna de Hogwarts, Profesorado, etc. Ministerio de Magia: Departamentos, Seguridad Mágica, Wizengamot, etc. Azkaban, Bastión Woodcroft: Política > Azkaban, Bastión Woodcroft, etc.
+C1 Arcanos domésticos: Aguamenti, Tergeo, Fregotego (en Legendario, además Waddiwasi)
+C1 Etapa: Joven
+
+! ENFERMERO | Bajo |
+d Vela por la salud del personal del centro en el que trabaja. Al ser una atención primaria no necesita ser tan cualificado como un sanador de San Mungo, pero sí necesita solvencia en medimagia. Hay enfermeros en Hogwarts, Hogsmeade, Azkaban, La Reserva, Bastión Woodcroft y los Bajos Fondos.
+A Voluntad 00123
+A Inteligencia 12234
+A Poder 11223
+S Frialdad 00122
+S Empatía 12233
+S Arcanismo 11233
+S Medicina 23334
+S Pociones 12234
+S Rituales 12233
+B Biblioteca|Medicina| 12334
+B Biblioteca|Medicina|Enfermedades mágicas 11233
+B Biblioteca|Medicina|Experimental 00122
+B Biblioteca|Medicina|Heridas mágicas 22345
+B Biblioteca|Herbología| 00123 ó B Biblioteca|Magizoología| 00123 ó B Biblioteca|Arcanismo| 00123
+B Informantes|Académicos| 00123
+n Biblioteca general a elegir entre: Herbología, Magizoología y Arcanismo.
+C1 Etapa: Joven
+
+! BIBLIOTECARIO | Bajo | Puesto único por biblioteca
+d Gestiona toda la información bibliográfica y el archivo de la biblioteca en la que trabaja. Cataloga y ordena libros, asesora a estudiantes y visitantes y ejerce de vigilante para que se respeten las normas.
+A Carisma 00111
+A Percepción 11123
+A Inteligencia 11233
+A Poder 01122
+S Sigilo 11222
+S Intimidación 00012
+S Alerta 11224
+S Empatía 00012
+S Investigación 12233
+S Cultura Mágica 22334
+M Inteligencia 02233
+= Hogwarts
+B Biblioteca|Cultura Mágica| 11223
+B Biblioteca|*| 01123
+B Biblioteca|Arcanismo| 00112
+B Informantes|Hogwarts| 12223
+B Informantes|Hogwarts|Profesorado 00012
+B Informantes|Hogwarts|Personal no-docente 00012
+B Influencia|Hogwarts| 01122
+= Hogsmeade
+B Biblioteca|Cultura Mágica| 11223
+B Biblioteca|*| 01123
+B Biblioteca|Cultura Muggle| 00112
+B Informantes|Política|Hogsmeade 12223
+B Informantes|Académicos| 00012
+B Informantes|Académicos|* 12223
+B Influencia|Académicos|* 01122
+B Influencia|Política|Hogsmeade 01122
+= Bastión Woodcroft
+B Biblioteca|Cultura Mágica| 11223
+B Biblioteca|*| 01123
+B Biblioteca|Cultura Muggle| 00112
+B Informantes|Política|Bastión Woodcroft 12223
+B Informantes|Académicos| 00012
+B Informantes|Académicos|* 12223
+B Influencia|Académicos|* 01122
+B Influencia|Política|Bastión Woodcroft 01122
+=-
+C1 TIMOs: Supera las Expectativas
+C1 Idioma mágico (Runas): Bajo · Bajo · Medio · Medio · Alto
+C1 Idioma muggle (a elegir): Bajo · Medio · Medio · Alto · Alto
+C3 Objeto: Libro Infinito
+
+! JUGADOR PROFESIONAL DE QUIDDITCH | Medio |
+d Para jugadores profesionales tanto nacionales como extranjeros y para jugadores de la liga escolar.
+A Vigor 23346
+A Destreza 23456
+A Carisma 00234
+S Atletismo 23334
+S Vuelo 23344
+S Coordinación 00124
+S Intimidación 00011
+S Estilo 00012
+B Informantes|Sociedad|Deportes 01234
+B Influencia|Sociedad| 00224
+B Influencia|Sociedad|Deportes 01124
+B Seguidores|Sociedad| 00023
+B Seguidores|Sociedad|Deportes 00125
+C1 Maniobras domésticas: 1 · 1 · 1 · 1 · 1
+C1 Maniobras básicas: 1 · 2 · 2 · 2 · 2
+C3 Maniobras intermedias: – · – · 1 · 2 · 2
+C4 Maniobras avanzadas: – · – · – · 1 · 2
+C2 Equipamiento básico: – · 1 · 3 · 3 · 3
+C3 Equipamiento intermedio: – · – · 2 · 3 · 3
+C4 Equipamiento avanzado: – · – · – · 1 · 3
+n Los buscadores no cobran empleo, así que no requieren las maniobras ni el equipamiento.
+
+! RECEPCIONISTA | Muy Bajo |
+d Recibe a los visitantes, toma recados y recibe paquetes. También orienta a las visitas por su centro de trabajo. Hay recepcionistas en el Ministerio de Magia, Hogsmeade, La Reserva y Bastión Woodcroft.
+A Carisma 01112
+A Voluntad 00012
+S Oratoria 01223
+S Frialdad 01223
+S Alerta 01122
+S Empatía 00012
+B Biblioteca|Cultura Mágica| 11222
+B Biblioteca|Cultura Mágica|* 00012
+B Biblioteca|Cultura Mágica|* 00012
+B Informantes|*| 11122
+B Informantes|Sociedad|* 00002
+B Informantes|Sociedad|* 00002
+n Informantes generales: los de su puesto de trabajo.
+C1 TIMOs: Aceptable
+C1 Etapa: Joven
+
+! GUARDIA DE SEGURIDAD | Bajo |
+d Mantienen el orden en los puestos donde han sido asignados; son la primera línea de defensa contra vándalos, ladrones e incluso agresores más peligrosos. Tienen autoridad para retener e identificar a quienes no sigan las normas.
+A Vigor 00023
+A Destreza 01223
+A Percepción 12233
+A Poder 11223
+S Atletismo 11233
+S Esquiva 11233
+S Empatía 00023
+S Alerta 12334
+S Duelo 12234
+B Informantes|*| 11123
+B Biblioteca|Callejeo| 12333
+B Biblioteca|Callejeo|Criminales 00224
+B Biblioteca|Callejeo|* 00224
+R bas 44444
+R int 00022
+R tot 44466
+C1 TIMOs: Aceptable
+C1 Etapa: Joven
+n Informantes generales: los de su lugar de trabajo.
+X Personaje físico: A Poder>Vigor, A Vigor>Voluntad, S Duelo>Pelea
+n Personaje físico: en lugar de arcanos, un arma encantada con un gasto en grageas igual o superior a los arcanos pedidos.
+
+@ Hogwarts
+! PROFESOR DE ADIVINACIÓN, ASTRONOMÍA Y ASTROLOGÍA | Medio | Puesto único
+d Es un empleo y un cargo al mismo tiempo: impartir la asignatura mensualmente y poner notas a los alumnos. A efectos roleros, los profesores tienen el deber de atender a sus alumnos en clase y en tutorías.
+A Carisma 01224
+A Voluntad 00113
+A Percepción 12333
+A Inteligencia 23444
+S Coordinación 22344
+S Intimidación 00012
+S Oratoria 23344
+S Estilo 00012
+S Frialdad 00223
+S Alerta 00223
+S Consciencia 12334
+S Adivinación 23334
+S Cultura Mágica 00223
+S Supervivencia 01223
+B Biblioteca|Adivinación| 23345
+B Biblioteca|Adivinación|* 00023
+B Biblioteca|*| 00023
+B Influencia|Hogwarts| 22234
+B Influencia|Hogwarts|* 00023
+B Informantes|Hogwarts| 01234
+B Informantes|Académicos|Adivinadores y oráculos 00013
+B Informantes|Hogwarts|* 00013
+R tot 5,5,8,12,16
+R int 00123
+R ava 00001
+C1 ÉXTASIS: Supera las Expectativas en Adivinación, Astronomía y Astrología
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 2 meses en el foro
+
+! PROFESOR DE CUIDADO DE CRIATURAS MÁGICAS | Medio | Puesto único
+d Es un empleo y un cargo al mismo tiempo: impartir la asignatura mensualmente y poner notas a los alumnos. A efectos roleros, los profesores tienen el deber de atender a sus alumnos en clase y en tutorías.
+A Carisma 01224
+A Voluntad 00113
+A Percepción 12333
+A Inteligencia 23444
+S Coordinación 22344
+S Intimidación 00012
+S Oratoria 23344
+S Estilo 00012
+S Frialdad 00223
+S Alerta 00223
+S Cultura Mágica 00223
+S Magizoología 23334
+S Supervivencia 12334
+S Rituales 01223
+B Biblioteca|Magizoología| 23345
+B Biblioteca|Magizoología|* 00023
+B Biblioteca|*| 00023
+B Influencia|Hogwarts| 22234
+B Influencia|Hogwarts|* 00023
+B Informantes|Hogwarts| 01234
+B Informantes|Hogwarts|* 00013
+B Informantes|Académicos|Magizoólogos 00013
+R tot 5,5,8,12,16
+R int 00123
+R ava 00001
+C1 ÉXTASIS: Supera las Expectativas en Cuidado de Criaturas Mágicas
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 2 meses en el foro
+
+! PROFESOR DE DEFENSA CONTRA ARTES OSCURAS | Medio | Puesto único
+d Es un empleo y un cargo al mismo tiempo: impartir la asignatura mensualmente y poner notas a los alumnos. A efectos roleros, los profesores tienen el deber de atender a sus alumnos en clase y en tutorías.
+A Carisma 01224
+A Voluntad 00113
+A Inteligencia 23444
+A Poder 12333
+S Coordinación 22344
+S Intimidación 00012
+S Oratoria 23344
+S Estilo 00012
+S Frialdad 00223
+S Alerta 00223
+S Arcanismo 23334
+S Magizoología 01223
+S Duelo 12334
+S Rituales 00223
+B Biblioteca|Arcanismo| 23345
+B Biblioteca|Arcanismo|Artes oscuras 00023
+B Biblioteca|*| 00023
+B Influencia|Hogwarts| 22234
+B Influencia|Hogwarts|* 00023
+B Informantes|Hogwarts| 01234
+B Informantes|Académicos|Arcanistas 00013
+B Informantes|Hogwarts|* 00013
+R tot 5,5,8,12,16
+R int 00123
+R ava 00001
+C1 ÉXTASIS: Supera las Expectativas en Defensa Contra las Artes Oscuras
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 2 meses en el foro
+
+! PROFESOR DE ENCANTAMIENTOS Y TRANSFORMACIONES | Medio | Puesto único
+d Es un empleo y un cargo al mismo tiempo: impartir la asignatura mensualmente y poner notas a los alumnos. A efectos roleros, los profesores tienen el deber de atender a sus alumnos en clase y en tutorías.
+A Carisma 01224
+A Voluntad 00113
+A Inteligencia 23444
+A Poder 12333
+S Coordinación 22344
+S Intimidación 00012
+S Oratoria 23344
+S Estilo 00012
+S Frialdad 00223
+S Alerta 00223
+S Arcanismo 23334
+S Cultura Mágica 01223
+S Medicina 00223
+S Duelo 12334
+B Biblioteca|Arcanismo| 23345
+B Biblioteca|Arcanismo|* 00023
+B Biblioteca|*| 00023
+B Influencia|Hogwarts| 22234
+B Influencia|Hogwarts|* 00023
+B Informantes|Hogwarts| 01234
+B Informantes|Académicos|Arcanistas 00013
+B Informantes|Hogwarts|* 00013
+R tot 5,5,8,12,16
+R int 00123
+R ava 00001
+C1 ÉXTASIS: Supera las Expectativas en Encantamientos y Transformaciones
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 2 meses en el foro
+
+! PROFESOR DE ESTUDIOS MUGGLES | Medio | Puesto único
+d Es un empleo y un cargo al mismo tiempo: impartir la asignatura mensualmente y poner notas a los alumnos. A efectos roleros, los profesores tienen el deber de atender a sus alumnos en clase y en tutorías.
+A Carisma 01224
+A Voluntad 00113
+A Percepción 12333
+A Inteligencia 23444
+S Coordinación 22344
+S Intimidación 00012
+S Oratoria 23344
+S Estilo 00012
+S Frialdad 00223
+S Alerta 00223
+S Investigación 00223
+S Cultura Mágica 23334
+S Cultura Muggle 12334
+S Política 01223
+B Biblioteca|Cultura Muggle| 23345
+B Biblioteca|Cultura Muggle|* 00023
+B Biblioteca|*| 00023
+B Influencia|Hogwarts| 22234
+B Influencia|Hogwarts|* 00023
+B Informantes|Hogwarts| 01234
+B Informantes|Académicos|Arqueólogos e historiadores 00013
+B Informantes|Hogwarts|* 00013
+R tot 5,5,8,12,16
+R int 00123
+R ava 00001
+C1 ÉXTASIS: Supera las Expectativas en Estudios Muggles
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 2 meses en el foro
+
+! PROFESOR DE HERBOLOGÍA Y POCIONES | Medio | Puesto único
+d Es un empleo y un cargo al mismo tiempo: impartir la asignatura mensualmente y poner notas a los alumnos. A efectos roleros, los profesores tienen el deber de atender a sus alumnos en clase y en tutorías.
+A Carisma 01224
+A Voluntad 00113
+A Inteligencia 23444
+A Poder 12333
+S Coordinación 22344
+S Intimidación 00012
+S Oratoria 23344
+S Estilo 00012
+S Frialdad 00223
+S Alerta 00223
+S Arcanismo 00223
+S Herbología 12334
+S Magizoología 01223
+S Pociones 23334
+B Biblioteca|Herbología| 23345
+B Biblioteca|Herbología|* 00023
+B Biblioteca|*| 00023
+B Influencia|Hogwarts| 22234
+B Influencia|Hogwarts|* 00023
+B Informantes|Hogwarts| 01234
+B Informantes|Académicos|Herbólogos y pocionistas 00013
+B Informantes|Hogwarts|* 00013
+R tot 5,5,8,12,16
+R int 00123
+R ava 00001
+C1 ÉXTASIS: Supera las Expectativas en Herbología y Pociones
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 2 meses en el foro
+
+! PROFESOR DE HISTORIA DE LA MAGIA | Medio | Puesto único
+d Es un empleo y un cargo al mismo tiempo: impartir la asignatura mensualmente y poner notas a los alumnos. A efectos roleros, los profesores tienen el deber de atender a sus alumnos en clase y en tutorías.
+A Carisma 01224
+A Voluntad 00113
+A Percepción 12333
+A Inteligencia 23444
+S Coordinación 22344
+S Intimidación 00012
+S Oratoria 23344
+S Estilo 00012
+S Frialdad 00223
+S Alerta 00223
+S Investigación 00223
+S Cultura Mágica 23334
+S Cultura Muggle 12334
+S Política 01223
+B Biblioteca|Cultura Mágica| 23345
+B Biblioteca|Cultura Mágica|Historia de la magia 00023
+B Biblioteca|*| 00023
+B Influencia|Hogwarts| 22234
+B Influencia|Hogwarts|* 00023
+B Informantes|Hogwarts| 01234
+B Informantes|Académicos|Arqueólogos e historiadores 00013
+B Informantes|Hogwarts|* 00013
+R tot 5,5,8,12,16
+R int 00123
+R ava 00001
+C1 ÉXTASIS: Supera las Expectativas en Historia de la Magia
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 2 meses en el foro
+
+! PROFESOR DE MAGIA RITUAL | Medio | Puesto único
+d Es un empleo y un cargo al mismo tiempo: impartir la asignatura mensualmente y poner notas a los alumnos. A efectos roleros, los profesores tienen el deber de atender a sus alumnos en clase y en tutorías.
+A Carisma 01224
+A Voluntad 00113
+A Percepción 12333
+A Inteligencia 23444
+S Coordinación 22344
+S Intimidación 00012
+S Oratoria 23344
+S Estilo 00012
+S Frialdad 00223
+S Alerta 00223
+S Arcanismo 12334
+S Magizoología 00223
+S Medicina 01223
+S Rituales 23334
+B Biblioteca|Arcanismo| 23345
+B Biblioteca|Arcanismo|Arcanos 00023
+B Biblioteca|*| 00023
+B Influencia|Hogwarts| 22234
+B Influencia|Hogwarts|* 00023
+B Informantes|Hogwarts| 01234
+B Informantes|Académicos|Arcanistas 00013
+B Informantes|Hogwarts|* 00013
+R tot 5,5,8,12,16
+R int 00123
+R ava 00001
+C1 ÉXTASIS: Supera las Expectativas en Magia Ritual
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 2 meses en el foro
+
+! DIRECTOR DE HOGWARTS | Muy Alto | Puesto único
+d Máxima autoridad dentro del Colegio Hogwarts de Magia y Hechicería; su voluntad sólo puede superarse por una mayoría del Consejo Escolar en su conjunto, que es quien lo elige.
+A Carisma 33456
+A Voluntad 12235
+A Inteligencia 23446
+A Poder 22345
+S Coordinación 34444
+S Intimidación 01123
+S Oratoria 23334
+S Subterfugio 00112
+S Estilo 01112
+S Frialdad 22334
+S Alerta 01123
+S Consciencia 12224
+S Empatía 12344
+S Arcanismo 22344
+S Cultura Mágica 23444
+S Cultura Muggle 01123
+S Política 22344
+M Poder 12334
+C2 Resto de habilidades de Poder: – · 1 · 1 · 2 · 3
+B Biblioteca|Cultura Mágica| 11235
+B Biblioteca|Cultura Mágica|Hogwarts 11234
+B Biblioteca|Política|Ministerio de Magia 11224
+B Influencia|Hogwarts| 34555
+B Influencia|Hogwarts|Fauna de Hogwarts 01224
+B Influencia|Hogwarts|Profesorado 01234
+B Influencia|Hogwarts|Personal no-docente 01234
+B Influencia|Hogwarts|Gryffindor 00123
+B Influencia|Hogwarts|Hufflepuff 00123
+B Influencia|Hogwarts|Ravenclaw 00123
+B Influencia|Hogwarts|Slytherin 00123
+B Informantes|Hogwarts| 34555
+B Informantes|Hogwarts|Fauna de Hogwarts 00125
+B Informantes|Hogwarts|Personal no-docente 00223
+B Informantes|Hogwarts|Profesorado 01224
+B Informantes|Hogwarts|Gryffindor 00123
+B Informantes|Hogwarts|Hufflepuff 00123
+B Informantes|Hogwarts|Ravenclaw 00123
+B Informantes|Hogwarts|Slytherin 00123
+B Informantes|Política| 01124
+B Informantes|Sociedad| 00123
+B Seguidores|Hogwarts| 00002
+B Seguidores|Hogwarts|Fauna de Hogwarts 00123
+B Seguidores|Hogwarts|Personal no-docente 00123
+B Seguidores|Hogwarts|Profesorado 00122
+R tot 6,6,8,16,40
+R int 2,2,2,4,10
+R ava 00125
+C1 Idiomas muggles: 1 Medio · 2 Medio · 2 Medio · 2 Alto · 3 Alto
+C1 Idiomas mágicos: 1 Bajo · 1 Medio · 1 Alto · 1 Alto · 3 Alto
+C1 Etapa mínima: Adulto
+C1 Veteranía: usuario con 2 años en el foro; PJ con 6 meses en el foro
+
+! SUBDIRECTOR DE HOGWARTS | Alto | Puesto único
+d Es el segundo al mando del director y su principal consejero. Responde a las responsabilidades del director cuando éste se ausenta, y le ayuda en ellas el resto del tiempo.
+A Carisma 23345
+A Voluntad 12234
+A Inteligencia 22345
+A Poder 12345
+S Coordinación 23344
+S Intimidación 00112
+S Oratoria 23344
+S Estilo 00123
+S Frialdad 22334
+S Alerta 01233
+S Consciencia 12334
+S Empatía 12334
+S Adivinación 00002
+S Arcanismo 12333
+S Cultura Mágica 23444
+S Cultura Muggle 00123
+S Herbología 00002
+S Magizoología 00002
+S Medicina 00002
+S Política 23334
+M Poder 11233
+C3 Resto de habilidades de Poder: – · – · 1 · 2 · 2
+B Biblioteca|Cultura Mágica| 00002
+B Biblioteca|Cultura Mágica|Hogwarts 00002
+B Biblioteca|Política| 00001
+B Biblioteca|Política|Ministerio de Magia 00012
+B Influencia|Hogwarts| 23455
+B Influencia|Hogwarts|Fauna de Hogwarts 00012
+B Influencia|Hogwarts|Profesorado 00012
+B Influencia|Hogwarts|Gryffindor 00012
+B Influencia|Hogwarts|Ravenclaw 00012
+B Influencia|Hogwarts|Hufflepuff 00012
+B Influencia|Hogwarts|Slytherin 00012
+B Informantes|Hogwarts| 23455
+B Informantes|Hogwarts|Gryffindor 00012
+B Informantes|Hogwarts|Ravenclaw 00012
+B Informantes|Hogwarts|Hufflepuff 00012
+B Informantes|Hogwarts|Slytherin 00012
+B Informantes|Hogwarts|Fauna de Hogwarts 00012
+B Informantes|Política| 00112
+B Seguidores|Hogwarts|Fauna de Hogwarts 00012
+B Seguidores|Hogwarts|Personal no-docente 00012
+B Seguidores|Hogwarts|Profesorado 00012
+R tot 5,6,8,15,26
+R int 12238
+R ava 00013
+C1 Idiomas muggles: 2 Bajo · 2 Bajo · 1 Medio y 1 Alto · 1 Medio y 1 Alto · 2 Alto
+C2 Idiomas mágicos: – · 1 Bajo · 1 Medio · 1 Alto · 1 Alto
+C1 Etapa mínima: Adulto
+C1 Veteranía: usuario con 1 año en el foro; PJ con 3 meses en el foro
+
+! PREFECTO | Muy Bajo | 1 puesto por casa y por género
+d Ayudan a mantener la autoridad del colegio. Destacados en sus casas, tienen poder y responsabilidad dentro de ellas y pueden imponer castigos a otros alumnos. Es el único empleo sin nivel Legendario: sólo puede ejercerse durante tres años.
+A Carisma 01111
+A Voluntad 00011
+S Coordinación 12222
+S Intimidación 00111
+S Alerta 00122
+S Empatía 01222
+B Biblioteca|Cultura Mágica|Hogwarts 11333
+B Informantes|Hogwarts| 11122
+B Informantes|Hogwarts|* 12233
+B Informantes|Hogwarts|* 11233
+B Influencia|Hogwarts| 11122
+B Influencia|Hogwarts|* 12333
+n Las específicas * de Informantes e Influencia Hogwarts son de su Casa.
+C1 Curso: 5º
+C1 Veteranía: PJ con 3 meses en el foro
+C1 No haber repetido año
+C5 El Prefecto no tiene nivel Legendario
+
+! PREMIO ANUAL | Sin sueldo | Título único, 1 puesto por género
+d Requisitos: ser Prefecto a nivel Experto y estar en séptimo curso. El periodo para presentarse es del 1 al 26 de agosto; el 31 de agosto el staff otorga los premios siguiendo los criterios del directorio.
+C1 Ser Prefecto a nivel Experto
+C1 Estar en séptimo curso
+
+! MIEMBRO DEL CONSEJO ESCOLAR | Alto |
+d El Consejo Escolar ejerce de intermediario entre la Dirección y los padres de los alumnos. Vela por sus intereses y colabora de forma influyente en las decisiones relacionadas con los altos mandos del colegio.
+A Carisma 22334
+A Voluntad 12223
+A Percepción 00012
+A Inteligencia 01123
+S Subterfugio 12233
+S Coordinación 22334
+S Intimidación 23444
+S Oratoria 23344
+S Estilo 00012
+S Frialdad 22334
+S Empatía 12234
+S Cultura Mágica 22344
+S Cultura Muggle 00122
+S Política 23344
+B Influencia|Hogwarts| 12344
+B Influencia|Hogwarts|Personal no-docente 12233
+B Influencia|Hogwarts|Profesorado 12233
+B Influencia|Hogwarts|* 11223
+B Influencia|Hogwarts|* 11223
+B Influencia|Política| 01123
+B Influencia|Política|* 11223
+B Influencia|Sociedad| 12333
+B Influencia|Sociedad|* 11223
+B Informantes|Hogwarts| 23445
+B Informantes|Hogwarts|Personal no-docente 23345
+B Informantes|Hogwarts|Profesorado 23345
+B Informantes|Hogwarts|* 12234
+B Informantes|Hogwarts|* 12234
+B Informantes|Hogwarts|* 00024
+B Informantes|Hogwarts|* 00024
+B Informantes|Política| 01234
+B Informantes|Política|* 12234
+B Informantes|Política|* 00034
+B Informantes|Sociedad| 12345
+B Informantes|Sociedad|* 12234
+B Informantes|Sociedad|* 00034
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 1 año en el foro; PJ con 2 meses en el foro
+C1 Ser pariente o tutor legal de un alumno
+
+! GUARDIÁN DE LAS LLAVES Y TERRENOS | Medio | Puesto único
+d Si el celador se encarga del interior del castillo, el guardián de las llaves se encarga del exterior: vigilar y cuidar la vegetación, controlar las plagas y mantener a raya a las bestias del Bosque Prohibido.
+A Vigor 01122
+A Percepción 12334
+A Inteligencia 12345
+A Poder 11234
+S Pelea 01123
+S Sigilo 11234
+S Frialdad 01233
+S Alerta 11234
+S Investigación 11223
+S Cultura Mágica 12334
+S Herbología 12234
+S Magizoología 23344
+S Supervivencia 22334
+S Duelo 12234
+S Rituales 01123
+B Informantes|Hogwarts| 11123
+B Influencia|Hogwarts| 11123
+B Biblioteca|Magizoología| 11234
+B Biblioteca|Herbología| 11223
+C1 TIMOs: Supera las Expectativas
+C1 ÉXTASIS: Extraordinario en Cuidado de Criaturas Mágicas
+C4 Idiomas muggles: – · – · – · 1 Medio · 2 Medio
+C1 Idiomas mágicos: 1 Bajo · 1 Medio · 1 Alto · 2 Alto · 2 Alto
+C2 Maestrías en Animal Muggle o Bestia Mágica: – · 2 · 2 · 4 · 6 (las de Seres Mágicos cuentan doble)
+C1 Etapa: Joven
+X Personaje físico: A Poder>Vigor, A Vigor>Voluntad, S Duelo>Pelea, S Pelea>Frialdad
+
+! INSTRUCTOR DE VUELO | Medio |
+d El especialista del arte de la escoba dentro del colegio. Instruye a los más jóvenes en lecciones de Vuelo y también hace de árbitro de quidditch durante la temporada escolar.
+A Vigor 12334
+A Destreza 22345
+A Carisma 12224
+A Voluntad 11223
+S Atletismo 22334
+S Esquiva 12234
+S Vuelo 23344
+S Coordinación 22333
+S Oratoria 12234
+S Estilo 11233
+S Frialdad 01223
+B Informantes|Hogwarts| 12345
+B Informantes|Hogwarts|* 01234
+B Informantes|Hogwarts|* 01234
+B Influencia|Hogwarts| 12345
+B Influencia|Hogwarts|* 01223
+B Influencia|Hogwarts|* 01223
+C1 TIMOs: Aceptable
+C1 Etapa: Joven
+
+@ Ministerio · Ministro y personal de apoyo
+! MINISTRO DE MAGIA | Muy Alto | Puesto único
+d Líder de la comunidad mágica de Reino Unido e Irlanda y cabeza del Ministerio de Magia, sobre el que tiene un control casi absoluto. Es elegido por la ciudadanía mágica.
+A Carisma 33567
+A Voluntad 12346
+A Percepción 12345
+A Inteligencia 22446
+S Coordinación 34444
+S Intimidación 00124
+S Oratoria 23444
+S Seducción 00002
+S Subterfugio 00134
+S Estilo 23344
+S Frialdad 11224
+S Alerta 01123
+S Empatía 12344
+S Iniciativa 00123
+S Cultura Mágica 33444
+S Cultura Muggle 01233
+S Política 23444
+M Poder 00024
+B Biblioteca|Cultura Mágica| 00014
+B Biblioteca|Política| 11345
+B Biblioteca|Política|Ministerio de Magia 00135
+B Biblioteca|Política|Ley mágica 00024
+B Biblioteca|*| 00023
+B Influencia|Hogwarts| 00003
+B Influencia|Hogwarts|* 00001
+B Influencia|Política| 45555
+B Influencia|Política|Azkaban 00013
+B Influencia|Política|* 00013
+B Influencia|Política|Gringotts 00013
+B Influencia|Política|Hogsmeade 00013
+B Influencia|Política|Ministerio de Magia 34555
+B Influencia|Seres mágicos| 00003
+B Influencia|Seres mágicos|* 00003
+B Influencia|Sociedad|Negocios 00023
+B Influencia|Sociedad| 00034
+B Influencia|Sociedad|Prensa 00223
+B Influencia|Sociedad|* 00023
+B Influencia|Sociedad|* 00003
+B Informantes|Política| 34455
+B Informantes|Política|Azkaban 00013
+B Informantes|Política|* 00013
+B Informantes|Política|Gringotts 00013
+B Informantes|Política|Hogsmeade 00013
+B Informantes|Política|Ministerio de Magia 34555
+B Informantes|Seres mágicos| 00003
+B Informantes|Seres mágicos|* 00003
+B Informantes|Sociedad| 00034
+B Informantes|Sociedad|Negocios 00013
+B Informantes|Sociedad|Prensa 00223
+B Informantes|Sociedad|* 00003
+B Informantes|Sociedad|* 00023
+B Seguidores|Política| 00034
+B Seguidores|Política|Ministerio de Magia 00024
+B Seguidores|Sociedad| 00023
+B Seguidores|Sociedad|* 00223
+n Las específicas Política > * corresponden a «Gobierno Mágico de [X País]».
+C1 TIMOs: Extraordinario
+C1 ÉXTASIS: 2 con Extraordinario
+C1 Idiomas muggles: 1 Alto · 2 Alto · 2 Alto · 3 Alto · 5 Alto
+C1 Veteranía: usuario con 2 años en el foro; PJ con 6 meses en el foro
+C1 Etapa: Adulto
+C1 Ser elegido en elecciones populares organizadas por los Cronistas o, en su defecto, nombrado por el Wizengamot como Ministro de Emergencia
+
+! SUBSECRETARIO DEL MINISTRO | Alto | Puesto único
+d Segunda persona en la escala de mando del Ministerio de Magia. Es una posición escogida por el propio Ministro y funge como «viceministro» a todos los efectos.
+A Carisma 23345
+A Voluntad 00124
+A Percepción 00123
+A Inteligencia 12346
+S Coordinación 23344
+S Intimidación 00002
+S Oratoria 23344
+S Subterfugio 01234
+S Estilo 01234
+S Frialdad 12234
+S Empatía 01234
+S Cultura Mágica 23344
+S Cultura Muggle 01233
+S Política 33444
+B Biblioteca|Cultura Mágica| 00012
+B Biblioteca|Política| 23455
+B Biblioteca|Política|Ley mágica 00124
+B Biblioteca|Política|Ministerio de Magia 02345
+B Biblioteca|*| 00002
+B Informantes|Política| 34455
+B Informantes|Política|Azkaban 00022
+B Informantes|Política|* 00102
+B Informantes|Política|Gringotts 00022
+B Informantes|Política|Hogsmeade 00222
+B Informantes|Política|Ministerio de Magia 23455
+B Informantes|Sociedad| 00123
+B Informantes|Sociedad|Prensa 00122
+B Influencia|Política| 34555
+B Influencia|Política|Azkaban 00022
+B Influencia|Política|Gringotts 00022
+B Influencia|Política|* 00012
+B Influencia|Política|Hogsmeade 00022
+B Influencia|Política|Ministerio de Magia 23455
+B Influencia|Sociedad| 00003
+B Influencia|Sociedad|Prensa 00002
+B Influencia|Sociedad|* 00002
+B Influencia|Sociedad|* 00002
+B Seguidores|Política| 00003
+B Seguidores|Política|Ministerio de Magia 00002
+n Las específicas Política > * corresponden a «Gobierno Mágico de [X País]».
+C1 TIMOs: Extraordinario
+C1 ÉXTASIS: Extraordinario en Historia de la Magia y en otra asignatura
+C3 Idiomas muggles: – · – · 1 Medio · 1 Medio y 1 Alto · 3 Alto
+C4 Idiomas mágicos: – · – · – · 1 Alto · 3 Alto
+C1 Veteranía: usuario con 1 año en el foro; PJ con 3 meses en el foro
+C1 Etapa: Adulto
+C1 Nombramiento on rol (al menos aceptado) por el Ministro de Magia
+
+! ASISTENTE JUNIOR DEL MINISTRO | Medio | Puesto único
+d Es el secretario del Ministro de Magia: le sigue allá donde vaya, lleva y organiza sus documentos, controla su agenda y hasta sirve cafés.
+A Carisma 00123
+A Percepción 11234
+A Inteligencia 12334
+S Coordinación 00002
+S Intimidación 00002
+S Oratoria 22334
+S Subterfugio 00002
+S Frialdad 01223
+S Empatía 12234
+S Cultura Mágica 22344
+S Cultura Muggle 12334
+S Política 22344
+B Biblioteca|Cultura Mágica| 00112
+B Biblioteca|Política| 23344
+B Biblioteca|Política|Ley mágica 00333
+B Biblioteca|Política|Ministerio de Magia 02333
+B Influencia|Política| 11222
+B Informantes|Política| 23344
+B Informantes|Política|Bastión Woodcroft 00222
+B Informantes|Política|Confederación Internacional de Magos 00222
+B Informantes|Política|Hogsmeade 02222
+B Informantes|Política|Gringotts 02222
+B Informantes|Política|Ministerio de Magia 02333
+C1 TIMOs: Extraordinario
+C1 ÉXTASIS: Extraordinario en Historia de la Magia y en otra asignatura
+C3 Idiomas muggles: – · – · 1 Medio · 1 Alto · 3 Alto
+C4 Idiomas mágicos: – · – · – · 1 Alto · 3 Alto
+C1 Etapa: Joven (al abandonar la etapa Joven deja de ser seleccionable)
+
+! PORTAVOZ DEL MINISTERIO | Alto | Puesto único
+d Da la cara ante la prensa en la mayoría de las decisiones del día a día y aparece en comparecencias públicas. En ocasiones importantes, el Ministro o el Subsecretario contestan personalmente.
+C1 Etapa: Adulto
+n El directorio no lista atributos, habilidades ni trasfondos para este empleo.
+
+@ Ministerio · Aplicación de la Ley Mágica
+! DIRECTOR DEL DEPARTAMENTO DE SEGURIDAD MÁGICA | Alto | Puesto único
+d Máxima autoridad del Departamento. Gestiona el funcionamiento de todos los cuerpos y grupos que hay en su interior y trata con las autoridades de las distintas oficinas para luego reportar al Ministro.
+A Carisma 23456
+A Voluntad 11234
+A Percepción 01234
+A Inteligencia 12345
+S Coordinación 23444
+S Intimidación 00024
+S Oratoria 22344
+S Seducción 00012
+S Subterfugio 02244
+S Frialdad 00024
+S Alerta 00233
+S Empatía 00244
+S Cultura Mágica 22344
+S Cultura Muggle 02234
+S Política 23344
+M Inteligencia#1 00024
+M Inteligencia#2 00023
+M Inteligencia#3 00012
+M Poder 00013
+B Biblioteca|Política| 00024
+B Biblioteca|Política|Ley mágica 00024
+B Biblioteca|Política|Ministerio de Magia 00034
+B Biblioteca|*| 00023
+B Biblioteca|*|* 00045
+B Influencia|Política| 33345
+B Influencia|Política|Ministerio de Magia 34555
+B Influencia|Política|* 23455
+B Influencia|Política|* 13455
+B Influencia|Política|* 00355
+B Influencia|Sociedad| 00135
+B Influencia|Sociedad|* 13334
+B Influencia|Sociedad|* 00023
+B Informantes|Política| 33345
+B Informantes|Política|Ministerio de Magia 34555
+B Informantes|Política|* 00345
+B Informantes|Política|* 00345
+B Informantes|Política|* 00245
+B Informantes|Sociedad| 00135
+B Informantes|Sociedad|* 13334
+B Informantes|Sociedad|* 00023
+B Seguidores|Política| 00134
+B Seguidores|Política|Ministerio de Magia 00135
+B Seguidores|Política|* 00024
+B Seguidores|Sociedad| 00024
+B Seguidores|Sociedad|* 00024
+C1 TIMOs: Supera las Expectativas
+C1 ÉXTASIS: 3 con Supera las Expectativas
+C1 Idiomas muggles: 1 Medio · 1 Alto y 1 Medio · 1 Alto y 1 Medio · 2 Alto y 1 Medio · 3 Alto y 1 Medio
+C1 Idiomas mágicos: 1 Medio · 1 Alto y 1 Medio · 1 Alto y 1 Medio · 2 Alto y 1 Medio · 3 Alto y 1 Medio
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 1 año en el foro; PJ con 3 meses en el foro
+
+! SEÑOR DE LA GUERRA | Alto | Puesto único
+d Cargo creado durante la historia del foro: máxima autoridad del Ministerio de Magia en temas estrictamente militares.
+A Carisma 23456
+A Voluntad 23456
+A Percepción 23346
+A Inteligencia 01235
+S Coordinación 23444
+S Intimidación 22344
+S Oratoria 22233
+S Subterfugio 23444
+S Frialdad 23344
+S Alerta 11234
+S Empatía 12334
+S Investigación 00124
+S Callejeo 00234
+S Cultura Mágica 00233
+S Cultura Muggle 00023
+S Política 23334
+B Biblioteca|Callejeo| 00035
+B Biblioteca|Política| 23455
+B Influencia|Política| 01233
+B Influencia|Política|Ministerio de Magia 45555
+B Informantes|Bajos fondos| 00235
+B Informantes|Política|Ministerio de Magia 00034
+B Informantes|Política|* 00013
+B Informantes|Política|* 00013
+B Informantes|Política|* 00013
+B Informantes|Política|* 00013
+B Informantes|Sociedad| 00023
+B Informantes|Sociedad|* 00034
+n Las cuatro específicas Política > * corresponden a «Gobierno mágico de [X País]».
+C1 Etapa: Adulto
+C1 Al menos 6 meses como Jefe de Escuadrón o Director de Seguridad Mágica (u otro alto cargo del Ministerio de Magia)
+
+! BRIGADA DE APLICACIÓN DE LA LEY MÁGICA | Medio |
+d Son los agentes de calle, los policías comunes. Cuando se incumple la ley regular (un ladrón, abuso de sustancias...) no intervienen ni los aurores ni las fuerzas de choque, salvo casos excepcionales.
+A Vigor 01223 ó A Poder 01223
+A Carisma 11234
+A Percepción 22234
+A Inteligencia 11223
+S Atletismo 22233
+S Pelea 11122 ó S Duelo 11122
+S Coordinación 01223
+S Oratoria 01234
+S Frialdad 12233
+S Alerta 22334
+S Empatía 12233
+S Investigación 23344
+S Callejeo 12334
+S Cultura Mágica 22223
+S Política 12334
+B Biblioteca|Callejeo| 11223
+B Biblioteca|Callejeo|Criminales 01223
+B Biblioteca|Callejeo|Localizaciones 01223
+B Biblioteca|Política| 01123
+B Biblioteca|Política|Ley mágica 12234
+B Biblioteca|Política|Ministerio de Magia 12234
+B Informantes|Bajos fondos| 00123
+B Informantes|Política| 00112
+B Informantes|Política|Ministerio de Magia 12234
+B Informantes|Política|* 12234
+C1 TIMOs: Aceptable
+C1 ÉXTASIS: Historia de la Magia (Supera las Expectativas)
+C1 Idiomas muggles: 1 Bajo · 1 Bajo y 1 Medio · 1 Medio y 1 Alto · 2 Alto · 3 Alto
+C1 Etapa: Joven
+
+! BRUJAS GUARDIANAS | Medio |
+d Son los oficiales de inteligencia del Ministerio de Magia. Se estacionan en distintos lugares para supervisarlos y gestionan la información y el espionaje dentro del Ministerio.
+A Destreza 12334
+A Percepción 23456
+A Inteligencia 01234
+S Latrocinio 11223
+S Sigilo 12334
+S Subterfugio 12333
+S Frialdad 12223
+S Alerta 23344
+S Empatía 12334
+S Investigación 22334
+S Callejeo 22234
+S Cultura Mágica 12223
+S Cultura Muggle 00112
+S Política 00112
+B Biblioteca|Callejeo| 12233
+B Biblioteca|Callejeo|Criminales 00122
+B Biblioteca|Callejeo|Localizaciones 00122
+B Biblioteca|Cultura Mágica| 11223
+B Informantes|Bajos fondos|* 12334
+B Informantes|Bajos fondos|* 12334
+B Informantes|Política| 00112
+B Informantes|Política|Ministerio de Magia 11223
+B Informantes|Política|* 11223
+B Informantes|Sociedad|* 01123
+B Informantes|Sociedad|* 01123
+C1 TIMOs: Supera las Expectativas
+C1 Idiomas muggles: 1 Medio · 1 Alto · 2 Alto · 3 Alto · 3 Alto
+C1 Etapa: Joven
+
+! AUROR | Medio |
+d Los investigadores mágicos: expertos combatientes y cazadores de magos oscuros. Rastrean y detienen la actividad relacionada con las artes oscuras y, si la situación es demasiado peligrosa, piden apoyo a las fuerzas de choque.
+A Percepción 23456
+A Inteligencia 12334
+A Poder 01234
+S Intimidación 00112
+S Frialdad 12223
+S Alerta 23344
+S Empatía 12334
+S Investigación 22334
+S Arcanismo 22234
+S Callejeo 12334
+S Cultura Mágica 11223
+S Política 00112
+S Duelo 12334
+S Pociones 12223
+B Biblioteca|Arcanismo| 12233
+B Biblioteca|Arcanismo|Artes oscuras 11334
+B Biblioteca|Arcanismo|* 11334
+B Biblioteca|Callejeo| 11223
+B Biblioteca|Callejeo|Criminales 00122
+B Biblioteca|Callejeo|Localizaciones 00122
+B Informantes|Académicos|Arcanistas 01123
+B Informantes|Académicos|* 01123
+B Informantes|Política| 00112
+B Informantes|Política|Ministerio de Magia 11223
+B Informantes|Política|* 11223
+R bas 23456
+R int 00123
+R ava 00004
+R tot 2,3,5,7,13
+n Arcanos de utilidad.
+C1 TIMOs: Supera las Expectativas
+C1 ÉXTASIS: DCAO y HyP con Supera las Expectativas
+C1 Etapa: Joven
+
+! MILICIANO | Medio |
+d La milicia es el ejército profesional del mundo mágico: los militares convencionales que forman el grueso de un ejército, con un entrenamiento mínimo en combate.
+A Destreza 12234
+A Inteligencia 01234
+A Percepción 12334
+A Poder 11234
+S Atletismo 22344
+S Esquiva 12234
+S Sigilo 12223
+S Frialdad 12333
+S Alerta 00123
+S Empatía 01222
+S Iniciativa 01223
+S Cultura Mágica 12223
+S Política 00123
+S Supervivencia 12334
+S Duelo 22333
+B Biblioteca|Supervivencia| 12334
+B Biblioteca|Política| 00123
+B Informantes|Política| 00123
+B Informantes|Política|Ministerio de Magia 12223
+B Informantes|Política|* 12223
+B Informantes|Sociedad|* 00112
+R bas 58888
+R int 00335
+R ava 00003
+R tot 5,8,11,11,16
+n Arcanos de combate.
+C1 TIMOs: Aceptable
+C2 Idiomas muggles: – · 1 Bajo · 2 Medio · 1 Medio y 1 Alto · 2 Alto
+C1 Etapa: Joven
+X Personaje físico: A Poder>Vigor, S Duelo>Pelea
+
+! FUERZA DE CHOQUE | Medio |
+d Grupo de operaciones especiales de élite del Ministerio de Magia: magos de combate altamente capacitados que son enviados a las tareas más peligrosas.
+A Vigor 01234
+A Destreza 12334
+A Poder 23456
+S Atletismo 22234
+S Pelea 12334
+S Esquiva 12334
+S Sigilo 12334
+S Intimidación 00112
+S Frialdad 12223
+S Iniciativa 11223
+S Cultura Mágica 00112
+S Supervivencia 11223
+S Política 12223
+S Duelo 23344
+B Biblioteca|Política| 11223
+B Biblioteca|Supervivencia| 00122
+B Informantes|Sociedad|* 01123
+B Informantes|Sociedad|* 01123
+B Informantes|Política| 00112
+B Informantes|Política|Ministerio de Magia 11223
+B Informantes|Política|* 11223
+R bas 34456
+R int 01234
+R ava 00012
+R tot 3,5,6,9,12
+n Arcanos de combate.
+C1 Etapa: Joven
+X Personaje físico: A Poder>Vigor, A Vigor>Percepción, S Duelo>Pelea, S Pelea>Alerta
+
+! JEFE DE ESCUADRÓN | Alto | Puesto único por escuadrón
+d Controlan y gestionan a los grupos anteriores y a sus empleados, y responden ante el Director del Departamento. Además de esto, necesitan los requisitos del empleo de su escuadrón al mismo nivel.
+A Carisma 34457
+S Coordinación 23444
+S Oratoria 02234
+C2 Otra habilidad de Carisma (no válida ninguna que pida el empleo del que es jefe): – · 1 · 1 · 2 · 4
+B Influencia|Política| 12445
+B Influencia|Política|Ministerio de Magia 24555
+B Influencia|Sociedad| 11345
+B Influencia|Sociedad|* 00224
+B Seguidores|Política| 00222
+B Seguidores|Política|Ministerio de Magia 00224
+C1 Tener los requisitos del empleo de su escuadrón (Brigada, Brujas Guardianas, Auror, Miliciano o Fuerza de Choque) al mismo nivel
+C1 Al menos 4 roleos como miembro de su escuadrón, o en otro alto cargo del Ministerio
+
+! OFICIAL DE MINISTERIO | Bajo |
+d Agentes del Ministerio en sus distintos campos de actuación: rompemaldiciones, oficiales de magia accidental, de enlace con muggles, agentes de control de criaturas, de sustancias... Cada especialidad tiene sus propios requisitos.
+A Destreza 01223
+A Inteligencia 11233
+S Cultura Mágica 22223
+S Sigilo 00223
+C1 TIMOs: Supera las Expectativas
+C1 Etapa: Joven
+= Rompemaldiciones, magia accidental y similares
+A Poder 12233
+S Consciencia 00233
+S Arcanismo 22334
+S Duelo 12224
+S Rituales 12233
+B Biblioteca|Arcanismo| 12234
+B Biblioteca|Arcanismo|* 01234
+B Biblioteca|Arcanismo|* 00023
+B Influencia|Académicos|Arcanistas 01234
+B Influencia|Académicos|* 00023
+B Informantes|Académicos|Arcanistas 00112
+B Informantes|Académicos|* 00112
+B Informantes|Política| 11111
+C1 ÉXTASIS: Encantamientos y Transformaciones con Supera las Expectativas
+C1 Idioma mágico: Runas Alto
+= Trabajos con muggles (invisibilidad, disculpas...)
+A Carisma 12233
+S Oratoria 12333
+S Subterfugio 12234
+S Empatía 00033
+S Cultura Muggle 22334
+B Biblioteca|Arcanismo|Arcanos 00023
+B Biblioteca|Arcanismo|* 00023
+B Influencia|Sociedad|Muggles 00234
+B Informantes|Política| 11112
+B Informantes|Sociedad|Muggles 00234
+B Biblioteca|Cultura Muggle| 12234
+C1 Arcano: Repello Muggletum
+C1 ÉXTASIS: Estudios Muggles con Supera las Expectativas
+C2 Idiomas muggles: – · 1 Medio · 2 Medio · 2 Alto · 2 Alto
+= Regulación de criaturas, control de plagas, etc.
+A Percepción 12233
+S Empatía 00034
+S Investigación 12233
+S Herbología 12333
+S Magizoología 22334
+B Informantes|Política| 11223
+B Informantes|Académicos|Magizoólogos 00012
+B Informantes|Académicos|Herbólogos y pocionistas 00011
+B Biblioteca|Magizoología| 00004
+B Biblioteca|Magizoología|Bestias mágicas 12334
+B Biblioteca|Magizoología|Seres racionales 12334
+B Influencia|Académicos|Magizoólogos 00012
+B Influencia|Académicos|Herbólogos y pocionistas 00011
+C1 ÉXTASIS: Cuidado de Criaturas Mágicas con Supera las Expectativas
+C2 Idiomas mágicos: – · 1 Bajo · 1 Bajo · 1 Medio · 1 Medio
+= Sustancias intoxicantes y similares
+A Percepción 12233
+S Empatía 00034
+S Investigación 12233
+S Herbología 12333
+S Pociones 22334
+B Biblioteca|Herbología| 00004
+B Biblioteca|Herbología|Pociones 12334
+B Biblioteca|Herbología|Plantas naturales 12334
+B Influencia|Académicos|Herbólogos y pocionistas 00012
+B Influencia|Académicos|Magizoólogos 00011
+B Informantes|Política| 11223
+B Informantes|Académicos|Herbólogos y pocionistas 00012
+B Informantes|Académicos|Magizoólogos 00011
+C1 ÉXTASIS: Herbología y Pociones con Supera las Expectativas
+C2 Idiomas mágicos: – · 1 Bajo · 1 Bajo · 1 Medio · 1 Medio
+=-
+
+@ Ministerio · Accidentes y Catástrofes
+! DIRECTOR DEL DEPARTAMENTO DE ACCIDENTES Y CATÁSTROFES | Alto | Puesto único
+d Máxima autoridad del Departamento. Gestiona el funcionamiento de todos los cuerpos y grupos que hay en su interior y trata con las autoridades de las distintas oficinas para luego reportar al Ministro.
+& DIRECTOR DEL DEPARTAMENTO DE SEGURIDAD MÁGICA
+
+! DESMEMORIZADOR | Bajo |
+d Mago especializado en hechizos de memoria que elimina los recuerdos relacionados con las violaciones del Estatuto Internacional del Secreto en muggles, cada vez que es posible hacerlo.
+A Carisma 11223
+A Percepción 01123
+A Inteligencia 00012
+A Poder 11233
+S Subterfugio 12334
+S Alerta 12233
+S Empatía 11233
+S Callejeo 01122
+S Cultura Mágica 11223
+S Cultura Muggle 12233
+S Duelo 12234
+B Influencia|Política|Ministerio de Magia 00022
+B Informantes|Política| 01223
+B Informantes|Política|Ministerio de Magia 11234
+B Informantes|Política|* 11233
+B Informantes|Sociedad| 22223
+B Informantes|Sociedad|Muggles 00022
+C1 TIMOs: Aceptable
+C1 ÉXTASIS: Estudios Muggles con Aceptable
+C2 Idiomas muggles: – · 1 Bajo · 1 Bajo y 1 Medio · 2 Medio · 1 Alto y 1 Medio
+C1 Etapa: Joven
+
+@ Ministerio · Regulación y Control de Criaturas Mágicas
+! DIRECTOR DEL DEPARTAMENTO DE REGULACIÓN Y CONTROL DE CRIATURAS MÁGICAS | Alto | Puesto único
+d Máxima autoridad del Departamento. Gestiona el funcionamiento de todos los cuerpos y grupos que hay en su interior y trata con las autoridades de las distintas oficinas para luego reportar al Ministro.
+& DIRECTOR DEL DEPARTAMENTO DE SEGURIDAD MÁGICA
+
+@ Ministerio · Cooperación Mágica Internacional
+! DIRECTOR DEL DEPARTAMENTO DE COOPERACIÓN MÁGICA INTERNACIONAL | Alto | Puesto único
+d Máxima autoridad del Departamento. Gestiona el funcionamiento de todos los cuerpos y grupos que hay en su interior y trata con las autoridades de las distintas oficinas para luego reportar al Ministro.
+& DIRECTOR DEL DEPARTAMENTO DE SEGURIDAD MÁGICA
+
+! EMBAJADOR | Bajo |
+d Mago de otra nación asentado en Gran Bretaña para las relaciones de su país con éste, o mago británico asentado en un país extranjero para defender sus intereses. Es un puesto fijo.
+A Carisma 11224
+A Inteligencia 01133
+S Coordinación 11222
+S Oratoria 12234
+S Subterfugio 01223
+S Empatía 00123
+S Cultura Mágica 12233
+S Cultura Muggle 00111
+S Política 22334
+B Informantes|Política| 11233
+B Informantes|Política|Confederación Internacional de Magos 11233
+B Informantes|Política|* 12334
+B Biblioteca|Política| 12234
+B Biblioteca|Política|* 11233
+B Influencia|Política| 01223
+B Influencia|Política|* 11234
+n Las específicas Política > * de Informantes e Influencia corresponden a «Gobierno Mágico de [X País]».
+C1 TIMOs: Supera las Expectativas
+C1 ÉXTASIS: 1 con Supera las Expectativas
+C1 Idioma del país en el que está: nivel Alto
+C3 Otros idiomas muggles: – · – · 1 Medio · 1 Alto · 2 Alto
+C1 Etapa: Adulto
+
+! MIEMBRO DE LA CONFEDERACIÓN INTERNACIONAL DE MAGOS | Medio |
+d Su labor es, en cierto modo, la de un diplomático. Se sobreentiende que el Ministro de Magia y el Director de este Departamento son miembros de la Confederación o está entre sus funciones.
+A Carisma 12335
+A Percepción 01123
+A Inteligencia 11234
+S Coordinación 00223
+S Oratoria 22344
+S Subterfugio 12234
+S Estilo 00122
+S Frialdad 00122
+S Empatía 11234
+S Cultura Mágica 22334
+S Cultura Muggle 00002
+S Política 23334
+B Biblioteca|Política| 23334
+B Biblioteca|Política|Ley mágica 22345
+B Biblioteca|Política|Ministerio de Magia 22345
+B Influencia|Política|Confederación Internacional de Magos 12334
+B Influencia|Política|Ministerio de Magia 12345
+B Influencia|Política|* 12345
+B Informantes|Política|Confederación Internacional de Magos 12345
+B Informantes|Política|* 12334
+B Informantes|Política|Ministerio de Magia 12334
+B Informantes|Sociedad|Alta sociedad 12334
+n Las específicas Política > * corresponden a «Gobierno Mágico de [X País]».
+C1 TIMOs: Supera las Expectativas
+C1 ÉXTASIS: 2 con Supera las Expectativas
+C1 Idiomas muggles: 1 Alto y 1 Medio · 2 Alto · 2 Alto y 1 Medio · 3 Alto · 4 Alto
+C1 Etapa: Adulto
+
+@ Ministerio · Transportes Mágicos
+! DIRECTOR DEL DEPARTAMENTO DE TRANSPORTES MÁGICOS | Alto | Puesto único
+d Máxima autoridad del Departamento. Gestiona el funcionamiento de todos los cuerpos y grupos que hay en su interior y trata con las autoridades de las distintas oficinas para luego reportar al Ministro.
+& DIRECTOR DEL DEPARTAMENTO DE SEGURIDAD MÁGICA
+
+! EXAMINADOR DE APARICIONES | Bajo |
+d Es el profesor que enseña y da la licencia para Aparecerse a los magos que la soliciten y superen el curso de Aparición.
+C1 Etapa: Joven
+n El directorio no lista atributos, habilidades ni trasfondos para este empleo.
+
+@ Ministerio · Deportes y Juegos Mágicos
+! DIRECTOR DEL DEPARTAMENTO DE DEPORTES Y JUEGOS MÁGICOS | Alto | Puesto único
+d Máxima autoridad del Departamento. Gestiona el funcionamiento de todos los cuerpos y grupos que hay en su interior y trata con las autoridades de las distintas oficinas para luego reportar al Ministro.
+& DIRECTOR DEL DEPARTAMENTO DE SEGURIDAD MÁGICA
+
+! MIEMBRO DE LA FIQA | Medio |
+d La FIQA es la Federación Internacional de Quidditch Asociación: revisa la normativa del Quidditch y se asegura de que cada país la cumple (extensión del campo, altura de los aros...).
+n El directorio no lista requisitos para este empleo.
+
+! ÁRBITRO DE QUIDDITCH | Medio |
+d Supervisa que un partido de Quidditch se desarrolle acorde al reglamento y toma las decisiones apropiadas en el momento.
+C1 Etapa: Joven
+n El directorio no lista atributos, habilidades ni trasfondos para este empleo.
+
+! COMENTARISTA DE QUIDDITCH | Bajo |
+d Asiste a los partidos y transmite los eventos que suceden narrándolos apropiadamente.
+C1 Etapa: Adulto
+n El directorio no lista atributos, habilidades ni trasfondos para este empleo.
+
+! JUGADOR PROFESIONAL DE DEPORTE MÁGICO | Medio |
+d Para jugadores profesionales de deportes mágicos distintos del Quidditch.
+A Carisma 00123
+A Voluntad 23446
+A Percepción 12234
+A Inteligencia 23345
+S Intimidación 00112
+S Frialdad 23334
+S Arte/Artesanía 33344
+S Estilo 11223
+S Subterfugio 00112
+S Empatía 01122
+S Iniciativa 11243
+S Alerta 11234
+S Cultura Mágica 01234
+B Biblioteca|Cultura Mágica| 01122
+B Biblioteca|Cultura Mágica|Deportes mágicos 11233
+B Informantes|Sociedad| 01223
+B Informantes|Sociedad|Deportes 12334
+B Informantes|Sociedad|Prensa 11233
+B Influencia|Sociedad| 11223
+B Influencia|Sociedad|Deportes 11234
+B Influencia|Sociedad|Prensa 11223
+B Seguidores|Sociedad| 00122
+B Seguidores|Sociedad|Deportes 11223
+B Seguidores|Sociedad|Prensa 11223
+n Arte/Artesanía: el del juego mágico que practica.
+C1 TIMOs: Supera las Expectativas
+C1 Etapa: Joven
+
+@ Ministerio · Misterios y Tribunales del Wizengamot
+! DIRECTOR DEL DEPARTAMENTO DE MISTERIOS | Alto | Puesto único
+d Máxima autoridad del Departamento. Requisitos: los de cualquier otro director de departamento y los de Inefable.
+& DIRECTOR DEL DEPARTAMENTO DE SEGURIDAD MÁGICA
+C1 Requisitos de Inefable (los valora el staff)
+
+! INEFABLE | Medio |
+d Investigador mágico de alto secreto: se encarga de las innovaciones en investigación mágica, de tantear los límites de la magia y descubrir nuevas formas de funcionamiento de la misma.
+C1 Requisitos «misteriosos»: altos niveles de Inteligencia, sus habilidades, arcanos, bibliotecas y canjes «extraordinarios» o de «vanguardia de investigación» (los valora el staff)
+
+! JEFE SUPREMO DEL WIZENGAMOT | Muy Alto | Puesto único
+d Máxima autoridad del Wizengamot, el tribunal supremo de la comunidad mágica británica.
+A Carisma 33567
+A Voluntad 12346
+A Percepción 12345
+A Inteligencia 22446
+S Coordinación 34444
+S Intimidación 00124
+S Oratoria 23444
+S Seducción 00002
+S Subterfugio 00134
+S Estilo 02334
+S Frialdad 01224
+S Alerta 01123
+S Empatía 12344
+S Iniciativa 00123
+S Cultura Mágica 33444
+S Cultura Muggle 01223
+S Política 02344
+M Poder 00024
+B Biblioteca|Cultura Mágica| 00014
+B Biblioteca|Política| 11345
+B Biblioteca|Política|Ministerio de Magia 00135
+B Biblioteca|Política|Ley mágica 12345
+B Biblioteca|*| 00023
+B Influencia|Hogwarts| 00003
+B Influencia|Política|San Mungo 00001
+B Influencia|Política| 45555
+B Influencia|Política|Azkaban 00013
+B Influencia|Política|Bastión Woodcroft 00013
+B Influencia|Política|Gringotts 00013
+B Influencia|Política|Hogsmeade 00013
+B Influencia|Política|Ministerio de Magia 23455
+B Influencia|Seres mágicos| 00003
+B Influencia|Seres mágicos|Duendes 00003
+B Influencia|Sociedad|Negocios 00003
+B Influencia|Sociedad| 00034
+B Influencia|Sociedad|Prensa 00223
+B Influencia|Sociedad|Alta sociedad 00023
+B Influencia|Sociedad|* 00003
+B Informantes|Política| 34455
+B Informantes|Política|Azkaban 00013
+B Informantes|Política|San Mungo 00013
+B Informantes|Política|Gringotts 00013
+B Informantes|Política|Hogsmeade 00013
+B Informantes|Política|Bastión Woodcroft 00013
+B Informantes|Política|Ministerio de Magia 34555
+B Informantes|Seres mágicos| 00003
+B Informantes|Seres mágicos|Duendes 00003
+B Informantes|Sociedad| 00034
+B Informantes|Sociedad|Negocios 00013
+B Informantes|Sociedad|Prensa 00223
+B Informantes|Sociedad|Alta sociedad 00003
+B Informantes|Sociedad|* 00023
+B Seguidores|Política| 00024
+B Seguidores|Política|Ministerio de Magia 00024
+B Seguidores|Sociedad| 00003
+B Seguidores|Sociedad|* 00223
+C1 Idiomas muggles: 1 Alto · 1 Alto · 1 Alto · 1 Alto · 2 Alto
+C2 Idiomas mágicos: – · 1 Bajo · 1 Medio · 1 Alto · 2 Alto
+C1 TIMOs: Extraordinario
+C1 ÉXTASIS: 2 con Extraordinario
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 1 año en el foro; PJ con 3 meses en el foro
+
+! MIEMBRO DEL WIZENGAMOT | Alto |
+d Miembro del Wizengamot, el tribunal supremo y parlamento de la comunidad mágica británica.
+A Carisma 23345
+A Voluntad 00124
+A Percepción 00123
+A Inteligencia 12346
+S Coordinación 23344
+S Intimidación 00002
+S Oratoria 23344
+S Subterfugio 01234
+S Estilo 01234
+S Frialdad 12234
+S Empatía 01234
+S Cultura Mágica 23344
+S Cultura Muggle 01233
+S Política 33444
+B Biblioteca|Cultura Mágica| 11133
+B Biblioteca|Política| 23455
+B Biblioteca|Política|Ley mágica 23455
+B Biblioteca|Política|Ministerio de Magia 12244
+B Informantes|Política| 22235
+B Informantes|Política|Ministerio de Magia 34455
+B Informantes|Política|* 12244
+B Informantes|Sociedad| 11234
+B Informantes|Sociedad|Prensa 00023
+B Influencia|Política| 22235
+B Influencia|Política|Ministerio de Magia 33455
+B Influencia|Política|* 00133
+B Influencia|Sociedad| 11234
+B Influencia|Sociedad|Prensa 00023
+C1 TIMOs: Extraordinario
+C1 ÉXTASIS: Extraordinario en Historia de la Magia y en otra asignatura
+C3 Idiomas muggles: – · – · 1 Medio · 1 Medio y 1 Alto · 3 Alto
+C3 Idiomas mágicos: – · – · 1 Alto · 2 Alto · 3 Alto
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 1 año en el foro; PJ con 3 meses en el foro
+
+@ Hogsmeade
+! ALCALDE | Muy Alto | Puesto único
+d La función de cualquier alcalde: gestiona lo económico, urbanístico y social, organiza fiestas y eventos y, por supuesto, representa al pueblo mágico.
+A Carisma 23456
+A Voluntad 12346
+A Percepción 01134
+A Inteligencia 11234
+A Poder 00002
+S Coordinación 23344
+S Intimidación 00123
+S Oratoria 24444
+S Seducción 11234
+S Subterfugio 22234
+S Estilo 11244
+S Frialdad 11224
+S Alerta 00123
+S Consciencia 00112
+S Empatía 22244
+S Arcanismo 00023
+S Callejeo 00022
+S Cultura Mágica 23344
+S Cultura Muggle 00002
+S Política 23444
+M Poder 00034
+B Biblioteca|Cultura Mágica| 12235
+B Biblioteca|Cultura Mágica|* 02234
+B Biblioteca|Cultura Mágica|* 00003
+B Biblioteca|Política| 23335
+B Biblioteca|Política|* 01224
+B Influencia|Hogwarts| 00023
+B Influencia|Hogwarts|* 00002
+B Influencia|Política| 34445
+B Influencia|Política|Hogsmeade 33555
+B Influencia|Política|* 00002
+B Influencia|Seres mágicos| 00013
+B Influencia|Seres mágicos|* 00003
+B Influencia|Sociedad| 00345
+B Influencia|Sociedad|* 00235
+B Influencia|Sociedad|* 00002
+B Informantes|Hogwarts| 00234
+B Informantes|Hogwarts|* 00125
+B Informantes|Política| 34445
+B Informantes|Política|Hogsmeade 33555
+B Informantes|Seres mágicos| 00034
+B Informantes|Seres mágicos|* 00023
+B Informantes|Sociedad| 00345
+B Informantes|Sociedad|* 00235
+B Seguidores|Política| 00003
+B Seguidores|Política|Hogsmeade 00003
+C1 TIMOs: Supera las Expectativas
+C1 ÉXTASIS: 3 con Supera las Expectativas
+C2 Idiomas muggles: – · 1 Medio · 1 Alto y 1 Medio · 2 Alto y 1 Medio · 3 Alto
+C1 Idiomas mágicos: 1 Medio · 1 Alto · 1 Alto y 1 Medio · 2 Alto y 1 Medio · 3 Alto
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 1 año en el foro; PJ con 3 meses en el foro
+
+! LOCUTOR DE LA RED INALÁMBRICA MÁGICA | Medio |
+d Locuta los programas más famosos de la radio mágica, como La Hora de las Brujas o Noticias de la Red Mágica Inalámbrica.
+C1 Etapa: Joven
+n El directorio no lista atributos, habilidades ni trasfondos para este empleo.
+
+@ San Mungo
+! DIRECTOR DE SAN MUNGO | Muy Alto | Puesto único
+d Encargado del funcionamiento general del hospital: lleva las relaciones políticas con otros estamentos gubernamentales y se implica proactivamente en las donaciones al hospital.
+A Carisma 33456
+A Voluntad 12236
+A Inteligencia 23446
+A Percepción 22346
+S Coordinación 24444
+S Intimidación 01123
+S Oratoria 23334
+S Subterfugio 00112
+S Estilo 01114
+S Frialdad 23344
+S Alerta 01123
+S Consciencia 02224
+S Empatía 12344
+S Medicina 13444
+S Cultura Mágica 22344
+S Cultura Muggle 01123
+S Política 22344
+S Pociones 01234
+M Inteligencia#1 12334
+M Inteligencia#2 01123
+M Inteligencia#3 01123
+B Biblioteca|Medicina| 22335
+B Biblioteca|Medicina|Enfermedades mágicas 12335
+B Biblioteca|Medicina|Heridas mágicas 12335
+B Biblioteca|Medicina|Experimental 11235
+B Biblioteca|Medicina|Medicina muggle 01235
+B Biblioteca|Herbología| 12235
+B Biblioteca|Herbología|Pociones 12235
+B Biblioteca|Herbología|Plantas naturales 11235
+B Influencia|Política| 11234
+B Influencia|Política|San Mungo 12235
+B Influencia|Política|Bastión Woodcroft 11234
+B Influencia|Política|Ministerio de Magia 01224
+B Influencia|Académicos| 11224
+B Influencia|Académicos|Biólogos e investigadores médicos 01223
+B Informantes|Política| 11234
+B Informantes|Política|San Mungo 12235
+B Informantes|Política|Bastión Woodcroft 11224
+B Informantes|Política|Ministerio de Magia 01224
+B Informantes|Académicos| 11224
+B Informantes|Académicos|Biólogos e investigadores médicos 01223
+B Seguidores|Política| 01123
+B Seguidores|Política|San Mungo 12223
+B Seguidores|Política|Bastión Woodcroft 01123
+B Seguidores|Política|Ministerio de Magia 00012
+B Seguidores|Académicos| 11122
+B Seguidores|Académicos|Biólogos e investigadores médicos 00012
+C1 Idiomas muggles: 1 Medio · 2 Medio · 2 Medio · 2 Alto · 3 Alto
+C1 Idiomas mágicos: 1 Bajo · 1 Medio · 1 Alto · 1 Alto · 3 Alto
+C1 Etapa mínima: Adulto
+C1 Veteranía: usuario con 2 años en el foro; PJ con 6 meses en el foro
+
+! SUBDIRECTOR DE SAN MUNGO | Alto | Puesto único
+d Encargado de la contratación y ascenso del personal de San Mungo y de asegurar un buen funcionamiento interno de la institución.
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 1 año en el foro; PJ con 3 meses en el foro
+n El directorio no lista atributos, habilidades ni trasfondos para este empleo.
+
+! SANADOR | Medio |
+d Atiende pacientes, de urgencia o no, y se ocupa de la burocracia asociada al historial médico de sus pacientes, manteniéndola actualizada durante sus visitas.
+A Inteligencia 23456
+A Poder 12234
+A Voluntad 11223
+A Percepción 11223
+S Medicina 23334
+S Herbología 12234
+S Magizoología 12234
+S Arcanismo 11223
+S Cultura Mágica 11223
+S Oratoria 01123
+S Frialdad 01233
+S Empatía 11234
+S Alerta 01123
+S Pociones 12234
+S Rituales 12234
+S Cultura Muggle 00012
+B Biblioteca|Herbología| 11233
+B Biblioteca|Herbología|Plantas naturales 01222
+B Biblioteca|Herbología|Pociones 01222
+B Biblioteca|Medicina| 12335
+B Biblioteca|Medicina|Enfermedades mágicas 02335
+B Biblioteca|Medicina|Experimental 00233
+B Biblioteca|Medicina|Heridas mágicas 02335
+B Biblioteca|Medicina|Medicina muggle 00122
+B Informantes|Política|San Mungo 01223
+B Influencia|Política|San Mungo 00223
+C1 TIMOs: Supera las Expectativas
+C1 ÉXTASIS: 2 de estos 4 con Supera las Expectativas: Herbología / Transformación y Encantamientos / Criaturas / DCAO
+
+@ Azkaban
+! ALCAIDE | Alto | Puesto único
+d El jefe de la prisión. Gestiona los recursos, ejerce de portavoz ante los medios y tiene la última palabra en la contratación de personal.
+A Carisma 12345
+A Poder 12345
+A Percepción 12235
+A Voluntad 01234
+S Coordinación 23444
+S Intimidación 12344
+S Oratoria 01333
+S Subterfugio 12344
+S Frialdad 23344
+S Alerta 11234
+S Empatía 12224
+S Investigación 11224
+S Callejeo 12234
+S Cultura Mágica 11233
+S Política 22334
+B Biblioteca|Callejeo| 01234
+B Biblioteca|Callejeo|Criminales 01234
+B Biblioteca|Política|Ley mágica 23445
+B Influencia|Política| 01233
+B Influencia|Política|Azkaban 34455
+B Influencia|Política|Ministerio de Magia 23445
+B Informantes|Bajos fondos| 00235
+B Informantes|Bajos fondos|Soplones 00023
+B Informantes|Bajos fondos|* 00012
+B Informantes|Política|Azkaban 00013
+B Informantes|Política|Confederación Internacional de Magos 00012
+B Informantes|Política|Ministerio de Magia 00013
+B Informantes|Sociedad| 00023
+B Informantes|Sociedad|* 00034
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 1 año en el foro; PJ con 3 meses en el foro
+
+! SECRETARIO DE AZKABAN | Bajo | Puesto único
+d El segundo al mando. Organiza la agenda política del Alcaide y hace de nexo entre él y quienes negocian con la prisión: proveedores, etc.
+A Voluntad 00022
+A Percepción 11233
+A Inteligencia 12334
+S Frialdad 12233
+S Alerta 01123
+S Empatía 01223
+S Investigación 12334
+S Callejeo 22334
+S Cultura Mágica 11223
+S Política 11233
+B Biblioteca|Callejeo|Criminales 12233
+B Biblioteca|Política|Ley mágica 11123
+B Biblioteca|Política|Ministerio de Magia 11123
+B Influencia|Política|Azkaban 11333
+B Informantes|Política|Azkaban 22334
+B Informantes|Bajos fondos|* 00012
+B Informantes|Bajos fondos|* 00012
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 6 meses en el foro; PJ con 2 meses en el foro
+
+@ Bastión Woodcroft
+! DIRECTOR DEL BASTIÓN | Alto | Puesto único
+d La cabeza visible del Bastión. Gestiona la economía y el personal de la institución, la representa en el mundo mágico y es el principal valedor de las actividades y cursos que allí se desarrollan.
+A Carisma 23345
+A Voluntad 00124
+A Percepción 00123
+A Inteligencia 12346
+A Poder 00012
+S Coordinación 23344
+S Intimidación 00034
+S Oratoria 23344
+S Subterfugio 01234
+S Estilo 01234
+S Frialdad 12234
+S Empatía 01234
+S Cultura Mágica 23344
+S Política 33444
+B Influencia|Sociedad| 22245
+B Influencia|Política| 01123
+B Influencia|Política|Ministerio de Magia 01124
+B Influencia|Política|Bastión Woodcroft 34445
+B Influencia|Académicos| 11233
+B Influencia|Académicos|Adivinadores y oráculos 01112
+B Influencia|Académicos|Arcanistas 01112
+B Influencia|Académicos|Arqueólogos e historiadores 01112
+B Influencia|Académicos|Biólogos e investigadores médicos 01112
+B Influencia|Académicos|Herbólogos y pocionistas 01112
+B Influencia|Académicos|Magizoólogos 01112
+B Influencia|Académicos|Muggleólogos 01112
+B Informantes|Política| 14444
+B Informantes|Política|Ministerio de Magia 01223
+B Informantes|Política|Bastión Woodcroft 33334
+B Informantes|Académicos| 12223
+B Informantes|Académicos|Adivinadores y oráculos 00112
+B Informantes|Académicos|Arcanistas 00112
+B Informantes|Académicos|Arqueólogos e historiadores 00112
+B Informantes|Académicos|Biólogos e investigadores médicos 00112
+B Informantes|Académicos|Herbólogos y pocionistas 00112
+B Informantes|Académicos|Magizoólogos 00112
+B Informantes|Académicos|Muggleólogos 00112
+B Seguidores|Política|Bastión Woodcroft 11223
+B Seguidores|Académicos|Adivinadores y oráculos 00112
+B Seguidores|Académicos|Arcanistas 00112
+B Seguidores|Académicos|Arqueólogos e historiadores 00112
+B Seguidores|Académicos|Biólogos e investigadores médicos 00112
+B Seguidores|Académicos|Herbólogos y pocionistas 00112
+B Seguidores|Académicos|Magizoólogos 00112
+B Seguidores|Académicos|Muggleólogos 00112
+B Biblioteca|Cultura Mágica| 11245
+B Biblioteca|*| 00123
+B Biblioteca|*| 00123
+B Biblioteca|*| 00123
+B Biblioteca|*| 00123
+B Biblioteca|Política| 00134
+B Biblioteca|Política|Ley mágica 11223
+B Biblioteca|Política|Ministerio de Magia 11223
+n Las cuatro Bibliotecas * son bibliotecas generales de conocimiento a elegir (distintas entre sí).
+C1 Idiomas muggles: 1 Bajo · 1 Bajo y 1 Medio · 2 Alto y 1 Medio · 2 Alto, 2 Medio y 2 Bajo · 4 Alto y 1 Medio
+C1 Idiomas mágicos: Runas Bajo · Runas Medio y 1 Bajo · Runas Alto y 1 Medio · Runas Alto, 1 Alto y 1 Medio · Runas Alto, 2 Alto y 1 Medio
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 1 año en el foro; PJ con 3 meses en el foro
+
+! ACADÉMICO | Medio |
+d Profesional experimentado con conocimientos teóricos sobre un campo concreto. Investiga y estudia acerca del tema, siendo conocido y respetado por ello.
+A Carisma 01234
+A Percepción 12334
+A Inteligencia 23456
+S Coordinación 11223
+S Oratoria 12334
+S Alerta 12334
+S Consciencia 12223
+S Investigación 22334
+M Inteligencia#1 23344
+M Inteligencia#2 22234
+S Cultura Muggle 00112
+B Biblioteca|*| 23445
+B Biblioteca|*| 11233
+B Biblioteca|*|* 12345
+B Biblioteca|*|* 00002
+B Influencia|Académicos| 11224
+B Influencia|Académicos|* 00001
+B Informantes|Académicos| 11235
+B Informantes|Académicos|* 11234
+B Informantes|Política|Bastión Woodcroft 11235
+B Informantes|Sociedad|* 00001
+n Cultura Mágica 2·2·2·3·4 y una habilidad de Inteligencia relacionada 2·3·3·4·4 (o al revés, con prioridad para empleos basados en Cultura Mágica como arqueólogo o historiador). Lo mismo con las Bibliotecas: Cultura Mágica I·I·II·III·III y la relacionada II·III·IV·IV·V (o al revés), más una específica de la relacionada I·II·III·IV·V.
+C1 Idiomas muggles: 1 Medio · 1 Alto · 2 Alto · 3 Alto · 3 Alto
+C1 Etapa: Joven
+
+! ARTISTA | Medio |
+d Los artistas viven por y para el arte. No necesitan descripción, porque es imposible encasillarles. Hay de múltiples tipos.
+A Carisma 12334
+A Voluntad 22345
+A Percepción 12224 + A Inteligencia 11223 ó A Inteligencia 12224 + A Percepción 11223
+S Oratoria 12334
+S Subterfugio 12334
+S Arte/Artesanía 23344
+S Estilo 23344
+S Empatía 01233
+S Cultura Mágica 22334
+S Cultura Muggle 12334
+S Frialdad 12334 ó S Alerta 12334 ó S Consciencia 12334 ó S Investigación 12334 ó S Política 12334
+C3 Otras 2 habilidades relacionadas (Frialdad, Alerta, Consciencia, Investigación, Política): – · – · 1 · 2 · 3
+B Influencia|Sociedad| 00122
+B Influencia|Sociedad|* 11223
+B Influencia|Sociedad|* 00002
+B Influencia|*|* 00002
+B Informantes|Sociedad| 22344
+B Informantes|Sociedad|Prensa 11223
+B Informantes|Sociedad|* 12334
+B Informantes|Académicos| 00002
+B Informantes|*| 00002
+B Informantes|*|* 12334
+B Seguidores|*| 00223
+B Seguidores|*|* 12345
+C1 Etapa: Joven
+
+@ Bajos Fondos
+! SEÑOR DEL CRIMEN | Muy Alto |
+d El señor de los bajos fondos del mundo mágico. Controla todos los negocios turbios que desee: drogas mágicas, tráfico de influencias, mercado negro de pociones, objetos y criaturas mágicas, contrabando...
+A Destreza 12234
+A Carisma 23457
+A Voluntad 22345
+A Percepción 12345
+A Inteligencia 22456
+S Latrocinio 23334
+S Sigilo 00002
+S Coordinación 34444
+S Intimidación 23444
+S Oratoria 01234
+S Subterfugio 23344
+S Estilo 11234
+S Frialdad 23344
+S Alerta 01234
+S Empatía 12344
+S Iniciativa 00113
+S Callejeo 33444
+S Cultura Mágica 22334
+S Cultura Muggle 00112
+S Política 01234
+B Biblioteca|Callejeo| 12245
+B Biblioteca|Callejeo|Criminales 12244
+B Biblioteca|Callejeo|* 00013
+B Biblioteca|Política| 11223
+B Biblioteca|Política|Ley mágica 12234
+B Influencia|Bajos fondos| 23455
+B Influencia|Bajos fondos|* 34555
+B Influencia|Bajos fondos|* 00023
+B Influencia|Bajos fondos|* 00003
+B Influencia|Sociedad| 12223
+B Influencia|Sociedad|* 00234
+B Influencia|Sociedad|* 00003
+B Informantes|Bajos fondos| 23445
+B Informantes|Bajos fondos|* 34555
+B Informantes|Bajos fondos|* 00123
+B Informantes|Bajos fondos|* 00002
+B Informantes|Política| 11233
+B Informantes|Política|* 00234
+B Informantes|Política|* 00003
+B Informantes|Sociedad| 22333
+B Informantes|Sociedad|* 00234
+B Informantes|Sociedad|* 00003
+n La primera específica de Bajos fondos (Influencia e Informantes) es la de su negocio principal.
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 1 año en el foro; PJ con 3 meses en el foro
+
+! CONSIGLIERI | Alto |
+d El hombre de confianza del Señor del Crimen. Actúa como cerebro de la organización mientras el Señor del Crimen se dedica a disfrutar de la vida. Sólo está disponible si el Señor del Crimen lo desea.
+A Carisma 12235
+A Percepción 01234
+A Inteligencia 12345
+S Latrocinio 11223
+S Intimidación 22234
+S Oratoria 22234
+S Subterfugio 22344
+S Frialdad 12233
+S Alerta 12233
+S Empatía 22334
+S Callejeo 23444
+S Cultura Mágica 22233
+S Cultura Muggle 00123
+S Política 12234
+B Biblioteca|Callejeo| 22345
+B Biblioteca|Callejeo|Criminales 22345
+B Biblioteca|Política| 22334
+B Biblioteca|Política|Ley mágica 02345
+B Influencia|Bajos fondos| 23334
+B Influencia|Bajos fondos|* 23445
+B Influencia|Bajos fondos|* 12234
+B Influencia|Bajos fondos|* 00024
+B Influencia|Política| 00002
+B Influencia|Política|* 23445
+B Influencia|Sociedad| 23445
+B Informantes|Bajos fondos| 23345
+B Informantes|Bajos fondos|* 23445
+B Informantes|Bajos fondos|* 11234
+B Informantes|Bajos fondos|* 00024
+B Informantes|Política| 00223
+B Informantes|Política|* 00123
+B Informantes|Sociedad| 00223
+B Informantes|Sociedad|* 00133
+n La primera específica de Bajos fondos (Influencia e Informantes) es la del negocio principal.
+C1 Etapa: Adulto
+
+! EVANESCEDOR / CAZARRECOMPENSAS | Medio |
+d Matón a sueldo o brazo ejecutor de la organización criminal: extorsiona, amenaza e incluso asesina a quien se le ordene, siendo discreto, sigiloso y guardando silencio.
+A Destreza 01124
+A Voluntad 11223
+A Percepción 12345
+A Poder 11234
+S Esquiva 22334
+S Sigilo 11223
+S Latrocinio 01123
+S Intimidación 01123
+S Frialdad 02233
+S Iniciativa 01223
+S Investigación 22344
+S Callejeo 11223
+S Duelo 22334
+B Biblioteca|Callejeo| 01123
+B Influencia|Bajos fondos| 11223
+B Influencia|Bajos fondos|* 01124
+B Informantes|Bajos fondos| 11224
+B Informantes|Bajos fondos|* 01124
+B Informantes|Sociedad| 11223
+R tot 6,6,8,9,10
+R int 02234
+R ava 00112
+C1 Etapa: Joven
+
+! CONTRABANDISTA MÁGICO | Medio |
+d Distribuye mercancía ilegal dentro de su campo. Pociones engloba material de pociones y Criaturas engloba material de criaturas mágicas.
+A Carisma 23456
+A Percepción 01234
+A Inteligencia 12334
+S Latrocinio 11223
+S Sigilo 00112
+S Oratoria 23344
+S Subterfugio 22334
+S Frialdad 12223
+S Alerta 12333
+S Empatía 12334
+S Callejeo 22234
+S Cultura Mágica 12223
+S Cultura Muggle 00112
+M Inteligencia 12334
+n Habilidad de Inteligencia: la relacionada con el producto que se vende.
+B Biblioteca|Callejeo| 12233
+B Biblioteca|Callejeo|Contrabando 00122
+B Biblioteca|Callejeo|Criminales 00122
+B Influencia|Bajos fondos| 01123
+B Influencia|Bajos fondos|* 12233
+B Influencia|Sociedad|Negocios 11223
+B Informantes|Bajos fondos| 12334
+B Informantes|Bajos fondos|Contrabandistas 22334
+B Informantes|Bajos fondos|* 22334
+B Informantes|Sociedad| 00112
+C1 Etapa: Joven
+
+! MALEANTE | Medio |
+d Un criminal genérico: ladrones, estafadores y cualquier otro empleo criminal que no esté en la lista.
+A Destreza 23456
+A Carisma 01234
+A Inteligencia 12334
+S Latrocinio 23344
+S Sigilo 22234
+S Intimidación 12334
+S Subterfugio 22334
+S Frialdad 12223
+S Alerta 12333
+S Empatía 00112
+S Investigación 11223
+S Callejeo 12334
+S Cultura Mágica 12223
+S Política 00112
+B Biblioteca|Callejeo| 12233
+B Biblioteca|Callejeo|Criminales 00122
+B Biblioteca|Callejeo|Localizaciones 00122
+B Influencia|Bajos fondos| 11233
+B Influencia|Bajos fondos|* 00222
+B Informantes|Bajos fondos| 12334
+B Informantes|Bajos fondos|* 22334
+B Informantes|Bajos fondos|* 01123
+B Informantes|Sociedad| 00112
+B Informantes|*| 11223
+n Informantes *: categoría (y subcategoría) a elegir.
+C1 Etapa: Joven
+
+@ La Reserva
+! VIEJO LOBO | Muy Alto | Puesto único
+d El líder de La Reserva. Puede declarar la guerra y firmar la paz, alcanzar acuerdos en su nombre y proponer a La Asamblea la aprobación de normas o leyes.
+A Carisma 23456
+A Voluntad 22335
+A Percepción 12235
+A Inteligencia 11234
+M Vigor 00024 ó M Poder 00024
+M Destreza 00002
+S Coordinación 33444
+S Intimidación 00013 + S Subterfugio 00124 ó S Intimidación 00014 + S Subterfugio 00123
+S Oratoria 34444
+S Seducción 12234
+S Arte/Artesanía 11234
+C2 Segunda Artesanía: – · 1 · 2 · 2 · 3
+S Estilo 22344
+S Frialdad 01224
+S Alerta 00123
+S Consciencia 00123
+S Empatía 23444
+S Investigación 00002
+S Callejeo 00002
+S Cultura Mágica 22344 + S Cultura Muggle 12234 ó S Cultura Muggle 22344 + S Cultura Mágica 12234
+S Herbología 00024 + S Magizoología 00013 ó S Magizoología 00024 + S Herbología 00013
+S Política 22344
+S Supervivencia 00013
+B Biblioteca|Cultura Mágica| 22235 + B Biblioteca|Cultura Muggle| 11224 ó B Biblioteca|Cultura Muggle| 22235 + B Biblioteca|Cultura Mágica| 11224
+B Biblioteca|Cultura Mágica/Cultura Muggle|* 00024
+B Biblioteca|Cultura Mágica/Cultura Muggle|* 00023
+B Biblioteca|Magizoología|Seres racionales 12345
+B Influencia|Sociedad| 12234
+B Influencia|Política| 00124
+B Influencia|Política|* 00013
+B Influencia|Política|* 00012
+B Influencia|Política|* 00123
+B Influencia|Sociedad|La Reserva 45555
+B Influencia|Seres mágicos| 23335
+B Influencia|Seres mágicos|Hombres Lobo 22445
+B Influencia|Seres mágicos|* 01124
+B Informantes|Académicos/Bajos fondos/Hogwarts| 11234
+B Informantes|Académicos/Bajos fondos/Hogwarts| 11233
+B Informantes|Académicos/Bajos fondos/Hogwarts|* 00223
+B Informantes|Académicos/Bajos fondos/Hogwarts|* 00223
+B Informantes|Académicos/Bajos fondos/Hogwarts| 00123
+B Informantes|Política| 12235
+B Informantes|Política|* 02223
+B Informantes|Política|* 00123
+B Informantes|Política|* 00024
+B Informantes|Política|* 00023
+B Informantes|Seres mágicos| 00334
+B Informantes|Seres mágicos|Hombres Lobo 23445
+B Informantes|Seres mágicos|* 02334
+B Informantes|Seres mágicos|* 01233
+B Informantes|Sociedad| 12235
+B Informantes|Sociedad|La Reserva 45555
+B Informantes|Sociedad|* 01223
+B Informantes|Sociedad|Prensa 00123
+B Seguidores|Sociedad| 00123
+B Seguidores|Sociedad|La Reserva 00002
+B Seguidores|Seres mágicos|* 00002
+n Hab. de Vigor o Poder: – · – · – · 2 · 4. Intimidación y Subterfugio: en Legendario una de las dos a 4. Las específicas de Seres mágicos * son «alguna con MDC»; varias Política > * son «Gobierno mágico de [X País]». Licántropos = Hombres Lobo.
+C1 Idiomas muggles: 1 Bajo · 1 Alto · 2 Alto · 3 Alto · 3 Alto
+C1 Idiomas mágicos: 1 Bajo · 1 Alto · 1 Alto · 2 Alto · 3 Alto
+C1 Veteranía: usuario con 2 años en el foro; PJ con 6 meses en el foro
+C1 Etapa: Adulto
+
+! MIEMBRO DEL CONCILIO DE PLATA | Alto | Tres puestos, uno de ellos rotativo cada 2 años
+d Se encarga del día a día de La Reserva en los asuntos que no requieren asamblea; son también los jueces del asentamiento y los consejeros del Viejo Lobo. Al reportar un roleo sólo se cobra uno de los dos empleos si se ocupan ambos.
+A Carisma 23346
+A Voluntad 12345
+A Percepción 00123
+A Inteligencia 00124
+S Atletismo 00012
+S Coordinación 23444
+S Oratoria 23344
+S Arte/Artesanía 12233
+C3 Segunda Artesanía: – · – · 1 · 2 · 3
+S Estilo 01234
+S Frialdad 01123
+S Alerta 00012
+S Consciencia 00012
+S Empatía 22344
+S Cultura Mágica 23334 + S Cultura Muggle 12334 ó S Cultura Muggle 23334 + S Cultura Mágica 12334
+S Política 22334
+B Biblioteca|Cultura Mágica| 11134 + B Biblioteca|Cultura Muggle| 01123 ó B Biblioteca|Cultura Muggle| 11134 + B Biblioteca|Cultura Mágica| 01123
+B Biblioteca|Cultura Mágica/Cultura Muggle|* 11123
+B Biblioteca|Cultura Mágica/Cultura Muggle|* 11123
+B Biblioteca|Magizoología|Seres racionales 23455
+B Influencia|Política| 00002
+B Influencia|Seres mágicos| 11234
+B Influencia|Seres mágicos|Hombres Lobo 23455
+B Influencia|Sociedad| 00002
+B Influencia|Sociedad|La Reserva 33445
+B Informantes|Académicos/Bajos fondos/Hogwarts| 12233
+B Informantes|Académicos/Bajos fondos/Hogwarts|* 23344
+B Informantes|Seres mágicos| 22345
+B Informantes|Seres mágicos|* 23344
+B Informantes|Política| 00123
+B Informantes|Política|* 23455
+B Informantes|Sociedad| 11233
+B Informantes|Sociedad|La Reserva 34555
+n En Legendario, una de las dos específicas (Académicos/Bajos fondos/Hogwarts > * o Seres mágicos > alguna con MDC) debe llegar a V. Licántropos = Hombres Lobo.
+C4 Idiomas muggles: – · – · – · 1 Alto · 2 Alto
+C3 Idiomas mágicos: – · – · 1 Alto · 2 Alto · 3 Alto
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 6 meses en el foro; PJ con 2 meses en el foro
+
+@ Negocios
+! DUEÑO DE NEGOCIO | Muy Alto | Puesto único por negocio
+d Gestiona la economía y el material del negocio: negociaciones con proveedores, compraventa al por mayor, mantenimiento del local y contratación de personal.
+A Destreza 12234
+A Carisma 23457
+A Voluntad 22345
+A Percepción 12345
+A Inteligencia 22456
+S Latrocinio 01234
+S Sigilo 00002
+S Coordinación 34444
+S Intimidación 01234
+S Oratoria 23444
+S Subterfugio 23344
+S Estilo 11234
+S Frialdad 12344
+S Alerta 00112
+S Empatía 23344
+S Iniciativa 00113
+S Callejeo 01234
+M Inteligencia 22334
+S Cultura Mágica 23334 ó S Cultura Muggle 23334
+S Política 33444
+B Biblioteca|Callejeo| 11234
+B Biblioteca|Callejeo|Contrabando 12345
+B Biblioteca|Callejeo|Localizaciones 12345
+B Biblioteca|Cultura Mágica| 00013
+B Biblioteca|Política| 11123
+B Biblioteca|Política|Ley mágica 11233
+B Biblioteca|Política|Ministerio de Magia 00012
+B Influencia|Política| 12235
+B Influencia|Política|* 11122
+B Influencia|Sociedad| 11235
+B Influencia|Sociedad|Negocios 22455
+B Influencia|Sociedad|* 23345
+B Influencia|Sociedad|* 11113
+B Influencia|*| 12224
+B Informantes|Sociedad| 12334
+B Informantes|Sociedad|Negocios 34555
+B Informantes|Sociedad|* 23445
+B Informantes|Sociedad|* 01124
+B Informantes|*| 12345
+B Informantes|*|* 00134
+B Informantes|*|* 00133
+n Habilidad de Inteligencia: la relacionada con el negocio.
+C1 Etapa: Adulto
+C1 Veteranía: usuario con 1 año en el foro; PJ con 3 meses en el foro
+
+! TRABAJADOR DE NEGOCIO | Muy Bajo |
+d Atiende al cliente según el tipo de negocio (libros, armas, artículos de quidditch, hostelería, cocina…) y se encarga de la apertura, cierre, limpieza y orden del local.
+A Carisma 11122
+A Voluntad 00112
+S Oratoria 01223
+S Alerta 00002
+M Inteligencia 12233
+B Biblioteca|*| 00111
+B Biblioteca|*| 00012
+B Influencia|*| 00112
+B Influencia|*|* 00002
+B Informantes|*| 01112
+B Informantes|*|* 00012
+n Bibliotecas: relacionadas con el tipo de negocio (Herbología para tiendas de pociones, Callejeo para locales de los bajos fondos, Cultura Mágica para bares mágicos...). Influencia e Informantes: relacionados con la clientela habitual (Hogsmeade, Muggles, Deportes, Alta sociedad...).
+C1 Arcanos domésticos: Aguamenti, Tergeo, Fregotego (desde Maestro, además Bauleo o Sonorus)
+C1 Etapa: Joven
+
+@ Otros
+! ADIVINOS / MÉDIUMS | Medio |
+d Los Adivinos son especialistas en las artes adivinatorias y atienden a magos y brujas preocupados por su futuro. Los Médiums son especialistas en el contacto con espíritus.
+A Carisma 01234
+A Percepción 23456
+A Inteligencia 12334
+S Coordinación 11223
+S Oratoria 12334
+S Frialdad 12223
+S Consciencia 23344
+S Empatía 22334
+S Investigación 12334
+S Arcanismo 22234
+S Cultura Mágica 12223
+S Cultura Muggle 00112
+S Magizoología 00112
+S Rituales 12333
+B Informantes|Sociedad| 00112
+B Informantes|Sociedad|* 01123
+C1 Idiomas muggles: 1 Medio · 1 Alto · 2 Alto · 3 Alto · 3 Alto
+C1 Etapa: Joven
+= Adivino
+B Biblioteca|Adivinación| 11223
+B Biblioteca|Adivinación|Métodos adivinatorios 22333
+B Biblioteca|Adivinación|Profecías 12333
+B Informantes|Académicos|Adivinadores y oráculos 12334
+B Influencia|Académicos| 01123
+B Influencia|Académicos|Adivinadores y oráculos 12334
+= Médium
+B Biblioteca|Arcanismo| 11223
+B Biblioteca|Arcanismo|Artes oscuras 12233
+B Biblioteca|Magizoología|Espíritus 12233
+B Influencia|Sociedad|Fantasmas 12334
+B Informantes|Sociedad| 00122
+B Informantes|Sociedad|Fantasmas 12334
+C1 Maestría en Fantasmas
+=-
+
+! DETECTIVE | Bajo |
+d Al margen de organizaciones gubernamentales o privadas, el detective es un mercenario de la información: investiga, busca, encuentra y vende la información... o se la guarda para tomarse la justicia por su mano.
+A Destreza 11223
+A Carisma 00011
+A Percepción 11233
+A Inteligencia 01122
+S Latrocinio 12233
+S Sigilo 12233
+S Subterfugio 01123
+S Alerta 11223
+S Investigación 22334
+S Callejeo 12234
+S Cultura Mágica 00123
+S Cultura Muggle 00112
+B Biblioteca|Callejeo| 11233
+B Informantes|Bajos fondos| 12234
+B Informantes|Sociedad| 11223
+B Informantes|*| 01122
+C1 Etapa: Joven
+
+! ENCANTADORES / POCIONISTAS / RITUALISTAS | Bajo |
+d Profesionales de la ejecución de pociones, rituales y encantamientos. No son expertos en los conceptos arcanos profundos de su arte, pero saben ponerlo en práctica.
+A Percepción 01122
+A Inteligencia 11223
+A Poder 12233
+S Consciencia 01223
+S Investigación 00023
+S Cultura Mágica 11223
+S Arcanismo 12234
+C1 TIMOs: Aceptable
+C1 Etapa: Joven
+= Encantador
+S Arte/Artesanía 12234
+C1 Segunda Artesanía: 1 · 2 · 2 · 3 · 4
+B Biblioteca|Arcanismo| 12334
+B Biblioteca|Arcanismo|Objetos mágicos 11244
+B Biblioteca|Arcanismo|* 00112
+B Biblioteca|Arcanismo|* 00123
+B Influencia|Académicos|Arcanistas 00012
+B Informantes|Académicos| 00023
+B Informantes|Académicos|Arcanistas 11124
+C1 Arcanos/Objetos relacionados con objetos: 500 · 600 · 1.300 · 1.700 · 1.800 grageas
+C1 ÉXTASIS: Encantamientos y Transformaciones con Aceptable
+= Pocionista
+S Pociones 12234
+B Biblioteca|Herbología| 12334
+B Biblioteca|Herbología|Pociones 11234
+B Biblioteca|Herbología|Plantas naturales 11234
+B Influencia|Académicos|Herbólogos y pocionistas 00023
+B Informantes|Académicos| 00022
+B Informantes|Académicos|Arcanistas 00023
+B Informantes|Académicos|Herbólogos y pocionistas 00013
+R bas:pocion 44555
+R int:pocion 00233
+C1 ÉXTASIS: Herbología y Pociones con Aceptable
+= Ritualista
+S Rituales 12234
+B Biblioteca|Arcanismo| 12334
+B Biblioteca|Arcanismo|Arcanos 11244
+B Biblioteca|Arcanismo|* 00112
+B Biblioteca|Arcanismo|* 00123
+B Influencia|Académicos|Arcanistas 00012
+B Informantes|Académicos| 00023
+B Informantes|Académicos|Arcanistas 11124
+R bas:ritual 44555
+R int:ritual 00233
+C1 ÉXTASIS: Magia Ritual con Aceptable
+=-
+
+! PERIODISTA | Bajo |
+d El cuarto poder. Su labor es estar al pie de la noticia y recolectar la información para luego difundirla por todo el mundo mágico.
+A Voluntad 01123
+A Percepción 11223
+A Inteligencia 00011
+S Oratoria 12233
+S Arte/Artesanía 22334
+S Alerta 11233
+S Investigación 12334
+S Cultura Mágica 12234
+S Política 00013
+B Biblioteca|Cultura Mágica| 12234
+B Biblioteca|Cultura Mágica|* 11122
+B Influencia|Sociedad| 00122
+B Influencia|Sociedad|Prensa 11233
+B Influencia|Sociedad|* 01223
+B Informantes|Sociedad| 22334
+B Informantes|Sociedad|Prensa 12334
+B Informantes|Sociedad|* 11122
+n Arte/Artesanía: Escritura.
+C2 Idiomas muggles: – · 1 Medio · 2 Medio · 3 Medio · 2 Medio
+C3 Idiomas mágicos: – · – · 1 Medio · 2 Medio · 2 Medio
+C1 Etapa: Joven
+
+! MODELO | Medio |
+d Los cuerpos que atraen todas las miradas en la pasarela. Tanto en el mundo mágico como en el muggle, su vida transcurre entre cámaras de fotos, diseñadores atrevidos y pasarelas.
+A Vigor 01234
+A Carisma 12334
+A Voluntad 23456
+S Atletismo 12334
+S Seducción 22334
+S Subterfugio 22234
+S Estilo 23344
+S Frialdad 12334
+S Empatía 12223
+S Cultura Mágica 11223
+S Cultura Muggle 00112
+B Biblioteca|Cultura Mágica|Mundo del corazón 00013
+B Biblioteca|Cultura Muggle|Arte muggle 00013
+B Influencia|Sociedad| 11224
+B Influencia|Sociedad|Negocios 11334
+B Influencia|Sociedad|Prensa 12334
+B Influencia|Sociedad|* 11224
+B Informantes|Sociedad| 12245
+B Informantes|Sociedad|Negocios 23445
+B Informantes|Sociedad|Prensa 22334
+B Informantes|Sociedad|* 11234
+C1 Idiomas muggles: 1 Medio · 1 Alto · 2 Alto · 3 Alto · 3 Alto
+C1 Etapa: Joven
+
+! VETERIMAGO | Medio |
+d
+A Voluntad 11223
+A Inteligencia 23445
+A Percepción 12234
+A Poder 11223
+S Seducción 00123
+S Frialdad 11233
+S Alerta 01123
+S Empatía 11234
+S Investigación 11223
+S Supervivencia 01123
+S Medicina 23344
+S Magizoología 22344
+S Herbología 11223
+S Pociones 01123
+S Rituales 12234
+B Biblioteca|Medicina| 12334
+B Biblioteca|Medicina|Heridas mágicas 01123
+B Biblioteca|Medicina|Enfermedades mágicas 00112
+B Biblioteca|Magizoología| 12345
+B Biblioteca|Magizoología|Bestias mágicas 12334
+B Biblioteca|Magizoología|Animales muggles 00123
+B Biblioteca|Herbología| 12223
+B Biblioteca|Herbología|Pociones 01123
+B Biblioteca|Herbología|Plantas naturales 01123
+B Informantes|Académicos| 00112
+B Informantes|Académicos|Magizoólogos 01122
+C1 TIMOs: Supera las Expectativas
+C1 ÉXTASIS: Cuidado de Criaturas Mágicas con Supera las Expectativas
+
+@ Facciones
+! PRÍNCIPE TENEBROSO | Muy Alto | Puesto único
+d El actual líder de los mortífagos. Tras décadas desde la muerte del Señor Tenebroso, es su deber guiar a la facción en este nuevo siglo, comandando a los magos oscuros y marcando sus objetivos.
+A Carisma 23456
+A Voluntad 22345
+A Percepción 01234
+A Inteligencia 12345
+A Poder 34567
+S Vuelo 00002
+S Coordinación 33444
+S Intimidación 12344
+S Oratoria 23344
+S Subterfugio 12234
+S Frialdad 22344
+S Alerta 12223
+S Consciencia 12334
+S Empatía 00123
+S Adivinación 00002
+S Arcanismo 22344
+S Callejeo 11234
+S Cultura Mágica 22344
+S Herbología 00002
+S Magizoología 00002
+S Política 01134
+M Poder#1 34444
+M Poder#2 23444
+M Poder#3 22244
+B Biblioteca|Arcanismo| 11235
+B Biblioteca|Arcanismo|* 00224
+B Influencia|Bajos fondos| 22345
+B Influencia|Bajos fondos|* 02334
+B Influencia|Bajos fondos|* 00224
+B Influencia|Política| 01235
+B Influencia|Seres mágicos| 11113
+B Influencia|Seres mágicos|* 00002
+B Influencia|Sociedad| 22345
+B Influencia|Sociedad|* 02335
+B Informantes|Bajos fondos| 22223
+B Informantes|Bajos fondos|* 02223
+B Informantes|Política| 11224
+B Informantes|Seres mágicos| 11223
+B Informantes|Seres mágicos|* 00003
+B Informantes|Sociedad| 22225
+B Informantes|Sociedad|* 02223
+B Seguidores|Bajos fondos| 00004
+B Seguidores|Bajos fondos|* 00004
+B Seguidores|Sociedad| 00004
+B Seguidores|Sociedad|* 00004
+B Seguidores|*| 00004
+B Seguidores|*|* 00004
+C1 Etapa: Joven
+C1 Veteranía: usuario con 2 años en el foro; PJ con 6 meses en el foro
+
+! CAUDILLO OSCURO | Alto | Máximo 3
+d Los más cercanos al líder de los mortífagos: sus agentes de mayor confianza, que guían a los miembros bajo las órdenes del Príncipe Tenebroso.
+A Inteligencia 23346
+A Voluntad 00124
+A Percepción 00123
+A Carisma 12345
+S Coordinación 23344
+S Intimidación 23344
+S Oratoria 01223
+S Subterfugio 01234
+S Estilo 01122
+S Frialdad 12234
+S Consciencia 01122
+S Investigación 01234
+S Arcanismo 23344
+S Callejeo 22334
+S Cultura Mágica 01233
+M Poder 12333
+B Biblioteca|Arcanismo| 01123
+B Biblioteca|Arcanismo|Artes oscuras 01134
+B Biblioteca|Callejeo| 23455
+B Biblioteca|Callejeo|Localizaciones 11245
+B Informantes|Bajos fondos| 34455
+B Informantes|Bajos fondos|Contrabandistas 02235
+B Informantes|Bajos fondos|Soplones 12223
+B Informantes|Sociedad| 00123
+B Informantes|Sociedad|Alta sociedad 00112
+B Informantes|Sociedad|Negocios 00112
+B Informantes|*| 00034
+B Informantes|*|* 00045
+B Influencia|Bajos fondos| 34555
+B Influencia|Bajos fondos|Contrabandistas 11222
+B Influencia|Bajos fondos|Sanadores ilegales 11222
+B Influencia|Académicos| 00234
+B Influencia|Académicos|Arcanistas 00012
+B Influencia|Académicos|* 00002
+B Seguidores|Seres mágicos| 00003
+B Seguidores|Seres mágicos|* 00002
+C1 Etapa: Joven
+C1 Veteranía: usuario con 6 meses en el foro; PJ con 3 meses en el foro
+
+! MORTÍFAGO | Muy Bajo |
+d Seguidores incondicionales del Príncipe Tenebroso: llevan a cabo las misiones que les encarga y le deben obediencia casi ciega, al grado de anteponer su lealtad a su propia seguridad.
+A Voluntad 00023
+A Carisma 01223
+A Percepción 12233
+A Poder 11223
+S Atletismo 11233
+S Esquiva 11233
+S Empatía 00023
+S Alerta 12334
+S Duelo 12234
+B Informantes|Bajos fondos| 11123
+B Informantes|Política|Ministerio de Magia 00224
+B Biblioteca|Arcanismo| 12333
+B Biblioteca|Arcanismo|Artes oscuras 00224
+R bas 44444
+R int 00022
+R tot 44466
+C1 Un rol terminado de reclutamiento
+
+! EL SABIO | Muy Alto | Puesto único
+d El actual líder de la Orden del Fénix. Más un guía que un general de batalla, organiza a quienes están dispuestos a plantar cara a las fuerzas oscuras que buscan imponer su ideología por la fuerza.
+A Carisma 34567
+A Voluntad 12345
+A Percepción 01234
+A Inteligencia 22345
+A Poder 23456
+S Atletismo 00002
+S Coordinación 34444
+S Intimidación 12344
+S Oratoria 23444
+S Subterfugio 12234
+S Frialdad 22344
+S Alerta 00123
+S Consciencia 01134
+S Empatía 12334
+S Adivinación 00002
+S Arcanismo 22344
+S Callejeo 11234
+S Cultura Mágica 22244
+S Herbología 00002
+S Magizoología 00002
+S Política 12223
+M Poder#1 33444
+M Poder#2 23344
+M Poder#3 22344
+B Biblioteca|Arcanismo| 11235
+B Biblioteca|Arcanismo|* 00224
+B Influencia|Académicos| 11113
+B Influencia|Académicos|* 00002
+B Influencia|Hogwarts| 22345
+B Influencia|Hogwarts|* 02335
+B Influencia|Política| 01235
+B Influencia|Sociedad| 22345
+B Influencia|Sociedad|* 02334
+B Influencia|Sociedad|* 00224
+B Informantes|Académicos| 11223
+B Informantes|Académicos|* 00003
+B Informantes|Hogwarts| 22225
+B Informantes|Hogwarts|* 02223
+B Informantes|Política| 11224
+B Informantes|Sociedad| 22223
+B Informantes|Sociedad|* 02223
+B Seguidores|Política| 00004
+B Seguidores|Política|* 00004
+B Seguidores|Sociedad| 00004
+B Seguidores|Sociedad|* 00004
+B Seguidores|*| 00004
+B Seguidores|*|* 00004
+C1 Etapa: Joven
+C1 Veteranía: usuario con 2 años en el foro; PJ con 6 meses en el foro
+
+! CONSEJERO DE LA ORDEN | Alto | Máximo 3
+d Las personas de mayor confianza del líder de la Orden: sus miembros más destacados, capaces de guiar al resto con la intención de salvaguardar a la comunidad mágica de las fuerzas oscuras.
+A Inteligencia 22346
+A Voluntad 00124
+A Percepción 00123
+A Carisma 22345
+S Coordinación 23344
+S Intimidación 00002
+S Oratoria 23344
+S Subterfugio 01223
+S Frialdad 12334
+S Consciencia 01124
+S Empatía 01234
+S Arcanismo 01123
+S Cultura Mágica 23344
+S Supervivencia 12333
+B Biblioteca|Cultura Mágica| 00012
+B Biblioteca|Cultura Mágica|Historia de la magia 00124
+B Biblioteca|Arcanismo| 23455
+B Biblioteca|Arcanismo|Arcanos 00124
+B Biblioteca|Arcanismo|Artes oscuras 00112
+B Biblioteca|*| 00002
+B Biblioteca|*|* 00002
+B Informantes|Sociedad| 33455
+B Informantes|Sociedad|Prensa 00022
+B Informantes|Sociedad|Fantasmas 00112
+B Informantes|Sociedad|Negocios 00022
+B Informantes|Política|Hogsmeade 00222
+B Informantes|Bajos fondos| 00123
+B Informantes|Bajos fondos|Soplones 00122
+B Informantes|*| 00122
+B Informantes|*|* 00122
+B Influencia|Sociedad| 34555
+B Influencia|Sociedad|Prensa 00022
+B Influencia|Sociedad|Fantasmas 00022
+B Influencia|Académicos|Arcanistas 00022
+B Influencia|Académicos|* 11123
+B Seguidores|Seres mágicos| 00003
+B Seguidores|Seres mágicos|* 00002
+C1 Etapa: Joven
+C1 Veteranía: usuario con 6 meses en el foro; PJ con 3 meses en el foro
+
+! MIEMBRO DE LA ORDEN DEL FÉNIX | Muy Bajo |
+d Personas que concuerdan con las metas de la Orden del Fénix, una organización secreta fundada para oponerse y luchar contra el Príncipe Tenebroso y sus mortífagos.
+A Voluntad 00023
+A Carisma 01223
+A Percepción 12233
+A Poder 11223
+S Atletismo 11233
+S Esquiva 11233
+S Empatía 00023
+S Alerta 12334
+S Duelo 12234
+B Informantes|Sociedad| 11123
+B Biblioteca|Arcanismo| 12333
+B Biblioteca|Arcanismo|Artes oscuras 00224
+B Biblioteca|Callejeo|* 00224
+R bas 44444
+R int 00022
+R tot 44466
+C1 Un rol terminado de reclutamiento
+
+! PRIMOGÉNITA | Muy Alto | Puesto único
+d Aunque no tiene más voz y voto que cualquiera de sus hermanas de aquelarre, su voz tiene, por el momento, la capacidad de conducirlas en una dirección u otra.
+A Carisma 34567
+A Voluntad 23456
+A Percepción 01234
+A Inteligencia 22345
+A Poder 12345
+S Atletismo 00002
+S Seducción 33444
+S Oratoria 12344
+S Coordinación 23344
+S Subterfugio 12234
+S Estilo 22344
+S Consciencia 12334
+S Empatía 00123
+S Investigación 12223
+S Adivinación 00002
+S Arcanismo 22344
+S Herbología 11234
+S Cultura Mágica 22344
+S Callejeo 00002
+S Política 00002
+S Magizoología 01134
+M Poder#1 34444
+M Poder#2 23444
+M Poder#3 22244
+B Biblioteca|Arcanismo| 11235
+B Biblioteca|Arcanismo|* 00224
+B Biblioteca|Herbología| 22345
+B Biblioteca|Herbología|* 02334
+B Biblioteca|Herbología|* 00224
+B Biblioteca|Adivinación| 01235
+B Biblioteca|Magizoología| 11113
+B Biblioteca|Magizoología|* 00002
+B Biblioteca|Cultura Mágica| 22345
+B Biblioteca|Cultura Mágica|* 02335
+B Informantes|Académicos| 22223
+B Informantes|Académicos|* 02223
+B Informantes|Sociedad| 11224
+B Influencia|Sociedad| 11223
+B Influencia|Sociedad|* 00003
+B Influencia|Académicos| 22225
+B Influencia|Académicos|* 02223
+B Seguidores|Académicos| 00004
+B Seguidores|Académicos|* 00004
+B Seguidores|Sociedad| 00004
+B Seguidores|Sociedad|* 00004
+B Seguidores|Seres mágicos| 00004
+B Seguidores|Seres mágicos|* 00004
+C1 Etapa: Joven
+C1 Veteranía: usuario con 2 años en el foro; PJ con 6 meses en el foro
+
+! HERMANA | Alto | Máximo 3
+d Brujas del aquelarre con una voz capaz de convencer y aunar a las demás bajo su ala. Cuando todas las voces tienen el mismo peso, lo que importa es cuántas comparten tus ideas.
+A Carisma 22346
+A Voluntad 00124
+A Poder 00123
+A Inteligencia 22345
+S Seducción 23344
+S Coordinación 00002
+S Oratoria 23344
+S Subterfugio 01223
+S Estilo 01234
+S Consciencia 01124
+S Investigación 12334
+S Arcanismo 01123
+S Cultura Mágica 23344
+S Herbología 12333 ó S Magizoología 12333 ó S Adivinación 12333
+B Biblioteca|Cultura Mágica| 00012
+B Biblioteca|Cultura Mágica|* 00124
+B Biblioteca|Arcanismo| 23455
+B Biblioteca|Arcanismo|* 00124
+B Biblioteca|Arcanismo|* 00112
+B Biblioteca|Herbología/Magizoología/Adivinación| 00002
+B Biblioteca|Herbología/Magizoología/Adivinación|* 00002
+B Informantes|Académicos| 33455
+B Informantes|Académicos|* 00022
+B Informantes|Académicos|* 00112
+B Informantes|Académicos|* 00022
+B Informantes|Sociedad|La Reserva 00222
+B Informantes|Seres mágicos| 00123
+B Informantes|Seres mágicos|Duendes 00122
+B Informantes|*| 00122
+B Informantes|*|* 00122
+B Influencia|Académicos| 34555
+B Influencia|Académicos|* 00022
+B Influencia|Académicos|* 00022
+B Influencia|Sociedad|La Reserva 00022
+B Influencia|Sociedad|* 11123
+B Seguidores|Seres mágicos| 00003
+B Seguidores|Seres mágicos|* 00002
+C1 Etapa: Joven
+C1 Veteranía: usuario con 6 meses en el foro; PJ con 3 meses en el foro
+
+! HEREDERA | |
+d Brujas que buscan conocimiento y hermandad junto a sus iguales; comparten metas y recursos para alcanzar una mayor comprensión de los intrincados giros del mundo mágico.
+A Voluntad 00023
+A Inteligencia 01223
+A Carisma 12233
+A Poder 11223
+S Oratoria 11233
+S Empatía 00033
+S Investigación 11233
+S Arcanismo 12334
+S Cultura Mágica 12234
+B Informantes|Académicos| 11123
+B Biblioteca|Arcanismo| 12333
+B Biblioteca|Arcanismo|* 00224
+B Biblioteca|*|* 00224
+R bas 44444
+R int 00022
+R tot 44466
+C1 Un rol terminado de reclutamiento o haber formado parte de la Gesta
+n El directorio no indica sueldo para este empleo.
+

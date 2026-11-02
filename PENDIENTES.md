@@ -27,11 +27,11 @@ Todo lo marcado como «comprobado» se ha verificado contra el código de `main`
 | F05 | El Inspector toma como partes de la ficha los mensajes del dueño de más de 800 caracteres: mezcla la ficha vigente con canjes antiguos. | comprobado | 3 · un solo lector para todos |
 | F09 | La importación de Excel usa SheetJS `xlsx@0.18.5` (CVE-2023-30533 y CVE-2024-22363). Riesgo práctico bajo: solo afecta al abrir un archivo manipulado. | comprobado | 8 · actualizar (cdn.sheetjs.com) o quitar si ya no se usa |
 | F10 | La sesión en la nube guarda con `PATCH` sin comprobar la versión: dos dispositivos a la vez pueden pisarse. | comprobado | 7 · usar la precondición `updateTime` de Firestore |
-| F11 | Al traer datos de la nube se borra todo lo local antes de escribir lo nuevo y los errores se tragan; si falla a medias, queda un estado parcial (se puede volver a traer de la nube). | comprobado | 1 · almacén con copia de seguridad y verificación |
-| F12 | El Inspector descarga `index.html` y ejecuta trozos con `new Function()` para leer precios y requisitos. Frágil: cualquier cambio de formato lo rompe. | comprobado | 1 · datos del sistema en JSON |
+| F11 | Al traer datos de la nube se borra todo lo local antes de escribir lo nuevo y los errores se tragan; si falla a medias, queda un estado parcial (se puede volver a traer de la nube). | comprobado | ✔ fase 1 · `Almacen.restaurar()` todo o nada, con prueba |
+| F12 | El Inspector descarga `index.html` y ejecuta trozos con `new Function()` para leer precios y requisitos. Frágil: cualquier cambio de formato lo rompe. | comprobado | 1 · ✔ datos en `data/sistema.json`; falta que el Inspector los use (fase 3) |
 | F13 | Mi PJ maneja PAM pulsando botones y leyendo su pantalla (`#f-parse`, `#dlg-ta`, `#bovForm`…). | comprobado | 5 · agente y protocolo (prueba de concepto ya hecha) |
-| F14 | El Registro de Roles guarda con 700 ms de retraso y no guarda al cerrar la página. | comprobado | 1 · almacén |
-| F15 | `fechaISO()` usa la fecha UTC: entre medianoche y la 1-2 h (hora de Madrid) da el día anterior. | comprobado | 1 · utilidades de fecha |
+| F14 | El Registro de Roles guarda con 700 ms de retraso y no guarda al cerrar la página. | comprobado | ✔ fase 1 · `Almacen.guardarLuego()` + `vigilarSalida()`, con prueba |
+| F15 | `fechaISO()` usa la fecha UTC: entre medianoche y la 1-2 h (hora de Madrid) da el día anterior. | comprobado | ✔ fase 1 · `core/fechas.js`, con prueba en hora de Madrid |
 | F16 | `renderAll()` vuelve a pintar toda la Tabla de Canjes por cualquier cambio. | comprobado | 8 · páginas |
 | F17 | Versiones distintas en un mismo script (`@version 1.7.1` y `mipj-1.7.2`), CSS repetido y `leerSaldos()` copiado en Mi PJ y en el Inspector. | comprobado | 8 · se resuelve al ordenar |
 | R01 | Editor personalizado: una línea nueva detrás de la última de una lista (`…[/spoiler]`) queda fuera del desplegable; sin `[b]`, o en trasfondos, duplica el `[/spoiler]` y rompe todo lo que viene detrás. | comprobado (Mortimer) | 4 |
@@ -40,7 +40,7 @@ Todo lo marcado como «comprobado» se ha verificado contra el código de `main`
 | R04 | Los arcanos nuevos salen sin descripción: al leer la ficha se descarta la descripción de los arcanos oficiales. | comprobado | 2 |
 | R05 | Los rituales «Nombre \| Latín» se renombran «Nombre (Latín)» y luego no se encuentran ni para añadir ni para quitar. | comprobado | 3 |
 | R06 | La pestaña «Otros» (idiomas, trasfondos nuevos, ventajas, especializaciones, talentos, títulos) queda siempre para hacer a mano, y PAM dice «Agregado» aunque la línea quede mal puesta. | comprobado | 4 |
-| R07 | Datos del sistema duplicados con nombres distintos («Esquivar»/«Esquiva», «Volar»/«Vuelo», «Seducir»/«Seducción»), unidos por una tabla de traducción; tres listas de personajes distintas. | comprobado | 1–2 |
+| R07 | Datos del sistema duplicados con nombres distintos («Esquivar»/«Esquiva», «Volar»/«Vuelo», «Seducir»/«Seducción»), unidos por una tabla de traducción; tres listas de personajes distintas. | comprobado | 1 · ✔ datos unificados (`Sistema`, nombres oficiales + nombre de ficha); 2 · listas de personajes |
 | R08 | La bóveda llega siempre a 0 al mandar desde el foro: «Grageas disponibles» de la Tabla de Canjes no se guarda. | comprobado | 2 · la bóveda sale del personaje |
 
 ## Después

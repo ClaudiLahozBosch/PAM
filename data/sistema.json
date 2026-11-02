@@ -1,0 +1,1355 @@
+{
+ "version": 1,
+ "origen": "PAM main b1dedad (2/11/2026), reconciliado con el Sistema Avadense",
+ "reconciliado": [
+  "Habilidades: nombre oficial del Sistema (Esquivar, Volar, Seducir); «enFicha» es el que usa el modelo de ficha (Esquiva, Vuelo, Seducción).",
+  "Hogwarts: «Personal no-docente» (texto oficial); «Personal no docente» queda como alias.",
+  "Política: incluye «Gobierno mágico de (X país)» (texto oficial: «Gobierno mágico de [X país]»); faltaba en Mi Ficha.",
+  "Tipos de trasfondo en orden alfabético (la Tabla de Canjes los listaba Biblioteca, Informantes, Influencia, Seguidores)."
+ ],
+ "atributos": [
+  "Vigor",
+  "Destreza",
+  "Carisma",
+  "Voluntad",
+  "Percepción",
+  "Inteligencia",
+  "Poder"
+ ],
+ "habilidades": [
+  {
+   "nombre": "Atletismo",
+   "atributo": "Vigor"
+  },
+  {
+   "nombre": "Pelea",
+   "atributo": "Vigor"
+  },
+  {
+   "nombre": "Esquivar",
+   "atributo": "Destreza",
+   "enFicha": "Esquiva"
+  },
+  {
+   "nombre": "Latrocinio",
+   "atributo": "Destreza"
+  },
+  {
+   "nombre": "Sigilo",
+   "atributo": "Destreza"
+  },
+  {
+   "nombre": "Volar",
+   "atributo": "Destreza",
+   "enFicha": "Vuelo"
+  },
+  {
+   "nombre": "Coordinación",
+   "atributo": "Carisma"
+  },
+  {
+   "nombre": "Intimidación",
+   "atributo": "Carisma"
+  },
+  {
+   "nombre": "Oratoria",
+   "atributo": "Carisma"
+  },
+  {
+   "nombre": "Seducir",
+   "atributo": "Carisma",
+   "enFicha": "Seducción"
+  },
+  {
+   "nombre": "Subterfugio",
+   "atributo": "Carisma"
+  },
+  {
+   "nombre": "Arte/Artesanía",
+   "atributo": "Voluntad",
+   "multiple": true,
+   "enProezas": "Arte / Artesanía"
+  },
+  {
+   "nombre": "Estilo",
+   "atributo": "Voluntad"
+  },
+  {
+   "nombre": "Frialdad",
+   "atributo": "Voluntad"
+  },
+  {
+   "nombre": "Alerta",
+   "atributo": "Percepción"
+  },
+  {
+   "nombre": "Consciencia",
+   "atributo": "Percepción"
+  },
+  {
+   "nombre": "Empatía",
+   "atributo": "Percepción"
+  },
+  {
+   "nombre": "Iniciativa",
+   "atributo": "Percepción"
+  },
+  {
+   "nombre": "Investigación",
+   "atributo": "Percepción"
+  },
+  {
+   "nombre": "Adivinación",
+   "atributo": "Inteligencia"
+  },
+  {
+   "nombre": "Arcanismo",
+   "atributo": "Inteligencia"
+  },
+  {
+   "nombre": "Callejeo",
+   "atributo": "Inteligencia"
+  },
+  {
+   "nombre": "Cultura Mágica",
+   "atributo": "Inteligencia"
+  },
+  {
+   "nombre": "Cultura Muggle",
+   "atributo": "Inteligencia"
+  },
+  {
+   "nombre": "Herbología",
+   "atributo": "Inteligencia"
+  },
+  {
+   "nombre": "Magizoología",
+   "atributo": "Inteligencia"
+  },
+  {
+   "nombre": "Medicina",
+   "atributo": "Inteligencia"
+  },
+  {
+   "nombre": "Política",
+   "atributo": "Inteligencia"
+  },
+  {
+   "nombre": "Supervivencia",
+   "atributo": "Inteligencia"
+  },
+  {
+   "nombre": "Duelo",
+   "atributo": "Poder"
+  },
+  {
+   "nombre": "Pociones",
+   "atributo": "Poder"
+  },
+  {
+   "nombre": "Rituales",
+   "atributo": "Poder"
+  }
+ ],
+ "nivelesHabilidad": [
+  {
+   "nombre": "Desentrenado",
+   "bonus": 0,
+   "enCanjes": "Sin nivel"
+  },
+  {
+   "nombre": "Novato",
+   "bonus": 1
+  },
+  {
+   "nombre": "Competente",
+   "bonus": 2
+  },
+  {
+   "nombre": "Experto",
+   "bonus": 4
+  },
+  {
+   "nombre": "Maestro",
+   "bonus": 7
+  },
+  {
+   "nombre": "Legendario",
+   "bonus": 9
+  }
+ ],
+ "artes": [
+  "Ajedrez Mágico",
+  "Baile",
+  "Canto",
+  "Escritura",
+  "Escultura",
+  "Fotografía",
+  "Gobbstones",
+  "Instrumento musical",
+  "Juegos muggles",
+  "Naipes explosivos",
+  "Pintura"
+ ],
+ "artesanias": [
+  "Albañilería",
+  "Alfarería",
+  "Agricultura",
+  "Carpintería",
+  "Cocina",
+  "Costura",
+  "Forja",
+  "Ingeniería",
+  "Varitería"
+ ],
+ "costes": {
+  "nota": "Coste acumulado desde 0 hasta el nivel N (posición N de la lista).",
+  "atributo": [
+   0,
+   250,
+   550,
+   950,
+   1500,
+   2250,
+   3250,
+   4550,
+   6300
+  ],
+  "habilidad": [
+   0,
+   75,
+   225,
+   475,
+   875,
+   1625
+  ],
+  "arte": [
+   0,
+   38,
+   113,
+   238,
+   438,
+   813
+  ],
+  "trasfondoGeneral": [
+   0,
+   100,
+   300,
+   600,
+   1000,
+   1500
+  ],
+  "trasfondoEspecifico": [
+   0,
+   50,
+   150,
+   300,
+   500,
+   750
+  ],
+  "ventaja": [
+   0,
+   100,
+   400,
+   1000
+  ]
+ },
+ "especializaciones": [
+  "Combatiente",
+  "Encantador",
+  "Hechicero",
+  "Jugador de Quidditch",
+  "Magizoólogo",
+  "Mago Oscuro",
+  "Medimago"
+ ],
+ "trasfondos": {
+  "tipos": [
+   "Biblioteca",
+   "Influencia",
+   "Informantes",
+   "Seguidores"
+  ],
+  "categoriasConocimiento": {
+   "Adivinación": [
+    "Métodos adivinatorios",
+    "Profecías"
+   ],
+   "Arcanismo": [
+    "Arcanos",
+    "Artes oscuras",
+    "No-Seres",
+    "Objetos mágicos",
+    "Otros planos"
+   ],
+   "Callejeo": [
+    "Contrabando",
+    "Criminales",
+    "Localizaciones"
+   ],
+   "Cultura Mágica": [
+    "Deportes mágicos",
+    "Historia de la magia",
+    "Hogwarts",
+    "Mundo del corazón"
+   ],
+   "Cultura Muggle": [
+    "Arte muggle",
+    "Deportes muggles",
+    "Tecnología"
+   ],
+   "Herbología": [
+    "Pociones",
+    "Plantas naturales"
+   ],
+   "Magizoología": [
+    "Animales muggles",
+    "Bestias mágicas",
+    "Espíritus",
+    "Seres racionales"
+   ],
+   "Medicina": [
+    "Enfermedades mágicas",
+    "Experimental",
+    "Heridas mágicas",
+    "Medicina muggle"
+   ],
+   "Política": [
+    "Ley mágica",
+    "Ministerio de Magia"
+   ],
+   "Supervivencia": [
+    "Caza",
+    "Entornos hostiles",
+    "Orientarse"
+   ]
+  },
+  "categoriasSociales": {
+   "Académicos": [
+    "Adivinadores y oráculos",
+    "Arcanistas",
+    "Arqueólogos e historiadores",
+    "Biólogos e investigadores médicos",
+    "Herbólogos y pocionistas",
+    "Magizoólogos",
+    "Muggleólogos"
+   ],
+   "Bajos fondos": [
+    "Contrabandistas",
+    "Estafadores",
+    "Evanescedores",
+    "Falsificadores",
+    "Ladrones",
+    "Sanadores ilegales",
+    "Soplones"
+   ],
+   "Hogwarts": [
+    "Gryffindor",
+    "Hufflepuff",
+    "Ravenclaw",
+    "Slytherin",
+    "Fauna de Hogwarts",
+    "Personal no-docente",
+    "Profesorado"
+   ],
+   "Política": [
+    "Azkaban",
+    "Bastión Woodcroft",
+    "Confederación Internacional de Magos",
+    "Gringotts",
+    "Hogsmeade",
+    "Ministerio de Magia",
+    "San Mungo",
+    "Gobierno mágico de (X país)"
+   ],
+   "Seres mágicos": [
+    "Arpías",
+    "Centauros",
+    "Duendes",
+    "Gente del Agua",
+    "Gigantes",
+    "Hombres Lobo",
+    "Vampiros"
+   ],
+   "Sociedad": [
+    "Alta sociedad",
+    "Deportes",
+    "Fantasmas",
+    "La Reserva",
+    "Muggles",
+    "Negocios",
+    "Prensa"
+   ]
+  },
+  "alias": {
+   "Personal no docente": "Personal no-docente"
+  }
+ },
+ "ventajas": [
+  {
+   "nombre": "Fama",
+   "niveles": [
+    "I · Conocido",
+    "II · Famoso",
+    "III · Leyenda"
+   ]
+  },
+  {
+   "nombre": "Orden de Merlín",
+   "niveles": [
+    "Tercera clase",
+    "Segunda clase",
+    "Primera clase"
+   ]
+  },
+  {
+   "nombre": "Patrón",
+   "niveles": [
+    "I · Fuerte",
+    "II · Formidable",
+    "III · Excepcional"
+   ]
+  },
+  {
+   "nombre": "Recursos",
+   "niveles": [
+    "I · Acomodado",
+    "II · Rico",
+    "III · Extremadamente rico"
+   ]
+  }
+ ],
+ "academico": {
+  "asignaturasExtasis": [
+   "Adivinación, Astrología y Astronomía",
+   "Cuidado de Criaturas Mágicas",
+   "Defensa Contra las Artes Oscuras",
+   "Encantamientos y Transformaciones",
+   "Estudios Muggles",
+   "Herbología y Pociones",
+   "Historia de la Magia",
+   "Magia Ritual"
+  ],
+  "notas": [
+   "Aceptable",
+   "Supera las Expectativas",
+   "Extraordinario"
+  ],
+  "preciosTimos": [
+   50,
+   100,
+   150
+  ],
+  "preciosExtasis": [
+   30,
+   60,
+   90
+  ]
+ },
+ "idiomas": {
+  "magicos": [
+   "Duendigozna",
+   "Gigante",
+   "Hadas",
+   "Pársel",
+   "Runas",
+   "Sirenio",
+   "Troll"
+  ],
+  "nivelesCanje": [
+   "Ninguno",
+   "Bajo",
+   "Medio",
+   "Alto"
+  ],
+  "nivelesFicha": [
+   "Bajo",
+   "Medio",
+   "Alto",
+   "Nativo"
+  ]
+ },
+ "razas": [
+  {
+   "nombre": "Metamorfomago",
+   "precio": 500,
+   "nota": "Sólo durante la creación del PJ."
+  },
+  {
+   "nombre": "Semiduende",
+   "precio": 500,
+   "nota": "Sólo durante la creación del PJ."
+  },
+  {
+   "nombre": "Semigigante",
+   "precio": 500,
+   "nota": "Canje obligatorio para semigigantes."
+  },
+  {
+   "nombre": "Semiveela",
+   "precio": 500,
+   "nota": "Sólo durante la creación del PJ."
+  },
+  {
+   "nombre": "Licantropía",
+   "precio": 150,
+   "nota": "Compatible con cualquier raza. Requiere explicarlo en la historia y registrarlo en el Registro de Licántropos."
+  }
+ ],
+ "armas": {
+  "precioBase": 100,
+  "materiales": [
+   {
+    "nombre": "Tratamiento de encantador",
+    "precio": 50,
+    "huecos": 1
+   },
+   {
+    "nombre": "Adamantino",
+    "precio": 100,
+    "huecos": 2
+   },
+   {
+    "nombre": "Emplasto de dragón",
+    "precio": 150,
+    "huecos": 2
+   },
+   {
+    "nombre": "Reforjado por duendes",
+    "precio": 200,
+    "huecos": 2
+   },
+   {
+    "nombre": "Acero duendigozna",
+    "precio": 300,
+    "huecos": 3,
+    "requisito": "Reforjado por duendes"
+   }
+  ],
+  "runas": [
+   {
+    "nombre": "Ignis",
+    "maximo": 3,
+    "arcanos": "Lacarnum Inflamarae / Incendio / Fiendfyre"
+   },
+   {
+    "nombre": "Glacies",
+    "maximo": 3,
+    "arcanos": "Frigus / Glacius / Arctis"
+   },
+   {
+    "nombre": "Ventus",
+    "maximo": 3,
+    "arcanos": "Ventus / Ruptis / Turbinis"
+   },
+   {
+    "nombre": "Fulgur",
+    "maximo": 3,
+    "arcanos": "Rayo / Infulgurum / Illuminas Pluviam"
+   },
+   {
+    "nombre": "Sanguis",
+    "maximo": 3,
+    "arcanos": "Diffindo / Sectum / Sectum"
+   },
+   {
+    "nombre": "Crepitus",
+    "maximo": 3,
+    "arcanos": "Bombarda / Confringo / Bombarda Máxima"
+   },
+   {
+    "nombre": "Fixum",
+    "maximo": 3,
+    "arcanos": "Claustra Terrae / Fianto Duri / Partis Temporus"
+   },
+   {
+    "nombre": "Venite",
+    "maximo": 1,
+    "arcanos": "Accio"
+   }
+  ],
+  "nivelesRuna": [
+   "",
+   "Mínima",
+   "Media",
+   "Máxima"
+  ],
+  "preciosRuna": [
+   0,
+   50,
+   150,
+   300
+  ]
+ },
+ "talentos": [
+  {
+   "grupo": "Generales",
+   "nombre": "Acción Coordinada",
+   "precio": 100
+  },
+  {
+   "grupo": "Generales",
+   "nombre": "Identidad Alternativa",
+   "precio": 500,
+   "campo": "text",
+   "ejemplo": "Nombre de la identidad",
+   "multiple": true
+  },
+  {
+   "grupo": "Generales",
+   "nombre": "Maestría en [Animal Muggle o Bestia Mágica]",
+   "precio": 100,
+   "campo": "text",
+   "ejemplo": "Criatura",
+   "multiple": true
+  },
+  {
+   "grupo": "Generales",
+   "nombre": "Maestría en [Ser Mágico]",
+   "precio": 200,
+   "campo": "text",
+   "ejemplo": "Ser mágico",
+   "multiple": true
+  },
+  {
+   "grupo": "Generales",
+   "nombre": "Primeros Auxilios",
+   "precio": 300
+  },
+  {
+   "grupo": "Generales",
+   "nombre": "Último Estertor",
+   "precio": 500
+  },
+  {
+   "grupo": "Mágicos",
+   "nombre": "Animagia",
+   "precio": 600,
+   "campo": "text",
+   "ejemplo": "Forma animal"
+  },
+  {
+   "grupo": "Mágicos",
+   "nombre": "Aparecerse",
+   "precio": 200,
+   "requisito": [
+    "Poder 2",
+    "PJ de 17 años o más"
+   ]
+  },
+  {
+   "grupo": "Mágicos",
+   "nombre": "Conjuración Silenciosa",
+   "precio": 250,
+   "requisito": [
+    "Poder 3"
+   ]
+  },
+  {
+   "grupo": "Mágicos",
+   "nombre": "Conjurar sin Varita",
+   "precio": 2500,
+   "pl": 25,
+   "requisito": [
+    "Poder 7",
+    "Arcanismo 3"
+   ]
+  },
+  {
+   "grupo": "Mágicos",
+   "nombre": "Horrocrux",
+   "precio": 1500,
+   "pl": 15,
+   "requisito": [
+    "Poder 7",
+    "Arcanismo 4",
+    "Mago Oscuro 3"
+   ],
+   "campo": "horrocrux",
+   "multiple": true
+  },
+  {
+   "grupo": "Mágicos",
+   "nombre": "Maestría en Antídotos",
+   "precio": 200
+  },
+  {
+   "grupo": "Mágicos",
+   "nombre": "Oráculo",
+   "precio": 666
+  },
+  {
+   "grupo": "Arcanos",
+   "nombre": "Hechizo Predilecto",
+   "precio": 200,
+   "pl": 2,
+   "campo": "arc:hechizo",
+   "multiple": true
+  },
+  {
+   "grupo": "Arcanos",
+   "nombre": "Hechizo Raudo",
+   "precio": 300,
+   "pl": 3,
+   "campo": "arc:hechizo",
+   "multiple": true
+  },
+  {
+   "grupo": "Arcanos",
+   "nombre": "Hechizo Virtuoso",
+   "precio": 300,
+   "pl": 3,
+   "campo": "arc:hechizo",
+   "multiple": true
+  },
+  {
+   "grupo": "Arcanos",
+   "nombre": "Hechizo Inventado",
+   "precio": 600,
+   "pl": 6,
+   "campo": "text",
+   "ejemplo": "Nombre provisional",
+   "multiple": true,
+   "limitePorPD": true
+  },
+  {
+   "grupo": "Arcanos",
+   "nombre": "Poción Predilecta",
+   "precio": 200,
+   "pl": 2,
+   "campo": "arc:pocion",
+   "multiple": true
+  },
+  {
+   "grupo": "Arcanos",
+   "nombre": "Poción Rauda",
+   "precio": 300,
+   "pl": 3,
+   "campo": "arc:pocion",
+   "multiple": true
+  },
+  {
+   "grupo": "Arcanos",
+   "nombre": "Poción Virtuosa",
+   "precio": 300,
+   "pl": 3,
+   "campo": "arc:pocion",
+   "multiple": true
+  },
+  {
+   "grupo": "Arcanos",
+   "nombre": "Poción Inventada",
+   "precio": 600,
+   "pl": 6,
+   "campo": "text",
+   "ejemplo": "Nombre provisional",
+   "multiple": true,
+   "limitePorPD": true
+  },
+  {
+   "grupo": "Arcanos",
+   "nombre": "Ritual Predilecto",
+   "precio": 200,
+   "pl": 2,
+   "campo": "arc:ritual",
+   "multiple": true
+  },
+  {
+   "grupo": "Arcanos",
+   "nombre": "Ritual Raudo",
+   "precio": 300,
+   "pl": 3,
+   "campo": "arc:ritual",
+   "multiple": true
+  },
+  {
+   "grupo": "Arcanos",
+   "nombre": "Ritual Virtuoso",
+   "precio": 300,
+   "pl": 3,
+   "campo": "arc:ritual",
+   "multiple": true
+  },
+  {
+   "grupo": "Arcanos",
+   "nombre": "Ritual Inventado",
+   "precio": 600,
+   "pl": 6,
+   "campo": "text",
+   "ejemplo": "Nombre provisional",
+   "multiple": true
+  },
+  {
+   "grupo": "Arcanos",
+   "nombre": "Objeto Inventado",
+   "precio": 600,
+   "pl": 6,
+   "campo": "text",
+   "ejemplo": "Nombre provisional",
+   "multiple": true,
+   "limitePorPD": true
+  },
+  {
+   "grupo": "Combate",
+   "nombre": "Ataque Agresivo",
+   "precio": 75,
+   "requisito": [
+    "Combatiente 1"
+   ]
+  },
+  {
+   "grupo": "Combate",
+   "nombre": "Ataque Cauteloso",
+   "precio": 75,
+   "requisito": [
+    "Combatiente 1"
+   ]
+  },
+  {
+   "grupo": "Combate",
+   "nombre": "Ataque Rápido",
+   "precio": 75,
+   "requisito": [
+    "Combatiente 1"
+   ]
+  },
+  {
+   "grupo": "Combate",
+   "nombre": "Flanquear",
+   "precio": 250,
+   "requisito": [
+    "Ataque Agresivo",
+    "Combatiente 2"
+   ]
+  },
+  {
+   "grupo": "Combate",
+   "nombre": "Usar Cobertura",
+   "precio": 250,
+   "requisito": [
+    "Ataque Cauteloso",
+    "Combatiente 2"
+   ]
+  },
+  {
+   "grupo": "Combate",
+   "nombre": "Ataque Explosivo",
+   "precio": 250,
+   "requisito": [
+    "Ataque Rápido",
+    "Combatiente 2"
+   ]
+  },
+  {
+   "grupo": "Combate",
+   "nombre": "Ataque Múltiple",
+   "precio": 250,
+   "requisito": [
+    "Combatiente 2"
+   ]
+  },
+  {
+   "grupo": "Combate",
+   "nombre": "Ataque Crítico",
+   "precio": 500,
+   "requisito": [
+    "Flanquear",
+    "Combatiente 3"
+   ]
+  },
+  {
+   "grupo": "Combate",
+   "nombre": "Defensa Total",
+   "precio": 500,
+   "requisito": [
+    "Usar Cobertura",
+    "Combatiente 3"
+   ]
+  },
+  {
+   "grupo": "Combate",
+   "nombre": "Asalto Cegador",
+   "precio": 500,
+   "requisito": [
+    "Ataque Explosivo",
+    "Combatiente 3"
+   ]
+  },
+  {
+   "grupo": "Combate",
+   "nombre": "Beber Poción",
+   "precio": 100
+  },
+  {
+   "grupo": "Combate",
+   "nombre": "Lanzar Poción",
+   "precio": 300,
+   "requisito": [
+    "Beber Poción"
+   ]
+  },
+  {
+   "grupo": "Combate",
+   "nombre": "Desarme",
+   "precio": 300
+  },
+  {
+   "grupo": "Combate",
+   "nombre": "Entrenador de Criaturas",
+   "precio": 300,
+   "requisito": [
+    "Un Compañero Animal"
+   ]
+  },
+  {
+   "grupo": "Combate",
+   "nombre": "Entrenador de Reanimados",
+   "precio": 300,
+   "requisito": [
+    "Un Reanimado"
+   ]
+  },
+  {
+   "grupo": "Combate",
+   "nombre": "Proteger",
+   "precio": 100
+  },
+  {
+   "grupo": "Combate",
+   "nombre": "Sometimiento",
+   "precio": 600
+  },
+  {
+   "grupo": "Sociales",
+   "nombre": "Aliado Torpe",
+   "precio": 100,
+   "campo": "text",
+   "ejemplo": "Nombre del PNJ",
+   "multiple": true
+  },
+  {
+   "grupo": "Sociales",
+   "nombre": "Aliado Común",
+   "precio": 300,
+   "campo": "text",
+   "ejemplo": "Nombre del PNJ",
+   "multiple": true
+  },
+  {
+   "grupo": "Sociales",
+   "nombre": "Aliado Dotado",
+   "precio": 600,
+   "campo": "text",
+   "ejemplo": "Nombre del PNJ",
+   "multiple": true
+  },
+  {
+   "grupo": "Sociales",
+   "nombre": "Compañero Animal Doméstico",
+   "precio": 50,
+   "requisito": [
+    "Magizoólogo 1",
+    "Maestría en [Animal Muggle o Bestia Mágica]"
+   ],
+   "campo": "text",
+   "ejemplo": "Criatura (* o **)",
+   "multiple": true
+  },
+  {
+   "grupo": "Sociales",
+   "nombre": "Compañero Animal Básico",
+   "precio": 100,
+   "requisito": [
+    "Magizoólogo 2",
+    "Maestría en [Animal Muggle o Bestia Mágica]"
+   ],
+   "campo": "text",
+   "ejemplo": "Criatura (***)",
+   "multiple": true
+  },
+  {
+   "grupo": "Sociales",
+   "nombre": "Compañero Animal Intermedio",
+   "precio": 300,
+   "requisito": [
+    "Magizoólogo 3",
+    "Maestría en [Animal Muggle o Bestia Mágica]"
+   ],
+   "campo": "text",
+   "ejemplo": "Criatura (****)",
+   "multiple": true
+  },
+  {
+   "grupo": "Sociales",
+   "nombre": "Compañero Animal Avanzado",
+   "precio": 600,
+   "requisito": [
+    "Magizoólogo 3",
+    "Maestría en [Animal Muggle o Bestia Mágica]"
+   ],
+   "campo": "text",
+   "ejemplo": "Criatura (*****)",
+   "multiple": true
+  },
+  {
+   "grupo": "Sociales",
+   "nombre": "Reanimado Torpe",
+   "precio": 50,
+   "campo": "text",
+   "ejemplo": "Descripción",
+   "multiple": true
+  },
+  {
+   "grupo": "Sociales",
+   "nombre": "Reanimado Común",
+   "precio": 150,
+   "campo": "text",
+   "ejemplo": "Descripción",
+   "multiple": true
+  },
+  {
+   "grupo": "Sociales",
+   "nombre": "Reanimado de Cámara",
+   "precio": 300,
+   "campo": "text",
+   "ejemplo": "Descripción",
+   "multiple": true
+  },
+  {
+   "grupo": "Sociales",
+   "nombre": "Reanimado de Combate",
+   "precio": 600,
+   "campo": "text",
+   "ejemplo": "Descripción",
+   "multiple": true
+  },
+  {
+   "grupo": "Sociales",
+   "nombre": "Lazo / Unión / Vínculo",
+   "precio": 50,
+   "campo": "lazo",
+   "multiple": true
+  }
+ ],
+ "veterania": [
+  {
+   "clave": "proeza",
+   "nombre": "Proeza",
+   "precio": 300,
+   "pl": 3,
+   "requisito": "Requiere sumar un bonificador total de +9 entre Habilidad y STAT.",
+   "descripcionHtml": "Te permite canjear una de las Proezas de la lista. Puedes realizar este canje tantas veces como Puntos de Destino poseas (es decir, si tienes 4 PDs, puedes adquirir, siempre que cumplas los requisitos, un total de 4 Proezas).",
+   "campo": {
+    "tipo": "proeza"
+   }
+  },
+  {
+   "clave": "pd",
+   "nombre": "Punto de Destino",
+   "precio": 1000,
+   "pl": 0,
+   "descripcionHtml": "Aumentas en uno tu nivel de Destino, y los Puntos de Destino disponibles. Tienes la descripción de los Puntos de Destino <a href=\"https://hp-avada-kedavra.foroactivo.com/t23040-6-reglas-especiales#337050\" target=\"_blank\" rel=\"noopener\">aquí</a>.",
+   "limite": "Máximo un canjeo cada año de veteranía.",
+   "maximoPorAno": 1
+  },
+  {
+   "clave": "limite",
+   "nombre": "+1 al límite de 1 STAT",
+   "precio": 500,
+   "pl": 0,
+   "requisito": "Límite actual del STAT entre 1 y 4.",
+   "descripcionHtml": "Cuando tienes un STAT en un nivel que va del 1 al 4, gastando 500 grageas podrías conseguir subir el límite de STAT en una categoría. No se puede tener una diferencia de dos puntos entre los límites de tus STATs. Estas 500 grageas amplían el límite, no el STAT en sí mismo. Una vez los STATs estén al 5, este canje se vuelve obsoleto y pasamos al siguiente (Talentoso).",
+   "limite": "Máximo dos canjeos cada año.",
+   "maximoPorAno": 2,
+   "campo": {
+    "tipo": "limite"
+   }
+  },
+  {
+   "clave": "talentoso",
+   "nombre": "Talentoso",
+   "precio": 1000,
+   "pl": 0,
+   "requisito": "Requiere tener todos tus Atributos con un Límite de 5 (límite, no valor).",
+   "descripcionHtml": "Aumenta el límite de un Atributo de 5 a 7 (dos subidas) y permite que todas las Habilidades asociadas a ese Atributo puedan adquirirse en Maestro.",
+   "limite": "Cada Etapa tiene un número máximo de huecos para Talentosos; sube en uno cada año, siempre que todos los Atributos tengan sus límites a 5.",
+   "campo": {
+    "tipo": "select",
+    "etiqueta": "Atributo",
+    "options": [
+     "Vigor",
+     "Destreza",
+     "Carisma",
+     "Voluntad",
+     "Percepción",
+     "Inteligencia",
+     "Poder"
+    ]
+   }
+  }
+ ],
+ "legendarias": [
+  {
+   "clave": "trasfEsp",
+   "nombre": "Trasfondo General Específico Legendario",
+   "precio": 300,
+   "pl": 3,
+   "requisito": "Requiere tener un Trasfondo Específico al V.",
+   "descripcionHtml": "Puedes subir un Trasfondo Específico que tuvieras a nivel V al nivel VI.",
+   "campo": {
+    "tipo": "text",
+    "etiqueta": "Trasfondo específico",
+    "ejemplo": "Ej.: Informantes Bajos fondos > Ladrones"
+   }
+  },
+  {
+   "clave": "trasfGen",
+   "nombre": "Trasfondo General Avanzado Legendario",
+   "precio": 600,
+   "pl": 6,
+   "requisito": "Requiere tener un Trasfondo General al V.",
+   "descripcionHtml": "Puedes subir un Trasfondo General que tuvieras a nivel V al nivel VI.",
+   "campo": {
+    "tipo": "text",
+    "etiqueta": "Trasfondo general",
+    "ejemplo": "Ej.: Biblioteca Arcanismo"
+   }
+  },
+  {
+   "clave": "ventLeg",
+   "nombre": "Ventaja Legendaria",
+   "precio": 1000,
+   "pl": 10,
+   "requisito": "Requiere tener una Ventaja al III.",
+   "descripcionHtml": "Puedes subir una Ventaja que tuvieras a nivel III al nivel IV (la Orden de Merlín permite inventar su propio título narrativo).",
+   "campo": {
+    "tipo": "select",
+    "etiqueta": "Ventaja",
+    "options": [
+     "Fama",
+     "Orden de Merlín",
+     "Patrón",
+     "Recursos"
+    ]
+   }
+  },
+  {
+   "clave": "animalLeg",
+   "nombre": "Compañero Animal Legendario",
+   "precio": 1000,
+   "pl": 10,
+   "requisito": "Requiere Especialización Magizoólogo del nivel que pida el compañero y Experto [Animal o Bestia escogida].",
+   "descripcionHtml": "Eres capaz de unir a tu vida a una criatura mítica y especial: un ave fénix, un basilisco, una acromántula gigante…",
+   "campo": {
+    "tipo": "text",
+    "etiqueta": "Criatura",
+    "ejemplo": "Ej.: Fénix"
+   }
+  },
+  {
+   "clave": "arcLeg",
+   "nombre": "Arcano Legendario",
+   "precio": 3000,
+   "pl": 30,
+   "descripcionHtml": "Un arcano único y especial, diseñado con los Encargados del Sistema. Nadie más puede imitarlo y es más fuerte que cualquier arcano avanzado virtuoso.",
+   "campo": {
+    "tipo": "text",
+    "etiqueta": "Nombre del arcano",
+    "ejemplo": "Opcional"
+   }
+  },
+  {
+   "clave": "relLeg",
+   "nombre": "Reliquia Legendaria",
+   "precio": 3000,
+   "pl": 30,
+   "descripcionHtml": "Un objeto único y especial diseñado con el autor del sistema. Nadie más puede imitarlo y es más fuerte que cualquier objeto avanzado.",
+   "campo": {
+    "tipo": "text",
+    "etiqueta": "Nombre de la reliquia",
+    "ejemplo": "Opcional"
+   }
+  }
+ ],
+ "arcanos": {
+  "tipos": {
+   "hechizo": {
+    "label": "Hechizos",
+    "sing": "Hechizo",
+    "fem": false,
+    "tiers": [
+     "dom",
+     "bas",
+     "int",
+     "ava"
+    ],
+    "skill": null
+   },
+   "pocion": {
+    "label": "Pociones",
+    "sing": "Poción",
+    "fem": true,
+    "tiers": [
+     "bas",
+     "int",
+     "ava"
+    ],
+    "skill": "Pociones"
+   },
+   "ritual": {
+    "label": "Rituales",
+    "sing": "Ritual",
+    "fem": false,
+    "tiers": [
+     "bas",
+     "int",
+     "ava"
+    ],
+    "skill": "Rituales"
+   },
+   "objeto": {
+    "label": "Objetos",
+    "sing": "Objeto",
+    "fem": false,
+    "tiers": [
+     "bas",
+     "int",
+     "ava"
+    ],
+    "skill": null
+   }
+  },
+  "niveles": {
+   "dom": {
+    "m": "doméstico",
+    "f": "doméstica",
+    "pl": "Domésticos",
+    "price": 25,
+    "gate": 0
+   },
+   "bas": {
+    "m": "básico",
+    "f": "básica",
+    "pl": "Básicos",
+    "price": 100,
+    "gate": 1
+   },
+   "int": {
+    "m": "intermedio",
+    "f": "intermedia",
+    "pl": "Intermedios",
+    "price": 300,
+    "gate": 2
+   },
+   "ava": {
+    "m": "avanzado",
+    "f": "avanzada",
+    "pl": "Avanzados",
+    "price": 600,
+    "gate": 3
+   }
+  }
+ },
+ "etapas": {
+  "Infante": {
+   "pa": 8,
+   "umbral": 1,
+   "heridas": 1,
+   "limites": "Uno al 4 y seis al 3"
+  },
+  "Adolescente": {
+   "pa": 12,
+   "umbral": 2,
+   "heridas": 2,
+   "limites": "Tres al 4 y cuatro al 3"
+  },
+  "Joven": {
+   "pa": 17,
+   "umbral": 3,
+   "heridas": 3,
+   "limites": "Cuatro al 4"
+  },
+  "Adulto": {
+   "pa": 17,
+   "umbral": 3,
+   "heridas": 3,
+   "limites": ""
+  },
+  "Experimentado": {
+   "pa": 12,
+   "umbral": 2,
+   "heridas": 2,
+   "limites": ""
+  },
+  "Veterano": {
+   "pa": 8,
+   "umbral": 1,
+   "heridas": 1,
+   "limites": ""
+  }
+ },
+ "vinculos": [
+  "Lazo",
+  "Unión",
+  "Vínculo"
+ ],
+ "empleos": {
+  "rangos": [
+   "No cumple",
+   "Novato",
+   "Competente",
+   "Experto",
+   "Maestro",
+   "Legendario"
+  ],
+  "rangosCortos": [
+   "—",
+   "Nov.",
+   "Comp.",
+   "Exp.",
+   "Maes.",
+   "Leg."
+  ],
+  "sueldos": {
+   "Muy Bajo": [
+    15,
+    25,
+    40,
+    60,
+    100
+   ],
+   "Bajo": [
+    30,
+    50,
+    80,
+    120,
+    200
+   ],
+   "Medio": [
+    45,
+    75,
+    125,
+    175,
+    300
+   ],
+   "Alto": [
+    60,
+    100,
+    160,
+    250,
+    400
+   ],
+   "Muy Alto": [
+    75,
+    125,
+    200,
+    300,
+    500
+   ]
+  }
+ },
+ "enlaces": {
+  "puntosDestino": "https://hp-avada-kedavra.foroactivo.com/t23040-6-reglas-especiales#337050",
+  "registroVeterania": "https://hp-avada-kedavra.foroactivo.com/t23263-registro-de-veterania"
+ }
+}

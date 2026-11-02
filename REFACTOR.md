@@ -70,6 +70,12 @@ La auditoría técnica (17 hallazgos, todos comprobados contra el código) coinc
   5. Cada edición va **al mensaje concreto** que contiene el dato, con vista previa de los cambios. Se cancela si el mensaje cambió desde que se leyó.
 - **No se adopta (por ahora): Vite y TypeScript con compilación.** Obligarían a compilar antes de publicar y a usar GitHub Actions, y ya no se podría subir desde la web como ahora. Los módulos sin compilar y los tipos en comentarios (JSDoc) dan casi lo mismo sin ese coste. Si más adelante hace falta, se puede añadir sin rehacer nada.
 
+## Cómo conviven el PAM antiguo y el nuevo
+
+- Durante las fases 0 a 4 (datos, núcleo, modelos, lectores, editor), **`index.html` no se toca**. El código nuevo se escribe aparte (`data/`, `js/`) y no lo usa ninguna página todavía.
+- Las pruebas de `tests/caracterizacion/` cargan el `index.html` antiguo y comprueban que el código nuevo da los mismos resultados. Las únicas diferencias permitidas son los errores corregidos, anotados en cada prueba.
+- A partir de la fase 5, las páginas nuevas (primero el panel de Mi PJ) empiezan a usar ese código. El `index.html` antiguo se sustituye al final, cuando todo esté portado.
+
 ## Fases
 
 Cada fase se prueba en el staging y en test-forito, y solo entonces se propone para `main`.
