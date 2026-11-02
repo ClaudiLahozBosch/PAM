@@ -14,7 +14,7 @@ Todo lo marcado como «comprobado» se ha verificado contra el código de `main`
 | ID | Problema | Dónde | Por qué ya |
 |---|---|---|---|
 | F06 | El Inspector lee «Puntos de Destino: 13» como **1**: la expresión captura un solo dígito. | `pam-inspector-canjes.user.js`, `fichaPD()` | Da veredictos erróneos sin avisar. Es un carácter: `(\d)` → `(\d+)`. |
-| F08 | Al importar un código del Registro de Roles, el color (`tono`) entra sin escapar en el HTML. Un código manipulado que alguien comparta podría ejecutar código dentro de PAM y leer lo guardado, incluido el código de sesión de la nube. | `index.html`, `case"import"` y plantillas con `t-${p.tono}` | Es de seguridad y se corrige en pocas líneas: al importar, aceptar solo los colores de la lista. |
+| F08 | Al importar un código del Registro de Roles, el color (`tono`) entra sin escapar en el HTML. Un código manipulado que alguien comparta podría ejecutar código dentro de PAM y leer lo guardado, incluido el código de sesión de la nube. | `index.html`, `case"import"` y plantillas con `t-${p.tono}` | ✔ fase 2 · `validarRegistro()` comprueba cada valor al importar (colores, listas, enlaces, `__proto__`), con prueba |
 
 ## Dentro del refactor
 
@@ -22,7 +22,7 @@ Todo lo marcado como «comprobado» se ha verificado contra el código de `main`
 |---|---|---|---|
 | F01 | Mi PJ lee solo el **primer mensaje** de la ficha; en fichas de varias partes se pierden atributos, magia y trasfondos (dos funciones, `leerFicha` en las dos mitades del script). | comprobado | 3 · lectores del foro |
 | F02 | El lector de trasfondos de PAM no reconoce el orden «Tipo NIVEL: categoría» (`Biblioteca V: Arcanismo.`, `Informantes III: Contrabandistas (Zacharias Hayes).`) y los descarta sin avisar. Los formatos «Biblioteca — Medicina — Heridas mágicas III» sí funcionan. | comprobado con el código real | 3 · lectores del foro |
-| F03 | El personaje se identifica por el **nombre**: «Irvin Giles.» y «Irvin Giles» no coinciden y se crea otro; el parecido «Hana» ↔ «Hana Park» puede confundir personajes. | comprobado | 2 · modelos (id = foro + tema) |
+| F03 | El personaje se identifica por el **nombre**: «Irvin Giles.» y «Irvin Giles» no coinciden y se crea otro; el parecido «Hana» ↔ «Hana Park» puede confundir personajes. | comprobado | 2 · ✔ `Personaje` con id estable + foro y tema; el nombre ya no es la clave. 3 · asignar el tema al importar |
 | F04/F07 | Al aplicar un canje se edita siempre el **primer mensaje**, aunque el dato esté en otro (en Irvin los trasfondos están en el 339216). La actualización de niveles busca «nombre + número» y no encaja con «número + nombre». | comprobado | 4 · editor de BBCode por bloques y por mensaje |
 | F05 | El Inspector toma como partes de la ficha los mensajes del dueño de más de 800 caracteres: mezcla la ficha vigente con canjes antiguos. | comprobado | 3 · un solo lector para todos |
 | F09 | La importación de Excel usa SheetJS `xlsx@0.18.5` (CVE-2023-30533 y CVE-2024-22363). Riesgo práctico bajo: solo afecta al abrir un archivo manipulado. | comprobado | 8 · actualizar (cdn.sheetjs.com) o quitar si ya no se usa |
@@ -37,11 +37,11 @@ Todo lo marcado como «comprobado» se ha verificado contra el código de `main`
 | R01 | Editor personalizado: una línea nueva detrás de la última de una lista (`…[/spoiler]`) queda fuera del desplegable; sin `[b]`, o en trasfondos, duplica el `[/spoiler]` y rompe todo lo que viene detrás. | comprobado (Mortimer) | 4 |
 | R02 | Editor personalizado: quitar el último elemento de una lista se lleva el `[/spoiler]`. | comprobado | 4 |
 | R03 | Varios arcanos nuevos del mismo nivel quedan en **orden inverso**. | comprobado | 4 |
-| R04 | Los arcanos nuevos salen sin descripción: al leer la ficha se descarta la descripción de los arcanos oficiales. | comprobado | 2 |
+| R04 | Los arcanos nuevos salen sin descripción: al leer la ficha se descarta la descripción de los arcanos oficiales. | comprobado | 2 · ✔ `Arcano.descripcion` en el modelo; 3 · que el lector no la tire |
 | R05 | Los rituales «Nombre \| Latín» se renombran «Nombre (Latín)» y luego no se encuentran ni para añadir ni para quitar. | comprobado | 3 |
 | R06 | La pestaña «Otros» (idiomas, trasfondos nuevos, ventajas, especializaciones, talentos, títulos) queda siempre para hacer a mano, y PAM dice «Agregado» aunque la línea quede mal puesta. | comprobado | 4 |
-| R07 | Datos del sistema duplicados con nombres distintos («Esquivar»/«Esquiva», «Volar»/«Vuelo», «Seducir»/«Seducción»), unidos por una tabla de traducción; tres listas de personajes distintas. | comprobado | 1 · ✔ datos unificados (`Sistema`, nombres oficiales + nombre de ficha); 2 · listas de personajes |
-| R08 | La bóveda llega siempre a 0 al mandar desde el foro: «Grageas disponibles» de la Tabla de Canjes no se guarda. | comprobado | 2 · la bóveda sale del personaje |
+| R07 | Datos del sistema duplicados con nombres distintos («Esquivar»/«Esquiva», «Volar»/«Vuelo», «Seducir»/«Seducción»), unidos por una tabla de traducción; tres listas de personajes distintas. | comprobado | ✔ fases 1–2 · datos unificados (`Sistema`) y una sola lista de personajes (`leerLegado` une fichas y Registro por id) |
+| R08 | La bóveda llega siempre a 0 al mandar desde el foro: «Grageas disponibles» de la Tabla de Canjes no se guarda. | comprobado | 2 · ✔ `Boveda` dentro del `Personaje`; 6 · que la Tabla de Canjes la use |
 
 ## Después
 
