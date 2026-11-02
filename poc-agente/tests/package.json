@@ -1,0 +1,7 @@
+{
+  "name": "pam-poc-agente-tests",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node e2e.mjs && node pestana-pam.mjs" },
+  "devDependencies": { "jsdom": "24.1.3" }
+}

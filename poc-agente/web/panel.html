@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel PAM</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<h1>Panel de PAM</h1>
+<p class="suave">Prueba de concepto · esta página vive en PAM y se muestra dentro del foro.</p>
+
+<div class="prueba">
+  <h2>0 · Conexión con el agente</h2>
+  <div class="res" id="r-hola">Conectando…</div>
+</div>
+
+<div class="prueba">
+  <h2>1 · Leer el foro con tu sesión</h2>
+  <div class="fila"><button id="b-leer">Leer la portada</button></div>
+  <div class="res" id="r-leer"></div>
+</div>
+
+<div class="prueba">
+  <h2>2 · Datos de PAM aquí dentro</h2>
+  <p class="suave">Primero guarda la ficha de prueba en la página de PAM.</p>
+  <div class="fila"><button id="b-datos">Comprobar</button></div>
+  <div class="res" id="r-datos"></div>
+</div>
+
+<div class="prueba">
+  <h2>3 · Publicar (pasa por la puerta del script)</h2>
+  <div class="fila"><label for="i-tema">Tema t</label><input id="i-tema" inputmode="numeric" placeholder="número"><button id="b-publicar">Publicar prueba</button></div>
+  <div class="res" id="r-publicar"></div>
+</div>
+
+<div class="prueba">
+  <h2>4 · Revisión antes de publicar desde el editor</h2>
+  <p class="suave">Escribe en el editor del foro un [spoiler] sin cerrar y pulsa Enviar.</p>
+  <div class="res" id="r-editor">Esperando…</div>
+</div>
+
+<div id="registro"></div>
+<script type="module" src="js/panel.js"></script>
+</body>
+</html>
