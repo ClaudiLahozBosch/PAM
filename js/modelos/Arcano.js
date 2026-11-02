@@ -7,15 +7,17 @@ export class Arcano {
    * @param {'dom'|'bas'|'int'|'ava'|'leg'} p.nivel
    * @param {string} p.nombre
    * @param {string} [p.descripcion] lo que la ficha dice del arcano (se conserva al editar)
+   * @param {string|null} [p.ref] id del arcano en el Compendio (data/arcanos.json), si se reconoce
    * @param {{tema?: number|null, post?: number|null}} [p.origen]
    * @param {string} [p.textoOriginal]
    * @param {'reconocido'|'revisar'} [p.estadoLectura]
    */
-  constructor({ tipo, nivel, nombre, descripcion = '', origen = {}, textoOriginal = '', estadoLectura = 'reconocido' }) {
+  constructor({ tipo, nivel, nombre, descripcion = '', ref = null, origen = {}, textoOriginal = '', estadoLectura = 'reconocido' }) {
     this.tipo = tipo;
     this.nivel = nivel;
     this.nombre = nombre;
     this.descripcion = descripcion;
+    this.ref = ref;
     this.origen = { tema: origen.tema ?? null, post: origen.post ?? null };
     this.textoOriginal = textoOriginal;
     this.estadoLectura = estadoLectura;

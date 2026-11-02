@@ -1,0 +1,11 @@
+{
+  "nota": "Ficha INVENTADA en cinco mensajes, con la estructura y las líneas de trasfondo que cita la auditoría del 2/11/2026 (caso Irvin Giles). No es la ficha real: el resto del contenido es de relleno.",
+  "tema": 23113,
+  "partes": [
+    { "post": 337672, "bbcode": "[b]DATOS[/b]\n[color=#6B62AE]▋ Nombre y Apellido:[/color] Irvin Giles.\n[color=#6B62AE]▋ Avatar/PB:[/color] -\n[color=#6B62AE]▋ Etapa:[/color] Adulto\n[color=#6B62AE]▋ Casa:[/color] Ravenclaw\n\n[b]DESC.[/b]\n[color=#6B62AE]▋ Historia:[/color] (texto de relleno)" },
+    { "post": 339214, "bbcode": "[b]CARACT.[/b]\n[color=#6B62AE]▋ Atributos:[/color] (Límites: Cuatro al 4)\n[color=#6B62AE]→ Vigor:[/color] +2\n[color=#6B62AE]→ Destreza:[/color] +3\n[color=#6B62AE]→ Inteligencia:[/color] +4\n[color=#6B62AE]▋ Habilidades:[/color]\nDESTREZA\n[color=#6B62AE]→ Esquiva:[/color] Competente (+2)\n[color=#6B62AE]→ Sigilo:[/color] Novato (+1)\nINTELIGENCIA\n[color=#6B62AE]→ Arcanismo:[/color] Experto (+4)\n[color=#6B62AE]▋ Puntos de Destino:[/color] 13" },
+    { "post": 339215, "bbcode": "[spoiler=HECHIZOS]DOMÉSTICOS\n✦ [b]Accio[/b]: atrae objetos.\nBÁSICOS\n✦ [b]Expelliarmus[/b]: desarma.\n✦ [b]Incendio[/b]: fuego.[/spoiler]\n[spoiler=POCIONES]BÁSICAS\n✦ [b]Poción embellecedora[/b]: mejora el aspecto.[/spoiler]" },
+    { "post": 339216, "bbcode": "[spoiler=TRASFONDOS]BIBLIOTECA\n→ Biblioteca V: Arcanismo.\n→ Biblioteca VI: Arcanismo > Artes Oscuras.\nINFORMANTES\nBajos Fondos\n→ Informantes III: Contrabandistas (Zacharias Hayes).\nINFLUENCIA\nPolítica\n→ Influencia V (Zacharias Hayes):\n→ Influencia II: Gobierno Mágico de los Estados Unidos / MACUSA.\n→ Biblioteca: algo sin nivel\nSEGUIDORES\n→ Seguidores II: Sociedad > Prensa.[/spoiler]\n[spoiler=VENTAJAS]Fama II\nRecursos I[/spoiler]" },
+    { "post": 339217, "bbcode": "[spoiler=RAZA]Humana[/spoiler]\n[spoiler=IDIOMAS]Inglés — Nativo\nFrancés — Medio[/spoiler]\n[spoiler=TALENTOS]Aparecerse[/spoiler]" }
+  ]
+}
