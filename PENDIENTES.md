@@ -65,6 +65,8 @@ Pasarlo por la ficha real destapó y corrigió seis fallos que la ficha inventad
 
 El editor se ha probado con el BBCode real de Mortimer (una parte) y con una ficha inventada de cinco partes. La página de Irvin Giles que tenemos es el HTML que muestra el foro, no su BBCode, así que con su ficha real solo se ha probado el lector. Conviene probar el editor con el BBCode de alguna ficha real de varias partes cuando se pueda (lo puede sacar su dueño desde «Editar»).
 
+**Por revisar (pedido el 4/11/2026):** el PAM antiguo también acepta el HTML de la página al importar una ficha. Ver si el editor puede trabajar con ese HTML (y, por tanto, probarse con la página de Irvin), o qué pierde: el HTML publicado no es el código que se edita (los `[b]`, `[spoiler]`… ya salen convertidos), así que lo que se publicara a partir de él cambiaría el código de la ficha.
+
 ## Cómo se trabaja cada punto
 
 1. Antes de arreglar, una prueba automática que falle con el caso real (fichas recortadas y sin datos de sesión: la página guardada de un tema contiene tokens que no deben subirse a un repositorio público).
