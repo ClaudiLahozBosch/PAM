@@ -102,6 +102,15 @@ Antes, el script «Mi PJ» manejaba PAM desde fuera: pulsaba sus botones y leía
 
 «Enviar a PAM» usa la ventana «Datos del foro → PAM» que ya tiene `index.html`: el agente abre PAM desde el foro y le pasa los datos, porque esa ventana solo acepta datos que vengan del foro. En la rama `refactor` acepta también el foro de pruebas (`FOROS_PRUEBA`), siempre con Aceptar / Denegar.
 
+## Dónde guarda PAM los datos (y la sesión con código)
+
+- **En el navegador**, siempre: el `localStorage` de la página de PAM. Sin cookies.
+- **En la nube**, si el usuario abre una «Sesión con código» (`PAM-XXXX-…`): PAM hace una foto de las claves del `localStorage` que empiezan por **`grimorio.`, `grimorioAvadense.`, `revisorEmpleos.`, `registro-roles-v1` o `cd_`** (menos `cd_bg`), la cifra en el navegador con una llave que sale del código y la sube a Firestore (`pam-avadense`). Sube los cambios cada 4 s y al cambiar de pestaña.
+- **Norma del refactor:** todo dato del usuario que PAM tenga que conservar va en una clave con uno de esos prefijos, o no viajará con la sesión. Si hace falta un prefijo nuevo, se añade en **los dos sitios** donde está la lista (`PRE`/`EXC`: al traer los datos, al principio de `index.html`, y al subirlos, en el bloque «Sesión con código»). La prueba `tests/unit/sesion-codigo.test.mjs` comprueba que las dos listas son iguales y que el código nuevo no escribe en el `localStorage` de PAM por su cuenta.
+- **Hoy (fase 6b):** el código nuevo no escribe nada propio en el `localStorage` de PAM. Los canjes cambian la ficha y la Bóveda con las funciones de PAM (`pamFicha`, `rrBoveda`), que guardan en `grimorio.*` y `registro-roles-v1`: entran en la sesión. Lo que va de paso entre el foro y PAM (`pam.*`) lo guarda el agente en Tampermonkey y no tiene que ir a la nube. Las preferencias del panel de Mi PJ (`mipj.*`) están en el almacenamiento del panel dentro del foro, que Chrome separa del de PAM; con el Mi PJ antiguo tampoco iban a la nube.
+- **Fases 7 y 8** (nube y páginas): al cambiar cómo guarda PAM, mantener esta norma o cambiar la foto a la vez, y comprobar que una sesión vieja se sigue pudiendo traer.
+- **Staging:** el PAM de pruebas tiene su propio `localStorage`, pero si se carga en él un código de sesión, escribe en **la misma copia de la nube** que el PAM de verdad. Para probar, un código nuevo solo de pruebas.
+
 ## Cómo se publica una versión
 
 1. Subir el número en `agente/pam-agente.user.js` (`@version` y `VERSION`).
