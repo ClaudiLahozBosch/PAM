@@ -3,14 +3,14 @@
 // pam-mi-pj.user.js 1.7.1, con los pasos de PAM (los del foro los hace la puerta del agente). Mismo HTML y mismos
 // textos. Nada se toca en PAM hasta «Aceptar».
 //
-// accion = { titulo, explicacion?, avisos?, pasos, enlaceFinal? }
+// accion = { titulo, explicacion?, avisos?, pasos, enlaceFinal?, antesDelEnlace?(resultados) }
 // paso   = { tipo: 'pam', titulo, vista?: Node, editar?(), recoger?(), ejecutar(avisar) → Promise<{ estado, detalle? }>,
 //            omitido?: texto, igual?: texto }
 // Devuelve { resultado: 'aceptada'|'denegada'|'fallida'|'parcial'|'igual', pasos }.
-import { CSS_PAM_VARS, CSS_PUERTA } from './estilosPuerta.js?v=0.3.6';
+import { CSS_PAM_VARS, CSS_PUERTA } from './estilosPuerta.js?v=0.3.7';
 
-/** @param {Document} doc */
-function estilos(doc) {
+/** Los estilos de la puerta y de la pastilla (una vez). @param {Document} doc */
+export function estilos(doc) {
   if (doc.getElementById('esc-css')) return;
   const s = doc.createElement('style'); s.id = 'esc-css';
   s.textContent = CSS_PAM_VARS + '\n' + CSS_PUERTA;
@@ -135,13 +135,19 @@ export function abrirPuerta(doc, quien, accion) {
         bCerrar.focus();
         bCerrar.addEventListener('click', () => cerrar({ resultado, pasos: resultados }));
         if ((todosOk || nadaQueHacer) && accion.enlaceFinal) {
-          const bSig = accion.enlaceFinal.alPulsar
-            ? el('button', { clase: 'p-btn ok', type: 'button', texto: accion.enlaceFinal.texto })
-            : el('a', { clase: 'p-btn ok', href: accion.enlaceFinal.href, target: '_blank', rel: 'noopener', texto: accion.enlaceFinal.texto });
-          bSig.style.textDecoration = 'none';
-          bSig.addEventListener('click', () => { if (accion.enlaceFinal.alPulsar) accion.enlaceFinal.alPulsar(); cerrar({ resultado, pasos: resultados }); });
-          botones.appendChild(bSig);
-          bSig.focus();
+          // antesDelEnlace puede devolver una promesa (p. ej. guardar la petición para el foro)
+          Promise.resolve(accion.antesDelEnlace ? accion.antesDelEnlace(resultados) : null).then(() => {
+            const bSig = accion.enlaceFinal.alPulsar
+              ? el('button', { clase: 'p-btn ok', type: 'button', texto: accion.enlaceFinal.texto })
+              : el('a', { clase: 'p-btn ok', href: accion.enlaceFinal.href, target: '_blank', rel: 'noopener', texto: accion.enlaceFinal.texto });
+            bSig.style.textDecoration = 'none';
+            bSig.addEventListener('click', () => { if (accion.enlaceFinal.alPulsar) accion.enlaceFinal.alPulsar(); cerrar({ resultado, pasos: resultados }); });
+            botones.appendChild(bSig);
+            bSig.focus();
+          }).catch(e => {
+            info.className = 'p-info error';
+            info.textContent = 'Hecho, pero no pude preparar el paso siguiente: ' + (e instanceof Error ? e.message : String(e));
+          });
         }
       });
     });

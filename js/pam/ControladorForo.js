@@ -1,17 +1,19 @@
 // @ts-check
 // El «controlador» de PAM para lo que llega del foro a través del agente. Es la única puerta de entrada:
 // lee lo que el foro dejó en el almacén del agente, lo comprueba y se lo pasa a PAM (PamActual), siempre después
-// de la puerta Aceptar / Denegar. Hoy: los oficiales de la Biblioteca. En la fase 6b, las peticiones de canje.
-import { abrirPuerta } from './ui/Puerta.js?v=0.3.6';
+// de la puerta Aceptar / Denegar: los oficiales de la Biblioteca y los canjes (preparar la petición y cerrarla).
+import { abrirPuerta } from './ui/Puerta.js?v=0.3.7';
+import { crearCanjesPam } from './CanjesPam.js?v=0.3.7';
 
 const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 /**
  * @param {{ agente: { leerDato(k: string): Promise<any>, guardarDato(k: string, v: any): Promise<any> },
- *   pam: ReturnType<typeof import('./PamActual.js').crearPamActual>, doc: Document }} dep
+ *   pam: ReturnType<typeof import('./PamActual.js').crearPamActual>, doc: Document, foros?: Record<string, any> }} dep
  */
-export function crearControladorForo({ agente, pam, doc }) {
+export function crearControladorForo({ agente, pam, doc, foros = {} }) {
   let abierta = false;
+  const canjes = crearCanjesPam({ agente, pam, doc, foros });
 
   /* Los oficiales que mandó la Biblioteca (pam.oficiales) se muestran en la puerta y se suman a «Posibles oficiales».
      Como recibirOficialesEnPAM() de Mi PJ 1.7.1, con el mismo texto. */
@@ -40,5 +42,5 @@ export function crearControladorForo({ agente, pam, doc }) {
     } finally { abierta = false; }
   }
 
-  return { revisarOficiales };
+  return { revisarOficiales, canjes };
 }

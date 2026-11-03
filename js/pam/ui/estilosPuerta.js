@@ -1,6 +1,6 @@
 // @ts-check
-// Estilos de la puerta (Aceptar / Modificar / Denegar) de Mi PJ, copiados tal cual de pam-mi-pj.user.js 1.7.1
-// (CSS_ESC y CSS_PAM_VARS). En PAM, las variables --m-* salen de los colores del tema de PAM.
+// Estilos de la puerta (Aceptar / Modificar / Denegar) y de la pastilla «Mi PJ» en PAM, copiados tal cual de
+// pam-mi-pj.user.js 1.7.1 (CSS_ESC y CSS_PAM_VARS). En PAM, las variables --m-* salen de los colores del tema de PAM.
 export const CSS_PAM_VARS = '.esc-ui{--m-ink:var(--ink);--m-panel:var(--panel);--m-panel-2:var(--panel-2);--m-parchment:var(--parchment);--m-parchment-dim:var(--parchment-dim);--m-gold:var(--gold);--m-gold-bright:var(--gold-bright);--m-arcane-bright:var(--arcane-bright);--m-good:var(--good);--m-bad:var(--bad);--m-line-strong:var(--line-strong);--m-accent-ink:var(--accent-ink);--m-serif:var(--serif);--m-sans:var(--sans)}';
 export const CSS_PUERTA = [
     '.esc-ui{--x-ink:var(--m-ink,#171a2b);--x-panel:var(--m-panel,#1e2236);--x-panel2:var(--m-panel-2,#262a42);--x-parch:var(--m-parchment,#F1EADF);--x-dim:var(--m-parchment-dim,#a7a1b6);',
@@ -48,5 +48,21 @@ export const CSS_PUERTA = [
     '.esc-ui .p-btn.edit{background:transparent;border-color:var(--x-gold);color:var(--x-goldb)}',
     '.esc-ui .p-btn.no{background:transparent;border-color:var(--x-bad);color:var(--x-bad)}',
     '.esc-ui .p-btn:disabled,.esc-ui .b:disabled{opacity:.5;cursor:default;transform:none}',
-    'html[data-mipj-skin="pixel"] .esc-ui .puerta,html[data-mipj-skin="pixel"] .esc-ui .p-paso,html[data-mipj-skin="pixel"] .esc-ui .p-btn{border-radius:0}'
+    // Panel en PAM: la misma caja y la misma pastilla que «Mi PJ» en el foro.
+    '.esc-ui.esc-pam{position:fixed;right:16px;bottom:16px;z-index:99990;width:350px;max-width:calc(100vw - 24px)}',
+    '.esc-pam .box{background:radial-gradient(420px 180px at 0% 0%,color-mix(in srgb,var(--x-arc) 16%,transparent),transparent 70%),var(--x-panel);border:1px solid color-mix(in srgb,var(--x-gold) 45%,transparent);border-radius:16px;box-shadow:0 24px 60px -24px rgba(0,0,0,.75);max-height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:hidden}',
+    '.esc-pam .hd{display:flex;align-items:center;gap:10px;padding:12px 16px 10px;cursor:pointer;user-select:none;border-bottom:1px solid var(--x-line)}',
+    '.esc-pam .brand{font-family:var(--x-serif);font-style:italic;font-size:20px}',
+    '.esc-pam .brand i{font-style:normal;color:var(--x-goldb);font-size:13px;margin-right:4px}',
+    '.esc-pam .hd small{margin-left:auto;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--x-dim)}',
+    '.esc-pam .bd{padding:6px 16px 14px;overflow:auto}',
+    '.esc-pam .card{margin-top:12px;padding:11px 13px;border-radius:12px;background:color-mix(in srgb,var(--x-panel2) 70%,transparent);border:1px solid var(--x-line);display:grid;gap:6px}',
+    '.esc-pam .ct{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--x-goldb);font-weight:700}',
+    '.esc-pam .row{font-size:13px}.esc-pam .dim{color:var(--x-dim);font-size:12.5px}',
+    '.esc-pam .acciones{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}',
+    '.esc-pam .pill{display:flex;align-items:center;gap:10px;margin-left:auto;width:max-content;padding:8px 16px;border-radius:999px;cursor:pointer;background:var(--x-panel);border:1px solid color-mix(in srgb,var(--x-gold) 50%,transparent);box-shadow:0 14px 34px -14px rgba(0,0,0,.7)}',
+    '.esc-pam .pill .brand{font-size:17px}',
+    '.esc-pam .pill .n{font-size:11px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--x-arc);color:var(--x-acc)}',
+    '.esc-pam .msg{margin-top:10px}',
+    'html[data-mipj-skin="pixel"] .esc-ui .puerta,html[data-mipj-skin="pixel"] .esc-ui .p-paso,html[data-mipj-skin="pixel"] .esc-ui .p-btn,html[data-mipj-skin="pixel"] .esc-pam .box,html[data-mipj-skin="pixel"] .esc-pam .card,html[data-mipj-skin="pixel"] .esc-pam .pill{border-radius:0}'
 ].join('\n');

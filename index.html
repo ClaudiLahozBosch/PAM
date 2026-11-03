@@ -4662,6 +4662,26 @@ const ui = (k,def)=>{ if(!(k in state.ui)) state.ui[k]=def; return state.ui[k]; 
 function addToCart(cat, line, cost, pl=0, key=null, meta={}){
   state.cart.push({id:uid++, cat, line, cost, pl, key, meta});
 }
+/* N04: una subida de lo mismo que ya está en el carrito (que termina donde empieza esta) se junta con ella en una
+   sola línea («0 → II» en vez de «0 → I» y «I → II»). Devuelve el nivel desde el que sale la subida juntada. */
+function fusionarSubida(kind, name, desde){
+  const prev = state.cart.find(i=>i.meta && i.meta.kind===kind && i.meta.name===name && i.meta.to===desde && i.meta.from!=null);
+  if(!prev) return desde;
+  state.cart = state.cart.filter(i=>i!==prev);
+  return prev.meta.from;
+}
+/* N04: el carrito, siempre en el mismo orden: por categoría y, dentro, alfabético (los arcanos, por tipo y nivel y después alfabético) */
+const ordenAlfabetico = (x,y)=> x.line.localeCompare(y.line, "es", {sensitivity:"base", numeric:true});
+function itemsOrdenados(cat){
+  const items = state.cart.filter(i=>i.cat===cat).slice();
+  if(cat==="ARCANOS"){
+    const order = {hechizo:0,pocion:1,ritual:2,objeto:3}, to = {dom:0,bas:1,int:2,ava:3};
+    return items.sort((a,b)=> order[a.meta.type]-order[b.meta.type] || to[a.meta.tier]-to[b.meta.tier] || ordenAlfabetico(a,b));
+  }
+  return items.sort(ordenAlfabetico);
+}
+/* N04: el nivel que ya tenés de un trasfondo: el de la ficha (al «Llevar a la calculadora») o el del carrito */
+const nivelTrasfondo = nombre => Math.max(Number((state.bgsBase||{})[nombre])||0, 0, ...state.cart.filter(i=>i.meta && i.meta.kind==="trasf" && i.meta.name===nombre).map(i=>Number(i.meta.to)||0));
 function removeItem(id){
   const it = state.cart.find(i=>i.id===id);
   if(!it) return;
@@ -4944,7 +4964,8 @@ RENDERERS.stats = function(){
       onActual:v=>{ state.statsBase[s]=v; if(state.statsTarget[s]<=v) state.statsTarget[s]=Math.min(v+1,8); renderAll(); },
       onTarget:v=>{ state.statsTarget[s]=v; renderAll(); },
       onAdd:()=>{
-        addToCart("ESTADÍSTICAS", `${s}: ${a} → ${t} — ${precioTexto(cost,pl)}${pl?" (Atributo Legendario)":""}`, cost, pl, null, {kind:"stat", name:s, from:a, to:t, notes:statNotes(s,a,t)});
+        const d = fusionarSubida("stat", s, a), c2 = costoSubida(STAT_ACUM,d,t), pl2 = (t===8 && d<8) ? 17 : 0;
+        addToCart("ESTADÍSTICAS", `${s}: ${d} → ${t} — ${precioTexto(c2,pl2)}${pl2?" (Atributo Legendario)":""}`, c2, pl2, null, {kind:"stat", name:s, from:d, to:t, notes:statNotes(s,d,t)});
         state.statsBase[s]=t; state.statsTarget[s]=Math.min(t+1,8); renderAll();
       }}));
     if(cost>0) c.insertAdjacentHTML("beforeend", reminderHtml(statNotes(s,a,t)));
@@ -4975,7 +4996,8 @@ RENDERERS.skills = function(){
         onActual:v=>{ state.skillsBase[name]=v; if(state.skillsTarget[name]<=v) state.skillsTarget[name]=Math.min(v+1,5); renderAll(); },
         onTarget:v=>{ state.skillsTarget[name]=v; renderAll(); },
         onAdd:()=>{
-          addToCart("HABILIDADES", `${name}: ${SKILL_LVL[a]} → ${SKILL_LVL[t]} — ${precioTexto(cost,pl)}${pl?" (Habilidad Legendaria)":""}`, cost, pl, null, {kind:"skill", name, from:a, to:t, notes:skillNotes(stat,a,t)});
+          const d = fusionarSubida("skill", name, a), c2 = costoSubida(SKILL_ACUM,d,t), pl2 = (t===5 && d<5) ? 7 : 0;
+          addToCart("HABILIDADES", `${name}: ${SKILL_LVL[d]} → ${SKILL_LVL[t]} — ${precioTexto(c2,pl2)}${pl2?" (Habilidad Legendaria)":""}`, c2, pl2, null, {kind:"skill", name, from:d, to:t, notes:skillNotes(stat,d,t)});
           state.skillsBase[name]=t; state.skillsTarget[name]=Math.min(t+1,5); renderAll();
         }}));
       if(cost>0) c.insertAdjacentHTML("beforeend", reminderHtml(skillNotes(stat,a,t)));
@@ -5117,7 +5139,8 @@ RENDERERS.trasfondos = function(){
       onActual:x=>{ state.ventBase[v]=x; if(state.ventTarget[v]<=x) state.ventTarget[v]=Math.min(x+1,3); renderAll(); },
       onTarget:x=>{ state.ventTarget[v]=x; renderAll(); },
       onAdd:()=>{
-        addToCart("VENTAJAS", `${v}: ${VENT_LABELS[v][a]} → ${VENT_LABELS[v][t]} — ${fmt(cost)} grageas`, cost, 0, null, {kind:"vent", name:v, from:a, to:t});
+        const d = fusionarSubida("vent", v, a), c2 = costoSubida(VENT_ACUM,d,t);
+        addToCart("VENTAJAS", `${v}: ${VENT_LABELS[v][d]} → ${VENT_LABELS[v][t]} — ${fmt(c2)} grageas`, c2, 0, null, {kind:"vent", name:v, from:d, to:t});
         state.ventBase[v]=t; state.ventTarget[v]=Math.min(t+1,3); renderAll();
       }}));
     g.appendChild(c);
@@ -5131,17 +5154,19 @@ function trasfAdder(kind){
   const cats = catsFor(tipo);
   let cat = ui(pre+"Cat", Object.keys(cats)[0]); if(!cats[cat]){ cat = Object.keys(cats)[0]; state.ui[pre+"Cat"]=cat; }
   let sp = ui(pre+"Sp", cats[cat][0]); if(!cats[cat].includes(sp)){ sp = cats[cat][0]; state.ui[pre+"Sp"]=sp; }
-  const a = ui(pre+"A",0), t = Math.max(ui(pre+"T",1), a);
-  const cost = costoSubida(esp?TESP_ACUM:TGEN_ACUM, a, t);
   const nombre = esp ? `${tipo} ${cat} > ${sp}` : `${tipo} ${cat}`;
+  const base = nivelTrasfondo(nombre);
+  if(state.ui[pre+"Nom"]!==nombre){ state.ui[pre+"Nom"]=nombre; state.ui[pre+"A"]=base; state.ui[pre+"T"]=Math.min(base+1,5); }
+  const a = Math.max(ui(pre+"A",0), base), t = a>=5 ? a : Math.max(ui(pre+"T",1), a+1);
+  const cost = costoSubida(esp?TESP_ACUM:TGEN_ACUM, a, t);
   const d = document.createElement("div"); d.className = "adder";
   d.innerHTML = `<div class="field" style="flex-basis:100%"><label>${esp?"Trasfondo específico (50 · 100 · 150 · 200 · 250)":"Trasfondo general (100 · 200 · 300 · 400 · 500)"}</label></div>
     <div class="field"><label>Tipo</label><select class="ft">${optionsHtml(TIPOS_TRASF,tipo)}</select></div>
     <div class="field"><label>Categoría</label><select class="fc">${optionsHtml(Object.keys(cats),cat)}</select></div>
     ${esp?`<div class="field"><label>Específico</label><select class="fs">${optionsHtml(cats[cat],sp)}</select></div>`:""}
-    <div class="field"><label>Actual</label><select class="la">${optionsHtml([0,1,2,3,4,5].map(l=>[l,ROMAN[l]]),a)}</select></div>
+    <div class="field"><label>Actual</label><select class="la">${optionsHtml([0,1,2,3,4,5].filter(l=>l>=base).map(l=>[l,ROMAN[l]]),a)}</select></div>
     <div class="arrow">→</div>
-    <div class="field"><label>Nuevo</label><select class="lt">${optionsHtml([0,1,2,3,4,5].map(l=>[l,ROMAN[l]]),t)}</select></div>
+    <div class="field"><label>Nuevo</label><select class="lt">${optionsHtml([0,1,2,3,4,5].filter(l=>l>a).map(l=>[l,ROMAN[l]]),t)}</select></div>
     ${priceHtml(cost,0)}
     <button class="btn" ${cost>0?"":"disabled"}>Agregar</button>`;
   d.querySelector(".ft").addEventListener("change", e=>{ state.ui[pre+"Tipo"]=e.target.value; renderAll(); });
@@ -5151,8 +5176,9 @@ function trasfAdder(kind){
   d.querySelector(".lt").addEventListener("change", e=>{ state.ui[pre+"T"]=+e.target.value; renderAll(); });
   d.querySelector("button.btn").addEventListener("click", ()=>{
     if(cost<=0) return;
-    addToCart("TRASFONDOS", `${nombre}: ${ROMAN[a]} → ${ROMAN[t]} — ${fmt(cost)} grageas`, cost, 0, null, {kind:"trasf", name:nombre, tipo, cat, esp:esp?sp:"", to:t});
-    state.ui[pre+"A"]=0; state.ui[pre+"T"]=1; renderAll();
+    const d = fusionarSubida("trasf", nombre, a), c2 = costoSubida(esp?TESP_ACUM:TGEN_ACUM, d, t);
+    addToCart("TRASFONDOS", `${nombre}: ${ROMAN[d]} → ${ROMAN[t]} — ${fmt(c2)} grageas`, c2, 0, null, {kind:"trasf", name:nombre, tipo, cat, esp:esp?sp:"", from:d, to:t});
+    state.ui[pre+"A"]=t; state.ui[pre+"T"]=Math.min(t+1,5); renderAll();
   });
   return d;
 }
@@ -5726,7 +5752,7 @@ RENDERERS.carrito = function(){
   }
   let any = false;
   CAT_ORDER.forEach(cat=>{
-    const items = state.cart.filter(i=>i.cat===cat);
+    const items = itemsOrdenados(cat);
     if(!items.length) return;
     any = true;
     const t = document.createElement("div"); t.className = "cart-section-title";
@@ -5751,12 +5777,8 @@ function buildSummary(){
   const out = [];
   const H = t=>out.push({h:true, t}), L = t=>out.push({t}), B = ()=>out.push({t:""});
   CAT_ORDER.forEach(cat=>{
-    let items = state.cart.filter(i=>i.cat===cat);
+    const items = itemsOrdenados(cat);
     if(!items.length) return;
-    if(cat==="ARCANOS"){
-      const order = {hechizo:0,pocion:1,ritual:2,objeto:3}, to = {dom:0,bas:1,int:2,ava:3};
-      items = items.slice().sort((a,b)=> order[a.meta.type]-order[b.meta.type] || to[a.meta.tier]-to[b.meta.tier]);
-    }
     H(cat==="LEGENDARIAS" ? "CARACTERÍSTICAS LEGENDARIAS" : cat);
     items.forEach(i=>L(i.line)); B();
   });
@@ -7210,7 +7232,7 @@ function fichaBBCode(){
 /* ============ Calculadora <-> ficha ============ */
 const SK_MAP = {'Esquivar':'Esquiva','Volar':'Vuelo','Seducir':'Seducción'};
 const SK_BACK = {'Esquiva':'Esquivar','Vuelo':'Volar','Seducción':'Seducir'};
-$('#f-sync').onclick=()=>{
+function traerCalculadora(){
   if(typeof state==='undefined'){ toast('No encuentro la calculadora'); return; }
   ATTRS.forEach(a=>{ if(state.statsBase[a]!==undefined) ficha.attrs[a]=Math.max(num(ficha.attrs[a]), state.statsBase[a]); });
   Object.entries(state.skillsBase).forEach(([s,v])=>{ const k=SK_MAP[s]||s; if(k in ficha.skills) ficha.skills[k]=Math.max(num(ficha.skills[k]),v); });
@@ -7229,8 +7251,9 @@ $('#f-sync').onclick=()=>{
   });
   if(state.pdActuales) ficha.extra.pd=Math.max(num(ficha.extra.pd), state.pdActuales);
   persist(); renderFicha(); toast('Niveles traídos de la calculadora');
-};
-$('#f-push').onclick=()=>{
+}
+$('#f-sync').onclick=()=>traerCalculadora();
+function llevarCalculadora(){
   if(typeof state==='undefined'){ toast('No encuentro la calculadora'); return; }
   if(state.cart.length && !window.confirm('Esto pone en la calculadora los niveles de tu ficha como «nivel actual». El carrito no se toca. ¿Seguir?')) return;
   ATTRS.forEach(a=>{ const v=Math.min(8,num(ficha.attrs[a])); state.statsBase[a]=v; state.statsTarget[a]=Math.min(v+1,8); });
@@ -7239,9 +7262,11 @@ $('#f-push').onclick=()=>{
   ESP_RAMAS.forEach(r=>{ if(r in state.espOwned) state.espOwned[r]=Math.min(3,num(ficha.esp[r])); });
   ['hechizo','pocion','ritual'].forEach(t=>['bas','int','ava'].forEach(tr=>{ state.arcOwned[t][tr]=ficha.arcanos.filter(a=>a.type===t&&a.tier===tr).length; }));
   state.pdActuales = num(ficha.extra.pd);
+  state.bgsBase = {}; (ficha.bgs||[]).forEach(b=>{ if(!b || !b.t) return; const n = b.e ? `${b.t} ${b.c} > ${b.e}` : `${b.t} ${b.c}`; state.bgsBase[n] = Math.max(state.bgsBase[n]||0, num(b.v)); });
   if(typeof renderAll==='function') renderAll();
   toast('Listo: tu ficha ya está cargada en la Tabla de Canjes');
-};
+}
+$('#f-push').onclick=()=>llevarCalculadora();
 
 /* ============ Diálogo ============ */
 let dlgCb=null;
@@ -7848,7 +7873,15 @@ window.pamFicha = {
     const p=parseFichaForo(txt); const js=ficha.jobState; const plant=ficha.plantilla;
     ficha=normFicha(p.ficha); ficha.jobState=js||{}; if(!ficha.nombre) ficha.nombre=nombre;
     if(esCodigoForo(txt)) guardarPlantilla(txt, ficha); else if(plant) ficha.plantilla=plant;
-    persist(); flushSave(); refreshAll(); return {id, resumen:p.resumen}; }
+    persist(); flushSave(); refreshAll(); return {id, resumen:p.resumen}; },
+  /* canjes (Mi PJ): pasar el carrito a la ficha, como el botón «Traer de la calculadora» */
+  traerCalculadora: () => traerCalculadora(),
+  /* canjes (Mi PJ): poner la ficha en la Tabla de Canjes, como el botón «Llevar a la calculadora» */
+  llevarCalculadora: () => llevarCalculadora(),
+  /* canjes (Mi PJ): el código del foro actualizado en modo «Personalizada» (null si la ficha no lo tiene guardado) */
+  codigoPersonal: () => { const P = plantillaDe(ficha); if (P.modo !== 'personal' || !P.codigo) return null;
+    const r = actualizarCodigo(P.codigo, P.base || ficha, ficha);
+    return { codigo: r.code, base: P.codigo, hechos: r.hechos.join(' · '), manual: r.manual.slice() }; }
 };
 window.pamPjs = {
   lista: () => pjs.lista.map(p=>({id:p.id, nombre:String(p.ficha.nombre||'').trim()})),
@@ -8713,7 +8746,18 @@ window.rrBoveda = {
     ["ini","tot","act","plt","pla"].forEach(k=>{ if(v[k]!==undefined && v[k]!==null && v[k]!=="") b[k]=num(v[k]); });
     ["l1","l2","l3"].forEach(k=>{ if(v[k]) b[k]=v[k]; });
     b.foro = Object.assign({}, b.foro||{}, {leido:v.leido||"", url:v.url||""});
-    pjSel=r.id; save(); if(panel.innerHTML) render(); return true; }
+    pjSel=r.id; save(); if(panel.innerHTML) render(); return true; },
+  /* canjes (Mi PJ): deja preparado un movimiento de grageas y devuelve sus códigos (lo que sale en «Formulario» y «Código para la bóveda») */
+  preparar: (pamId, v) => { syncPam(); const r=S.personajes.find(x=>x.pamId===pamId||x.id===pamId); if(!r) return null; const b=bov(r);
+    b.tipo="gr"; ["delta","pet","ace"].forEach(k=>{ if(v[k]!==undefined) b[k]=String(v[k]); });
+    pjSel=r.id; save(); if(panel.innerHTML) render(); const {c,form,html}=bovCodesGr(b); return {form, html, c, divisor:divisor()}; },
+  /* canjes (Mi PJ): «Ya lo publiqué: actualizar mis números» con los enlaces del canje; devuelve las grageas actuales */
+  cerrar: (pamId, v) => { syncPam(); const r=S.personajes.find(x=>x.pamId===pamId||x.id===pamId); if(!r) return null; const bb=bov(r);
+    bb.tipo="gr"; ["delta","pet","ace"].forEach(k=>{ if(v && v[k]!==undefined) bb[k]=String(v[k]); });
+    const c=bovCalc(bb); if(!c.d) return {act:num(bb.act), sinCambio:true};
+    bb.log=bb.log||[]; bb.log.unshift({id:uid(),at:new Date().toISOString(),ini0:num(bb.ini),act0:num(bb.act),tot0:num(bb.tot),ini:c.ini,d:c.d,act:c.act,tot:c.tot,enl:bovEnlaces(bb),pet:String(bb.pet||"").trim(),ace:String(bb.ace||"").trim()}); if(bb.log.length>150)bb.log.length=150;
+    bb.ini=c.ini;bb.act=c.act;bb.tot=c.tot;bb.delta="";bb.enl="";bb.pet="";bb.ace="";
+    pjSel=r.id; save(); if(panel.innerHTML) render(); return {act:c.act}; }
 };
 syncPam();
 document.addEventListener("pam:pjs",()=>{ if(syncPam() && panel.innerHTML) render(); });
@@ -9494,6 +9538,6 @@ window.pamForoListo = true;
 })();
 </script>
 <!-- Lo nuevo de PAM (js/pam/): lo que llega del foro a través del script de PAM. Sin el script, no hace nada. -->
-<script type="module" src="js/pam/main.js?v=0.3.6"></script>
+<script type="module" src="js/pam/main.js?v=0.3.7"></script>
 </body>
 </html>
