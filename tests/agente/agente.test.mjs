@@ -54,10 +54,10 @@ const esperarFin = async () => { for (let i = 0; i < 100 && !boton('Cerrar'); i+
 
 test('hola (con la ventana del foro), iframe sin marco y lectura del foro', async () => {
   const h = await agente.hola();
-  assert.deepEqual([h.agente, h.protocolo, h.foro, h.cuenta, h.ruta], ['0.3.1', 1, 'hp-avada-kedavra.foroactivo.com', { id: 7, nombre: 'TEST' }, '/t5-uno']);
+  assert.deepEqual([h.agente, h.protocolo, h.foro, h.cuenta, h.ruta], ['0.3.2', 1, 'hp-avada-kedavra.foroactivo.com', { id: 7, nombre: 'TEST' }, '/t5-uno']);
   assert.ok(h.ventana.ancho > 0 && h.ventana.alto > 0);
   const f = sombra().querySelector('iframe');
-  assert.equal(f.getAttribute('src'), PAM + '/PAM/panel.html?foro=' + encodeURIComponent(FORO) + '&v=0.3.1', 'con la versión: el navegador no mezcla archivos');
+  assert.equal(f.getAttribute('src'), PAM + '/PAM/panel.html?foro=' + encodeURIComponent(FORO) + '&v=0.3.2', 'con la versión: el navegador no mezcla archivos');
   assert.equal(f.className, 'marco');
   assert.equal(sombra().querySelector('.pastilla'), null, 'la pastilla es la de Mi PJ, dentro del panel');
   assert.equal((await agente.leer('/')).title, 'Foro');
@@ -162,20 +162,85 @@ test('canal: ignora otros orígenes y pide actualizar si el protocolo no coincid
   assert.equal(recibidos.length, 1);
   assert.match(recibidos[0].error, /Actualiza el script/);
 });
-test('editor del foro: «Antes de publicar» de Mi PJ si PAM ve algo', async () => {
-  agente.atender('editor.revisar', d => ({ avisos: d.texto.includes('mal') ? ['algo va mal'] : [], encabezado: 'Revisé el formulario de la bóveda y ' }));
-  const form = W.document.getElementById('editor');
-  let envios = 0; form.addEventListener('submit', e => { envios++; e.preventDefault(); });
-  form.querySelector('textarea').value = 'todo bien'; form.requestSubmit(); await espera(40);
-  assert.equal(envios, 1);
-  form.querySelector('textarea').value = 'esto va mal'; form.requestSubmit(); await espera(40);
-  assert.equal(envios, 1);
+
+// ---------- editor del foro: la barra y «Antes de publicar» de Mi PJ, con la revisión de verdad de PAM ----------
+const { revisarEditor } = await import('../../js/reglas/RevisorBoveda.js');
+const formBoveda = (ini, act, tot) => `Grageas iniciales» ${ini}\n{Grageas que se añaden / quitan» +125 (sueldo)\n{Grageas actuales» ${act}\n{Grageas totales» ${tot}\n{Enlaces» [url=/t172-sueldos]sueldo[/url]`;
+const BIEN = formBoveda('1.200', '1.325', '9.125'), MAL = formBoveda('1.200', '1.300', '9.125');
+let bovedaPanel = { tema: 5, act: 1200, tot: 9000 }; // la página es /t5-uno: el jugador está en su bóveda
+agente.atender('editor.revisar', d => revisarEditor(d, bovedaPanel));
+const editor = W.document.getElementById('editor'), ta = editor.querySelector('textarea');
+const caja = () => editor.querySelector('.pam-agente-check');
+const barra = () => caja().shadowRoot.querySelector('.mipj-check');
+const tocarBarra = async () => { barra().click(); await espera(40); };
+let envios = 0; editor.addEventListener('submit', e => { envios++; e.preventDefault(); });
+
+test('editor: la barra va justo debajo del editor y no se ve si no hay formulario de bóveda', async () => {
+  assert.equal(ta.nextElementSibling, caja());
+  ta.value = 'Un mensaje normal.'; await tocarBarra();
+  assert.equal(caja().style.display, 'none');
+  assert.equal(sombra().querySelector('#mipj-modal'), null);
+});
+
+test('editor: barra «las cuentas cuadran», con el mismo HTML que Mi PJ', async () => {
+  ta.value = BIEN; await tocarBarra();
+  assert.equal(caja().style.display, '');
+  assert.equal(barra().outerHTML, '<div class="mipj-check ok"><span class="ic">✦</span>Bóveda: las cuentas cuadran<small>Mi PJ</small></div>');
+  assert.equal(sombra().querySelector('#mipj-modal'), null, 'si cuadra, tocarla no abre nada');
+  bovedaPanel = null; ta.value = BIEN + ' '; await tocarBarra();
+  assert.equal(barra().outerHTML, '<div class="mipj-check ok"><span class="ic">✦</span>Bóveda: las cuentas cuadran (sin comparar con tu bóveda)<small>Mi PJ</small></div>');
+  bovedaPanel = { tema: 5, act: 1200, tot: 9000 };
+});
+
+test('editor: barra «N cosas para revisar»; tocarla abre «Antes de publicar» solo con «Entendido»', async () => {
+  ta.value = MAL; await tocarBarra();
+  assert.equal(barra().outerHTML, '<div class="mipj-check mal"><span class="ic">⚠</span>Bóveda: 1 cosa para revisar<small>Mi PJ · tocá para ver</small></div>');
   const m = sombra().querySelector('#mipj-modal');
-  assert.equal(m.querySelector('h3').textContent, 'Antes de publicar');
   assert.equal(m.querySelector('p').textContent, 'Revisé el formulario de la bóveda y hay algo que no cuadra:');
-  assert.equal(m.querySelector('li').textContent, 'algo va mal');
+  assert.equal(m.querySelector('li').innerHTML, '<b>Grageas:</b> 1.200 + 125 da 1.325, no 1.300.');
+  assert.deepEqual([...m.querySelectorAll('button')].map(b => b.textContent), ['Entendido']);
+  boton('Entendido').click(); await espera(10);
+  assert.equal(sombra().querySelector('#mipj-modal'), null);
+  ta.value = formBoveda('1.000', '1.300', '9.000'); await tocarBarra(); // empieza en 1.000 (bóveda: 1.200), suma mal y totales mal
+  assert.match(barra().textContent, /Bóveda: 3 cosas para revisar/);
+  assert.match(sombra().querySelector('#mipj-modal p').textContent, /hay 3 cosas que no cuadran:$/);
+  boton('Entendido').click(); await espera(10);
+});
+
+test('editor: al enviar con problemas, «Publicar igual» / «Volver a corregir»; sin problemas, se envía en el acto', async () => {
+  envios = 0;
+  ta.value = MAL; editor.requestSubmit(); await espera(40);
+  assert.equal(envios, 0);
+  assert.deepEqual([...sombra().querySelectorAll('#mipj-modal button')].map(b => b.textContent), ['Publicar igual', 'Volver a corregir']);
   boton('Volver a corregir').click(); await espera(10);
+  assert.equal(envios, 0);
+  editor.requestSubmit(); await espera(40); boton('Publicar igual').click(); await espera(20);
   assert.equal(envios, 1);
-  form.requestSubmit(); await espera(40); boton('Publicar igual').click(); await espera(20);
-  assert.equal(envios, 2);
+  ta.value = BIEN; await tocarBarra();
+  editor.requestSubmit();
+  assert.equal(envios, 2, 'ya revisado y sin problemas: no espera a PAM');
+  ta.value = 'Un mensaje normal, nuevo.'; editor.requestSubmit(); await espera(40);
+  assert.equal(envios, 3, 'sin formulario: se pregunta a PAM y se envía');
+});
+
+test('editor: si PAM no contesta, no hay barra y se puede enviar igual', async () => {
+  agente.atender('editor.revisar', () => new Promise(() => {}));
+  envios = 0; ta.value = MAL + ' sin PAM';
+  editor.requestSubmit(); await espera(3100);
+  assert.equal(envios, 1);
+  assert.equal(caja().style.display, 'none');
+  agente.atender('editor.revisar', d => revisarEditor(d, bovedaPanel));
+});
+
+test('editor: la barra sigue el tema de Mi PJ', async () => {
+  await agente.tema({ skin: 'pixel', bad: '#f00' });
+  assert.equal(caja().getAttribute('data-skin'), 'pixel');
+  assert.match(caja().shadowRoot.querySelectorAll('style')[1].textContent, /--m-bad:#f00/);
+  await agente.tema(null);
+  assert.equal(caja().getAttribute('data-skin'), 'avadense');
+});
+
+test('hola dice si la página tiene editor (para releer la bóveda al escribir en ella)', async () => {
+  assert.equal((await agente.hola()).editor, true);
+  W.close(); // para los temporizadores del agente (la barra se revisa cada 1,5 s)
 });

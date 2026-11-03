@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PAM · Agente (staging)
 // @namespace    https://claudilahozbosch.github.io/PAM/staging
-// @version      0.3.1
+// @version      0.3.2
 // @description  El script mínimo de PAM: lee el foro con tu sesión, publica y edita SOLO tras tu «Aceptar» y muestra el panel «Mi PJ» de PAM. Toda la lógica está en PAM.
 // @updateURL    https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
 // @downloadURL  https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
@@ -28,7 +28,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.3.1';
+  var VERSION = '0.3.2';
   var PROTOCOLO = 1;
   // Staging: el fork de pruebas (otro dominio que PAM real, así no ve los datos de los jugadores).
   var PAM = { origen: 'https://claudilahozbosch.github.io', ruta: '/PAM/' };
@@ -106,7 +106,8 @@
   function hola() {
     return {
       agente: VERSION, protocolo: PROTOCOLO, foro: enForo ? location.host : null,
-      cuenta: enForo ? cuentaConectada() : null, ruta: enForo ? location.pathname + location.search : null, ventana: ventana()
+      cuenta: enForo ? cuentaConectada() : null, ruta: enForo ? location.pathname + location.search : null, ventana: ventana(),
+      editor: enForo ? !!document.querySelector('textarea[name="message"]') : false
     };
   }
 
@@ -360,17 +361,32 @@
     ':host([data-skin="pixel"]) .esc-ui .puerta,:host([data-skin="pixel"]) .esc-ui .p-paso,:host([data-skin="pixel"]) .esc-ui .p-btn,:host([data-skin="pixel"]) #mipj-modal .mb{border-radius:0}'
   ].join('\n');
 
+  // La barra de debajo del editor («✦ Bóveda: las cuentas cuadran»), la de Mi PJ
+  var CSS_CHECK = [
+    ':host{display:block}',
+    '.mipj-check{margin:8px 0;padding:9px 14px;border-radius:12px;font:600 13px var(--m-sans);display:flex;gap:10px;align-items:center;cursor:pointer;text-align:left;',
+    '  background:var(--m-panel);color:var(--m-parchment);border:1px solid var(--m-line-strong)}',
+    '.mipj-check .ic{font-family:var(--m-serif);font-size:18px;line-height:1}',
+    '.mipj-check.ok{border-color:color-mix(in srgb,var(--m-good) 60%,transparent)} .mipj-check.ok .ic{color:var(--m-good)}',
+    '.mipj-check.mal{border-color:var(--m-bad)} .mipj-check.mal .ic{color:var(--m-bad)}',
+    '.mipj-check small{color:var(--m-parchment-dim);font-weight:500;margin-left:auto;font-size:11px}',
+    ':host([data-skin="pixel"]) .mipj-check{border-radius:0}'
+  ].join('\n');
+  var estilosTema = []; // el del agente y el de cada barra del editor
+  var temaActual = { css: '', skin: 'avadense' };
+
   var host = document.createElement('div');
   host.id = 'pam-agente';
   document.body.appendChild(host);
   var raiz = host.attachShadow({ mode: 'open' });
   var estilo = document.createElement('style'); estilo.textContent = CSS_ESC; raiz.appendChild(estilo);
   var estiloTema = document.createElement('style'); raiz.appendChild(estiloTema);
+  estilosTema.push({ estilo: estiloTema, host: host });
 
   function aplicarTema(tema) {
     var t = Object.assign({}, TEMA_AVADENSE, tema || {});
-    estiloTema.textContent = ':host{' + Object.keys(t).filter(function (k) { return k !== 'skin'; }).map(function (k) { return '--m-' + k + ':' + t[k]; }).join(';') + '}';
-    host.setAttribute('data-skin', t.skin || 'avadense');
+    temaActual = { css: ':host{' + Object.keys(t).filter(function (k) { return k !== 'skin'; }).map(function (k) { return '--m-' + k + ':' + t[k]; }).join(';') + '}', skin: t.skin || 'avadense' };
+    estilosTema.forEach(function (x) { x.estilo.textContent = temaActual.css; x.host.setAttribute('data-skin', temaActual.skin); });
     // las fuentes del tema, como hacía Mi PJ
     var fams = ['Cormorant Garamond', 'Nunito'];
     [t.serif, t.sans].forEach(function (f) { var n = String(f || '').split(',')[0].replace(/["']/g, '').trim(); if (n && !/^(Georgia|system-ui|serif|sans-serif|monospace)$/i.test(n) && fams.indexOf(n) < 0) { fams.push(n); } });
@@ -572,19 +588,23 @@
   }
 
   // «Antes de publicar» (la de Mi PJ): problemas que PAM ha visto en el mensaje del editor.
-  function modalAntesDePublicar(probs, encabezado) {
+  // Cada aviso es { b: 'Grageas:', t: ' falta…' } (la parte en negrita y el resto) o un texto.
+  // conSeguir: al enviar («Publicar igual» / «Volver a corregir»); si no, solo «Entendido» (al tocar la barra).
+  function modalAntesDePublicar(probs, encabezado, conSeguir) {
     return new Promise(function (resolver) {
       var m = el('div', { id: 'mipj-modal' });
-      var lista = el('ul', {}, probs.map(function (p) { return el('li', { texto: String(p) }); }));
-      var bSeguir = el('button', { clase: 'b', type: 'button', texto: 'Publicar igual' });
-      var bVolver = el('button', { clase: 'b pri', type: 'button', texto: 'Volver a corregir' });
+      var lista = el('ul', {}, probs.map(function (p) {
+        return p && typeof p === 'object' ? el('li', {}, [p.b ? el('b', { texto: p.b }) : null, document.createTextNode(String(p.t || ''))]) : el('li', { texto: String(p) });
+      }));
+      var bSeguir = conSeguir ? el('button', { clase: 'b', type: 'button', texto: 'Publicar igual' }) : null;
+      var bVolver = el('button', { clase: 'b pri', type: 'button', texto: conSeguir ? 'Volver a corregir' : 'Entendido' });
       m.appendChild(el('div', { clase: 'mb', role: 'dialog', 'aria-modal': 'true' }, [
         el('h3', { texto: 'Antes de publicar' }),
         el('p', { texto: (encabezado || 'Revisé el mensaje y ') + (probs.length === 1 ? 'hay algo que no cuadra' : 'hay ' + probs.length + ' cosas que no cuadran') + ':' }),
         lista, el('div', { clase: 'bt' }, [bSeguir, bVolver])
       ]));
       var fin = function (v) { m.remove(); resolver(v); };
-      bSeguir.addEventListener('click', function () { fin('seguir'); });
+      if (bSeguir) { bSeguir.addEventListener('click', function () { fin('seguir'); }); }
       bVolver.addEventListener('click', function () { fin('volver'); });
       m.addEventListener('click', function (e) { if (e.target === m) { fin('volver'); } });
       raiz.appendChild(m);
@@ -595,7 +615,7 @@
   // ---------------------------------------------------------------
   // Panel «Mi PJ» (página de PAM en un iframe que ocupa justo lo que ocupa el panel)
   // ---------------------------------------------------------------
-  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=0.3.1' });
+  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=0.3.2' });
   raiz.appendChild(iframe);
   // Si el panel no arranca (no pide tamaño), se enseña al menos su pastilla, para que nunca quede invisible.
   var panelVivo = false;
@@ -644,20 +664,63 @@
     return ta.value;
   }
 
+  function revisarTexto(texto) {
+    return canal.pedir('editor.revisar', { texto: texto, ruta: location.pathname + location.search }, 3000);
+  }
+
+  // Como Mi PJ: una barra debajo del editor que se revisa cada 1,5 s, y la ventana «Antes de publicar» al enviar.
   function engancharEditor(form) {
     if (form.getAttribute('data-pam-agente')) { return; }
     form.setAttribute('data-pam-agente', '1');
-    var ta = form.querySelector('textarea[name="message"]'), pasar = false;
+    var ta = form.querySelector('textarea[name="message"]'); if (!ta) { return; }
+    var caja = document.createElement('div'); caja.className = 'pam-agente-check'; caja.style.display = 'none';
+    var sombra = caja.attachShadow({ mode: 'open' });
+    var est = document.createElement('style'); est.textContent = CSS_CHECK; sombra.appendChild(est);
+    var estT = document.createElement('style'); estT.textContent = temaActual.css; sombra.appendChild(estT);
+    caja.setAttribute('data-skin', temaActual.skin);
+    estilosTema.push({ estilo: estT, host: caja });
+    var bar = el('div', { clase: 'mipj-check' }); sombra.appendChild(bar);
+    (form.querySelector('.sceditor-container') || ta).insertAdjacentElement('afterend', caja);
+
+    var ult = null, res = null, enCurso = false; // res: lo que PAM contestó para el texto «ult»
+    function pintarBarra(r) {
+      if (!r || !r.formulario) { caja.style.display = 'none'; return; }
+      var n = r.avisos.length;
+      caja.style.display = '';
+      bar.className = 'mipj-check ' + (n ? 'mal' : 'ok');
+      bar.replaceChildren(
+        el('span', { clase: 'ic', texto: n ? '⚠' : '✦' }),
+        document.createTextNode(n ? 'Bóveda: ' + (n === 1 ? '1 cosa para revisar' : n + ' cosas para revisar') : 'Bóveda: las cuentas cuadran' + (r.conBoveda ? '' : ' (sin comparar con tu bóveda)')),
+        el('small', { texto: n ? 'Mi PJ · tocá para ver' : 'Mi PJ' })
+      );
+    }
+    function chequear(forzar) {
+      var t = textoEditor(ta);
+      if (!forzar && (t === ult || enCurso)) { return Promise.resolve(res); }
+      enCurso = true;
+      return revisarTexto(t).then(function (r) {
+        enCurso = false; ult = t; res = r; pintarBarra(r); return r;
+      }, function (err) {
+        enCurso = false; ult = null; res = null; pintarBarra(null); throw err; // PAM no contesta: sin barra
+      });
+    }
+    bar.addEventListener('click', function () {
+      chequear(false).then(function (r) { if (r && r.avisos.length) { modalAntesDePublicar(r.avisos, r.encabezado, false); } }, function () {});
+    });
+    setInterval(function () { chequear(false).catch(function () {}); }, 1500);
+
+    var pasar = false;
     form.addEventListener('submit', function (e) {
       if (pasar) { pasar = false; return; }
       var sub = e.submitter;
       if (sub && /preview|draft|borrador|previsual/i.test((sub.name || '') + ' ' + (sub.value || ''))) { return; }
+      // texto ya revisado y sin nada que decir: se envía sin esperar, como antes
+      if (res && ult === textoEditor(ta) && !res.avisos.length) { return; }
       e.preventDefault(); e.stopImmediatePropagation();
       var seguir = function () { pasar = true; try { form.requestSubmit(sub || undefined); } catch (err) { form.submit(); } };
-      canal.pedir('editor.revisar', { texto: textoEditor(ta), ruta: location.pathname + location.search }, 3000).then(function (r) {
-        var avisos = (r && r.avisos) || [];
-        if (!avisos.length) { seguir(); return; }
-        modalAntesDePublicar(avisos, r.encabezado).then(function (dec) { if (dec === 'seguir') { seguir(); } });
+      chequear(true).then(function (r) {
+        if (!r || !r.avisos.length) { seguir(); return; }
+        modalAntesDePublicar(r.avisos, r.encabezado, true).then(function (dec) { if (dec === 'seguir') { seguir(); } });
       }, function (err) {
         console.warn('[PAM agente] sin revisión:', err.message); // si PAM no contesta, no se bloquea al usuario
         seguir();

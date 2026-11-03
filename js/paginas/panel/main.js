@@ -1,11 +1,12 @@
 // @ts-check
 // Arranque del panel «Mi PJ» dentro del foro (el agente lo muestra en un iframe sin marco).
-import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=0.3.1';
-import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=0.3.1';
-import { cargarSistema, cargarCompendio, cargarForos } from '../../datos/cargar.js?v=0.3.1';
-import { LectorFicha } from '../../lectores/LectorFicha.js?v=0.3.1';
-import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=0.3.1';
-import { crearPanelMiPj } from './MiPjPanel.js?v=0.3.1';
+import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=0.3.2';
+import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=0.3.2';
+import { cargarSistema, cargarCompendio, cargarForos } from '../../datos/cargar.js?v=0.3.2';
+import { LectorFicha } from '../../lectores/LectorFicha.js?v=0.3.2';
+import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=0.3.2';
+import { crearPanelMiPj } from './MiPjPanel.js?v=0.3.2';
+import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=0.3.2';
 
 const CACHE_MIN = 30; // como Mi PJ: si lo leído tiene más de media hora, se vuelve a leer al abrir
 const root = /** @type {HTMLElement} */ (document.getElementById('mipj'));
@@ -13,8 +14,10 @@ const root = /** @type {HTMLElement} */ (document.getElementById('mipj'));
 async function arrancar() {
   const agente = ClienteAgente.enPanel();
   if (!agente) { root.replaceChildren(); root.textContent = 'Este panel lo muestra el script de PAM dentro del foro.'; return; }
-  // Mientras no esté la revisión de la bóveda (fase 5b), el editor del foro publica sin preguntar
-  agente.atender('editor.revisar', () => ({ avisos: [] }));
+  // La revisión de la bóveda del editor del foro (la barra de debajo y «Antes de publicar»).
+  // Funciona desde el principio: sin datos todavía, revisa las cuentas sin compararlas con la bóveda.
+  /** @type {any} */ let panel = null;
+  agente.atender('editor.revisar', d => revisarEditor({ texto: String(d.texto ?? ''), ruta: String(d.ruta ?? '') }, panel?.datos?.boveda ?? null));
   const hola = await agente.hola();
   if (hola.protocolo !== PROTOCOLO) { root.textContent = 'Hay una versión nueva del script de PAM: actualizalo en Tampermonkey.'; await agente.tamano(420, 80).catch(() => {}); return; }
   if (!hola.cuenta) { await agente.tamano(1, 1); return; } // sin sesión, Mi PJ no se mostraba
@@ -27,14 +30,17 @@ async function arrancar() {
 
   const [sistema, compendio, foros] = await Promise.all([cargarSistema(), cargarCompendio(), cargarForos()]);
   const lector = new LectorFicha(sistema, compendio);
-  const panel = crearPanelMiPj({
+  panel = crearPanelMiPj({
     root, documento: document, guardado, agente, ventana: hola.ventana, cuenta: hola.cuenta,
     pamUrl: new URL('index.html', location.href).href,
     cargar: async () => aDatosMiPj(await leerMiPj(agente, { sistema, compendio, lector, foros }), sistema)
   });
   agente.atender('ventana.cambio', v => { panel.ventana(v); return {}; });
   const d = panel.datos;
-  if (!d || d.v !== 2 || Date.now() - new Date(d.leido).getTime() > CACHE_MIN * 60000) panel.actualizar();
+  const viejo = !d || d.v !== 2 || Date.now() - new Date(d.leido).getTime() > CACHE_MIN * 60000;
+  // como Mi PJ: escribiendo en la propia bóveda, se relee si lo leído tiene más de 2 minutos (para comparar con lo último)
+  const enMiBoveda = !!(d?.boveda && hola.editor && (d.boveda.tema ?? d.boveda.tid) === temaDeRuta(hola.ruta) && Date.now() - new Date(d.leido).getTime() > 2 * 60000);
+  if (viejo || enMiBoveda) panel.actualizar();
 }
 
 arrancar().catch(e => {

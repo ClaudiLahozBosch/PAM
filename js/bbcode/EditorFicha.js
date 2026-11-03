@@ -10,10 +10,10 @@
 //     cosa o si se descuadra una etiqueta, el cambio se deshace y va a la lista «a mano». Nunca dice
 //     «hecho» sin haberlo comprobado.
 // Los campos de texto, atributos, habilidades y combate se cambian como en el PAM antiguo (funcionaba bien).
-import { analizar, balance, partesDeLinea, visible, marco } from './Etiquetas.js?v=0.3.1';
-import { limpiarForo, seccion } from '../lectores/LectorFicha.js?v=0.3.1';
-import { combate, puntos } from '../reglas/Combate.js?v=0.3.1';
-import { norm, num, aRomano, escRe } from '../core/texto.js?v=0.3.1';
+import { analizar, balance, partesDeLinea, visible, marco } from './Etiquetas.js?v=0.3.2';
+import { limpiarForo, seccion } from '../lectores/LectorFicha.js?v=0.3.2';
+import { combate, puntos } from '../reglas/Combate.js?v=0.3.2';
+import { norm, num, aRomano, escRe } from '../core/texto.js?v=0.3.2';
 
 const SKILL_LV = ['Desentrenado (+0)', 'Novato (+1)', 'Competente (+2)', 'Experto (+4)', 'Maestro (+7)', 'Legendario (+9)'];
 const NIVEL_ARC = { dom: 'doméstico', bas: 'básico', int: 'intermedio', ava: 'avanzado', leg: 'legendario' };
