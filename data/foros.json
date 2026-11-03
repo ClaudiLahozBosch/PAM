@@ -19,7 +19,7 @@
    "pruebas": true,
    "campoFicha": null,
    "campoBoveda": null,
-   "registroCanjes": null,
+   "registroCanjes": "/t6-registro-de-canjes-de-test",
    "forosFicha": [],
    "foroBovedas": null,
    "grupos": {},
