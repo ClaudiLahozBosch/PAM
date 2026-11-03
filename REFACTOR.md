@@ -92,6 +92,16 @@ Cada fase se prueba en el staging y en test-forito, y solo entonces se propone p
 | 7 | Sincronización con la nube con control de versiones. |
 | 8 | Resto de páginas, estilos y dependencias. |
 
+## Lo que llega del foro a PAM (`js/pam/`)
+
+Antes, el script «Mi PJ» manejaba PAM desde fuera: pulsaba sus botones y leía su pantalla (F13). Ahora lo hace PAM, por capas, como un controlador de una API:
+
+- `index.html` solo tiene **una línea más** al final (`<script type="module" src="js/pam/main.js">`). PAM se ve y funciona igual. Si el script no está instalado, esa línea no hace nada.
+- `js/pam/ControladorForo.js` es **la única puerta de entrada** de lo que llega del foro a través del agente (hoy, los oficiales de la Biblioteca; en la fase 6b, las peticiones de canje). Lo comprueba y lo enseña en la puerta Aceptar / Denegar de siempre (`js/pam/ui/Puerta.js`, el mismo aspecto que en el foro).
+- `js/pam/PamActual.js` es **el único archivo que conoce `index.html` por dentro** (`rrOficiales`, `showSection`…). Cuando las páginas de PAM se reescriban (fase 8), se cambia este archivo y lo demás sigue igual.
+
+«Enviar a PAM» usa la ventana «Datos del foro → PAM» que ya tiene `index.html`: el agente abre PAM desde el foro y le pasa los datos, porque esa ventana solo acepta datos que vengan del foro. En la rama `refactor` acepta también el foro de pruebas (`FOROS_PRUEBA`), siempre con Aceptar / Denegar.
+
 ## Cómo se publica una versión
 
 1. Subir el número en `agente/pam-agente.user.js` (`@version` y `VERSION`).

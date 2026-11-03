@@ -1,7 +1,7 @@
 // Pone la versión del agente en todas las direcciones del panel, para que el navegador nunca mezcle archivos
 // de dos versiones (GitHub Pages los guarda 10 minutos: si main.js es nuevo y MiPj.js viejo, el panel no arranca).
 //   · cada «import … from './x.js'» de js/ pasa a «'./x.js?v=VERSION'»;
-//   · panel.html: main.js y mipj.css con ?v=VERSION;
+//   · panel.html: main.js y mipj.css con ?v=VERSION; index.html: js/pam/main.js con ?v=VERSION;
 //   · js/datos/cargar.js: los JSON con ?v=VERSION;
 //   · el agente pide panel.html?…&v=VERSION.
 // Uso (antes de subir): node scripts/versionar.mjs
@@ -24,6 +24,8 @@ for (const p of archivos(path.join(RAIZ, 'js'))) {
 }
 // 2. panel.html
 n += cambiar('panel.html', s => s.replace(/(src="js\/paginas\/panel\/main\.js)(?:\?v=[^"]*)?"/, `$1${v}"`).replace(/(href="css\/mipj\.css)(?:\?v=[^"]*)?"/, `$1${v}"`));
+// 2b. index.html: el arranque de js/pam/
+n += cambiar('index.html', s => s.replace(/(src="js\/pam\/main\.js)(?:\?v=[^"]*)?"/, `$1${v}"`));
 // 3. datos
 n += cambiar('js/datos/cargar.js', s => s.replace(/const VERSION_DATOS = '[^']*';/, `const VERSION_DATOS = '${VERSION}';`));
 // 4. el agente

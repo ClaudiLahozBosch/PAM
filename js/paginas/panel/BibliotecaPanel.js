@@ -4,8 +4,8 @@
 // Lo que cambia:
 //   · vive en el panel (iframe): al abrirla, el panel le pide al agente toda la ventana del foro, y al cerrarla vuelve;
 //   · los enlaces llevan el dominio del foro (dentro del iframe, uno relativo iría a PAM);
-//   · «Pasar a PAM» deja los oficiales preparados en el almacén del agente; recogerlos en PAM llega con la fase 6.
-import { clave, normBib as norm } from '../../servicios/BibliotecaDelForo.js?v=0.3.5';
+//   · «Pasar a PAM» deja los oficiales en el almacén del agente (antes, en el de Mi PJ); en PAM los recoge js/pam/.
+import { clave, normBib as norm } from '../../servicios/BibliotecaDelForo.js?v=0.3.6';
 
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const MESES = { enero: 1, febrero: 2, marzo: 3, abril: 4, mayo: 5, junio: 6, julio: 7, agosto: 8, septiembre: 9, setiembre: 9, octubre: 10, noviembre: 11, diciembre: 12 };
@@ -84,7 +84,7 @@ const HTML = `
  * @param {{ documento: Document, gv(k: string, d: any): any, sv(k: string, v: any): void, borrar(k: string): void,
  *   escanear(op: { completo?: boolean, forzar?: boolean }, log: (m: string) => void): Promise<any>,
  *   origen: string, guardarEnAgente?: (clave: string, valor: any) => Promise<any>,
- *   alEscanear?: () => void, alAbrir?: () => void, alCerrar?: () => void }} opc
+ *   alEscanear?: () => void, alAbrir?: () => void, alCerrar?: () => void, abrirPam?: () => void }} opc
  */
 export function crearBibliotecaOficiales(opc) {
   const { documento } = opc;
@@ -138,7 +138,8 @@ export function crearBibliotecaOficiales(opc) {
     const { n, paquete } = aPAM(solo);
     if (!n) { log(solo ? 'No tenés favoritos ★ entre los sucesos libres o abandonados.' : 'No hay sucesos libres ni abandonados para pasar.'); return; }
     try { if (opc.guardarEnAgente) await opc.guardarEnAgente('pam.oficiales', paquete); } catch (e) { /* queda sin guardar */ }
-    log(`Listo: ${n} ${n === 1 ? 'oficial preparado' : 'oficiales preparados'}. Sumarlos a «Posibles oficiales» de PAM todavía no está en esta versión de prueba (llega con la fase 6).`, true);
+    log(`Listo: ${n} ${n === 1 ? 'oficial preparado' : 'oficiales preparados'}. Abrí PAM (con Mi PJ instalado) y aceptá el cuadro para sumarlos a «Posibles oficiales».`, true);
+    if (opc.abrirPam) opc.abrirPam();
   };
   $('pamFav').onclick = () => pasar(true);
   $('pamTodos').onclick = () => pasar(false);

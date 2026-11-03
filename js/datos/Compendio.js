@@ -1,6 +1,6 @@
 // @ts-check
 // El Compendio Arcano (data/arcanos.json): 455 arcanos oficiales e inventados, con su texto.
-import { norm } from '../core/texto.js?v=0.3.5';
+import { norm } from '../core/texto.js?v=0.3.6';
 
 const TIPO = { Hechizos: 'hechizo', Pociones: 'pocion', Rituales: 'ritual', Objetos: 'objeto' };
 const NIVEL = { 'Doméstico': 'dom', 'Básico': 'bas', 'Básica': 'bas', 'Intermedio': 'int', 'Intermedia': 'int', 'Avanzado': 'ava', 'Avanzada': 'ava', 'Legendario': 'leg' };

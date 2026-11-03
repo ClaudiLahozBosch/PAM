@@ -1,5 +1,5 @@
 // @ts-check
-import { PROTOCOLO, FOROS } from './protocolo.js?v=0.3.5';
+import { PROTOCOLO, FOROS } from './protocolo.js?v=0.3.6';
 
 /** Habla con el agente (el script de Tampermonkey). Toda la lógica está en PAM; el agente solo ejecuta. */
 export class ClienteAgente {
@@ -105,4 +105,11 @@ export class ClienteAgente {
    * @param {{ estado: 'leyendo'|'ok'|'error', abierta: boolean, barra?: any, error?: string }} d
    */
   oficial(d) { return this.pedir('foro.oficial', d); }
+  /**
+   * Abre PAM en otra pestaña desde el foro y le pasa `mensaje` hasta que conteste con `respuesta`
+   * (el «Datos del foro → PAM» de PAM solo acepta datos que vengan del foro).
+   * @param {{ hash?: string, mensaje?: any, respuesta?: string }} d
+   * @returns {Promise<{ abierta: boolean, respuesta?: any }>}
+   */
+  abrirPam(d) { return this.pedir('pam.abrir', d, 45000); }
 }

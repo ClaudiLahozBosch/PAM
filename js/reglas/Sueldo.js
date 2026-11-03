@@ -2,7 +2,7 @@
 // El sueldo del mes, de Mi PJ (pam-mi-pj.user.js 1.7.1) tal cual.
 // Cada mes se abre «Sueldos de <mes anterior>» en Sueldos Mensuales: pedís con el formulario, un inspector
 // contesta nombrándote y después lo sumás a la bóveda.
-import { normPalabras as norm, escRe, numForo as num } from '../core/texto.js?v=0.3.5';
+import { normPalabras as norm, escRe, numForo as num } from '../core/texto.js?v=0.3.6';
 
 export const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 const S_NEG = /\b(falta|faltan|vuelve a postear|volve a postear|corrige|corregi|no es correct|no son correct|no esta correct|incorrect|no (se )?puede cobrar|no puedes cobrar|no podes cobrar|desgraciadamente|lamentablemente|no es valid|no son valid|no cuenta|no computa|denegad|rechazad)/;

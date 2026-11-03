@@ -7,10 +7,10 @@
 //   · los enlaces abren la página del foro (<base target="_top"> en panel.html).
 // Las tarjetas que aún no están en PAM (canjes) lo dicen en vez de «Tocá Actualizar».
 // Arreglos: R09 (los oficiales cerrados ya no salen en curso) y R10 (✕ para ocultar un oficial hasta volver a escribir en él).
-import { aFecha } from '../../lectores/FechaForo.js?v=0.3.5';
-import { estadoSueldo } from '../../reglas/Sueldo.js?v=0.3.5';
-import { grageasOf } from '../../reglas/Oficiales.js?v=0.3.5';
-import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=0.3.5';
+import { aFecha } from '../../lectores/FechaForo.js?v=0.3.6';
+import { estadoSueldo } from '../../reglas/Sueldo.js?v=0.3.6';
+import { grageasOf } from '../../reglas/Oficiales.js?v=0.3.6';
+import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=0.3.6';
 
 const TEMA_AVADENSE = { skin: 'avadense', ink: '#171a2b', panel: '#1e2236', 'panel-2': '#262a42', parchment: '#F1EADF', 'parchment-dim': '#a7a1b6', gold: '#B49768',
   'gold-bright': '#d6bd8f', 'arcane-bright': '#cf94a3', good: '#93b8a0', bad: '#d98377', 'line-strong': 'rgba(241,234,223,.16)', 'accent-ink': '#1b1e30',
@@ -70,7 +70,7 @@ function bgsDe(R) {
 
 /**
  * @param {{ root: HTMLElement, documento: Document, guardado?: Storage|null, cargar: () => Promise<any>,
- *   agente?: { tamano(an: number, al: number): Promise<any>, tema?(t: any): Promise<any> } | null,
+ *   agente?: { tamano(an: number, al: number): Promise<any>, tema?(t: any): Promise<any>, abrirPam?(d: any): Promise<any> } | null,
  *   ventana: { ancho: number, alto: number }, pamUrl: string, cuenta?: { id: number, nombre: string } | null, ahora?: () => number,
  *   biblioteca?: { escanear: (op: any, log: (m: string) => void) => Promise<any>, origen: string, guardarEnAgente?: (k: string, v: any) => Promise<any> } | null }} dep
  */
@@ -306,6 +306,17 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
     else { const ta = documento.createElement('textarea'); ta.value = t; documento.body.appendChild(ta); ta.select(); try { documento.execCommand('copy'); } catch (e) { /* sin portapapeles */ } ta.remove(); ok(); }
   }
 
+  /* «Enviar a PAM»: el agente abre PAM desde el foro y le pasa los datos; PAM contesta con su tema */
+  function enviarAPam() {
+    if (!datos) return;
+    if (!agente || !agente.abrirPam) { error = 'PAM no respondió. ¿Está actualizado a la última versión?'; pintar(); return; }
+    agente.abrirPam({ hash: '#foro', mensaje: { pamForo: 1, data: Object.assign({}, datos, { cuenta: datos.pj || YO }) }, respuesta: 'pamForoOk' }).then(r => {
+      if (!r || !r.abierta) { error = 'El navegador bloqueó la ventana de PAM: permití ventanas emergentes para el foro.'; pintar(); return; }
+      if (!r.respuesta) { error = 'PAM no respondió. ¿Está actualizado a la última versión?'; pintar(); return; }
+      if (r.respuesta.tema) ponerTema(r.respuesta.tema);
+    }, () => { error = 'PAM no respondió. ¿Está actualizado a la última versión?'; pintar(); });
+  }
+
   async function actualizar() {
     if (cargando) return; cargando = true; error = ''; pintar();
     try {
@@ -326,7 +337,7 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
     if (k === 'cerrar') { ui.abierto = false; sv(K.ui, ui); pintar(); }
     else if (k === 'abrir') { ui.abierto = true; sv(K.ui, ui); pintar(); }
     else if (k === 'act') actualizar();
-    else if (k === 'pam') { error = 'Enviar a PAM llega con los canjes (fase 6).'; pintar(); }
+    else if (k === 'pam') enviarAPam();
     else if (k === 'todos') { e.preventDefault(); ui.todos = !ui.todos; sv(K.ui, ui); pintar(); }
     else if (k === 'viejos') { e.preventDefault(); ui.viejos = !ui.viejos; sv(K.ui, ui); pintar(); }
     else if (k === 'ocultar') { ocultos[a.dataset.t] = +a.dataset.l || 1; sv(K.ocultos, ocultos); pintar(); }
@@ -398,6 +409,7 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
     documento, gv, sv, borrar: k => { try { guardado?.removeItem(k); } catch (e) { /* nada */ } },
     escanear: biblioteca.escanear, origen: biblioteca.origen, guardarEnAgente: biblioteca.guardarEnAgente,
     alEscanear: () => pintar(),
+    abrirPam: () => { const w = documento.defaultView?.open(pamUrl + '#oficiales', 'pam'); if (w) try { w.focus(); } catch (e) { /* nada */ } },
     alAbrir: () => { pantallaCompleta = true; sincronizarTamano(); },
     alCerrar: () => { pantallaCompleta = false; sincronizarTamano(); }
   }) : null;

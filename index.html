@@ -9409,6 +9409,7 @@ if(ses) revisarNube();
 /* ============ Datos del foro → PAM (lo manda el script «Mi PJ» de Tampermonkey) ============ */
 (function(){
 const FORO = "https://hp-avada-kedavra.foroactivo.com";
+const FOROS_PRUEBA = ["https://test-forito.foroactivo.com"];   /* el foro de pruebas también puede mandar datos (siempre con Aceptar / Denegar) */
 const esc = t=>String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fmtN = n => (n===null||n===undefined||n==="") ? "—" : Number(n).toLocaleString("es-ES");
 let actual = null;
@@ -9421,7 +9422,7 @@ function temaPAM(){
   pr.remove(); return out;
 }
 window.addEventListener("message", e=>{
-  if(e.origin!==FORO || !e.data || !e.data.pamForo) return;
+  if((e.origin!==FORO && !FOROS_PRUEBA.includes(e.origin)) || !e.data || !e.data.pamForo) return;
   try{ e.source && e.source.postMessage({pamForoOk:1, tema:temaPAM()}, e.origin); }catch(_){}
   const d = e.data.data; if(!d || !d.cuenta) return;
   if(actual && actual.leido===d.leido && document.getElementById("foroDlg")) return;   /* ya está abierto */
@@ -9492,5 +9493,7 @@ if(location.hash==="#foro"){ try{ history.replaceState(null,"",location.pathname
 window.pamForoListo = true;
 })();
 </script>
+<!-- Lo nuevo de PAM (js/pam/): lo que llega del foro a través del script de PAM. Sin el script, no hace nada. -->
+<script type="module" src="js/pam/main.js?v=0.3.6"></script>
 </body>
 </html>

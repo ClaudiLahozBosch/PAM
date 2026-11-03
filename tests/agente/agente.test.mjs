@@ -54,10 +54,10 @@ const esperarFin = async () => { for (let i = 0; i < 100 && !boton('Cerrar'); i+
 
 test('hola (con la ventana del foro), iframe sin marco y lectura del foro', async () => {
   const h = await agente.hola();
-  assert.deepEqual([h.agente, h.protocolo, h.foro, h.cuenta, h.ruta], ['0.3.5', 1, 'hp-avada-kedavra.foroactivo.com', { id: 7, nombre: 'TEST' }, '/t5-uno']);
+  assert.deepEqual([h.agente, h.protocolo, h.foro, h.cuenta, h.ruta], ['0.3.6', 1, 'hp-avada-kedavra.foroactivo.com', { id: 7, nombre: 'TEST' }, '/t5-uno']);
   assert.ok(h.ventana.ancho > 0 && h.ventana.alto > 0);
   const f = sombra().querySelector('iframe');
-  assert.equal(f.getAttribute('src'), PAM + '/PAM/panel.html?foro=' + encodeURIComponent(FORO) + '&v=0.3.5', 'con la versión: el navegador no mezcla archivos');
+  assert.equal(f.getAttribute('src'), PAM + '/PAM/panel.html?foro=' + encodeURIComponent(FORO) + '&v=0.3.6', 'con la versión: el navegador no mezcla archivos');
   assert.equal(f.className, 'marco');
   assert.equal(sombra().querySelector('.pastilla'), null, 'la pastilla es la de Mi PJ, dentro del panel');
   assert.equal((await agente.leer('/')).title, 'Foro');
@@ -238,6 +238,22 @@ test('editor: la barra sigue el tema de Mi PJ', async () => {
   assert.match(caja().shadowRoot.querySelectorAll('style')[1].textContent, /--m-bad:#f00/);
   await agente.tema(null);
   assert.equal(caja().getAttribute('data-skin'), 'avadense');
+});
+
+test('abrir PAM desde el foro y pasarle un mensaje hasta que conteste («Enviar a PAM»)', async () => {
+  const otra = new JSDOM('', { url: PAM + '/PAM/' }).window, recibidos = [];
+  otra.postMessage = (m, o) => { recibidos.push([m, o]); if (recibidos.length === 2) W.dispatchEvent(new W.MessageEvent('message', { data: { pamForoOk: 1, tema: { gold: '#123' } }, origin: PAM, source: otra })); };
+  const abiertas = []; W.open = (u, n) => { abiertas.push([u, n]); return otra; };
+  const r = await agente.abrirPam({ hash: '#foro', mensaje: { pamForo: 1, data: { cuenta: 'Irvin Giles' } }, respuesta: 'pamForoOk' });
+  assert.deepEqual(abiertas, [[PAM + '/PAM/#foro', 'pam']]);
+  assert.deepEqual(recibidos[0], [{ pamForo: 1, data: { cuenta: 'Irvin Giles' } }, PAM], 'solo a PAM');
+  assert.deepEqual(r, { abierta: true, respuesta: { pamForoOk: 1, tema: { gold: '#123' } } });
+  W.open = () => null;
+  assert.deepEqual(await agente.abrirPam({ hash: '#foro', mensaje: {}, respuesta: 'x' }), { abierta: false }, 'ventana bloqueada');
+  W.open = (u) => { abiertas.push([u]); return otra; };
+  await agente.abrirPam({ hash: 'javascript:alert(1)' });
+  assert.equal(abiertas.at(-1)[0], PAM + '/PAM/', 'solo se abre PAM, sin rutas raras');
+  otra.close();
 });
 
 test('hola dice si la página tiene editor (para releer la bóveda al escribir en ella)', async () => {

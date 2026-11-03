@@ -234,3 +234,26 @@ test('cierres-oficial.json mal escrito: Mi PJ sigue funcionando, sin detectar ci
   } finally { console.warn = w; }
   assert.deepEqual(await cargarCierresOficial(async url => json(String(url).match(/data\/([^?]+)/)[1])), json('cierres-oficial.json').avisos);
 });
+
+test('«Enviar a PAM»: el agente abre PAM con los datos de Mi PJ y PAM devuelve su tema', async () => {
+  const { window: w } = new JSDOM('<!doctype html><html><head></head><body><div id="mipj"></div></body></html>', { url: 'https://claudilahozbosch.github.io/PAM/panel.html' });
+  const mem = new Map([['mipj.' + CUENTA.id, JSON.stringify(nuevo)], ['mipj.ui', JSON.stringify({ abierto: true })]]);
+  const guardado = { getItem: k => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, v) };
+  let pedido = null, respuesta = { abierta: true, respuesta: { pamForoOk: 1, tema: { skin: 'pixel', gold: '#abcdef' } } };
+  const agente = { tamano: async () => ({}), tema: async () => ({}), abrirPam: async d => { pedido = d; return respuesta; } };
+  const p = crearPanelMiPj({ root: w.document.getElementById('mipj'), documento: w.document, guardado, cargar: async () => nuevo, ventana: { ancho: 1400, alto: 900 }, pamUrl: 'https://x/', cuenta: CUENTA, agente });
+  p.pintar();
+  const pam = () => w.document.querySelector('[data-a="pam"]');
+  pam().click(); await espera(10);
+  assert.equal(pedido.hash, '#foro');
+  assert.equal(pedido.respuesta, 'pamForoOk');
+  assert.equal(pedido.mensaje.pamForo, 1);
+  assert.equal(pedido.mensaje.data.cuenta, nuevo.pj, 'como Mi PJ: «cuenta» es el nombre del personaje');
+  assert.deepEqual(pedido.mensaje.data.roles, nuevo.roles);
+  assert.match(w.document.head.innerHTML, /--m-gold:#abcdef/, 'se queda con el tema de PAM');
+  assert.equal(JSON.parse(mem.get('mipj.tema')).skin, 'pixel');
+  respuesta = { abierta: false }; pam().click(); await espera(10);
+  assert.match(w.document.querySelector('.err').textContent, /bloqueó la ventana de PAM/);
+  respuesta = { abierta: true, respuesta: null }; pam().click(); await espera(10);
+  assert.match(w.document.querySelector('.err').textContent, /PAM no respondió/);
+});

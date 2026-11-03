@@ -1,8 +1,7 @@
 // La Biblioteca de oficiales (fase 5d): la de PAM tiene que leer, guardar y pintar lo mismo que la de Mi PJ.
 // Las dos escanean el mismo El Profeta inventado (fixtures/actividad/profeta.mjs), y se comparan lo guardado,
 // la ventana (filtros, tabla, búsqueda, ★), lo que se prepara para PAM y la tarjeta del panel.
-// Diferencias permitidas: los enlaces llevan el dominio del foro (el panel está en un iframe) y el mensaje de
-// «Pasar a PAM» (recogerlos en PAM llega con la fase 6).
+// Diferencia permitida: los enlaces llevan el dominio del foro (el panel está en un iframe).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -89,14 +88,15 @@ test('ventana: cada filtro, la búsqueda y las ★, igual que Mi PJ', async () =
   for (const r of [viejo.root, nuevo.root]) r.querySelector('.chip[data-f="todos"]').click();
 });
 
-test('«Pasar a PAM»: prepara lo mismo que Mi PJ; sumarlo en PAM queda para la fase 6', async () => {
+test('«Pasar a PAM»: prepara lo mismo que Mi PJ y dice lo mismo', async () => {
   for (const [id, modo] of [['pamFav', 'favoritos'], ['pamTodos', 'todos']]) {
     clic(viejo.root, '#' + id); clic(nuevo.root, '#' + id); await espera(20);
     const sin = p => { const { creado, ...r } = JSON.parse(JSON.stringify(p)); return r; };
     assert.deepEqual(sin(nuevo.guardadoEnAgente['pam.oficiales']), sin(viejo.gm['pam.oficiales']), modo);
     assert.equal(nuevo.guardadoEnAgente['pam.oficiales'].modo, modo);
   }
-  assert.match(nuevo.root.getElementById('log').textContent, /^Listo: 3 oficiales preparados\. Sumarlos a «Posibles oficiales» de PAM todavía no está en esta versión de prueba/);
+  assert.equal(nuevo.root.getElementById('log').textContent, viejo.root.getElementById('log').textContent, 'el mismo mensaje');
+  assert.match(nuevo.root.getElementById('log').textContent, /^Listo: 3 oficiales preparados\. Abrí PAM/);
 });
 
 test('escaneo completo: verifica también los terminados y cerrados, igual que Mi PJ', async () => {

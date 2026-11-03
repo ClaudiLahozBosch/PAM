@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PAM · Agente (staging)
 // @namespace    https://claudilahozbosch.github.io/PAM/staging
-// @version      0.3.5
+// @version      0.3.6
 // @description  El script mínimo de PAM: lee el foro con tu sesión, publica y edita SOLO tras tu «Aceptar» y muestra el panel «Mi PJ» de PAM. Toda la lógica está en PAM.
 // @updateURL    https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
 // @downloadURL  https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
@@ -22,13 +22,14 @@
       (la del Escriba: todos los pasos a la vista, con las diferencias de cada mensaje que se edita);
    3. guardar datos compartidos entre el foro y PAM (almacén de Tampermonkey, claves «pam.*»);
    4. mostrar el panel «Mi PJ», que es una página de PAM;
-   5. pasar a PAM el texto del editor del foro antes de enviarlo, para que lo revise.
+   5. pasar a PAM el texto del editor del foro antes de enviarlo, para que lo revise;
+   6. abrir PAM y pasarle un mensaje desde el foro («Enviar a PAM»: PAM solo acepta datos que vengan del foro).
    No sabe nada de fichas ni de canjes. Habla con PAM con mensajes { pam, de, id, tipo, datos } (protocolo 1). */
 
 (function () {
   'use strict';
 
-  var VERSION = '0.3.5';
+  var VERSION = '0.3.6';
   var PROTOCOLO = 1;
   // Staging: el fork de pruebas (otro dominio que PAM real, así no ve los datos de los jugadores).
   var PAM = { origen: 'https://claudilahozbosch.github.io', ruta: '/PAM/' };
@@ -634,7 +635,7 @@
   // ---------------------------------------------------------------
   // Panel «Mi PJ» (página de PAM en un iframe que ocupa justo lo que ocupa el panel)
   // ---------------------------------------------------------------
-  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=0.3.5' });
+  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=0.3.6' });
   raiz.appendChild(iframe);
   // Si el panel no arranca (no pide tamaño), se enseña al menos su pastilla, para que nunca quede invisible.
   var panelVivo = false;
@@ -671,10 +672,35 @@
       iframe.style.width = an + 'px'; iframe.style.height = al + 'px'; return { ancho: an, alto: al };
     },
     'panel.tema': function (d) { return aplicarTema(d.tema); },
-    'foro.oficial': function (d) { return pintarOficial(d); }
+    'foro.oficial': function (d) { return pintarOficial(d); },
+    'pam.abrir': function (d) { return abrirPam(d); }
   });
   // El panel calcula su tamaño con la ventana del foro (dentro del iframe no la ve).
   window.addEventListener('resize', function () { canal.avisar('ventana.cambio', ventana()); });
+
+  // ---------------------------------------------------------------
+  // Abrir PAM en otra pestaña y pasarle un mensaje desde el foro (p. ej. «Enviar a PAM»: PAM solo acepta
+  // los datos si vienen del foro). El agente no mira el mensaje: lo reenvía hasta que PAM contesta con `respuesta`.
+  // ---------------------------------------------------------------
+  function abrirPam(d) {
+    var hash = /^#[a-z]{0,20}$/.test(d.hash || '') ? d.hash : '';
+    var w = window.open(PAM.origen + PAM.ruta + hash, 'pam');
+    if (!w) { return { abierta: false }; }
+    if (!d.mensaje || !d.respuesta) { return { abierta: true }; }
+    return new Promise(function (resolver) {
+      var n = 0, hecho = false;
+      var alResponder = function (e) {
+        if (e.origin !== PAM.origen || e.source !== w || !e.data || !e.data[d.respuesta]) { return; }
+        hecho = true; window.removeEventListener('message', alResponder);
+        resolver({ abierta: true, respuesta: e.data });
+      };
+      window.addEventListener('message', alResponder);
+      var t = setInterval(function () {
+        if (hecho || ++n > 60) { clearInterval(t); if (!hecho) { window.removeEventListener('message', alResponder); resolver({ abierta: true, respuesta: null }); } return; }
+        try { w.postMessage(d.mensaje, PAM.origen); } catch (e) { /* todavía cargando */ }
+      }, 500);
+    });
+  }
 
   // ---------------------------------------------------------------
   // Tema de un oficial: la barra de Mi PJ arriba de los mensajes (las cuentas las hace PAM)
