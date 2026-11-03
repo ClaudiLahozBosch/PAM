@@ -49,7 +49,7 @@ const boton = txt => [...sombra().querySelectorAll('.fondo button')].find(b => b
 
 test('hola, iframe del panel y lectura del foro', async () => {
   const h = await agente.hola();
-  assert.deepEqual([h.agente, h.protocolo, h.foro, h.cuenta, h.ruta], ['0.2.0', 1, 'hp-avada-kedavra.foroactivo.com', { id: 7, nombre: 'TEST' }, '/t5-uno']);
+  assert.deepEqual([h.agente, h.protocolo, h.foro, h.cuenta, h.ruta], ['0.2.1', 1, 'hp-avada-kedavra.foroactivo.com', { id: 7, nombre: 'TEST' }, '/t5-uno']);
   assert.equal(sombra().querySelector('iframe').getAttribute('src'), PAM + '/PAM/panel.html?foro=' + encodeURIComponent(FORO));
   const d = await agente.leer('/');
   assert.equal(d.title, 'Foro');

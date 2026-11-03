@@ -1,8 +1,10 @@
 // ==UserScript==
 // @name         PAM · Agente (staging)
 // @namespace    https://claudilahozbosch.github.io/PAM/staging
-// @version      0.2.0
+// @version      0.2.1
 // @description  El script mínimo de PAM: lee el foro con tu sesión, publica y edita SOLO tras tu «Aceptar» y muestra el panel de PAM. Toda la lógica está en PAM.
+// @updateURL    https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
+// @downloadURL  https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
 // @match        https://test-forito.foroactivo.com/*
 // @match        https://hp-avada-kedavra.foroactivo.com/*
 // @match        https://claudilahozbosch.github.io/PAM/*
@@ -26,7 +28,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.2.0';
+  var VERSION = '0.2.1';
   var PROTOCOLO = 1;
   // Staging: el fork de pruebas (otro dominio que PAM real, así no ve los datos de los jugadores).
   var PAM = { origen: 'https://claudilahozbosch.github.io', ruta: '/PAM/' };
