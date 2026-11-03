@@ -2,9 +2,9 @@
 // Oficiales: posts que cuentan y recompensas. De Mi PJ (pam-mi-pj.user.js 1.7.1) tal cual, más el arreglo R09.
 // 20 grageas por post, con tope de 3 por día, 15 por semana (lunes a domingo) y 45 por mes, por usuario y en hora
 // de España; +60 por el Suceso de cierre. Un segundo oficial (suceso de más de dos años) se cobra a un cuarto.
-import { normPalabras as norm, fmtForo as fmt } from '../core/texto.js?v=0.3.3';
-import { clavesMadrid } from '../lectores/FechaForo.js?v=0.3.3';
-import { esBot } from './Misiones.js?v=0.3.3';
+import { normPalabras as norm, fmtForo as fmt } from '../core/texto.js?v=0.3.4';
+import { clavesMadrid } from '../lectores/FechaForo.js?v=0.3.4';
+import { esBot } from './Misiones.js?v=0.3.4';
 
 export const ES_OFICIAL = /\[\s*(?:rol(?:eo)?\s+)?oficial\s*\]|\boficial\b\s*[\]|:·•-]/i;
 export const TOPE = { dia: 3, semana: 15, mes: 45 };
@@ -13,15 +13,31 @@ const NO_COBRAN = ['tramas'];
 
 /*
  * Arreglo R09: un oficial cerrado seguía en «Oficiales en curso». Se da por cerrado si uno de sus tres últimos
- * mensajes es el cierre del staff («¡AVISO! … cerrado») o la «Ficha final de la aventura».
+ * mensajes tiene uno de los avisos de cierre del staff. Los avisos NO están aquí: están en data/cierres-oficial.json,
+ * para poder añadir frases sin tocar el código.
  */
-const CIERRE = [/¡\s*aviso\s*!?[\s\S]{0,300}?\bcerrad[oa]\b/i, /ficha\s+final\s+de\s+la\s+aventura/i];
-export const esCierre = texto => CIERRE.some(re => re.test(String(texto || '')));
+/** Para comparar avisos: sin mayúsculas, sin tildes y con los espacios juntos (los signos se quedan). */
+const plano = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+
+/**
+ * La función que dice si un mensaje cierra el oficial, a partir de los avisos de data/cierres-oficial.json
+ * (cada aviso: los trozos de texto que tiene que tener el mensaje, en ese orden).
+ * @param {string[][]} avisos
+ * @returns {(texto: string) => boolean}
+ */
+export function crearEsCierre(avisos) {
+  const lista = (avisos || []).map(a => (Array.isArray(a) ? a : [a]).map(plano).filter(Boolean)).filter(a => a.length);
+  return texto => {
+    const T = plano(texto);
+    return lista.some(trozos => { let desde = 0; return trozos.every(t => { const i = T.indexOf(t, desde); if (i < 0) return false; desde = i + t.length; return true; }); });
+  };
+}
 
 /**
  * @param {{ titulo: string, tid: number, url: string, posts: { id: number, autor: string, utc: number|null, texto?: string }[] }} T
+ * @param {(texto: string) => boolean} [esCierre] de crearEsCierre (sin ella, ningún oficial se da por cerrado)
  */
-export function contarOficial(T) {
+export function contarOficial(T, esCierre = () => false) {
   const por = new Map();
   const vale = p => p.autor && !esBot(p.autor) && !NO_COBRAN.includes(norm(p.autor));
   T.posts.filter(vale).forEach(p => {

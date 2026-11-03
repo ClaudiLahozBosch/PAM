@@ -17,7 +17,7 @@ import { foroDePrueba, rutaDe } from '../fixtures/actividad/foro.mjs';
 
 const json = f => JSON.parse(readFileSync(new URL('../../data/' + f, import.meta.url), 'utf8'));
 const sistema = new Sistema(json('sistema.json')), compendio = new Compendio(json('arcanos.json'));
-const deps = { sistema, compendio, lector: new LectorFicha(sistema, compendio), foros: json('foros.json').foros };
+const deps = { sistema, compendio, lector: new LectorFicha(sistema, compendio), foros: json('foros.json').foros, cierres: json('cierres-oficial.json').avisos };
 const VIEJO = readFileSync(new URL('../../pam-mi-pj.user.js', import.meta.url), 'utf8');
 const CUENTA = { id: 5203, nombre: 'Irvin Giles' };
 const FORO = 'https://hp-avada-kedavra.foroactivo.com';
@@ -208,4 +208,29 @@ test('✕ de un rol: se oculta hasta que haya un mensaje nuevo, como en Mi PJ', 
   root.querySelector('[data-a="ocultar"][data-t="500"]').click();
   assert.ok(!/Rol en la taberna/.test(root.innerHTML));
   assert.deepEqual(JSON.parse(mem.get('mipj.ocultos.' + CUENTA.id)), { 500: 9010 });
+});
+
+test('R09: los avisos de cierre salen de data/cierres-oficial.json y se editan a mano', async () => {
+  const { crearEsCierre } = await import('../../js/reglas/Oficiales.js');
+  const esCierre = crearEsCierre(json('cierres-oficial.json').avisos);
+  assert.ok(esCierre('¡AVISO! Este oficial queda cerrado. Gracias.'));
+  assert.ok(esCierre('¡Aviso!\nLa trama queda CERRADA por inactividad.'), 'sin importar mayúsculas ni saltos');
+  assert.ok(esCierre('Os dejo la ficha final de la aventura.'));
+  assert.ok(!esCierre('La puerta estaba cerrada. ¡AVISO! al resto'), 'los trozos van en orden');
+  assert.ok(!esCierre('AVISO: queda cerrado'), 'los signos cuentan: «¡AVISO!» no es «AVISO:»');
+  // una frase nueva, añadida como lo haría Hana: una lista de trozos
+  const conNueva = crearEsCierre([...json('cierres-oficial.json').avisos, ['Oficial finalizado']]);
+  assert.ok(conNueva('Oficial FINALIZADO, gracias a todos.'));
+  assert.ok(crearEsCierre(['Tema terminado'])('tema   terminado'), 'un aviso de un solo trozo también puede ir sin corchetes');
+});
+
+test('cierres-oficial.json mal escrito: Mi PJ sigue funcionando, sin detectar cierres', async () => {
+  const { cargarCierresOficial } = await import('../../js/datos/cargar.js');
+  const w = console.warn; let aviso = ''; console.warn = m => { aviso = String(m); };
+  try {
+    assert.deepEqual(await cargarCierresOficial(async () => { throw new SyntaxError('Unexpected token ]'); }), []);
+    assert.match(aviso, /cierres-oficial\.json/);
+    assert.deepEqual(await cargarCierresOficial(async () => ({ avisos: 'mal' })), []);
+  } finally { console.warn = w; }
+  assert.deepEqual(await cargarCierresOficial(async url => json(String(url).match(/data\/([^?]+)/)[1])), json('cierres-oficial.json').avisos);
 });

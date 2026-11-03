@@ -1,14 +1,14 @@
 // @ts-check
 // Arranque del panel «Mi PJ» dentro del foro (el agente lo muestra en un iframe sin marco).
-import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=0.3.3';
-import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=0.3.3';
-import { cargarSistema, cargarCompendio, cargarForos } from '../../datos/cargar.js?v=0.3.3';
-import { LectorFicha } from '../../lectores/LectorFicha.js?v=0.3.3';
-import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=0.3.3';
-import { crearPanelMiPj } from './MiPjPanel.js?v=0.3.3';
-import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=0.3.3';
-import { crearActividad } from '../../servicios/ActividadDelForo.js?v=0.3.3';
-import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=0.3.3';
+import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=0.3.4';
+import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=0.3.4';
+import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial } from '../../datos/cargar.js?v=0.3.4';
+import { LectorFicha } from '../../lectores/LectorFicha.js?v=0.3.4';
+import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=0.3.4';
+import { crearPanelMiPj } from './MiPjPanel.js?v=0.3.4';
+import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=0.3.4';
+import { crearActividad } from '../../servicios/ActividadDelForo.js?v=0.3.4';
+import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=0.3.4';
 
 const CACHE_MIN = 30; // como Mi PJ: si lo leído tiene más de media hora, se vuelve a leer al abrir
 const root = /** @type {HTMLElement} */ (document.getElementById('mipj'));
@@ -39,15 +39,15 @@ async function arrancar() {
     sv: (k, v) => { try { guardado?.setItem(k, JSON.stringify(v)); } catch { /* sin espacio */ } }
   };
 
-  const [sistema, compendio, foros] = await Promise.all([cargarSistema(), cargarCompendio(), cargarForos()]);
+  const [sistema, compendio, foros, cierres] = await Promise.all([cargarSistema(), cargarCompendio(), cargarForos(), cargarCierresOficial()]);
   const lector = new LectorFicha(sistema, compendio);
   const cfg = foros[hola.foro ?? ''];
   // en el tema de un oficial: la barra con las cuentas, arriba de los mensajes (como Mi PJ, antes de pintar el panel)
-  if (cfg?.actividad && ES_OFICIAL.test(hola.titulo || '') && /^\/t\d+/.test(hola.ruta || '')) barraOficial(agente, crearActividad(agente, { yo: hola.cuenta.nombre, uid: hola.cuenta.id, origen: 'https://' + hola.foro, cfg: cfg.actividad, memoria }), hola.ruta, memoria);
+  if (cfg?.actividad && ES_OFICIAL.test(hola.titulo || '') && /^\/t\d+/.test(hola.ruta || '')) barraOficial(agente, crearActividad(agente, { yo: hola.cuenta.nombre, uid: hola.cuenta.id, origen: 'https://' + hola.foro, cfg: cfg.actividad, memoria, cierres }), hola.ruta, memoria);
   panel = crearPanelMiPj({
     root, documento: document, guardado, agente, ventana: hola.ventana, cuenta: hola.cuenta,
     pamUrl: new URL('index.html', location.href).href,
-    cargar: async () => aDatosMiPj(await leerMiPj(agente, { sistema, compendio, lector, foros, memoria }), sistema)
+    cargar: async () => aDatosMiPj(await leerMiPj(agente, { sistema, compendio, lector, foros, memoria, cierres }), sistema)
   });
   agente.atender('ventana.cambio', v => { panel.ventana(v); return {}; });
   const d = panel.datos;

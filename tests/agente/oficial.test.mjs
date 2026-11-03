@@ -48,6 +48,7 @@ const agente = new ClienteAgente({ destino: { postMessage: (d, o) => o === FORO 
 const { crearActividad } = await import('../../js/servicios/ActividadDelForo.js');
 const { ES_OFICIAL, barraDeOficial, marcarCuarto } = await import('../../js/reglas/Oficiales.js');
 const foros = JSON.parse(readFileSync(new URL('../../data/foros.json', import.meta.url), 'utf8')).foros;
+const cierres = JSON.parse(readFileSync(new URL('../../data/cierres-oficial.json', import.meta.url), 'utf8')).avisos;
 const mem = new Map();
 const memoria = { gv: (k, d) => (mem.has(k) ? JSON.parse(mem.get(k)) : d), sv: (k, v) => mem.set(k, JSON.stringify(v)) };
 
@@ -61,7 +62,7 @@ test('hola trae el título del tema; el panel reconoce el oficial', async () => 
 });
 
 test('la barra sale igual que la de Mi PJ y en el mismo sitio', async () => {
-  const act = crearActividad(agente, { yo: CUENTA.nombre, uid: CUENTA.id, origen: FORO, cfg: foros['hp-avada-kedavra.foroactivo.com'].actividad, memoria });
+  const act = crearActividad(agente, { yo: CUENTA.nombre, uid: CUENTA.id, origen: FORO, cfg: foros['hp-avada-kedavra.foroactivo.com'].actividad, memoria, cierres });
   let vioLeyendo = false;
   const O = await act.leerOficialDeRuta(RUTA, () => { agente.oficial({ estado: 'leyendo', abierta: true }).then(() => { vioLeyendo = /leyendo…/.test(barra().innerHTML); }); });
   await agente.oficial({ estado: 'ok', abierta: true, barra: barraDeOficial(O, {}) });
@@ -77,7 +78,7 @@ test('la barra sale igual que la de Mi PJ y en el mismo sitio', async () => {
 test('marcar «segundo oficial»: PAM lo guarda y la barra cobra a un cuarto, igual que Mi PJ', async () => {
   let O = null;
   agente.atender('oficial.cuarto', d => { memoria.sv('mipj.of.cuarto', marcarCuarto(memoria.gv('mipj.of.cuarto', {}), d.tid, d.autor, d.si)); return { estado: 'ok', abierta: true, barra: barraDeOficial(O, memoria.gv('mipj.of.cuarto', {})) }; });
-  const act = crearActividad(agente, { yo: CUENTA.nombre, uid: CUENTA.id, origen: FORO, cfg: foros['hp-avada-kedavra.foroactivo.com'].actividad, memoria });
+  const act = crearActividad(agente, { yo: CUENTA.nombre, uid: CUENTA.id, origen: FORO, cfg: foros['hp-avada-kedavra.foroactivo.com'].actividad, memoria, cierres });
   O = await act.leerOficialDeRuta(RUTA);
   const c = barra().querySelector('input[data-autor="Bruno Ketch"]');
   c.checked = true; c.dispatchEvent(new W.Event('change', { bubbles: true }));

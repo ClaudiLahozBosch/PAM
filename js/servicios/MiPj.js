@@ -3,17 +3,17 @@
 // cuenta → perfil (enlaces a ficha y bóveda), roles y sueldo → ficha (con el lector nuevo) → bóveda → stats de combate
 // → oficiales en curso (salen de los temas de tus roles). El mismo orden que Mi PJ.
 // Cada paso que falla se apunta en `errores` y los demás siguen.
-import { leerPerfil, rutaTema, RUTA_PERFIL } from '../lectores/LectorPerfil.js?v=0.3.3';
-import { leerFichaDelForo } from './FichaDelForo.js?v=0.3.3';
-import { leerBovedaDelForo } from './BovedaDelForo.js?v=0.3.3';
-import { combate, puntos } from '../reglas/Combate.js?v=0.3.3';
-import { crearActividad } from './ActividadDelForo.js?v=0.3.3';
+import { leerPerfil, rutaTema, RUTA_PERFIL } from '../lectores/LectorPerfil.js?v=0.3.4';
+import { leerFichaDelForo } from './FichaDelForo.js?v=0.3.4';
+import { leerBovedaDelForo } from './BovedaDelForo.js?v=0.3.4';
+import { combate, puntos } from '../reglas/Combate.js?v=0.3.4';
+import { crearActividad } from './ActividadDelForo.js?v=0.3.4';
 
 /**
  * @param {import('./agente/ClienteAgente.js').ClienteAgente} agente
- * @param {{ sistema: any, compendio: any, lector: any, foros: Record<string, any>, memoria?: import('./ActividadDelForo.js').Memoria }} dep
+ * @param {{ sistema: any, compendio: any, lector: any, foros: Record<string, any>, memoria?: import('./ActividadDelForo.js').Memoria, cierres?: string[][] }} dep
  */
-export async function leerMiPj(agente, { sistema, compendio, lector, foros, memoria }) {
+export async function leerMiPj(agente, { sistema, compendio, lector, foros, memoria, cierres = [] }) {
   const errores = [];
   const hola = await agente.hola();
   const base = { leido: new Date().toISOString(), agente: hola.agente, foro: hola.foro, cuenta: hola.cuenta, errores };
@@ -23,7 +23,7 @@ export async function leerMiPj(agente, { sistema, compendio, lector, foros, memo
   let perfil = { ficha: '', boveda: '' };
 
   // roles, misiones y sueldo (como en Mi PJ, a la vez que el perfil; si fallan, el resto sigue)
-  const act = cfg.actividad && memoria ? crearActividad(agente, { yo: hola.cuenta.nombre, uid: hola.cuenta.id, origen: 'https://' + hola.foro, cfg: cfg.actividad, memoria }) : null;
+  const act = cfg.actividad && memoria ? crearActividad(agente, { yo: hola.cuenta.nombre, uid: hola.cuenta.id, origen: 'https://' + hola.foro, cfg: cfg.actividad, memoria, cierres }) : null;
   const [, rolesYFilas, sueldo] = await Promise.all([
     (async () => {
       if (!(cfg.campoFicha || cfg.campoBoveda)) return;

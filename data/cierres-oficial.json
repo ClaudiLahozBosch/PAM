@@ -1,0 +1,15 @@
+{
+ "version": 1,
+ "como_se_edita": [
+  "Frases con las que el staff cierra un oficial. Si una de ellas está en uno de los tres últimos mensajes del tema, Mi PJ da el oficial por cerrado y deja de mostrarlo en «Oficiales en curso».",
+  "Cada aviso es una lista de trozos de texto entre comillas. El mensaje tiene que tener todos los trozos, en ese orden (puede haber más texto entre uno y otro).",
+  "No importan las mayúsculas, las tildes ni los espacios de más. Sí importan los signos: «¡AVISO!» no es lo mismo que «AVISO».",
+  "Para añadir uno: copiar una línea de «avisos», cambiar el texto y poner una coma entre líneas (la última va sin coma).",
+  "Ejemplo: [\"¡AVISO!\", \"cerrado\"] vale para «¡AVISO! Este oficial queda cerrado.»"
+ ],
+ "avisos": [
+  ["¡AVISO!", "cerrado"],
+  ["¡AVISO!", "cerrada"],
+  ["Ficha final de la aventura"]
+ ]
+}
