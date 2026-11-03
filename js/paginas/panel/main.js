@@ -1,18 +1,18 @@
 // @ts-check
 // Arranque del panel «Mi PJ» dentro del foro (el agente lo muestra en un iframe sin marco).
-import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js';
-import { PROTOCOLO } from '../../servicios/agente/protocolo.js';
-import { cargarSistema, cargarCompendio, cargarForos } from '../../datos/cargar.js';
-import { LectorFicha } from '../../lectores/LectorFicha.js';
-import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js';
-import { crearPanelMiPj } from './MiPjPanel.js';
+import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=0.3.1';
+import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=0.3.1';
+import { cargarSistema, cargarCompendio, cargarForos } from '../../datos/cargar.js?v=0.3.1';
+import { LectorFicha } from '../../lectores/LectorFicha.js?v=0.3.1';
+import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=0.3.1';
+import { crearPanelMiPj } from './MiPjPanel.js?v=0.3.1';
 
 const CACHE_MIN = 30; // como Mi PJ: si lo leído tiene más de media hora, se vuelve a leer al abrir
 const root = /** @type {HTMLElement} */ (document.getElementById('mipj'));
 
 async function arrancar() {
   const agente = ClienteAgente.enPanel();
-  if (!agente) { root.textContent = 'Este panel lo muestra el script de PAM dentro del foro.'; return; }
+  if (!agente) { root.replaceChildren(); root.textContent = 'Este panel lo muestra el script de PAM dentro del foro.'; return; }
   // Mientras no esté la revisión de la bóveda (fase 5b), el editor del foro publica sin preguntar
   agente.atender('editor.revisar', () => ({ avisos: [] }));
   const hola = await agente.hola();
@@ -37,4 +37,9 @@ async function arrancar() {
   if (!d || d.v !== 2 || Date.now() - new Date(d.leido).getTime() > CACHE_MIN * 60000) panel.actualizar();
 }
 
-arrancar().catch(e => { root.textContent = 'No se pudo abrir Mi PJ: ' + (e instanceof Error ? e.message : String(e)); });
+arrancar().catch(e => {
+  // la pastilla de siempre, con el motivo al pasar el ratón (el agente la muestra aunque el panel no le pida tamaño)
+  const p = root.querySelector('.pill');
+  if (p) p.setAttribute('title', 'Mi PJ no pudo arrancar: ' + (e instanceof Error ? e.message : String(e)));
+  console.error('[Mi PJ]', e);
+});

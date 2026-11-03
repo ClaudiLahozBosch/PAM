@@ -1,7 +1,10 @@
 /* CSS del panel «Mi PJ» (Hana Park), sacado de pam-mi-pj.user.js 1.7.1 con scripts/extraer-css-mipj.py.
-   Cambios: 100vh/100vw → var(--vh)/var(--vw) (ventana del foro) y la regla de pantalla estrecha → #mipj.estrecho. */
+   Cambios: 100vh/100vw → var(--vh)/var(--vw) (ventana del foro) y la regla de pantalla estrecha → #mipj.estrecho.
+   Los colores del tema Avadense van también aquí, para que la pastilla se vea antes de que arranque el JavaScript
+   (el tema elegido los sobreescribe igual que antes). */
 :root{--vh:100vh;--vw:100vw}
 html,body{margin:0;padding:0;background:transparent;overflow:hidden}
+#mipj{--m-ink:#171a2b;--m-panel:#1e2236;--m-panel-2:#262a42;--m-parchment:#F1EADF;--m-parchment-dim:#a7a1b6;--m-gold:#B49768;--m-gold-bright:#d6bd8f;--m-arcane-bright:#cf94a3;--m-good:#93b8a0;--m-bad:#d98377;--m-line-strong:rgba(241,234,223,.16);--m-accent-ink:#1b1e30;--m-serif:"Cormorant Garamond",Georgia,serif;--m-sans:"Nunito",system-ui,sans-serif}
 #mipj,#mipj-modal{--m-r:16px;font-family:var(--m-sans);color:var(--m-parchment);font-size:14px;line-height:1.45;text-align:left}
   #mipj *,#mipj-modal *{box-sizing:border-box}
   #mipj{position:fixed;right:16px;bottom:16px;z-index:99990;width:350px;max-width:calc(var(--vw) - 24px)}

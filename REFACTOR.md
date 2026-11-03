@@ -92,6 +92,14 @@ Cada fase se prueba en el staging y en test-forito, y solo entonces se propone p
 | 7 | Sincronización con la nube con control de versiones. |
 | 8 | Resto de páginas, estilos y dependencias. |
 
+## Cómo se publica una versión
+
+1. Subir el número en `agente/pam-agente.user.js` (`@version` y `VERSION`).
+2. `node scripts/versionar.mjs`: pone esa versión en todas las direcciones del panel (imports, CSS, datos y la página que abre el agente). Así el navegador nunca mezcla archivos de dos versiones: GitHub Pages los guarda 10 minutos, y si `main.js` fuera nuevo y otro módulo viejo, el panel no arrancaría.
+3. Pasar las pruebas (`cd tests && npm test`) y subir.
+
+Si aun así el panel no arranca, el agente enseña la pastilla «✦ Mi PJ» a los 15 segundos (nunca queda invisible).
+
 ## Prueba de concepto (`poc-agente/`)
 
 - `agente/pam-agente-poc.user.js`: el agente «PAM · Agente (staging)». Solo funciona en test-forito y en el staging; no se mezcla con tu «Mi PJ».

@@ -2,10 +2,10 @@
 // Todo lo que el panel «Mi PJ» necesita saber de la cuenta conectada, leído del foro a través del agente:
 // cuenta → perfil (enlaces a ficha y bóveda) → ficha (con el lector nuevo) → bóveda → stats de combate.
 // Cada paso que falla se apunta en `errores` y los demás siguen.
-import { leerPerfil, rutaTema, RUTA_PERFIL } from '../lectores/LectorPerfil.js';
-import { leerFichaDelForo } from './FichaDelForo.js';
-import { leerBovedaDelForo } from './BovedaDelForo.js';
-import { combate, puntos } from '../reglas/Combate.js';
+import { leerPerfil, rutaTema, RUTA_PERFIL } from '../lectores/LectorPerfil.js?v=0.3.1';
+import { leerFichaDelForo } from './FichaDelForo.js?v=0.3.1';
+import { leerBovedaDelForo } from './BovedaDelForo.js?v=0.3.1';
+import { combate, puntos } from '../reglas/Combate.js?v=0.3.1';
 
 /**
  * @param {import('./agente/ClienteAgente.js').ClienteAgente} agente

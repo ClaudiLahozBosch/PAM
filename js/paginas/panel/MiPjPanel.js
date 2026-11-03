@@ -79,6 +79,7 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
 
   const vistaRapidaFn = () => vistaRapida();
   function pintar() {
+    variablesVentana();
     const B = datos && datos.boveda, F = datos && datos.ficha, R = [];
     const pendF = F && F.estado === 'pendiente';
     if (!ui.abierto) {
@@ -256,11 +257,15 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
   /* ---------------- tamaño de la ventana: arrastrar la esquina, A− / A+ ---------------- */
   const tamEl = documento.createElement('style'); tamEl.id = 'mipj-tam'; documento.head.appendChild(tamEl);
   const entre = (v, a, b) => Math.min(b, Math.max(a, v));
-  function aplicarTam() {
-    const z = ui.zoom || 1, W0 = foro.ancho - 24, H0 = foro.alto - 32;
+  /** El tamaño de la ventana del foro, antes de pintar (dentro del iframe, 100vw/100vh serían los del iframe). */
+  function variablesVentana() {
     documento.documentElement.style.setProperty('--vw', foro.ancho + 'px');
     documento.documentElement.style.setProperty('--vh', foro.alto + 'px');
     root.classList.toggle('estrecho', foro.ancho <= 520);
+  }
+  function aplicarTam() {
+    const z = ui.zoom || 1, W0 = foro.ancho - 24, H0 = foro.alto - 32;
+    variablesVentana();
     let c = '';
     if (ui.ancho) c += `#mipj{width:${Math.round(entre(ui.ancho, 280, W0))}px}`;
     if (z !== 1) c += `#mipj .box{zoom:${z};max-height:${Math.round(H0 / z)}px}`;
