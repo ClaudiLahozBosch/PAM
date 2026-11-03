@@ -5,8 +5,9 @@
 import { limpiarForo } from './LectorFicha.js';
 
 /**
- * @typedef {{ id: number, autorId: number|null, autor: string, fecha: string, html: string, texto: string }} Mensaje
- * @typedef {{ tema: number|null, titulo: string, posts: Mensaje[], paginas: string[] }} PaginaTema
+ * @typedef {{ id: number, autorId: number|null, autor: string, fecha: string, html: string, texto: string, imgs: number }} Mensaje
+ * @typedef {{ tema: number|null, foro: number|null, titulo: string, posts: Mensaje[], paginas: string[] }} PaginaTema
+ * `foro`: el subforo donde está el tema (el último de la ruta de navegación: «Fichas de personaje › Adultos › Ex-Slytherin»).
  */
 
 /** @param {Document} doc @returns {PaginaTema} */
@@ -19,7 +20,10 @@ export function leerPaginaTema(doc) {
   if (tema == null) tema = numero(doc.querySelector('h2.topic-title a[href]')?.getAttribute('href')?.match(/\/t(\d+)/)?.[1]);
   const paginas = [...new Set([...doc.querySelectorAll('a[href]')].map(a => a.getAttribute('href') ?? '')
     .filter(h => tema != null && new RegExp(`^/t${tema}p\\d+-`).test(h)).map(h => h.replace(/#.*$/, '')))];
-  return { tema, titulo, posts, paginas };
+  const nav = [...doc.querySelectorAll('a.nav[href]')].map(a => numero((a.getAttribute('href') ?? '').match(/^(?:https?:\/\/[^/]+)?\/f(\d+)-/)?.[1])).filter(x => x != null);
+  // la ruta sale arriba y abajo de la página: vale la primera, hasta que se repite
+  const ruta = nav.slice(0, Math.max(1, nav.indexOf(nav[0], 1) > 0 ? nav.indexOf(nav[0], 1) : nav.length));
+  return { tema, foro: ruta.length ? ruta[ruta.length - 1] : null, titulo, posts, paginas };
 }
 
 /** @param {Element} p */
@@ -33,7 +37,8 @@ function leerMensaje(p) {
   if (autor && fecha.startsWith(autor)) fecha = fecha.slice(autor.length).trim();
   const contenido = p.querySelector('.content');
   const html = contenido?.innerHTML ?? '';
-  return { id, autorId, autor, fecha, html, texto: limpiarForo(html).trim() }; // texto con sus saltos de línea
+  const imgs = contenido ? contenido.querySelectorAll('img').length : 0;
+  return { id, autorId, autor, fecha, html, texto: limpiarForo(html).trim(), imgs }; // texto con sus saltos de línea
 }
 
 /** Une los mensajes de varias páginas del mismo tema, sin repetir y en orden. @param {Mensaje[][]} listas */

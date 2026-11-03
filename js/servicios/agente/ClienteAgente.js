@@ -82,6 +82,13 @@ export class ClienteAgente {
   /** Pide editar un mensaje propio. El agente enseña las diferencias y no toca nada si el mensaje cambió. */
   editar(post, original, nuevo, { motivo = '', titulo = '' } = {}) { return this.pedir('foro.editar', { post, original, nuevo, motivo, titulo }, 10 * 60000); }
 
+  /**
+   * La puerta del Escriba con varios pasos (p. ej. publicar la petición y editar la ficha y la bóveda).
+   * @param {{ titulo: string, explicacion?: string, avisos?: string[], pasos: any[] }} accion
+   * @returns {Promise<{ resultado: 'aceptada'|'denegada'|'fallida'|'parcial'|'igual', pasos: any[] }>}
+   */
+  puerta(accion) { return this.pedir('foro.puerta', accion, 30 * 60000); }
+
   /** @param {string} clave */
   async leerDato(clave) { return (await this.pedir('almacen.leer', { clave })).valor; }
   /** @param {string} clave @param {any} valor */
@@ -89,7 +96,8 @@ export class ClienteAgente {
   /** Lo que guardaba el «Mi PJ» antiguo en Tampermonkey. */
   async legado() { return (await this.pedir('almacen.legado', {})).valores; }
 
+  /** Tamaño del iframe del panel (lo que ocupa Mi PJ, con su margen). */
   tamano(ancho, alto) { return this.pedir('panel.tamano', { ancho, alto }); }
-  mostrar(abierto) { return this.pedir('panel.mostrar', { abierto }); }
-  pastilla(texto) { return this.pedir('panel.pastilla', { texto }); }
+  /** El tema de Mi PJ también para las puertas del agente. */
+  tema(t) { return this.pedir('panel.tema', { tema: t }); }
 }

@@ -41,7 +41,9 @@ test('ficha ajena: lee las cinco partes con el HTML publicado (como el Inspector
   const r = await leerFichaDelForo(a, 'https://hp-avada-kedavra.foroactivo.com/t23113-irvin-giles#337672', { lector, cuentaId: 999 });
   assert.equal(r.tema, 23113);
   assert.equal(r.propia, false);
-  assert.deepEqual(a.pedidas, ['/t23113-'], 'no intenta editar mensajes ajenos');
+  assert.equal(a.pedidas[0], '/t23113-');
+  assert.ok(!a.pedidas.some(r => r.includes('editpost')), 'no intenta editar mensajes ajenos');
+  assert.ok(a.pedidas.includes('/t23113p30-irvin-giles'), 'lee también la última página (para saber si está revisada, como Mi PJ)');
   assert.deepEqual(r.ficha.partes.map(p => [p.post, p.seccion]), [[337672, 'html'], [339214, 'html'], [339215, 'html'], [339216, 'html'], [339217, 'html']]);
   assert.deepEqual(r.historial, [373284, 402093]);
   assert.equal(r.ficha.presentacion.pd, 13, 'el 14 de la actualización posterior no se mezcla (F05)');

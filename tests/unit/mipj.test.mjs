@@ -1,4 +1,5 @@
-// Panel «Mi PJ»: servicio (lo que se lee del foro a través del agente) y vista, con un agente de prueba.
+// Panel «Mi PJ»: el servicio (lo que se lee del foro a través del agente), con un agente de prueba.
+// (Que la vista pinte lo mismo que Mi PJ se comprueba en caracterizacion/panel-mipj.test.mjs.)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -6,11 +7,11 @@ import { JSDOM } from 'jsdom';
 import { Sistema } from '../../js/datos/Sistema.js';
 import { Compendio } from '../../js/datos/Compendio.js';
 import { LectorFicha } from '../../js/lectores/LectorFicha.js';
-import { leerMiPj } from '../../js/servicios/MiPj.js';
+import { leerMiPj, aDatosMiPj } from '../../js/servicios/MiPj.js';
+import { crearPanelMiPj } from '../../js/paginas/panel/MiPjPanel.js';
 
 const { window: W } = new JSDOM('<!doctype html><body><main id="c"></main></body>');
 globalThis.DOMParser = W.DOMParser; globalThis.document = W.document; globalThis.Node = W.Node;
-const { PanelMiPj } = await import('../../js/paginas/panel/PanelMiPj.js');
 
 const json = f => JSON.parse(readFileSync(new URL('../../data/' + f, import.meta.url), 'utf8'));
 const sistema = new Sistema(json('sistema.json')), compendio = new Compendio(json('arcanos.json'));
@@ -69,33 +70,21 @@ test('Mi PJ: si falla la bóveda, la ficha se ve igual', async () => {
   assert.match(d.errores.join(' '), /Bóveda: ruta no prevista/);
 });
 
-test('vista: pinta ficha, stats y bóveda; guarda y usa la caché', async () => {
-  const raiz = W.document.getElementById('c');
-  const mem = new Map(); const guardado = { getItem: k => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, v) };
-  let ahora = Date.parse('2026-11-04T12:00:00Z'), cargas = 0;
-  // el mismo reloj para la vista y para la hora de lectura
-  const cargar = async () => { cargas++; return { ...(await leerMiPj(agente(), deps)), leido: new Date(ahora).toISOString() }; };
-  const panel = new PanelMiPj(raiz, { cargar, guardado, ahora: () => ahora });
-  await panel.iniciar();
-  const t = raiz.textContent;
-  assert.match(t, /Irvin Giles\./);
-  assert.match(t, /Grageas\s*1\.525/);
-  assert.match(t, /Destino\s*13/);
-  assert.equal(raiz.querySelector('h2 a').getAttribute('href'), 'https://hp-avada-kedavra.foroactivo.com/t23113-');
-  assert.equal(raiz.querySelector('h2 a').getAttribute('target'), '_top');
-  assert.equal(cargas, 1);
-  ahora += 5 * 60000;
-  await new PanelMiPj(raiz, { cargar, guardado, ahora: () => ahora }).iniciar();
-  assert.equal(cargas, 1, 'con la caché reciente no vuelve a leer el foro');
-  ahora += 31 * 60000;
-  await new PanelMiPj(raiz, { cargar, guardado, ahora: () => ahora }).iniciar();
-  assert.equal(cargas, 2, 'pasada media hora, sí');
+test('estado de la ficha como Mi PJ: pendiente si el dueño escribió después del último sello', async () => {
+  const d = await leerMiPj(agente(), deps);
+  assert.equal(d.ficha.estado, 'pendiente');
+  assert.deepEqual(d.ficha.sello, { autor: 'Revisor', fecha: 'Dom 2 Ago 2020 - 18:03' });
+  const datos = aDatosMiPj(d, sistema);
+  assert.equal(datos.ficha.url, 'https://hp-avada-kedavra.foroactivo.com/t23113-');
+  assert.equal(datos.boveda.url, 'https://hp-avada-kedavra.foroactivo.com/t23175-');
+  assert.equal(datos.rapido.skills.Esquiva, 2, 'con los nombres de la ficha, como Mi PJ');
+  assert.equal(datos.rapido.combate.Defensa, d.stats.combate.def);
 });
 test('vista: un nombre con HTML se ve como texto (nunca se interpreta)', async () => {
   const raiz = W.document.getElementById('c');
-  // escrito con entidades en el BBCode: el lector lo convierte en el texto «<img …>», que llega a la vista
-  const panel = new PanelMiPj(raiz, { cargar: () => leerMiPj(agente({ nombre: '&lt;img src=x onerror=alert(1)&gt;' }), deps) });
-  await panel.iniciar();
+  const datos = aDatosMiPj(await leerMiPj(agente({ nombre: '&lt;img src=x onerror=alert(1)&gt;' }), deps), sistema);
+  const p = crearPanelMiPj({ root: raiz, documento: W.document, cargar: async () => datos, ventana: { ancho: 1200, alto: 800 }, pamUrl: 'https://x/', cuenta: { id: 5203, nombre: 'Irvin Giles' } });
+  await p.actualizar();
   assert.equal(raiz.querySelector('img'), null);
   assert.match(raiz.textContent, /<img src=x onerror=alert\(1\)>/);
 });

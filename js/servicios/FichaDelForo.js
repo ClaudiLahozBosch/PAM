@@ -2,9 +2,27 @@
 // Leer la ficha de un personaje desde el foro, de principio a fin, a través del agente:
 //   tema → mensajes → partes vigentes → código de cada parte → Ficha → a qué personaje corresponde.
 // Lo usarán Mi PJ (tu ficha) y el Inspector (fichas de otros), con el mismo lector.
-import { leerPaginaTema } from '../lectores/LectorTema.js';
+import { leerPaginaTema, unirMensajes, mismoAutor } from '../lectores/LectorTema.js';
 import { partesVigentes } from '../lectores/PartesFicha.js';
 import { normNombre } from '../core/texto.js';
+
+const FORO_FICHAS_PENDIENTES = 21; // «Solicitud de Ficha de Personaje»
+
+/**
+ * Revisada o pendiente, como lo decidía Mi PJ: pendiente si está en el subforo de solicitudes o si el dueño
+ * escribió después del último sello (mensaje de otra persona con imagen y casi sin texto).
+ * @param {import('../lectores/LectorTema.js').Mensaje[]} posts @param {number|null} foro
+ */
+export function estadoFicha(posts, foro) {
+  let sello = null, ultDueno = null;
+  for (const p of posts.slice(1)) {
+    if (mismoAutor(p, posts[0])) ultDueno = p;
+    else if (p.imgs && p.texto.trim().length < 40) sello = p;
+  }
+  let estado = foro === FORO_FICHAS_PENDIENTES ? 'pendiente' : 'revisada';
+  if (ultDueno && (!sello || ultDueno.id > sello.id)) estado = 'pendiente';
+  return { estado, sello: sello ? { autor: sello.autor, fecha: sello.fecha } : null };
+}
 
 /**
  * @param {{ leer(ruta: string): Promise<Document> }} agente el ClienteAgente (o uno de prueba)
@@ -33,7 +51,13 @@ export async function leerFichaDelForo(agente, ruta, { lector, cuentaId = null }
   }
   const { ficha, resumen } = lector.leer(entradas, { tema: pag.tema ?? Number(tema) });
   entradas.forEach((e, i) => { ficha.partes[i].seccion = e.codigo ? 'bbcode' : 'html'; });
-  return { tema: pag.tema ?? Number(tema), titulo: pag.titulo, dueno, ficha, resumen, historial: historial.map(h => h.id), propia };
+  // revisada o pendiente: con la primera y la última página, como Mi PJ
+  let todos = pag.posts;
+  const ultima = [...pag.paginas].sort((a, b) => Number(b.match(/p(\d+)-/)?.[1]) - Number(a.match(/p(\d+)-/)?.[1]))[0];
+  if (ultima) { try { todos = unirMensajes(pag.posts, leerPaginaTema(await agente.leer(ultima)).posts); } catch { /* solo la primera */ } }
+  const { estado, sello } = estadoFicha(todos, pag.foro);
+  return { tema: pag.tema ?? Number(tema), foro: pag.foro, titulo: pag.titulo, dueno, ficha, resumen, historial: historial.map(h => h.id), propia, estado, sello,
+    codigo: entradas.reduce((n, e) => n + e.bbcode.length, 0) };
 }
 
 /**

@@ -4,15 +4,19 @@
 // «de» es 'pam' o 'agente': en la misma ventana cada lado ignora sus propios mensajes.
 //
 // PAM → agente:
-//   hola                                   → { agente, protocolo, foro, cuenta: {id, nombre}|null, ruta }
+//   hola                                   → { agente, protocolo, foro, cuenta: {id, nombre}|null, ruta, ventana: {ancho, alto} }
 //   foro.leer      { ruta }                → { estado, ruta, url, html }        (solo rutas del foro)
-//   foro.publicar  { tipo:'responder', tema, mensaje, motivo }   → puerta del agente → { publicado, decision, … }
-//   foro.editar    { post, original, nuevo, motivo, titulo }     → puerta con diferencias → { editado, decision, estado, … }
+//   foro.puerta    { titulo, explicacion, avisos, pasos: [{tipo:'publicar', tema, texto} | {tipo:'editar', post, original, nuevo, motivo}] }
+//                                          → la puerta del Escriba → { resultado, pasos: [{estado, post, …}] }
+//                                            («enlace del paso n» en un texto = enlace al mensaje del paso n)
+//   foro.publicar  { tema, mensaje, motivo } y foro.editar { post, original, nuevo, motivo }: la misma puerta con un paso
 //   almacen.leer   { clave } / almacen.guardar { clave, valor }   (claves «pam.*»)
 //   almacen.legado                         → { valores } lo que guardaba el «Mi PJ» antiguo
-//   panel.tamano   { ancho, alto } · panel.mostrar { abierto } · panel.pastilla { texto }
+//   panel.tamano   { ancho, alto }         tamaño del iframe (lo que ocupa Mi PJ)
+//   panel.tema     { tema }                el tema de Mi PJ para las puertas
 // agente → PAM:
-//   editor.revisar { texto, ruta }         → { avisos: string[] }
+//   editor.revisar { texto, ruta }         → { avisos: string[], encabezado? }   («Antes de publicar»)
+//   ventana.cambio { ancho, alto }         cambió el tamaño de la ventana del foro
 
 export const PROTOCOLO = 1;
 

@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         PAM · Agente (staging)
 // @namespace    https://claudilahozbosch.github.io/PAM/staging
-// @version      0.2.1
-// @description  El script mínimo de PAM: lee el foro con tu sesión, publica y edita SOLO tras tu «Aceptar» y muestra el panel de PAM. Toda la lógica está en PAM.
+// @version      0.3.0
+// @description  El script mínimo de PAM: lee el foro con tu sesión, publica y edita SOLO tras tu «Aceptar» y muestra el panel «Mi PJ» de PAM. Toda la lógica está en PAM.
 // @updateURL    https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
 // @downloadURL  https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
 // @match        https://test-forito.foroactivo.com/*
@@ -18,17 +18,17 @@
 
 /* El agente hace SOLO lo que PAM no puede hacer desde su dominio:
    1. leer páginas del foro con tu sesión (solo rutas del propio foro, solo lectura);
-   2. publicar y editar mensajes, siempre después de su propia ventana Aceptar / Modificar / Denegar,
-      que enseña exactamente lo que se va a publicar (y, al editar, qué líneas cambian);
+   2. publicar y editar mensajes, siempre después de su propia puerta Aceptar / Modificar / Denegar
+      (la del Escriba: todos los pasos a la vista, con las diferencias de cada mensaje que se edita);
    3. guardar datos compartidos entre el foro y PAM (almacén de Tampermonkey, claves «pam.*»);
-   4. mostrar el panel de PAM dentro del foro;
+   4. mostrar el panel «Mi PJ», que es una página de PAM;
    5. pasar a PAM el texto del editor del foro antes de enviarlo, para que lo revise.
    No sabe nada de fichas ni de canjes. Habla con PAM con mensajes { pam, de, id, tipo, datos } (protocolo 1). */
 
 (function () {
   'use strict';
 
-  var VERSION = '0.2.1';
+  var VERSION = '0.3.0';
   var PROTOCOLO = 1;
   // Staging: el fork de pruebas (otro dominio que PAM real, así no ve los datos de los jugadores).
   var PAM = { origen: 'https://claudilahozbosch.github.io', ruta: '/PAM/' };
@@ -97,14 +97,16 @@
           pendientes[id] = { ok: ok, ko: ko, t: t };
           destino().postMessage({ pam: PROTOCOLO, de: 'agente', id: id, tipo: tipo, datos: datos || {} }, origen);
         });
-      }
+      },
+      avisar: function (tipo, datos) { destino().postMessage({ pam: PROTOCOLO, de: 'agente', id: 'av' + (siguiente++), tipo: tipo, datos: datos || {} }, origen); }
     };
   }
 
+  function ventana() { return { ancho: window.innerWidth, alto: window.innerHeight }; }
   function hola() {
     return {
       agente: VERSION, protocolo: PROTOCOLO, foro: enForo ? location.host : null,
-      cuenta: enForo ? cuentaConectada() : null, ruta: enForo ? location.pathname + location.search : null
+      cuenta: enForo ? cuentaConectada() : null, ruta: enForo ? location.pathname + location.search : null, ventana: ventana()
     };
   }
 
@@ -150,6 +152,23 @@
     });
   }
 
+  // Mensajes de una página de tema (lo justo para no publicar dos veces lo mismo).
+  function postsDe(doc) {
+    return Array.prototype.map.call(doc.querySelectorAll('div.post[id^="p"]'), function (p) {
+      var a = p.querySelector('.author a[href^="/u"], .postprofile a[href^="/u"]');
+      return { id: (p.id || '').replace(/\D/g, ''), autorId: a ? parseInt((a.getAttribute('href').match(/^\/u(\d+)/) || [])[1], 10) : null };
+    }).filter(function (p) { return p.id; });
+  }
+  // Los mensajes de las dos últimas páginas del tema.
+  function ultimosMensajes(tema) {
+    return pedirDoc('/t' + tema + '-').then(function (d1) {
+      var max = 0;
+      Array.prototype.forEach.call(d1.querySelectorAll('a[href*="/t' + tema + 'p"]'), function (a) { var x = (a.getAttribute('href') || '').match(new RegExp('/t' + tema + 'p(\\d+)-')); if (x) { max = Math.max(max, +x[1]); } });
+      if (!max) { return postsDe(d1); }
+      return pedirDoc('/t' + tema + 'p' + max + '-').then(function (dn) { return postsDe(d1).concat(postsDe(dn)); });
+    });
+  }
+
   // ---------------------------------------------------------------
   // En el foro: escritura (solo la llama la puerta)
   // ---------------------------------------------------------------
@@ -181,9 +200,18 @@
   function esperar(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
   // Reintenta solo si el foro pide esperar (antiflood), hasta 3 veces.
-  function conReintentos(fn) {
+  function conReintentos(fn, avisar) {
     var n = 0;
-    function uno() { return fn().then(function (r) { if (r.estado === 'flood' && n < 3) { n++; return esperar(((r.segundos || 10) + 1) * 1000).then(uno); } return r; }); }
+    function uno() {
+      return fn().then(function (r) {
+        if (r.estado === 'flood' && n < 3) {
+          n++; var s = (r.segundos || 10) + 1;
+          if (avisar) { avisar('El foro pide esperar ' + s + ' s entre mensajes. Vuelvo a intentar…'); }
+          return esperar(s * 1000).then(uno);
+        }
+        return r;
+      });
+    }
     return uno();
   }
 
@@ -195,58 +223,163 @@
     });
   }
 
-  function responderTema(tema, texto) {
-    return conReintentos(function () {
-      return pedirDoc('/post?t=' + tema + '&mode=reply').then(function (d) {
-        var f = d.querySelector('form[name="post"]');
-        if (!f) { return { estado: 'error', detalle: 'No puedes responder en este tema.' }; }
-        return enviarFormulario(camposDe(f, { message: texto }));
-      });
+  function mismoTexto(a, b) {
+    var n = function (s) { return String(s == null ? '' : s).replace(/\r\n?/g, '\n').replace(/[ \t]+$/gm, '').trim(); };
+    return n(a) === n(b);
+  }
+
+  // ¿Ya está publicado este texto entre tus últimos mensajes del tema? (para no publicar dos veces)
+  function buscarMensajePropio(cuenta, tema, texto) {
+    return ultimosMensajes(tema).then(function (posts) {
+      var propios = posts.filter(function (p) { return p.autorId === cuenta.id; }).slice(-3).reverse();
+      var i = 0;
+      function sig() {
+        if (i >= propios.length) { return null; }
+        var p = propios[i++];
+        return formularioEdicion(p.id).then(function (f) { return mismoTexto(f.elements.message.value, texto) ? p : sig(); }, sig);
+      }
+      return sig();
     });
   }
 
-  function editarMensaje(post, original, nuevo, motivo) {
-    return formularioEdicion(post).then(function (f) {
-      // Si alguien lo cambió desde que PAM lo leyó, no se toca.
-      if (f.elements.message.value !== original) { return { estado: 'cambiado' }; }
-      return conReintentos(function () {
-        return formularioEdicion(post).then(function (f2) { return enviarFormulario(camposDe(f2, { message: nuevo, edit_reason: motivo || '' })); });
-      }).then(function (r) {
-        if (r.estado === 'flood' || r.estado === 'antispam') { return r; }
-        // Se comprueba volviendo a leer el mensaje.
-        return formularioEdicion(post).then(function (f3) {
-          return f3.elements.message.value === nuevo ? { estado: 'ok', post: post } : { estado: 'error', detalle: 'El mensaje no quedó como se esperaba.' };
+  // Copia del mensaje antes de editarlo (las últimas 30, por cuenta), por si hay que volver atrás.
+  function guardarCopia(cuenta, post, texto) {
+    var k = 'pam.copias.' + location.host + '.' + cuenta.id, l = GM_getValue(k, []) || [];
+    l.push({ post: post, fecha: new Date().toISOString(), bbcode: texto });
+    GM_setValue(k, l.slice(-30));
+  }
+
+  // Paso: { tipo: 'editar', post, original, nuevo, motivo }  o  { tipo: 'publicar', tema, texto }
+  function ejecutarPaso(cuenta, paso, avisar) {
+    if (paso.tipo === 'editar') {
+      return formularioEdicion(paso.post).then(function (f) {
+        // Si alguien lo ha cambiado desde que PAM lo leyó, no se toca.
+        if (f.elements.message.value !== paso.original) { return { estado: 'cambiado' }; }
+        guardarCopia(cuenta, paso.post, paso.original);
+        return conReintentos(function () {
+          return formularioEdicion(paso.post).then(function (f2) { return enviarFormulario(camposDe(f2, { message: paso.nuevo, edit_reason: paso.motivo || '' })); });
+        }, avisar).then(function (r) {
+          if (r.estado === 'flood' || r.estado === 'antispam') { return r; }
+          // Se comprueba leyendo el mensaje otra vez.
+          return formularioEdicion(paso.post).then(function (f3) {
+            return f3.elements.message.value === paso.nuevo ? { estado: 'ok', post: paso.post } : { estado: 'error', detalle: 'El mensaje no quedó como se esperaba.' };
+          });
         });
       });
-    });
+    }
+    if (paso.tipo === 'publicar') {
+      var yaPublicado = function () { return buscarMensajePropio(cuenta, paso.tema, paso.texto).catch(function () { return null; }); };
+      var intento = 0;
+      return conReintentos(function () {
+        var antes = intento++ ? yaPublicado() : Promise.resolve(null);
+        return antes.then(function (ya) {
+          if (ya) { return { estado: 'ok', post: ya.id }; }
+          return pedirDoc('/post?t=' + paso.tema + '&mode=reply').then(function (d) {
+            var f = d.querySelector('form[name="post"]');
+            if (!f) { return { estado: 'error', detalle: 'No podés responder en este tema.' }; }
+            return enviarFormulario(camposDe(f, { message: paso.texto })).catch(function () { return { estado: 'desconocido' }; });
+          });
+        });
+      }, avisar).then(function (r) {
+        if (r.estado !== 'desconocido') { return r; }
+        return yaPublicado().then(function (ya) {
+          return ya ? { estado: 'ok', post: ya.id } : { estado: 'error', detalle: 'El foro no confirmó la publicación y no la encuentro en el tema. Mirá el tema antes de volver a intentarlo.' };
+        });
+      }).then(function (r) {
+        if (r.estado !== 'ok' || r.post) { return r; }
+        // Sin número de mensaje en la respuesta: es tu último mensaje del tema.
+        return ultimosMensajes(paso.tema).then(function (posts) {
+          var propios = posts.filter(function (p) { return p.autorId === cuenta.id; });
+          r.post = propios.length ? propios[propios.length - 1].id : null;
+          return r;
+        }).catch(function () { return r; });
+      });
+    }
+    return Promise.resolve({ estado: 'error', detalle: 'Tipo de paso desconocido.' });
   }
 
+  function enlacePost(post) { return location.origin + '/viewtopic?p=' + post + '#' + post; }
+
   // ---------------------------------------------------------------
-  // Interfaz del agente (shadow DOM: el CSS del foro no le afecta)
+  // Estilos y tema: los de «Mi PJ» y el Escriba (variables --m-*)
   // ---------------------------------------------------------------
+  var TEMA_AVADENSE = { skin: 'avadense', ink: '#171a2b', panel: '#1e2236', 'panel-2': '#262a42', parchment: '#F1EADF', 'parchment-dim': '#a7a1b6', gold: '#B49768',
+    'gold-bright': '#d6bd8f', 'arcane-bright': '#cf94a3', good: '#93b8a0', bad: '#d98377', 'line-strong': 'rgba(241,234,223,.16)', 'accent-ink': '#1b1e30',
+    serif: '"Cormorant Garamond", Georgia, serif', sans: '"Nunito", system-ui, sans-serif' };
+  var CSS_ESC = [
+    ':host{all:initial}',
+    '.esc-ui{--x-ink:var(--m-ink,#171a2b);--x-panel:var(--m-panel,#1e2236);--x-panel2:var(--m-panel-2,#262a42);--x-parch:var(--m-parchment,#F1EADF);--x-dim:var(--m-parchment-dim,#a7a1b6);',
+    '--x-gold:var(--m-gold,#B49768);--x-goldb:var(--m-gold-bright,#d6bd8f);--x-arc:var(--m-arcane-bright,#cf94a3);--x-good:var(--m-good,#93b8a0);--x-bad:var(--m-bad,#d98377);--x-line:var(--m-line-strong,rgba(241,234,223,.16));',
+    '--x-acc:var(--m-accent-ink,#1b1e30);--x-serif:var(--m-serif,"Cormorant Garamond",Georgia,serif);--x-sans:var(--m-sans,"Nunito",system-ui,sans-serif);font-family:var(--x-sans);color:var(--x-parch);font-size:14px;line-height:1.45;text-align:left}',
+    '.esc-ui *{box-sizing:border-box}',
+    '.esc-ui a{color:var(--x-goldb);text-decoration:none;border-bottom:1px dotted color-mix(in srgb,var(--x-gold) 60%,transparent)}',
+    '.esc-ui.puerta-fondo{position:fixed;inset:0;z-index:99999;background:rgba(8,7,14,.6);display:flex;align-items:flex-start;justify-content:center;padding:4vh 16px;overflow:auto}',
+    '.esc-ui .puerta{width:min(760px,100%);border-radius:16px;padding:20px 22px;display:grid;gap:12px;background:radial-gradient(500px 200px at 0% 0%,color-mix(in srgb,var(--x-arc) 14%,transparent),transparent 70%),var(--x-panel);border:1px solid var(--x-gold);box-shadow:0 30px 80px -30px #000}',
+    '.esc-ui .p-cab{display:flex;justify-content:space-between;align-items:baseline;gap:10px}',
+    '.esc-ui .p-cab b{font-family:var(--x-serif);font-style:italic;font-weight:500;font-size:28px;color:var(--x-goldb)}',
+    '.esc-ui .p-cab small{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--x-dim)}',
+    '.esc-ui .p-expl{color:var(--x-dim)}',
+    '.esc-ui .aviso{padding:8px 10px;border-radius:10px;border-left:3px solid var(--x-gold);background:color-mix(in srgb,var(--x-gold) 12%,transparent);font-size:13px}',
+    '.esc-ui .error{padding:8px 10px;border-radius:10px;border-left:3px solid var(--x-bad);background:color-mix(in srgb,var(--x-bad) 10%,transparent);font-size:13px}',
+    '.esc-ui .p-paso{padding:11px 13px;border-radius:12px;background:color-mix(in srgb,var(--x-panel2) 70%,transparent);border:1px solid var(--x-line);display:grid;gap:8px;min-width:0}',
+    '.esc-ui .p-paso-cab{display:flex;justify-content:space-between;gap:10px;font-weight:700}',
+    '.esc-ui .p-estado{font-size:11.5px;font-weight:700;white-space:nowrap}',
+    '.esc-ui .ok{color:var(--x-good)}.esc-ui .mal{color:var(--x-bad)}.esc-ui .warn{color:var(--x-goldb)}.esc-ui .neutro{color:var(--x-dim)}',
+    '.esc-ui .p-nota{color:var(--x-dim);font-size:12.5px}',
+    '.esc-ui .p-diff{font:12px/1.5 Consolas,"Courier New",monospace;background:var(--x-ink);border-radius:10px;padding:8px 10px;overflow:auto;white-space:pre;max-height:320px}',
+    '.esc-ui .p-diff .mas{background:color-mix(in srgb,var(--x-good) 22%,transparent)}',
+    '.esc-ui .p-diff .menos{background:color-mix(in srgb,var(--x-bad) 22%,transparent)}',
+    '.esc-ui .p-diff .corte{color:var(--x-dim)}',
+    '.esc-ui .p-texto{display:block;width:100%;min-height:120px;max-height:320px;resize:vertical;font:12px/1.5 Consolas,"Courier New",monospace;background:var(--x-ink);color:var(--x-parch);border:1px solid var(--x-line);border-radius:10px;padding:8px 10px}',
+    '.esc-ui .p-texto[hidden]{display:none}',
+    '.esc-ui .p-texto:not([readonly]){border-color:var(--x-gold)}',
+    '.esc-ui .p-info{min-height:1.4em;color:var(--x-dim)}',
+    '.esc-ui .p-info.error{color:var(--x-parch)}',
+    '.esc-ui .p-info.okmsg{padding:8px 10px;border-radius:10px;border-left:3px solid var(--x-good);background:color-mix(in srgb,var(--x-good) 12%,transparent);color:var(--x-parch)}',
+    '.esc-ui .p-botones{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px}',
+    '.esc-ui .p-btn,.esc-ui .b{font:700 12.5px var(--x-sans);border-radius:999px;padding:8px 14px;cursor:pointer;border:1px solid var(--x-line);background:color-mix(in srgb,var(--x-panel2) 90%,transparent);color:var(--x-parch);transition:border-color .2s,transform .2s;display:inline-block}',
+    '.esc-ui .p-btn:hover,.esc-ui .b:hover{border-color:var(--x-gold);transform:translateY(-1px)}',
+    '.esc-ui .p-btn.ok,.esc-ui .b.pri{background:var(--x-gold);border-color:var(--x-gold);color:var(--x-acc)}',
+    '.esc-ui .p-btn.edit{background:transparent;border-color:var(--x-gold);color:var(--x-goldb)}',
+    '.esc-ui .p-btn.no{background:transparent;border-color:var(--x-bad);color:var(--x-bad)}',
+    '.esc-ui .p-btn:disabled,.esc-ui .b:disabled{opacity:.5;cursor:default;transform:none}',
+    // «Antes de publicar» (la ventana de Mi PJ)
+    '#mipj-modal{--m-r:16px;font-family:var(--m-sans);color:var(--m-parchment);font-size:14px;line-height:1.45;text-align:left;position:fixed;inset:0;z-index:99999;background:rgba(8,7,14,.6);display:flex;align-items:center;justify-content:center;padding:16px}',
+    '#mipj-modal *{box-sizing:border-box}',
+    '#mipj-modal .mb{width:min(520px,100%);max-height:90vh;overflow:auto;border-radius:var(--m-r);padding:20px 22px;background:radial-gradient(500px 200px at 0% 0%,color-mix(in srgb,var(--m-arcane-bright) 14%,transparent),transparent 70%),var(--m-panel);border:1px solid var(--m-gold);box-shadow:0 30px 80px -30px #000}',
+    '#mipj-modal h3{margin:0 0 4px;font-family:var(--m-serif);font-style:italic;font-weight:500;font-size:28px;color:var(--m-gold-bright)}',
+    '#mipj-modal p{margin:6px 0 10px;color:var(--m-parchment-dim)}',
+    '#mipj-modal ul{margin:0 0 14px;padding:0;list-style:none}',
+    '#mipj-modal li{padding:8px 10px;margin:6px 0;border-radius:10px;border-left:3px solid var(--m-bad);background:color-mix(in srgb,var(--m-bad) 10%,transparent);color:var(--m-parchment)}',
+    '#mipj-modal .bt{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}',
+    '#mipj-modal button.b{font:700 12.5px var(--m-sans);border-radius:999px;padding:8px 14px;cursor:pointer;border:1px solid var(--m-line-strong);background:color-mix(in srgb,var(--m-panel-2) 90%,transparent);color:var(--m-parchment);transition:border-color .2s,transform .2s}',
+    '#mipj-modal button.b:hover{border-color:var(--m-gold);transform:translateY(-1px)}',
+    '#mipj-modal button.b.pri{background:var(--m-gold);border-color:var(--m-gold);color:var(--m-accent-ink)}',
+    // El panel: un iframe sin marco ni fondo; lo que se ve es el «Mi PJ» de siempre, dibujado por PAM
+    '.marco{position:fixed;right:0;bottom:0;z-index:99990;width:1px;height:1px;border:0;background:transparent;color-scheme:normal}',
+    ':host([data-skin="pixel"]) .esc-ui .puerta,:host([data-skin="pixel"]) .esc-ui .p-paso,:host([data-skin="pixel"]) .esc-ui .p-btn,:host([data-skin="pixel"]) #mipj-modal .mb{border-radius:0}'
+  ].join('\n');
+
   var host = document.createElement('div');
   host.id = 'pam-agente';
   document.body.appendChild(host);
   var raiz = host.attachShadow({ mode: 'open' });
-  var estilo = document.createElement('style');
-  estilo.textContent = [
-    ':host{all:initial}',
-    '.pastilla{position:fixed;right:16px;bottom:16px;z-index:2147483000;background:#2b2440;color:#f3ead7;border:1px solid #6b62ae;border-radius:999px;padding:8px 14px;font:600 13px system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.35)}',
-    '.marco{position:fixed;right:16px;bottom:60px;z-index:2147483000;width:400px;height:600px;max-width:calc(100vw - 32px);max-height:calc(100vh - 80px);border:1px solid #6b62ae;border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.45);background:#1d1830;display:none}',
-    '.marco.abierto{display:block}',
-    '.marco iframe{width:100%;height:100%;border:0;border-radius:10px}',
-    '.fondo{position:fixed;inset:0;z-index:2147483600;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;font:14px system-ui,sans-serif}',
-    '.caja{background:#f6f1e6;color:#222;border-radius:10px;max-width:760px;width:calc(100vw - 32px);max-height:calc(100vh - 32px);overflow:auto;padding:18px 20px;box-shadow:0 10px 40px rgba(0,0,0,.5)}',
-    '.caja h3{margin:0 0 6px;font-size:17px}', '.caja p{margin:6px 0}', '.caja small{color:#555}',
-    '.caja textarea{width:100%;box-sizing:border-box;min-height:160px;font:12px ui-monospace,Consolas,monospace;margin:8px 0;padding:8px}',
-    '.caja textarea[readonly]{background:#ebe5d6}', '.caja ul{margin:6px 0 6px 18px;padding:0}',
-    '.dif{font:12px ui-monospace,Consolas,monospace;white-space:pre-wrap;word-break:break-word;background:#fff;border:1px solid #d8cfbb;border-radius:6px;padding:6px 8px;max-height:45vh;overflow:auto}',
-    '.dif .mas{background:#e3f4e6;color:#005c1f}', '.dif .menos{background:#f9e1e3;color:#a3000d;text-decoration:line-through}', '.dif .corte{color:#999}',
-    '.botones{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px}',
-    '.botones button{font:600 13px system-ui,sans-serif;padding:7px 14px;border-radius:6px;border:1px solid #888;background:#fff;cursor:pointer}',
-    '.botones .si{background:#005c1f;border-color:#005c1f;color:#fff}', '.botones .no{background:#a3000d;border-color:#a3000d;color:#fff}'
-  ].join('\n');
-  raiz.appendChild(estilo);
+  var estilo = document.createElement('style'); estilo.textContent = CSS_ESC; raiz.appendChild(estilo);
+  var estiloTema = document.createElement('style'); raiz.appendChild(estiloTema);
+
+  function aplicarTema(tema) {
+    var t = Object.assign({}, TEMA_AVADENSE, tema || {});
+    estiloTema.textContent = ':host{' + Object.keys(t).filter(function (k) { return k !== 'skin'; }).map(function (k) { return '--m-' + k + ':' + t[k]; }).join(';') + '}';
+    host.setAttribute('data-skin', t.skin || 'avadense');
+    // las fuentes del tema, como hacía Mi PJ
+    var fams = ['Cormorant Garamond', 'Nunito'];
+    [t.serif, t.sans].forEach(function (f) { var n = String(f || '').split(',')[0].replace(/["']/g, '').trim(); if (n && !/^(Georgia|system-ui|serif|sans-serif|monospace)$/i.test(n) && fams.indexOf(n) < 0) { fams.push(n); } });
+    var l = document.getElementById('mipj-fonts');
+    if (!l) { l = document.createElement('link'); l.id = 'mipj-fonts'; l.rel = 'stylesheet'; document.head.appendChild(l); }
+    l.href = 'https://fonts.googleapis.com/css2?' + fams.map(function (f) { return 'family=' + encodeURIComponent(f).replace(/%20/g, '+') + ':ital,wght@0,400;0,600;0,700;1,500'; }).join('&') + '&display=swap';
+    return { skin: t.skin || 'avadense' };
+  }
+  aplicarTema(GM_getValue('mipj.tema', null) ? (function () { try { return JSON.parse(GM_getValue('mipj.tema', 'null')); } catch (e) { return null; } })() : null);
 
   function el(tag, attrs, hijos) {
     var e = document.createElement(tag);
@@ -255,21 +388,6 @@
     });
     (hijos || []).forEach(function (h) { if (h) { e.appendChild(h); } });
     return e;
-  }
-
-  function dialogo(titulo, cuerpo, botones) {
-    return new Promise(function (resolver) {
-      var fila = el('div', { clase: 'botones' });
-      var caja = el('div', { clase: 'caja', role: 'dialog', 'aria-modal': 'true' }, [el('h3', { texto: titulo })].concat(cuerpo, [fila]));
-      var fondo = el('div', { clase: 'fondo' }, [caja]);
-      botones.forEach(function (b) {
-        var bt = el('button', { texto: b.texto, clase: b.clase || '', type: 'button' });
-        bt.addEventListener('click', function () { if (b.alPulsar && b.alPulsar() === false) { return; } fondo.remove(); resolver(b.id); });
-        fila.appendChild(bt);
-      });
-      raiz.appendChild(fondo);
-      var primero = fila.querySelector('button'); if (primero) { primero.focus(); }
-    });
   }
 
   // Comparación por líneas con dos de contexto (la de la puerta del Escriba).
@@ -302,90 +420,217 @@
     return res;
   }
 
-  function vistaDiferencias(antes, despues) {
-    var caja = el('div', { clase: 'dif' });
-    compararLineas(antes, despues).forEach(function (x) {
-      caja.appendChild(el('div', { clase: x.t === '+' ? 'mas' : x.t === '-' ? 'menos' : x.t === '…' ? 'corte' : '', texto: (x.t === '=' ? '  ' : x.t === '…' ? '…' : x.t + ' ') + x.l }));
+  // ---------------------------------------------------------------
+  // PUERTA DE VALIDACIÓN (la del Escriba)
+  // accion = { titulo, explicacion, avisos, pasos: [{ tipo:'editar', post, original, nuevo, motivo, descripcion } |
+  //                                                  { tipo:'publicar', tema, texto, descripcion }] }
+  // «enlace del paso n» en un texto se cambia por el enlace al mensaje que publicó (o editó) el paso n.
+  // Devuelve { resultado: 'aceptada'|'denegada'|'fallida'|'parcial'|'igual', pasos }
+  // ---------------------------------------------------------------
+  function abrirPuerta(accion) {
+    var cuenta = cuentaConectada();
+    if (!cuenta) { return Promise.reject(new Error('No hay ninguna cuenta conectada en el foro.')); }
+    if (!accion || !Array.isArray(accion.pasos) || !accion.pasos.length) { return Promise.reject(new Error('La puerta no tiene pasos.')); }
+    accion.pasos.forEach(function (paso) {
+      if (paso.tipo === 'editar') {
+        if (!(parseInt(paso.post, 10) > 0) || typeof paso.original !== 'string' || typeof paso.nuevo !== 'string') { throw new Error('Paso de edición incompleto.'); }
+        if (!paso.igual && mismoTexto(paso.original, paso.nuevo)) { paso.igual = 'El mensaje ya tiene exactamente este texto.'; }
+      } else if (paso.tipo === 'publicar') {
+        if (!(parseInt(paso.tema, 10) > 0) || typeof paso.texto !== 'string' || !paso.texto.trim()) { throw new Error('Paso de publicación incompleto.'); }
+      } else { throw new Error('Tipo de paso desconocido: ' + paso.tipo); }
     });
-    return caja;
-  }
+    // Si todo ya está igual, no hay nada que aceptar: no se abre la puerta.
+    if (accion.pasos.every(function (p) { return p.igual; })) {
+      return Promise.resolve({ resultado: 'igual', pasos: accion.pasos.map(function () { return { estado: 'igual' }; }) });
+    }
+    return new Promise(function (resolver) {
+      var fondo = el('div', { clase: 'esc-ui puerta-fondo' });
+      var dlg = el('div', { clase: 'puerta', role: 'dialog', 'aria-modal': 'true', 'aria-label': accion.titulo || 'Puerta' });
+      fondo.appendChild(dlg);
+      dlg.appendChild(el('div', { clase: 'p-cab' }, [el('b', { texto: accion.titulo || 'Confirmar' }), el('small', { texto: cuenta.nombre })]));
+      if (accion.explicacion) { dlg.appendChild(el('div', { clase: 'p-expl', texto: accion.explicacion })); }
+      (accion.avisos || []).forEach(function (a) { dlg.appendChild(el('div', { clase: 'aviso', texto: a })); });
 
-  // Puerta para publicar: nada se publica sin pasar por aquí.
-  function puertaPublicar(d) {
-    var tema = parseInt(d.tema, 10);
-    if (!(tema > 0)) { throw new Error('Tema no válido.'); }
-    if (typeof d.mensaje !== 'string' || !d.mensaje.trim()) { throw new Error('Mensaje vacío.'); }
-    var area = el('textarea', { readonly: 'readonly' }); area.value = d.mensaje;
-    var cuerpo = [
-      el('p', { texto: 'PAM quiere responder en el tema t' + tema + ' con tu cuenta (' + ((cuentaConectada() || {}).nombre || 'sin sesión') + ').' }),
-      d.motivo ? el('p', { texto: 'Motivo: ' + d.motivo }) : null, area,
-      el('small', { texto: 'Esta ventana es del script, no de PAM: lo que ves aquí es exactamente lo que se publicará.' })
-    ];
-    return dialogo('Publicar en el foro', cuerpo, [
-      { id: 'denegar', texto: 'Denegar', clase: 'no' },
-      { id: 'modificar', texto: 'Modificar', alPulsar: function () { area.removeAttribute('readonly'); area.focus(); return false; } },
-      { id: 'aceptar', texto: 'Aceptar', clase: 'si' }
-    ]).then(function (dec) {
-      if (dec !== 'aceptar') { return { publicado: false, decision: dec }; }
-      var texto = area.value;
-      return responderTema(tema, texto).then(function (r) {
-        return { publicado: r.estado === 'ok', decision: 'aceptar', modificado: texto !== d.mensaje, estado: r.estado, post: r.post || null, detalle: r.detalle || null };
+      var editables = [], estados = [];
+      accion.pasos.forEach(function (paso, k) {
+        var caja = el('div', { clase: 'p-paso' });
+        var tituloPaso = paso.tipo === 'editar' ? 'Editar mensaje' : 'Publicar en el tema';
+        if (paso.igual) {
+          var estadoIgual = el('span', { clase: 'p-estado ok', texto: 'Ya está igual' });
+          estados.push(estadoIgual);
+          caja.appendChild(el('div', { clase: 'p-paso-cab' }, [el('span', { texto: (k + 1) + '. ' + (paso.titulo || tituloPaso) }), estadoIgual]));
+          caja.appendChild(el('div', { clase: 'p-nota', texto: paso.igual + ' No se toca.' }));
+          dlg.appendChild(caja);
+          return;
+        }
+        var enlace = paso.tipo === 'editar' ? '/post?p=' + paso.post + '&mode=editpost' : '/t' + paso.tema + '-';
+        var estado = el('span', { clase: 'p-estado neutro', texto: 'Pendiente' });
+        estados.push(estado);
+        caja.appendChild(el('div', { clase: 'p-paso-cab' }, [el('span', { texto: (k + 1) + '. ' + tituloPaso + (paso.descripcion ? ' · ' + paso.descripcion : '') }), estado]));
+        caja.appendChild(el('a', { href: enlace, target: '_blank', rel: 'noopener', texto: paso.tipo === 'editar' ? 'Ver el mensaje' : 'Ver el tema' }));
+        var area = el('textarea', { clase: 'p-texto', spellcheck: 'false' });
+        area.value = paso.tipo === 'editar' ? paso.nuevo : paso.texto;
+        area.readOnly = true;
+        var vista = el('div', { clase: 'p-diff' });
+        var pintarDiff = function () {
+          vista.replaceChildren();
+          compararLineas(paso.original, area.value).forEach(function (x) {
+            vista.appendChild(el('div', { clase: 'd' + (x.t === '+' ? ' mas' : x.t === '-' ? ' menos' : x.t === '…' ? ' corte' : ''), texto: (x.t === '=' ? '  ' : x.t + ' ') + x.l }));
+          });
+        };
+        if (paso.tipo === 'editar') {
+          pintarDiff(); caja.appendChild(vista); area.hidden = true;
+          var t; area.addEventListener('input', function () { clearTimeout(t); t = setTimeout(pintarDiff, 250); });
+        }
+        caja.appendChild(area);
+        editables.push({ paso: paso, area: area });
+        dlg.appendChild(caja);
+      });
+
+      var info = el('div', { clase: 'p-info' });
+      dlg.appendChild(info);
+      var bAceptar = el('button', { clase: 'p-btn ok', type: 'button', texto: 'Aceptar' });
+      var bModificar = el('button', { clase: 'p-btn edit', type: 'button', texto: 'Modificar' });
+      var bDenegar = el('button', { clase: 'p-btn no', type: 'button', texto: 'Denegar' });
+      var botones = el('div', { clase: 'p-botones' }, [bDenegar, bModificar, bAceptar]);
+      dlg.appendChild(botones);
+      raiz.appendChild(fondo);
+      bAceptar.focus();
+
+      function cerrar(res) { fondo.remove(); resolver(res); }
+      bDenegar.addEventListener('click', function () { cerrar({ resultado: 'denegada', pasos: [] }); });
+      bModificar.addEventListener('click', function () {
+        editables.forEach(function (x) { x.area.readOnly = false; x.area.hidden = false; });
+        bModificar.disabled = true;
+        bAceptar.textContent = 'Aceptar con mis cambios';
+        info.textContent = 'Editá el texto. Se publica exactamente lo que escribas.';
+        var primero = dlg.querySelector('textarea:not([readonly])'); if (primero) { primero.focus(); }
+      });
+      bAceptar.addEventListener('click', function () {
+        var ahora = cuentaConectada();
+        if (!ahora || ahora.id !== cuenta.id) { info.className = 'p-info error'; info.textContent = 'La cuenta conectada ya no es ' + cuenta.nombre + '. No se hizo nada.'; return; }
+        editables.forEach(function (x) { x.area.readOnly = true; x.paso.modificado = (x.paso.tipo === 'editar' ? x.paso.nuevo : x.paso.texto) !== x.area.value; if (x.paso.tipo === 'editar') { x.paso.nuevo = x.area.value; } else { x.paso.texto = x.area.value; } });
+        bAceptar.disabled = true; bModificar.disabled = true; bDenegar.disabled = true;
+        info.className = 'p-info';
+        var resultados = [], k = 0;
+        function siguiente() {
+          if (k >= accion.pasos.length) { return Promise.resolve(); }
+          var idx = k++, paso = accion.pasos[idx];
+          if (paso.igual) { resultados.push({ estado: 'igual', post: paso.post || null }); return siguiente(); }
+          var faltaEnlace = null;
+          var conEnlaces = function (tx) {
+            return String(tx).replace(/«enlace del paso (\d+)»/g, function (m, n) {
+              var r0 = resultados[parseInt(n, 10) - 1];
+              if (!r0 || !r0.post) { faltaEnlace = n; return m; }
+              return enlacePost(r0.post);
+            });
+          };
+          if (paso.tipo === 'publicar') { paso.texto = conEnlaces(paso.texto); }
+          if (paso.tipo === 'editar') { paso.nuevo = conEnlaces(paso.nuevo); }
+          if (faltaEnlace) {
+            resultados.push({ estado: 'error', detalle: 'Falta el enlace del paso ' + faltaEnlace + '.' });
+            estados[idx].className = 'p-estado mal'; estados[idx].textContent = 'No hecho';
+            info.className = 'p-info error';
+            info.textContent = 'Paso ' + (idx + 1) + ': no tengo el enlace del mensaje del paso ' + faltaEnlace + '. Los pasos anteriores sí se hicieron.';
+            return Promise.resolve();
+          }
+          estados[idx].className = 'p-estado warn'; estados[idx].textContent = 'En curso…';
+          var avisar = function (msg) { info.textContent = msg; };
+          return ejecutarPaso(cuenta, paso, avisar).catch(function (e) { return { estado: 'error', detalle: e.message }; }).then(function (r) {
+            r.modificado = !!paso.modificado;
+            resultados.push(r);
+            if (r.estado === 'ok') { estados[idx].className = 'p-estado ok'; estados[idx].textContent = 'Hecho'; info.textContent = ''; return siguiente(); }
+            estados[idx].className = 'p-estado mal'; estados[idx].textContent = 'No hecho';
+            var motivo = r.estado === 'cambiado' ? 'El mensaje cambió desde la vista previa; no se tocó.'
+              : r.estado === 'flood' ? 'El foro sigue pidiendo esperar.'
+              : r.estado === 'antispam' ? 'El foro pide una comprobación antispam: publicalo a mano.'
+              : (r.detalle || 'Error desconocido.');
+            for (var q = idx + 1; q < estados.length; q++) { if (!accion.pasos[q].igual) { estados[q].textContent = 'No ejecutado'; } }
+            info.className = 'p-info error';
+            info.textContent = 'Paso ' + (idx + 1) + ': ' + motivo + (idx > 0 ? ' Los pasos anteriores sí se hicieron.' : '') + (idx + 1 < estados.length ? ' Los siguientes no se hicieron.' : '');
+            return null;
+          });
+        }
+        siguiente().then(function () {
+          var algunoOk = resultados.some(function (r) { return r.estado === 'ok'; });
+          var completos = resultados.length === accion.pasos.length && resultados.every(function (r) { return r.estado === 'ok' || r.estado === 'igual'; });
+          var todosOk = algunoOk && completos;
+          var nadaQueHacer = !algunoOk && completos && resultados.some(function (r) { return r.estado === 'igual'; });
+          var resultado = todosOk ? 'aceptada' : (nadaQueHacer ? 'igual' : (algunoOk ? 'parcial' : 'fallida'));
+          if (todosOk || nadaQueHacer) {
+            var iguales = resultados.filter(function (r) { return r.estado === 'igual'; }).length;
+            info.className = 'p-info okmsg';
+            info.textContent = nadaQueHacer ? 'No había nada que cambiar.' : 'Hecho' + (iguales ? ' (los pasos que ya estaban igual no se tocaron).' : '.');
+          }
+          var bCerrar = el('button', { clase: 'p-btn', type: 'button', texto: 'Cerrar' });
+          botones.replaceChildren(bCerrar);
+          bCerrar.focus();
+          bCerrar.addEventListener('click', function () { cerrar({ resultado: resultado, pasos: resultados }); });
+        });
       });
     });
   }
 
-  // Puerta para editar: enseña qué líneas cambian; «Modificar» deja retocar el texto final.
-  function puertaEditar(d) {
-    var post = parseInt(d.post, 10);
-    if (!(post > 0)) { throw new Error('Mensaje no válido.'); }
-    if (typeof d.original !== 'string' || typeof d.nuevo !== 'string') { throw new Error('Faltan los textos.'); }
-    if (d.original === d.nuevo) { return Promise.resolve({ editado: false, decision: 'igual' }); }
-    var area = el('textarea', { readonly: 'readonly' }); area.value = d.nuevo; area.style.display = 'none';
-    var dif = vistaDiferencias(d.original, d.nuevo);
-    var cuerpo = [
-      el('p', { texto: 'PAM quiere editar tu mensaje ' + post + (d.titulo ? ' (' + d.titulo + ')' : '') + '. En verde lo que se añade, en rojo lo que se quita:' }),
-      d.motivo ? el('p', { texto: 'Motivo: ' + d.motivo }) : null, dif, area,
-      el('small', { texto: 'Esta ventana es del script, no de PAM. Si el mensaje ha cambiado desde que PAM lo leyó, no se tocará.' })
-    ];
-    return dialogo('Editar un mensaje del foro', cuerpo, [
-      { id: 'denegar', texto: 'Denegar', clase: 'no' },
-      { id: 'modificar', texto: 'Modificar', alPulsar: function () { dif.style.display = 'none'; area.style.display = ''; area.removeAttribute('readonly'); area.focus(); return false; } },
-      { id: 'aceptar', texto: 'Aceptar', clase: 'si' }
-    ]).then(function (dec) {
-      if (dec !== 'aceptar') { return { editado: false, decision: dec }; }
-      var texto = area.value;
-      return editarMensaje(post, d.original, texto, d.motivo).then(function (r) {
-        return { editado: r.estado === 'ok', decision: 'aceptar', modificado: texto !== d.nuevo, estado: r.estado, detalle: r.detalle || null };
-      });
+  // «Antes de publicar» (la de Mi PJ): problemas que PAM ha visto en el mensaje del editor.
+  function modalAntesDePublicar(probs, encabezado) {
+    return new Promise(function (resolver) {
+      var m = el('div', { id: 'mipj-modal' });
+      var lista = el('ul', {}, probs.map(function (p) { return el('li', { texto: String(p) }); }));
+      var bSeguir = el('button', { clase: 'b', type: 'button', texto: 'Publicar igual' });
+      var bVolver = el('button', { clase: 'b pri', type: 'button', texto: 'Volver a corregir' });
+      m.appendChild(el('div', { clase: 'mb', role: 'dialog', 'aria-modal': 'true' }, [
+        el('h3', { texto: 'Antes de publicar' }),
+        el('p', { texto: (encabezado || 'Revisé el mensaje y ') + (probs.length === 1 ? 'hay algo que no cuadra' : 'hay ' + probs.length + ' cosas que no cuadran') + ':' }),
+        lista, el('div', { clase: 'bt' }, [bSeguir, bVolver])
+      ]));
+      var fin = function (v) { m.remove(); resolver(v); };
+      bSeguir.addEventListener('click', function () { fin('seguir'); });
+      bVolver.addEventListener('click', function () { fin('volver'); });
+      m.addEventListener('click', function (e) { if (e.target === m) { fin('volver'); } });
+      raiz.appendChild(m);
+      bVolver.focus();
     });
   }
 
   // ---------------------------------------------------------------
-  // Panel de PAM dentro del foro
+  // Panel «Mi PJ» (página de PAM en un iframe que ocupa justo lo que ocupa el panel)
   // ---------------------------------------------------------------
-  var marco = el('div', { clase: 'marco' });
-  var iframe = el('iframe', { title: 'PAM', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) });
-  marco.appendChild(iframe);
-  var pastilla = el('button', { clase: 'pastilla', type: 'button', texto: 'PAM' });
-  pastilla.addEventListener('click', function () { marco.classList.toggle('abierto'); });
-  raiz.appendChild(marco);
-  raiz.appendChild(pastilla);
+  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) });
+  raiz.appendChild(iframe);
+
+  // Las tres formas de publicar/editar llegan a la misma puerta.
+  function resultadoUnPaso(res, tipo) {
+    var r = (res.pasos && res.pasos[0]) || {};
+    var hecho = res.resultado === 'aceptada';
+    var base = { decision: res.resultado === 'denegada' ? 'denegar' : res.resultado === 'igual' ? 'igual' : 'aceptar', estado: r.estado || null, detalle: r.detalle || null, modificado: !!r.modificado };
+    if (tipo === 'publicar') { base.publicado = hecho; base.post = r.post || null; } else { base.editado = hecho; }
+    return base;
+  }
 
   var canal = crearCanal(function () { return iframe.contentWindow; }, PAM.origen, {
     'hola': hola,
     'foro.leer': leer,
-    'foro.publicar': puertaPublicar,
-    'foro.editar': puertaEditar,
+    'foro.puerta': function (d) { return abrirPuerta(d); },
+    'foro.publicar': function (d) {
+      return abrirPuerta({ titulo: d.titulo || 'Publicar en el foro', explicacion: d.motivo || '', pasos: [{ tipo: 'publicar', tema: d.tema, texto: d.mensaje, descripcion: d.descripcion || '' }] })
+        .then(function (res) { return resultadoUnPaso(res, 'publicar'); });
+    },
+    'foro.editar': function (d) {
+      return abrirPuerta({ titulo: d.titulo || 'Editar un mensaje', explicacion: d.motivo || '', pasos: [{ tipo: 'editar', post: d.post, original: d.original, nuevo: d.nuevo, motivo: d.motivo || '', descripcion: d.descripcion || '' }] })
+        .then(function (res) { return resultadoUnPaso(res, 'editar'); });
+    },
     'almacen.leer': almacen.leer,
     'almacen.guardar': almacen.guardar,
     'almacen.legado': almacen.legado,
+    // El panel pide el tamaño exacto que ocupa (pastilla o caja abierta, con su margen y su sombra).
     'panel.tamano': function (d) {
-      var an = Math.max(300, Math.min(900, parseInt(d.ancho, 10) || 400)), al = Math.max(300, Math.min(1200, parseInt(d.alto, 10) || 600));
-      marco.style.width = an + 'px'; marco.style.height = al + 'px'; return { ancho: an, alto: al };
+      var an = Math.max(1, Math.min(window.innerWidth, parseInt(d.ancho, 10) || 1)), al = Math.max(1, Math.min(window.innerHeight, parseInt(d.alto, 10) || 1));
+      iframe.style.width = an + 'px'; iframe.style.height = al + 'px'; return { ancho: an, alto: al };
     },
-    'panel.mostrar': function (d) { marco.classList.toggle('abierto', !!d.abierto); return { abierto: marco.classList.contains('abierto') }; },
-    'panel.pastilla': function (d) { pastilla.textContent = String(d.texto || 'PAM').slice(0, 40); return { ok: true }; }
+    'panel.tema': function (d) { return aplicarTema(d.tema); }
   });
+  // El panel calcula su tamaño con la ventana del foro (dentro del iframe no la ve).
+  window.addEventListener('resize', function () { canal.avisar('ventana.cambio', ventana()); });
 
   // ---------------------------------------------------------------
   // Editor del foro: antes de enviar, PAM lo revisa
@@ -408,11 +653,7 @@
       canal.pedir('editor.revisar', { texto: textoEditor(ta), ruta: location.pathname + location.search }, 3000).then(function (r) {
         var avisos = (r && r.avisos) || [];
         if (!avisos.length) { seguir(); return; }
-        var lista = el('ul', {}, avisos.map(function (a) { return el('li', { texto: String(a) }); }));
-        dialogo('Antes de publicar', [el('p', { texto: 'PAM ha revisado el mensaje y ha encontrado:' }), lista], [
-          { id: 'volver', texto: 'Volver a editar' },
-          { id: 'seguir', texto: 'Publicar igualmente', clase: 'no' }
-        ]).then(function (dec) { if (dec === 'seguir') { seguir(); } });
+        modalAntesDePublicar(avisos, r.encabezado).then(function (dec) { if (dec === 'seguir') { seguir(); } });
       }, function (err) {
         console.warn('[PAM agente] sin revisión:', err.message); // si PAM no contesta, no se bloquea al usuario
         seguir();
