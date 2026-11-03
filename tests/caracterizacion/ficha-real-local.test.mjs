@@ -15,7 +15,7 @@ import { partesVigentes } from '../../js/lectores/PartesFicha.js';
 const RUTA = process.env.PAM_FICHA_IRVIN;
 const hay = !!RUTA && existsSync(RUTA);
 
-test('ficha real de Irvin Giles (auditoría): cinco partes, 64 trasfondos y todos los arcanos', { skip: hay ? false : 'sin PAM_FICHA_IRVIN' }, () => {
+test('ficha real de Irvin Giles (auditoría): cinco partes, 64 trasfondos y todos los arcanos', { skip: hay ? false : 'sin PAM_FICHA_IRVIN' }, async () => {
   const json = f => JSON.parse(readFileSync(new URL('../../data/' + f, import.meta.url), 'utf8'));
   const L = new LectorFicha(new Sistema(json('sistema.json')), new Compendio(json('arcanos.json')));
   const t = leerPaginaTema(new JSDOM(readFileSync(RUTA, 'utf8')).window.document);
@@ -54,4 +54,6 @@ test('ficha real de Irvin Giles (auditoría): cinco partes, 64 trasfondos y todo
   assert.equal(comprobados, 12);
   assert.ok(f.arcanos.every(a => a.origen.post === 339215));
   assert.equal(f.idiomas.length, 12);
+  // (El editor no se prueba aquí: esta página es el HTML que muestra el foro, en una sola línea; lo que se
+  //  edita de verdad es el BBCode original, que solo puede abrir el dueño de la ficha.)
 });

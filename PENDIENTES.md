@@ -23,7 +23,7 @@ Todo lo marcado como «comprobado» se ha verificado contra el código de `main`
 | F01 | Mi PJ lee solo el **primer mensaje** de la ficha; en fichas de varias partes se pierden atributos, magia y trasfondos (dos funciones, `leerFicha` en las dos mitades del script). | comprobado | ✔ fase 3 · `partesVigentes()` + `LectorFicha` por partes; Mi PJ lo usará en la fase 5 |
 | F02 | El lector de trasfondos de PAM no reconoce el orden «Tipo NIVEL: categoría» (`Biblioteca V: Arcanismo.`, `Informantes III: Contrabandistas (Zacharias Hayes).`) y los descarta sin avisar. Los formatos «Biblioteca — Medicina — Heridas mágicas III» sí funcionan. | comprobado con el código real | ✔ fase 3 · `LectorTrasfondo`: los cinco ejemplos y los formatos antiguos, con prueba contra el lector antiguo |
 | F03 | El personaje se identifica por el **nombre**: «Irvin Giles.» y «Irvin Giles» no coinciden y se crea otro; el parecido «Hana» ↔ «Hana Park» puede confundir personajes. | comprobado | ✔ fases 2–3 · `Personaje` (foro + tema) y `asociarPersonaje()`: por tema; por nombre solo como sugerencia |
-| F04/F07 | Al aplicar un canje se edita siempre el **primer mensaje**, aunque el dato esté en otro (en Irvin los trasfondos están en el 339216). La actualización de niveles busca «nombre + número» y no encaja con «número + nombre». | comprobado | 3 · ✔ cada dato sabe su mensaje (`origen.post`); 4 · el editor edita ese mensaje |
+| F04/F07 | Al aplicar un canje se edita siempre el **primer mensaje**, aunque el dato esté en otro (en Irvin los trasfondos están en el 339216). La actualización de niveles busca «nombre + número» y no encaja con «número + nombre». | comprobado | ✔ fases 3–4 · cada dato sabe su mensaje y `EditorFicha` edita solo ese (prueba con cinco partes) |
 | F05 | El Inspector toma como partes de la ficha los mensajes del dueño de más de 800 caracteres: mezcla la ficha vigente con canjes antiguos. | comprobado | ✔ fase 3 · el mismo lector para todos: la ficha son los mensajes seguidos del dueño al principio del tema; lo demás es historial. El Inspector lo usará en la fase 5 |
 | F09 | La importación de Excel usa SheetJS `xlsx@0.18.5` (CVE-2023-30533 y CVE-2024-22363). Riesgo práctico bajo: solo afecta al abrir un archivo manipulado. | comprobado | 8 · actualizar (cdn.sheetjs.com) o quitar si ya no se usa |
 | F10 | La sesión en la nube guarda con `PATCH` sin comprobar la versión: dos dispositivos a la vez pueden pisarse. | comprobado | 7 · usar la precondición `updateTime` de Firestore |
@@ -34,12 +34,12 @@ Todo lo marcado como «comprobado» se ha verificado contra el código de `main`
 | F15 | `fechaISO()` usa la fecha UTC: entre medianoche y la 1-2 h (hora de Madrid) da el día anterior. | comprobado | ✔ fase 1 · `core/fechas.js`: día local de cada usuario (pruebas con hora de Madrid y de Buenos Aires) |
 | F16 | `renderAll()` vuelve a pintar toda la Tabla de Canjes por cualquier cambio. | comprobado | 8 · páginas |
 | F17 | Versiones distintas en un mismo script (`@version 1.7.1` y `mipj-1.7.2`), CSS repetido y `leerSaldos()` copiado en Mi PJ y en el Inspector. | comprobado | 8 · se resuelve al ordenar |
-| R01 | Editor personalizado: una línea nueva detrás de la última de una lista (`…[/spoiler]`) queda fuera del desplegable; sin `[b]`, o en trasfondos, duplica el `[/spoiler]` y rompe todo lo que viene detrás. | comprobado (Mortimer) | 4 |
-| R02 | Editor personalizado: quitar el último elemento de una lista se lleva el `[/spoiler]`. | comprobado | 4 |
-| R03 | Varios arcanos nuevos del mismo nivel quedan en **orden inverso**. | comprobado | 4 |
+| R01 | Editor personalizado: una línea nueva detrás de la última de una lista (`…[/spoiler]`) queda fuera del desplegable; sin `[b]`, o en trasfondos, duplica el `[/spoiler]` y rompe todo lo que viene detrás. | comprobado (Mortimer) | ✔ fase 4 · la línea nueva va dentro del bloque, antes de los cierres que no son suyos, también si el bloque está en una sola línea |
+| R02 | Editor personalizado: quitar el último elemento de una lista se lleva el `[/spoiler]`. | comprobado | ✔ fase 4 · al quitar, los cierres se quedan; un bloque vacío queda con «-» |
+| R03 | Varios arcanos nuevos del mismo nivel quedan en **orden inverso**. | comprobado | ✔ fase 4 · cada nueva va tras la anterior del mismo grupo |
 | R04 | Los arcanos nuevos salen sin descripción: al leer la ficha se descarta la descripción de los arcanos oficiales. | comprobado | ✔ fase 3 · el lector guarda la descripción de todos los arcanos (55/55 en Mortimer; antes 1) |
 | R05 | Los rituales «Nombre \| Latín» se renombran «Nombre (Latín)» y luego no se encuentran ni para añadir ni para quitar. | comprobado | ✔ fase 3 · el nombre queda como en la ficha («Nombre | Latín») y se enlaza al Compendio por id |
-| R06 | La pestaña «Otros» (idiomas, trasfondos nuevos, ventajas, especializaciones, talentos, títulos) queda siempre para hacer a mano, y PAM dice «Agregado» aunque la línea quede mal puesta. | comprobado | 4 |
+| R06 | La pestaña «Otros» (idiomas, trasfondos nuevos, ventajas, especializaciones, talentos, títulos) queda siempre para hacer a mano, y PAM dice «Agregado» aunque la línea quede mal puesta. | comprobado | ✔ fase 4 · idiomas, trasfondos, ventajas, especializaciones, talentos y títulos; cada cambio se comprueba releyendo la ficha y, si no queda bien, se deshace y va a «a mano» |
 | R07 | Datos del sistema duplicados con nombres distintos («Esquivar»/«Esquiva», «Volar»/«Vuelo», «Seducir»/«Seducción»), unidos por una tabla de traducción; tres listas de personajes distintas. | comprobado | ✔ fases 1–2 · datos unificados (`Sistema`) y una sola lista de personajes (`leerLegado` une fichas y Registro por id) |
 | R08 | La bóveda llega siempre a 0 al mandar desde el foro: «Grageas disponibles» de la Tabla de Canjes no se guarda. | comprobado | 2 · ✔ `Boveda` dentro del `Personaje`; 6 · que la Tabla de Canjes la use |
 
@@ -60,6 +60,10 @@ Con la página guardada que usó la auditoría (no se sube: lleva datos de sesi�
 - lee los Puntos de Destino (13), atributos, habilidades, artes, idiomas, ventajas y especializaciones.
 
 Pasarlo por la ficha real destapó y corrigió seis fallos que la ficha inventada no tenía: título de caja pegado a la primera línea (modelo extendido), sello entre partes, descripción en la misma línea del trasfondo, encabezados «▋ HECHIZOS:» y «… | 28:», viñetas «●» y una línea de trasfondo que se fundía con otra.
+
+## Límite conocido del editor (fase 4)
+
+El editor se ha probado con el BBCode real de Mortimer (una parte) y con una ficha inventada de cinco partes. La página de Irvin Giles que tenemos es el HTML que muestra el foro, no su BBCode, así que con su ficha real solo se ha probado el lector. Conviene probar el editor con el BBCode de alguna ficha real de varias partes cuando se pueda (lo puede sacar su dueño desde «Editar»).
 
 ## Cómo se trabaja cada punto
 

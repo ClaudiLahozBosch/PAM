@@ -53,7 +53,7 @@ SECT['IDIOMAS MUGGLES'] = 'o:idiomas'; SECT['IDIOMAS MAGICOS'] = 'o:idiomas';
  * Admite adornos y recuentos: «▋ HECHIZOS:», «HECHIZOS BÁSICOS | 28:», «POCIONES (12)».
  * @returns {string[]|null}
  */
-function seccion(ln) {
+export function seccion(ln) {
   const directo = SECT[up(ln)];
   if (directo !== undefined) return [directo];
   // «{Los Trasfondos»», «▋ HECHIZOS:», «HECHIZOS BÁSICOS | 28:»
