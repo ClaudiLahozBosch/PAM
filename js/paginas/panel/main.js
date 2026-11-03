@@ -1,14 +1,16 @@
 // @ts-check
 // Arranque del panel «Mi PJ» dentro del foro (el agente lo muestra en un iframe sin marco).
-import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=0.3.4';
-import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=0.3.4';
-import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial } from '../../datos/cargar.js?v=0.3.4';
-import { LectorFicha } from '../../lectores/LectorFicha.js?v=0.3.4';
-import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=0.3.4';
-import { crearPanelMiPj } from './MiPjPanel.js?v=0.3.4';
-import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=0.3.4';
-import { crearActividad } from '../../servicios/ActividadDelForo.js?v=0.3.4';
-import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=0.3.4';
+import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=0.3.5';
+import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=0.3.5';
+import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial } from '../../datos/cargar.js?v=0.3.5';
+import { LectorFicha } from '../../lectores/LectorFicha.js?v=0.3.5';
+import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=0.3.5';
+import { crearPanelMiPj } from './MiPjPanel.js?v=0.3.5';
+import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=0.3.5';
+import { crearActividad } from '../../servicios/ActividadDelForo.js?v=0.3.5';
+import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=0.3.5';
+import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=0.3.5';
+import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=0.3.5';
 
 const CACHE_MIN = 30; // como Mi PJ: si lo leído tiene más de media hora, se vuelve a leer al abrir
 const root = /** @type {HTMLElement} */ (document.getElementById('mipj'));
@@ -25,12 +27,12 @@ async function arrancar() {
   if (!hola.cuenta) { await agente.tamano(1, 1); return; } // sin sesión, Mi PJ no se mostraba
 
   // lo que guardaba el «Mi PJ» antiguo (mismo script en Tampermonkey), la primera vez: el tema, los roles ocultos,
-  // qué foros son de rol y las marcas de «segundo oficial»
+  // qué foros son de rol, las marcas de «segundo oficial» y la Biblioteca de oficiales (último escaneo, caché y ★)
   let guardado = null; try { guardado = window.localStorage; } catch { /* sin almacenamiento */ }
   try {
     const L = await agente.legado();
-    for (const k of ['mipj.tema', 'mipj.ocultos.' + hola.cuenta.id, 'mipj.forosRol', 'mipj.of.cuarto', 'mipj.of.abierta']) {
-      if (L[k] == null || !guardado || guardado.getItem(k) != null) continue;
+    for (const k of ['mipj.tema', 'mipj.ocultos.' + hola.cuenta.id, 'mipj.forosRol', 'mipj.of.cuarto', 'mipj.of.abierta', CLAVES_BIBLIOTECA.ultimo, CLAVES_BIBLIOTECA.favs, CLAVES_BIBLIOTECA.cache]) {
+      if (L[k] == null || L[k] === '' || !guardado || guardado.getItem(k) != null) continue;
       guardado.setItem(k, typeof L[k] === 'string' ? L[k] : JSON.stringify(L[k]));
     }
   } catch { /* sin datos antiguos */ }
@@ -47,6 +49,11 @@ async function arrancar() {
   panel = crearPanelMiPj({
     root, documento: document, guardado, agente, ventana: hola.ventana, cuenta: hola.cuenta,
     pamUrl: new URL('index.html', location.href).href,
+    biblioteca: cfg?.actividad?.biblioteca ? (() => {
+      const origen = 'https://' + hola.foro;
+      const lectorBib = crearLectorBiblioteca(agente, { origen, cfg: cfg.actividad.biblioteca, store: { get: () => memoria.gv(CLAVES_BIBLIOTECA.cache, { ediciones: {}, roles: {} }), set: v => memoria.sv(CLAVES_BIBLIOTECA.cache, v) } });
+      return { origen, escanear: lectorBib.escanear, guardarEnAgente: (k, v) => agente.guardarDato(k, v) };
+    })() : null,
     cargar: async () => aDatosMiPj(await leerMiPj(agente, { sistema, compendio, lector, foros, memoria, cierres }), sistema)
   });
   agente.atender('ventana.cambio', v => { panel.ventana(v); return {}; });

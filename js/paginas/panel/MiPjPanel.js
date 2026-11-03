@@ -5,11 +5,12 @@
 //   · el tamaño de la ventana es el del FORO (lo da el agente), y el panel le pide al agente el tamaño justo del iframe;
 //   · al arrastrar la esquina se usa la posición en la pantalla (el iframe se mueve mientras crece);
 //   · los enlaces abren la página del foro (<base target="_top"> en panel.html).
-// Las tarjetas que aún no están en PAM (biblioteca, canjes) lo dicen en vez de «Tocá Actualizar».
+// Las tarjetas que aún no están en PAM (canjes) lo dicen en vez de «Tocá Actualizar».
 // Arreglos: R09 (los oficiales cerrados ya no salen en curso) y R10 (✕ para ocultar un oficial hasta volver a escribir en él).
-import { aFecha } from '../../lectores/FechaForo.js?v=0.3.4';
-import { estadoSueldo } from '../../reglas/Sueldo.js?v=0.3.4';
-import { grageasOf } from '../../reglas/Oficiales.js?v=0.3.4';
+import { aFecha } from '../../lectores/FechaForo.js?v=0.3.5';
+import { estadoSueldo } from '../../reglas/Sueldo.js?v=0.3.5';
+import { grageasOf } from '../../reglas/Oficiales.js?v=0.3.5';
+import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=0.3.5';
 
 const TEMA_AVADENSE = { skin: 'avadense', ink: '#171a2b', panel: '#1e2236', 'panel-2': '#262a42', parchment: '#F1EADF', 'parchment-dim': '#a7a1b6', gold: '#B49768',
   'gold-bright': '#d6bd8f', 'arcane-bright': '#cf94a3', good: '#93b8a0', bad: '#d98377', 'line-strong': 'rgba(241,234,223,.16)', 'accent-ink': '#1b1e30',
@@ -70,9 +71,10 @@ function bgsDe(R) {
 /**
  * @param {{ root: HTMLElement, documento: Document, guardado?: Storage|null, cargar: () => Promise<any>,
  *   agente?: { tamano(an: number, al: number): Promise<any>, tema?(t: any): Promise<any> } | null,
- *   ventana: { ancho: number, alto: number }, pamUrl: string, cuenta?: { id: number, nombre: string } | null, ahora?: () => number }} dep
+ *   ventana: { ancho: number, alto: number }, pamUrl: string, cuenta?: { id: number, nombre: string } | null, ahora?: () => number,
+ *   biblioteca?: { escanear: (op: any, log: (m: string) => void) => Promise<any>, origen: string, guardarEnAgente?: (k: string, v: any) => Promise<any> } | null }} dep
  */
-export function crearPanelMiPj({ root, documento, guardado = null, cargar, agente = null, ventana, pamUrl, cuenta = null }) {
+export function crearPanelMiPj({ root, documento, guardado = null, cargar, agente = null, ventana, pamUrl, cuenta = null, biblioteca = null }) {
   const gv = (k, d) => { try { const v = guardado?.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
   const sv = (k, v) => { try { guardado?.setItem(k, JSON.stringify(v)); } catch (e) { /* sin espacio */ } };
   const YO = (cuenta && cuenta.nombre) || '', UID = (cuenta && cuenta.id) || 0;
@@ -159,8 +161,10 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
         ${B.nota ? `<div class="nota">Nota de ${esc(B.nota.autor)}: ${esc(B.nota.texto)}</div>` : ''}` : '<div class="dim">No encontré tu bóveda en el Panel de Bóvedas.</div>'}</div>`;
     }
     if (!(datos && ui.rapido)) {
-      h += `<div class="card"><div class="ct">📜 Biblioteca de oficiales<span class="sp"></span><a href="#" data-a="oficiales">abrir</a></div>
-        <div class="dim">Biblioteca de sucesos de El Profeta: cuáles están libres, en curso o abandonados. Marcalos con ★ y pasalos a PAM.</div>
+      const rb = BIB ? BIB.resumen() : null;
+      h += `<div class="card"><div class="ct">📜 Biblioteca de oficiales<span class="sp"></span><a href="#" data-a="oficiales">abrir</a></div>${rb
+        ? `<div class="row">${rb.libres} libres · ${rb.abandonados} abandonados${rb.favs ? ` · ★ ${rb.favs}` : ''}</div><div class="dim">Último escaneo: ${esc(leidoTxt(rb.fecha))}</div>`
+        : '<div class="dim">Biblioteca de sucesos de El Profeta: cuáles están libres, en curso o abandonados. Marcalos con ★ y pasalos a PAM.</div>'}
         <div class="row" style="margin-top:6px"><button class="b" data-a="oficiales">Abrir la biblioteca</button></div></div>`;
       h += `<div class="card" id="mipj-canjes"><div class="ct">⚖ Canjes</div><div class="dim">Para pedir un canje: en PAM armá el carrito y tocá «Preparar el canje» en la pastilla Mi PJ.</div></div>`;
     }
@@ -328,7 +332,7 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
     else if (k === 'ocultar') { ocultos[a.dataset.t] = +a.dataset.l || 1; sv(K.ocultos, ocultos); pintar(); }
     else if (k === 'ocultar-of') { ocultosOf[a.dataset.t] = +a.dataset.l || 0; sv(K.ocultosOf, ocultosOf); pintar(); }
     else if (k === 'zoom-' || k === 'zoom+') { ui.zoom = Math.min(1.4, Math.max(0.8, Math.round(((ui.zoom || 1) + (k === 'zoom+' ? 0.1 : -0.1)) * 10) / 10)); sv(K.ui, ui); aplicarTam(); }
-    else if (k === 'oficiales') { e.preventDefault(); error = 'La Biblioteca de oficiales ' + PENDIENTE.toLowerCase(); pintar(); }
+    else if (k === 'oficiales') { e.preventDefault(); if (BIB) BIB.abrir(); else { error = 'La Biblioteca de oficiales ' + PENDIENTE.toLowerCase(); pintar(); } }
     else if (k === 'pam-abrir') { documento.defaultView?.open(pamUrl + '#ficha', 'pam'); }
     else if (k === 'rapido') { ui.rapido = !ui.rapido; ui.rapidoQ = ''; sv(K.ui, ui); pintar(); const bd = root.querySelector('.bd'); if (bd) bd.scrollTop = 0; }
     else if (k === 'sueldo-ocultar' || k === 'sueldo-ver') { e.preventDefault(); ui.sinSueldo = k === 'sueldo-ocultar'; sv(K.ui, ui); pintar(); }
@@ -364,8 +368,10 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
   // El iframe mide justo lo que ocupa el panel, más su margen (16 px) y sitio para la sombra.
   const SOMBRA = 32;
   let ultimoTam = '';
+  let pantallaCompleta = false; // la Biblioteca de oficiales abierta: el iframe ocupa toda la ventana del foro
   function sincronizarTamano() {
     if (!agente) return;
+    if (pantallaCompleta) { const k = 'todo' + foro.ancho + 'x' + foro.alto; if (k !== ultimoTam) { ultimoTam = k; agente.tamano(foro.ancho, foro.alto).catch(() => {}); } return; }
     const r = root.getBoundingClientRect();
     const margen = root.classList.contains('estrecho') ? 8 : 16;
     const an = Math.ceil(r.width) + margen + SOMBRA, al = Math.ceil(r.height) + margen + SOMBRA;
@@ -386,6 +392,15 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
     documento.defaultView?.addEventListener('pointermove', mover); documento.defaultView?.addEventListener('pointerup', soltar);
   });
   root.addEventListener('dblclick', e => { if (!(/** @type {HTMLElement} */ (e.target)).closest('.grip')) return; delete ui.ancho; delete ui.alto; ui.zoom = 1; sv(K.ui, ui); aplicarTam(); });
+
+  /* ---------------- Biblioteca de oficiales (la ventana grande) ---------------- */
+  const BIB = biblioteca ? crearBibliotecaOficiales({
+    documento, gv, sv, borrar: k => { try { guardado?.removeItem(k); } catch (e) { /* nada */ } },
+    escanear: biblioteca.escanear, origen: biblioteca.origen, guardarEnAgente: biblioteca.guardarEnAgente,
+    alEscanear: () => pintar(),
+    alAbrir: () => { pantallaCompleta = true; sincronizarTamano(); },
+    alCerrar: () => { pantallaCompleta = false; sincronizarTamano(); }
+  }) : null;
 
   aplicarTema();
   pintar();

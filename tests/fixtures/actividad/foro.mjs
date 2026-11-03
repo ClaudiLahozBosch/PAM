@@ -88,3 +88,17 @@ export function rutaDe(url) {
   u.searchParams.delete('_');
   return u.pathname + (u.search || '');
 }
+
+/**
+ * La página de una ruta, como la sirve el foro: «/t820-» (sin el nombre del tema) da la misma página que
+ * «/t820-oficial-el-dragon», y «/t901p15-» la de «/t901p15-el-profeta-edicion-3».
+ * @param {Record<string, string>} P
+ */
+export function paginaDe(P, url) {
+  const r = rutaDe(url);
+  if (r in P) return P[r];
+  const m = r.match(/^\/t(\d+)(p\d+)?-$/);
+  if (!m) return undefined;
+  const k = Object.keys(P).find(x => x.startsWith(`/t${m[1]}${m[2] || ''}-`));
+  return k ? P[k] : undefined;
+}

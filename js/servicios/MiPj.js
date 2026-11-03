@@ -3,11 +3,11 @@
 // cuenta → perfil (enlaces a ficha y bóveda), roles y sueldo → ficha (con el lector nuevo) → bóveda → stats de combate
 // → oficiales en curso (salen de los temas de tus roles). El mismo orden que Mi PJ.
 // Cada paso que falla se apunta en `errores` y los demás siguen.
-import { leerPerfil, rutaTema, RUTA_PERFIL } from '../lectores/LectorPerfil.js?v=0.3.4';
-import { leerFichaDelForo } from './FichaDelForo.js?v=0.3.4';
-import { leerBovedaDelForo } from './BovedaDelForo.js?v=0.3.4';
-import { combate, puntos } from '../reglas/Combate.js?v=0.3.4';
-import { crearActividad } from './ActividadDelForo.js?v=0.3.4';
+import { leerPerfil, rutaTema, RUTA_PERFIL } from '../lectores/LectorPerfil.js?v=0.3.5';
+import { leerFichaDelForo } from './FichaDelForo.js?v=0.3.5';
+import { leerBovedaDelForo } from './BovedaDelForo.js?v=0.3.5';
+import { combate, puntos } from '../reglas/Combate.js?v=0.3.5';
+import { crearActividad } from './ActividadDelForo.js?v=0.3.5';
 
 /**
  * @param {import('./agente/ClienteAgente.js').ClienteAgente} agente
@@ -72,8 +72,8 @@ export function aDatosMiPj(r, sistema) {
     ficha: F ? { url: `${foro}/t${F.tema}-`, titulo: F.titulo, estado: F.estado, sello: F.sello, codigo: f.partes.map(p => p.bbcode).join('\n') } : null,
     boveda,
     roles: r.roles ?? null, sueldo: r.sueldo ?? null, oficiales: r.oficiales ?? null,
-    // todavía no están en PAM (fases 5d y 6): el panel lo dice en lugar de «Tocá Actualizar»
-    pendientes: ['biblioteca', 'canjes'],
+    // todavía no está en PAM (fase 6): el panel lo dice en lugar de «Tocá Actualizar»
+    pendientes: ['canjes'],
     rapido: f && r.stats ? rapidoDeFicha(f, r.stats, sistema, r.leido) : null,
     errores: r.errores
   };
