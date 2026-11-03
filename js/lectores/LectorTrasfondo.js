@@ -13,6 +13,8 @@ import { Trasfondo } from '../modelos/Trasfondo.js';
 
 const TIPOS = ['Biblioteca', 'Influencia', 'Informantes', 'Seguidores'];
 const NIVEL = '(VI|V|IV|I{1,3}|[1-6])';
+/** Más de seis palabras o con comas: es una frase, no el nombre de una categoría. */
+const esFrase = s => /,/.test(s) || String(s).trim().split(/\s+/).length > 6;
 const SEP = /\s*(?:>|›|—|–|·|\s-\s)\s*/; // separadores de categoría y específico (el «/» NO: va dentro de nombres)
 
 export class LectorTrasfondo {
@@ -49,14 +51,25 @@ export class LectorTrasfondo {
 
   /** «Tipo NIVEL[ (identidad)]: resto» — la forma de la ficha de Irvin. */
   #formaNivelPrimero(tipo, resto, ctx) {
-    const m = resto.match(new RegExp(`^\\s*${NIVEL}\\b\\s*(?:\\(([^)]*)\\))?\\s*:\\s*(.*)$`, 'i'));
+    // «Tipo NIVEL: …», «Tipo NIVEL (identidad): …» y también «Tipo NIVEL (identidad). …»
+    const m = resto.match(new RegExp(`^\\s*${NIVEL}\\b\\s*(?:\\(([^)]*)\\)\\s*[:.]|\\s*:)\\s*(.*)$`, 'i'));
     if (!m) return null;
     const nivel = deRomano(m[1]);
     let identidad = (m[2] || '').trim();
-    let cuerpo = m[3].trim();
-    const finIdentidad = cuerpo.match(/^(.*?)\s*\(([^()]+)\)\s*$/);
-    if (finIdentidad && deRomano(finIdentidad[2]) == null) { cuerpo = finIdentidad[1].trim(); identidad = identidad || finIdentidad[2].trim(); }
-    return { nivel, identidad, ...this.#categorias(tipo, cuerpo, ctx), nota: '' };
+    const identidadDelante = !!identidad;
+    const cuerpo = m[3].trim();
+    // «Arcanismo. El verdadero hombre…» (o «Negocios.Un Ministro…», sin espacio): el nombre llega hasta
+    // el primer punto; lo demás es la descripción
+    const corte = cuerpo.match(/^(.*?[^.\s])\.(?:\s+|(?=[A-ZÁÉÍÓÚÑ¿¡"«]))(\S[\s\S]*)$/);
+    let nombre = corte ? corte[1] : cuerpo;
+    const nota = corte ? corte[2].trim() : '';
+    const finIdentidad = nombre.match(/^(.*?)\s*\(([^()]+)\)\s*$/);
+    if (finIdentidad && deRomano(finIdentidad[2]) == null) { nombre = finIdentidad[1].trim(); identidad = identidad || finIdentidad[2].trim(); }
+    const cats = this.#categorias(tipo, nombre, ctx);
+    // «Influencia V: Irvin Giles ya no necesita ocupar el cargo…» o «Seguidores VI (Zacharias Hayes): Hay
+    // organizaciones…»: no es un nombre, es la descripción (la categoría la da el encabezado)
+    if (cats.estadoLectura === 'revisar' && (esFrase(nombre) || identidadDelante)) return { nivel, identidad, ...this.#categorias(tipo, '', ctx), nota: cuerpo };
+    return { nivel, identidad, ...cats, nota };
   }
 
   /** Formas del PAM antiguo: el nivel va al final del nombre, o al principio de la nota. */

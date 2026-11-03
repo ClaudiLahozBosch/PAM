@@ -16,3 +16,14 @@ Las fichas del foro solo las ven los miembros, y la página guardada de un tema 
 - fragmentos **recortados** (solo el BBCode o el HTML de los mensajes que hacen falta);
 - **sin** cabeceras, scripts del foro ni datos de la cuenta;
 - de personajes cuyo dueño ha dado permiso, o inventados.
+
+## Prueba con una ficha real que no se sube
+
+`caracterizacion/ficha-real-local.test.mjs` usa la página guardada de la ficha de Irvin Giles (la de la auditoría).
+No está en el repositorio. Para pasarla:
+
+```
+PAM_FICHA_IRVIN="C:\ruta\Irvin Giles.htm" npm test
+```
+
+Sin la variable, la prueba se salta.

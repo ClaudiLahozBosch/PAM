@@ -15,6 +15,8 @@ import { LectorTrasfondo } from './LectorTrasfondo.js';
 export function limpiarForo(raw) {
   let t = String(raw ?? '').replace(/\r/g, '');
   t = t.replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<!--[\s\S]*?-->/g, '');
+  // también al ABRIR una caja: el modelo extendido pega el título de la caja a la primera línea («{Datos Básicos»▋ Nombre…»)
+  t = t.replace(/<(?:div|p|li|tr|h\d|center|dl|dt|dd|table|blockquote)\b[^>]*>/gi, '\n');
   t = t.replace(/<summary[^>]*>/gi, '\n').replace(/<(br|\/div|\/p|\/li|\/summary|\/details|\/h\d|\/tr|\/label)\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '');
   t = t.replace(/\[img[^\]]*\][\s\S]*?\[\/img\]/gi, '');
   t = t.replace(/\[spoiler=\s*(?:▋\s*)?([^\]]*)\]/gi, '\n$1\n').replace(/\[\/spoiler\]/gi, '\n');
@@ -44,6 +46,23 @@ const ROMANO = { I: 1, II: 2, III: 3, IV: 4, V: 5, VI: 6 };
 const NIVELES_HAB = { desentrenado: 0, novato: 1, competente: 2, experto: 3, maestro: 4, legendario: 5 };
 const TIPOS_BG = ['Biblioteca', 'Influencia', 'Informantes', 'Seguidores'];
 const up = s => norm(s).toUpperCase().replace(/:$/, '').trim();
+SECT['IDIOMAS MUGGLES'] = 'o:idiomas'; SECT['IDIOMAS MAGICOS'] = 'o:idiomas';
+
+/**
+ * Si la línea es un encabezado de sección, sus códigos (uno o dos: «HECHIZOS DOMÉSTICOS» = tipo + nivel).
+ * Admite adornos y recuentos: «▋ HECHIZOS:», «HECHIZOS BÁSICOS | 28:», «POCIONES (12)».
+ * @returns {string[]|null}
+ */
+function seccion(ln) {
+  const directo = SECT[up(ln)];
+  if (directo !== undefined) return [directo];
+  // «{Los Trasfondos»», «▋ HECHIZOS:», «HECHIZOS BÁSICOS | 28:»
+  const h = up(ln).replace(/^[^A-Z0-9]+/, '').replace(/[^A-Z0-9|()]+$/, '').replace(/\s*(?:\|\s*\d+|\(\d+\))\s*:?\s*$/, '').replace(/^(?:LOS|LAS|LA|EL)\s+/, '').trim();
+  if (SECT[h] !== undefined) return [SECT[h]];
+  const m = h.match(/^(HECHIZOS|POCIONES|RITUALES|OBJETOS\s*\/\s*ARMAS|OBJETOS)\s+(\S+)$/);
+  if (m && SECT[m[1].replace(/\s+/g, '')] !== undefined && String(SECT[m[2]] ?? '').startsWith('t:')) return [SECT[m[1].replace(/\s+/g, '')], SECT[m[2]]];
+  return null;
+}
 const esc = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /** @typedef {{ post: number|null, bbcode: string }} ParteEntrada */
@@ -90,7 +109,7 @@ export class LectorFicha {
     const flush = () => { if (cur && !(cur in got)) { const v = buf.join('\n').replace(/\n{3,}/g, '\n\n').trim(); if (v) got[cur] = v; } cur = null; buf = []; };
     const labelRe = /^(?:[▋■▌█●•→\-]\s*)?([A-Za-zÁÉÍÓÚÜáéíóúüÑñ\/ ]{2,40}?)\s*:\s*(.*)$/;
     for (const ln of lines) {
-      if (SECT[up(ln)] !== undefined) { flush(); continue; }
+      if (seccion(ln)) { flush(); continue; }
       const m = ln.match(labelRe), key = m && LBL[norm(m[1]).replace(/\s+/g, ' ').trim()];
       if (key) { flush(); cur = key; buf = [m[2]]; continue; }
       if (cur) buf.push(ln);
@@ -109,7 +128,7 @@ export class LectorFicha {
     const lim = T.match(/L[ií]mites?\s*:\s*([^)\n]*)/i); if (lim && !/^_+$/.test(lim[1].trim())) leg.extra.limites = lim[1].trim();
 
     // 2. atributos
-    let aStart = T.search(/Atributos\s*:/i); if (aStart < 0) aStart = T.search(/Atributos/i);
+    let aStart = T.search(/Atributos\s*:/i); if (aStart < 0) aStart = T.search(/(?:^|\n)\W*Atributos\b/i); if (aStart < 0) aStart = T.search(/Atributos/i);
     let sStart = T.search(/Habilidades\s*:/i); if (sStart < 0) sStart = T.search(/\bHabilidades\b/i);
     const aSeg = aStart >= 0 ? T.slice(aStart, sStart > aStart ? sStart : aStart + 600) : '';
     for (const a of S.atributos) { const m = aSeg.match(new RegExp(a + '\\s*:\\s*\\+?\\s*(\\d+)', 'i')); if (m) f.atributos[a] = num(m[1]); }
@@ -139,11 +158,15 @@ export class LectorFicha {
     let mode = null, mType = null, mTier = 'bas', oSec = null;
     const tal = [], tit = [], idi = [], raza = [];
     lines.forEach((ln, i) => {
-      const s = SECT[up(ln)];
-      if (s !== undefined) {
-        if (s.startsWith('m:')) { mode = 'm'; mType = s.slice(2); mTier = mType === 'hechizo' ? 'dom' : 'bas'; }
-        else if (s.startsWith('t:')) { if (mode === 'm') mTier = s.slice(2); }
-        else if (s.startsWith('o:')) { mode = 'o'; oSec = s.slice(2); }
+      // cada mensaje del foro empieza su propia sección (la magia de una parte no sigue en la siguiente)
+      if (i && postDe[i] !== postDe[i - 1]) { mode = null; oSec = null; }
+      const ss = seccion(ln);
+      if (ss) {
+        for (const s of ss) {
+          if (s.startsWith('m:')) { mode = 'm'; mType = s.slice(2); mTier = mType === 'hechizo' ? 'dom' : 'bas'; }
+          else if (s.startsWith('t:')) { if (mode === 'm') mTier = s.slice(2); }
+          else if (s.startsWith('o:')) { mode = 'o'; oSec = s.slice(2); }
+        }
         return;
       }
       if (!ln) return;
@@ -157,7 +180,8 @@ export class LectorFicha {
     });
 
     // idiomas
-    const idRe = /^[✦✧•\-–→*]?\s*([A-Za-zÁÉÍÓÚáéíóúÑñü' ]{2,30}?)\s*(?:—|–|-|:|\()\s*(Nativo|Bajo|Medio|Alto|Básico|Intermedio|Avanzado)\b[\)\.]?\s*(.*)$/i;
+    // «Francés — Medio», «Árabe (Alto)», y también «→ Alemán: nivel alto. Lo aprendió…»
+    const idRe = /^[✦✧•\-–→*]?\s*([A-Za-zÁÉÍÓÚáéíóúÑñü' ]{2,30}?)\s*(?:—|–|-|:|\()\s*(?:nivel\s+)?(Nativo|Bajo|Medio|Alto|Básico|Intermedio|Avanzado)\b[\)\.]?\s*(.*)$/i;
     const idMap = { basico: 'Bajo', intermedio: 'Medio', avanzado: 'Alto' };
     for (const l of (idi.length ? idi : lines)) {
       const m = l.match(idRe); if (!m) continue;
@@ -166,7 +190,7 @@ export class LectorFicha {
     }
 
     // trasfondos, ventajas, especializaciones: desde el primer encabezado de la parte final
-    const heads = [/\n\s*IDIOMAS\b/i, /\n\s*TRASFONDOS?\b/i, /\n\s*BIBLIOTECA\s*\n/i, /\n\s*INFORMANTES\s*\n/i, /\n\s*INFLUENCIA\s*\n/i, /\n\s*SEGUIDORES\s*\n/i, /\n\s*VENTAJAS\b/i].map(r => T.search(r)).filter(i => i >= 0);
+    const heads = [/\n\s*IDIOMAS\b/i, /\n\s*TRASFONDOS?\b/i, /\n\s*BIBLIOTECA\s*\n/i, /\n\s*INFORMANTES\s*\n/i, /\n\s*INFLUENCIA\s*\n/i, /\n\s*SEGUIDORES\s*\n/i, /\n\s*VENTAJAS\b/i, /\n[^\n]{0,4}(?:Los\s+)?Trasfondos?\b/i].map(r => T.search(r)).filter(i => i >= 0);
     const oIdx = heads.length ? Math.min(...heads) : 0;
     const desde = T.slice(0, oIdx).split('\n').length - 1;
     const ctx = { tipo: /** @type {string|undefined} */ (undefined), categoria: /** @type {string|undefined} */ (undefined) };
@@ -175,17 +199,23 @@ export class LectorFicha {
       if (!l) continue;
       // encabezados que dan contexto a los trasfondos («INFORMANTES», «Bajos Fondos:»)
       const h = up(l);
-      const tipoH = TIPOS_BG.find(t => norm(t).toUpperCase() === h);
+      const tipoH = TIPOS_BG.find(t => h === norm(t).toUpperCase() || h === norm(t).toUpperCase() + 'S'); // «BIBLIOTECA», «• Bibliotecas:»
       if (tipoH) { ctx.tipo = tipoH; ctx.categoria = undefined; continue; }
-      if (SECT[h] !== undefined) { if (SECT[h] !== 'o:bg') { ctx.tipo = undefined; ctx.categoria = undefined; } continue; }
-      const catH = this.#categoriaEncabezado(l, ctx.tipo);
-      if (catH) { ctx.categoria = catH; continue; }
+      const sh = seccion(l);
+      if (sh) { if (!sh.includes('o:bg')) { ctx.tipo = undefined; ctx.categoria = undefined; } continue; }
+      // «• Bajos Fondos:» tras «• Bibliotecas:»: es una categoría de otro tipo, así que el tipo deja de valer
+      const catDelTipo = this.#categoriaEncabezado(l, ctx.tipo), catH = catDelTipo ?? this.#categoriaEncabezado(l, undefined);
+      if (catH) { if (!catDelTipo) ctx.tipo = undefined; ctx.categoria = catH; continue; }
 
       const empiezaConTipo = new RegExp(`^(?:\\(?(?:VI|V|IV|I{1,3}|[1-6])\\)?\\s*[—–\\-:.]?\\s+)?(?:trasfondos?\\s*(?:generales?|espec[ií]ficos?)?\\s*[:—–\\-]?\\s*)?(${TIPOS_BG.join('|')})\\b`, 'i').test(l);
       if (!empiezaConTipo && this.#ventajaOEsp(f, l)) continue;
       const bg = this.trasfondos.leer(l, { tipo: ctx.tipo, categoria: ctx.categoria, origen: origen(i) });
       if (bg) {
-        if (!f.trasfondos.some(x => x.tipo === bg.tipo && norm(x.categoria) === norm(bg.categoria) && norm(x.especifico) === norm(bg.especifico) && norm(x.identidad) === norm(bg.identidad))) f.trasfondos.push(bg);
+        // Solo se descarta si es la MISMA línea repetida, o el mismo trasfondo al mismo nivel sin descripción
+        // propia. Dos líneas distintas nunca se funden en una (con la ficha real de Irvin se perdía una).
+        const repetido = f.trasfondos.some(x => x.textoOriginal === bg.textoOriginal
+          || (x.tipo === bg.tipo && norm(x.categoria) === norm(bg.categoria) && norm(x.especifico) === norm(bg.especifico) && norm(x.identidad) === norm(bg.identidad) && x.nivel === bg.nivel && (!bg.nota || x.nota === bg.nota)));
+        if (!repetido) f.trasfondos.push(bg);
         continue;
       }
       if (empiezaConTipo) { f.desconocidos.push(new EntradaDesconocida({ texto: l0, seccion: 'trasfondos', origen: origen(i) })); continue; }
@@ -193,8 +223,12 @@ export class LectorFicha {
     }
 
     // talentos y lazos
+    const grupos = [...new Set(S.datos.talentos.map(t => norm(t.grupo)))];
     for (const l0 of tal) {
-      const l = l0.replace(/^[✦✧•\-–→*]\s*/, '');
+      const l = l0.replace(/^[✦✧•●○◆❖♦▪■\-–→*]\s*/, '');
+      // «Talentos Generales», «Mágicos:»: encabezados de grupo, no talentos
+      const g = norm(l.replace(/:\s*$/, '')).replace(/^talentos?\s+/, '');
+      if (grupos.includes(g)) continue;
       let m = l.match(/^(Lazo|Uni[oó]n|V[ií]nculo)\s*(?:con)?\s*:?\s*(.+)$/i);
       if (m) {
         const [pj, ...rest] = m[2].split(/\s+[—–-]\s+/); const tipo = S.datos.vinculos.find(v => norm(v) === norm(m[1])) || 'Vínculo';
@@ -237,18 +271,26 @@ export class LectorFicha {
 
   /** Una línea de una sección de magia. El nombre y la descripción quedan como están en la ficha. */
   #arcano(f, ln, mType, mTier, origen) {
-    const bullet = /^[✦✧•\-–→*❖◆♦]/.test(ln);
-    const l = ln.replace(/^[✦✧•\-–→*❖◆♦]\s*/, '');
+    const bullet = /^[✦✧•●○▪■\-–→*❖◆♦]/.test(ln);
+    const l = ln.replace(/^[✦✧•●○▪■\-–→*❖◆♦]\s*/, '');
     const ci = l.indexOf(':');
-    const name = ci > 0 && ci < 80 ? l.slice(0, ci).trim() : (l.length <= 60 ? l.trim() : '');
+    let name = ci > 0 && ci < 80 ? l.slice(0, ci).trim() : (l.length <= 60 ? l.trim() : '');
+    let descripcion = ci > 0 ? l.slice(ci + 1).trim() : '';
+    // «• Alset. Requiere Especialización Encantador 2.»: sin dos puntos, el nombre llega hasta el primer punto
+    if (ci < 0) {
+      const p = l.match(/^([^.]{2,80}?)\.(?:\s+(.*))?$/);
+      // con viñeta, aunque no esté en el Compendio: una línea larga no se tira, se guarda para revisar (regla 3)
+      if (p && (this.compendio.buscar(p[1].trim(), mType) || (bullet && !name))) { name = p[1].trim(); descripcion = (p[2] || '').trim(); }
+    }
+    // restos de etiquetas rotas («Ferula.[/colo]») y el punto final
+    name = name.replace(/\[[^\]]*\]/g, '').replace(/\.+$/, '').trim();
     if (!name) return;
     const hit = this.compendio.buscar(name, mType);
     if (!hit && !bullet) return;
-    if (!hit && ci < 0 && l.length > 60) return;
+    if (!hit && ci < 0 && l.length > 60 && !(bullet && name.length < l.length)) return;
     const tipo = mType === 'objeto' && mTier === '' ? 'especial' : mType;
     if (f.arcanos.some(a => (hit && a.ref === hit.id) || norm(a.nombre) === norm(name))) return;
     const nivel = hit && tipo !== 'especial' ? hit.nivel : mTier;
-    const descripcion = ci > 0 ? l.slice(ci + 1).trim() : '';
     f.arcanos.push(new Arcano({ tipo: /** @type {any} */ (tipo), nivel: /** @type {any} */ (nivel), nombre: name, descripcion, ref: hit ? hit.id : null, origen, textoOriginal: ln, estadoLectura: hit ? 'reconocido' : 'revisar' }));
   }
 

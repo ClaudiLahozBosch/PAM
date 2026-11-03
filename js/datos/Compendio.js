@@ -22,7 +22,9 @@ export class Compendio {
     /** @type {Map<string, EntradaCompendio[]>} */
     this.#porClave = new Map();
     for (const a of this.lista) {
-      const ks = new Set([a.nombreCalc, a.nombre, ...a.nombre.split('|')].map(clave));
+      // también el nombre en latín suelto: «Mutatio Mentis Minoris» de «… | Mutatio Mentis Minoris» o de «… (Procul Visio)»
+      const latin = a.nombre.match(/\(([^)]+)\)\s*$/)?.[1];
+      const ks = new Set([a.nombreCalc, a.nombre, ...a.nombre.split('|'), latin ?? ''].map(clave));
       ks.delete('');
       for (const k of ks) { const l = this.#porClave.get(k) ?? []; l.push(a); this.#porClave.set(k, l); }
     }
@@ -36,6 +38,8 @@ export class Compendio {
   buscar(nombre, tipo) {
     let hits = this.#porClave.get(clave(nombre));
     if (!hits) { const p = String(nombre).match(/^(.*?)\s*\(([^)]+)\)\s*$/); if (p) hits = this.#porClave.get(clave(p[1] + '|' + p[2])) ?? this.#porClave.get(clave(p[2])); }
+    // «Ritual de modificación mental básico | Mutatio Mentis Minoris» (el Compendio dice «menor»): por cada parte, el latín primero
+    if (!hits && String(nombre).includes('|')) for (const parte of String(nombre).split('|').reverse()) { hits = this.#porClave.get(clave(parte)); if (hits) break; }
     if (!hits) return null;
     return hits.find(a => a.tipo === tipo) ?? hits[0];
   }

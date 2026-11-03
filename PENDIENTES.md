@@ -51,6 +51,16 @@ Todo lo marcado como «comprobado» se ha verificado contra el código de `main`
 | R10 | Botón ✕ en «Oficiales en curso» para ocultar un rol hasta volver a escribir en él. | Mejora pedida; fácil una vez esté el panel en PAM. |
 | N01 | Firestore: confirmar que las reglas no permiten **listar** ni borrar documentos ajenos. | Los datos van cifrados con el código de sesión (bien hecho); esto es solo para evitar vandalismo. No se ha probado contra el servidor. |
 
+## Comprobado con la ficha real de Irvin Giles (3/11/2026)
+
+Con la página guardada que usó la auditoría (no se sube: lleva datos de sesión), el lector nuevo:
+- encuentra las **cinco partes** (337672, 339214–339217) aunque el sello de revisión esté entre la primera y la segunda, y deja fuera las actualizaciones («Ficha actualizada…»);
+- lee los **64 de 64 trasfondos**, todos del mensaje 339216;
+- lee **todos los arcanos**: el número de cada grupo coincide con el que la propia ficha pone en el encabezado («RITUALES BÁSICOS | 24»);
+- lee los Puntos de Destino (13), atributos, habilidades, artes, idiomas, ventajas y especializaciones.
+
+Pasarlo por la ficha real destapó y corrigió seis fallos que la ficha inventada no tenía: título de caja pegado a la primera línea (modelo extendido), sello entre partes, descripción en la misma línea del trasfondo, encabezados «▋ HECHIZOS:» y «… | 28:», viñetas «●» y una línea de trasfondo que se fundía con otra.
+
 ## Cómo se trabaja cada punto
 
 1. Antes de arreglar, una prueba automática que falle con el caso real (fichas recortadas y sin datos de sesión: la página guardada de un tema contiene tokens que no deben subirse a un repositorio público).
