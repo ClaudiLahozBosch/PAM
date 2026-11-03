@@ -5,7 +5,11 @@
 //   · el tamaño de la ventana es el del FORO (lo da el agente), y el panel le pide al agente el tamaño justo del iframe;
 //   · al arrastrar la esquina se usa la posición en la pantalla (el iframe se mueve mientras crece);
 //   · los enlaces abren la página del foro (<base target="_top"> en panel.html).
-// Las tarjetas que aún no están en PAM (roles, sueldo, oficiales, biblioteca, canjes) lo dicen en vez de «Tocá Actualizar».
+// Las tarjetas que aún no están en PAM (biblioteca, canjes) lo dicen en vez de «Tocá Actualizar».
+// Arreglos: R09 (los oficiales cerrados ya no salen en curso) y R10 (✕ para ocultar un oficial hasta volver a escribir en él).
+import { aFecha } from '../../lectores/FechaForo.js?v=0.3.3';
+import { estadoSueldo } from '../../reglas/Sueldo.js?v=0.3.3';
+import { grageasOf } from '../../reglas/Oficiales.js?v=0.3.3';
 
 const TEMA_AVADENSE = { skin: 'avadense', ink: '#171a2b', panel: '#1e2236', 'panel-2': '#262a42', parchment: '#F1EADF', 'parchment-dim': '#a7a1b6', gold: '#B49768',
   'gold-bright': '#d6bd8f', 'arcane-bright': '#cf94a3', good: '#93b8a0', bad: '#d98377', 'line-strong': 'rgba(241,234,223,.16)', 'accent-ink': '#1b1e30',
@@ -17,6 +21,27 @@ const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&am
 const fmt = n => n == null ? '—' : Number(n).toLocaleString('es-AR');
 const leidoTxt = iso => { try { return new Date(iso).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
 const PENDIENTE = 'Todavía no está en esta versión de prueba.';
+const DIAS_ROL = 60;   /* roles con más días sin movimiento se juntan en «viejos» */
+const dias = d => d ? Math.floor((Date.now() - d) / 864e5) : null;
+const haceTxt = d => { const n = dias(d); return n == null ? '' : n <= 0 ? 'hoy' : n === 1 ? 'hace 1 día' : `hace ${n} días`; };
+const restaTxt = ms => { const h = Math.round(ms / 36e5); if (h < 1) return 'menos de 1 h'; if (h < 48) return `${h} h`; const d = Math.floor(h / 24); return `${d} días${h % 24 ? ' y ' + (h % 24) + ' h' : ''}`; };
+function venceTxt(t) {
+  const d = new Date(t), hoy = new Date(), man = new Date(); man.setDate(hoy.getDate() + 1);
+  const hh = d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const dia = d.toDateString() === hoy.toDateString() ? 'hoy' : d.toDateString() === man.toDateString() ? 'mañana' : d.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric' });
+  return `${dia} a las ${hh}`;
+}
+function filaMision(r, cuenta) {
+  const M = r.mision, ahora = Date.now();
+  let cls = '', plazo = '<span class="dim">sin plazo escrito</span>';
+  if (M.vence) { const q = M.vence - ahora; cls = q < 0 ? 'vencida' : q < 864e5 ? 'urge' : ''; plazo = q < 0 ? `Venció ${venceTxt(M.vence)}` : `Vence ${venceTxt(M.vence)} (tu hora) · quedan ${restaTxt(q)}${M.supuesta ? ' · <span class="dim">supuse hora de España</span>' : ''}`; }
+  return `<div class="rol mis ${cls}"><div class="rt"><a href="${esc(M.url)}#${M.post}">⚔ ${esc(r.titulo.replace(/\s*\[(misi[oó]n|acontecimiento)\]\s*/i, ' ').trim())}</a>
+      <div class="dim">${M.n ? 'Turno ' + esc(M.n) + ' · ' : 'Turno nuevo · '}master ${esc(M.master)}${cuenta ? ' · <b>' + esc(cuenta) + '</b>' : ''}</div><div class="pz">${plazo}</div></div>
+      ${cuenta ? '' : `<button class="x" data-a="ocultar" data-t="${r.tid}" data-l="${r.lpid}" title="Ocultar hasta el próximo mensaje">✕</button>`}</div>`;
+}
+const finDeMes = () => { const h = new Date(); return new Date(h.getFullYear(), h.getMonth() + 1, 0).toLocaleDateString('es-AR', { day: 'numeric', month: 'numeric' }); };
+const Mayus = t => t ? t[0].toUpperCase() + t.slice(1) : '';
+const SUELDO_TXT = { sinPedir: 'Sueldo del mes sin pedir', corregir: 'Te pidieron corregir el pedido de sueldo', aprobado: 'Sueldo aprobado: falta sumarlo a la bóveda' };
 
 /* ---------------- acceso rápido: atributos, habilidades y combate para tirar ---------------- */
 /* Tirada de habilidad = 1d10 + Atributo + bono de la Habilidad. Valor pasivo = 5 + Atributo + bono. */
@@ -51,7 +76,7 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
   const gv = (k, d) => { try { const v = guardado?.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
   const sv = (k, v) => { try { guardado?.setItem(k, JSON.stringify(v)); } catch (e) { /* sin espacio */ } };
   const YO = (cuenta && cuenta.nombre) || '', UID = (cuenta && cuenta.id) || 0;
-  const K = { datos: 'mipj.' + UID, ui: 'mipj.ui', tema: 'mipj.tema' };
+  const K = { datos: 'mipj.' + UID, ui: 'mipj.ui', tema: 'mipj.tema', ocultos: 'mipj.ocultos.' + UID, ocultosOf: 'mipj.ocultosOf.' + UID };
   let foro = { ...ventana };
 
   /* ---------------- tema (el mismo de PAM) ---------------- */
@@ -76,14 +101,29 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
   let datos = gv(K.datos, null), cargando = false, error = '';
   const ui = Object.assign({ abierto: foro.ancho > 600 }, gv(K.ui, {}));
   const pend = k => !!(datos && datos.pendientes && datos.pendientes.includes(k));
+  const ocultos = gv(K.ocultos, {}), ocultosOf = gv(K.ocultosOf, {});
+  const rolesTodos = () => ((datos && datos.roles) || []).filter(r => !(ocultos[r.tid] && ocultos[r.tid] >= r.lpid));
+  const esViejo = r => { if (r.mision) return false; const n = dias(aFecha(r.fecha)); return n != null && n > DIAS_ROL; };
+  const rolesVisibles = () => { const L = rolesTodos().filter(r => !esViejo(r)); const M = L.filter(r => r.mision).sort((a, b) => (a.mision.vence || 9e15) - (b.mision.vence || 9e15)); return M.concat(L.filter(r => !r.mision)); };
+  /* misiones con turno en tus otras cuentas (lo que leyó Mi PJ la última vez que entraste con cada una) */
+  function misionesOtras() {
+    const C = gv('mipj.cuentas', {}), out = [];
+    Object.keys(C).forEach(uid => {
+      if (String(uid) === String(UID)) return;
+      const d = gv('mipj.' + uid, null), oc = gv('mipj.ocultos.' + uid, {});
+      ((d && d.roles) || []).filter(r => r.mision && !(oc[r.tid] && oc[r.tid] >= r.lpid) && (!r.mision.vence || r.mision.vence > Date.now() - 3 * 864e5))
+        .forEach(r => out.push({ r, cuenta: (d && d.pj) || C[uid].nombre, leido: d && d.leido }));
+    });
+    return out.sort((a, b) => (a.r.mision.vence || 9e15) - (b.r.mision.vence || 9e15));
+  }
 
   const vistaRapidaFn = () => vistaRapida();
   function pintar() {
     variablesVentana();
-    const B = datos && datos.boveda, F = datos && datos.ficha, R = [];
+    const B = datos && datos.boveda, F = datos && datos.ficha, R = rolesVisibles();
     const pendF = F && F.estado === 'pendiente';
     if (!ui.abierto) {
-      root.innerHTML = `<div class="pill" data-a="abrir" title="Abrir Mi PJ"><span class="brand"><i>✦</i>Mi PJ</span>${B && B.act != null ? `<b>${fmt(B.act)}</b>` : ''}${R.length ? `<span class="n" title="Roles donde te toca responder">${R.length}</span>` : ''}${pendF ? '<span class="dot" title="Ficha pendiente de revisión"></span>' : ''}</div>`;
+      root.innerHTML = `<div class="pill" data-a="abrir" title="Abrir Mi PJ"><span class="brand"><i>✦</i>Mi PJ</span>${B && B.act != null ? `<b>${fmt(B.act)}</b>` : ''}${R.length ? `<span class="n" title="Roles donde te toca responder">${R.length}</span>` : ''}${(() => { const u = R.filter(r => r.mision && r.mision.vence && r.mision.vence - Date.now() < 864e5).length + misionesOtras().filter(x => x.r.mision.vence && x.r.mision.vence - Date.now() < 864e5 && x.r.mision.vence > Date.now()).length; return u ? `<span class="ms" title="Turnos de misión que vencen en menos de 24 h">⚔${u}</span>` : ''; })()}${sueldoPendiente() ? `<span class="sd" title="${SUELDO_TXT[sueldoPendiente()]}">⚜</span>` : ''}${pendF ? '<span class="dot" title="Ficha pendiente de revisión"></span>' : ''}</div>`;
       sincronizarTamano();
       return;
     }
@@ -96,9 +136,18 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
       if (B) h += `<div class="rule">☾</div><div class="big">${fmt(B.act)}<span>grageas</span></div>
         <div class="stats"><div class="stat"><b>${fmt(B.tot)}</b><small>Totales</small></div><div class="stat"><b>${fmt(B.ini)}</b><small>Iniciales</small></div><div class="stat"><b>${B.pla != null ? fmt(B.pla) + '<span class="dim"> / ' + fmt(B.plt) + '</span>' : '—'}</b><small>Legendarios</small></div></div>`;
       h += `<div class="card"><div class="ct">✒ Te toca responder${R.length ? `<span class="n">${R.length}</span>` : ''}</div>`;
-      if (!datos.roles) h += `<div class="dim">${pend('roles') ? PENDIENTE : cargando ? 'Buscando…' : 'Tocá «Actualizar».'}</div>`;
+      if (!datos.roles) h += `<div class="dim">${cargando ? 'Buscando…' : 'Tocá «Actualizar».'}</div>`;
       else if (!R.length) h += `<div class="dim">Estás al día con todos tus roles ✦</div>`;
+      else h += R.slice(0, ui.todos ? 60 : 5).map(r => { if (r.mision) return filaMision(r); const d = aFecha(r.fecha), n = dias(d);
+        return `<div class="rol"><div class="rt"><a href="${esc(r.ultUrl || r.url)}">${esc(r.titulo)}</a><div class="dim">Respondió ${esc(r.autor || 'alguien')}</div></div><span class="d ${n != null && n >= 7 ? 'old' : ''}">${esc(haceTxt(d))}</span><button class="x" data-a="ocultar" data-t="${r.tid}" data-l="${r.lpid}" title="No me toca o ya terminó (vuelve a aparecer si hay un mensaje nuevo)">✕</button></div>`; }).join('')
+        + (R.length > 5 ? `<div class="row"><a href="#" data-a="todos">${ui.todos ? 'Ver menos' : `Ver los ${R.length}`}</a></div>` : '');
+      const O = misionesOtras();
+      if (O.length) h += `<div class="otras"><div class="rgrp">Tus otras cuentas</div>${O.map(x => filaMision(x.r, x.cuenta)).join('')}<div class="dim" style="margin-top:4px">Según la última vez que entraste con cada cuenta.</div></div>`;
+      const V = rolesTodos().filter(esViejo);
+      if (V.length) h += ui.viejos ? `<div class="row dim" style="margin-top:8px">Sin movimiento hace más de ${DIAS_ROL} días:</div>` + V.map(r => `<div class="rol"><div class="rt"><a href="${esc(r.ultUrl || r.url)}">${esc(r.titulo)}</a><div class="dim">Respondió ${esc(r.autor || 'alguien')}</div></div><span class="d">${esc(haceTxt(aFecha(r.fecha)))}</span><button class="x" data-a="ocultar" data-t="${r.tid}" data-l="${r.lpid}" title="Ya terminó">✕</button></div>`).join('') + `<div class="row"><a href="#" data-a="viejos">Ocultar los viejos</a></div>`
+        : `<div class="row dim" style="margin-top:6px">y ${V.length} ${V.length === 1 ? 'rol viejo' : 'roles viejos'} (más de ${DIAS_ROL} días quietos) · <a href="#" data-a="viejos">ver</a></div>`;
       h += `</div>`;
+      h += tarjetaOficiales();
       h += tarjetaSueldo();
       h += `<div class="card"><div class="ct">❖ Ficha</div>${F ? `<a class="tl" href="${esc(F.url)}">${esc(F.titulo)}</a><br>
         <span class="badge ${pendF ? 'warn' : 'ok'}">${pendF ? '◷ Pendiente de revisión' : '✓ Revisada'}</span>
@@ -124,11 +173,42 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
     aplicarTam();
   }
 
-  /* ---------------- sueldo del mes (aún no está en PAM) ---------------- */
+  /* ---------------- sueldo del mes ---------------- */
   function tarjetaSueldo() {
+    const S = datos && datos.sueldo, E = estadoSueldo(S, datos && datos.boveda);
     if (ui.sinSueldo) return `<div class="card fino"><div class="ct">⚜ Sueldo<span class="sp"></span><a href="#" data-a="sueldo-ver">mostrar</a></div></div>`;
-    const h = `<div class="card"><div class="ct">⚜ Sueldo<span class="sp"></span><a href="#" data-a="sueldo-ocultar" title="Si no cobrás sueldo, ocultalo">ocultar</a></div>`;
-    return h + `<div class="dim">${pend('sueldo') ? PENDIENTE : cargando ? 'Buscando…' : 'Tocá «Actualizar».'}</div></div>`;
+    let h = `<div class="card"><div class="ct">⚜ Sueldo${S && S.mes ? ' de ' + Mayus(S.mes) : ''}<span class="sp"></span><a href="#" data-a="sueldo-ocultar" title="Si no cobrás sueldo, ocultalo">ocultar</a></div>`;
+    if (!E) return h + `<div class="dim">${cargando ? 'Buscando…' : 'Tocá «Actualizar».'}</div></div>`;
+    const yo = id => `${esc(S.url)}#${id}`, monto = S.pedido && S.pedido.monto ? ` (${fmt(S.pedido.monto)} grageas)` : '';
+    const FORM = esc(S.formulario || '');
+    if (E.k === 'sinTema') h += `<div class="dim">Todavía no abrieron el tema de «Sueldos de ${esc(Mayus(S.mes))}». Suele abrirse en los primeros días del mes.</div>`;
+    else if (E.k === 'sinPedir') h += `<span class="badge warn">◷ Sin pedir</span><div class="row">Todavía no lo pediste. Tenés hasta el ${finDeMes()}.</div>
+      <div class="row"><a href="${esc(S.url)}">Ir a pedirlo</a> <span class="dim">·</span> <a href="${FORM}">Formulario</a></div>`;
+    else if (E.k === 'esperando') h += `<span class="badge warn">◷ Pedido</span><div class="row">Lo pediste${S.pedido.fecha ? ' el ' + esc(S.pedido.fecha) : ''}${monto}. Falta que lo revise un inspector.</div>
+      <div class="row"><a href="${yo(S.pedido.id)}">Ver tu pedido</a></div>`;
+    else if (E.k === 'corregir') h += `<span class="badge bad">✕ Hay que corregir</span><div class="nota">${esc(S.resp.autor)}: «${esc(S.resp.frase)}»</div>
+      <div class="row"><a href="${yo(S.resp.id)}">Ver la respuesta</a> <span class="dim">·</span> <a href="${FORM}">Formulario</a></div>`;
+    else if (E.k === 'aprobado') h += `<span class="badge warn">✓ Aprobado · falta sumarlo</span><div class="row">Lo aprobó ${esc(S.resp.autor)}${S.resp.fecha ? ', ' + esc(S.resp.fecha) : ''}. ${E.sinBoveda ? 'No encontré tu bóveda para ver si ya lo sumaste.' : `Todavía no lo veo en tu bóveda: sumá${monto ? ' las' + monto.replace(/[()]/g, '') : ' el sueldo'}.`}</div>
+      <div class="row"><a href="${yo(S.resp.id)}">Aprobación</a>${datos.boveda ? ` <span class="dim">·</span> <a href="${esc(datos.boveda.url.split('#')[0])}">Tu bóveda</a>` : ''}</div>`;
+    else h += `<span class="badge ok">✓ Cobrado</span><div class="row">Aprobado por ${esc(S.resp.autor)} y sumado a tu bóveda${monto}.</div>`;
+    return h + '</div>';
+  }
+  function sueldoPendiente() { const E = !ui.sinSueldo && datos && estadoSueldo(datos.sueldo, datos.boveda); return E && ['sinPedir', 'corregir', 'aprobado'].includes(E.k) ? E.k : null; }
+
+  /* ---------------- oficiales en curso ---------------- */
+  /* R10: ✕ oculta uno de tus oficiales hasta que vuelvas a escribir en él */
+  const ocultoOf = (O, quien) => { if (!(O.tid in ocultosOf)) return false; const r = O.parts.find(p => norm(p.autor) === norm(quien)); return ((r && r.ultimoId) || 0) <= ocultosOf[O.tid]; };
+  function tarjetaOficiales() {
+    /* abandonados: un mes o más sin posts de los participantes (Tramas no cuenta); vuelven si alguien postea. R09: los cerrados, nunca */
+    const vivo = O => !O.cerrado && (!O.ultimo || Date.now() - O.ultimo < 30 * 864e5);
+    const marcas = gv('mipj.of.cuarto', {});
+    const mios = ((datos && datos.oficiales) || []).filter(vivo).filter(O => !ocultoOf(O, YO)), otras = [];
+    const C = gv('mipj.cuentas', {});
+    Object.keys(C).forEach(uid => { if (String(uid) === String(UID)) return; const d = gv('mipj.' + uid, null); ((d && d.oficiales) || []).filter(vivo).forEach(O => otras.push({ O, cuenta: (d && d.pj) || C[uid].nombre })); });
+    if (!mios.length && !otras.length) return '';
+    const fila = (O, quien) => { const r = O.parts.find(p => norm(p.autor) === norm(quien)) || { posts: 0, cuentan: 0, fuera: {}, ultimoId: 0 }; const d = O.ultimo ? Math.floor((Date.now() - O.ultimo) / 864e5) : null;
+      return `<div class="rol"><div class="rt"><a href="${esc(O.url)}">${esc(O.titulo.replace(/\s*\[\s*oficial\s*\]\s*/i, ' ').trim())}</a><div class="dim">${quien !== YO ? '<b>' + esc(quien) + '</b> · ' : ''}${r.posts} posts · ${r.cuentan} cuentan → <b class="of-g">${fmt(grageasOf(O, quien, marcas))} grageas</b></div>${d != null && d >= 21 ? `<div class="of-av">${d} días sin posts: quedan ${30 - d} para que se dé por abandonado</div>` : ''}</div>${quien === YO ? `<button class="x" data-a="ocultar-of" data-t="${O.tid}" data-l="${r.ultimoId || 0}" title="Ocultar hasta que vuelvas a escribir en él">✕</button>` : ''}</div>`; };
+    return `<div class="card"><div class="ct">🎓 Oficiales en curso</div>${mios.map(O => fila(O, YO)).join('')}${otras.map(x => fila(x.O, x.cuenta)).join('')}<div class="dim" style="margin-top:4px">Abrí el tema para ver a todos los participantes.</div></div>`;
   }
 
   function vistaRapida() {
@@ -226,7 +306,11 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
     if (cargando) return; cargando = true; error = ''; pintar();
     try {
       const d = await cargar();
-      if (d) { datos = d; sv(K.datos, datos); if (d.errores && d.errores.length && !(d.ficha && d.boveda)) error = d.errores.join(' '); }
+      if (d) {
+        if (d.oficiales == null) d.oficiales = (datos && datos.oficiales) || [];
+        datos = d; sv(K.datos, datos); if (d.errores && d.errores.length && !(d.ficha && d.boveda)) error = d.errores.join(' ');
+        const C = gv('mipj.cuentas', {}); C[UID] = { nombre: YO, leido: datos.leido }; sv('mipj.cuentas', C);
+      }
       else error = 'No se pudo leer el foro.';
     } catch (e) { error = 'No se pudo leer el foro: ' + (e instanceof Error ? e.message : String(e)); }
     cargando = false; pintar();
@@ -239,6 +323,10 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
     else if (k === 'abrir') { ui.abierto = true; sv(K.ui, ui); pintar(); }
     else if (k === 'act') actualizar();
     else if (k === 'pam') { error = 'Enviar a PAM llega con los canjes (fase 6).'; pintar(); }
+    else if (k === 'todos') { e.preventDefault(); ui.todos = !ui.todos; sv(K.ui, ui); pintar(); }
+    else if (k === 'viejos') { e.preventDefault(); ui.viejos = !ui.viejos; sv(K.ui, ui); pintar(); }
+    else if (k === 'ocultar') { ocultos[a.dataset.t] = +a.dataset.l || 1; sv(K.ocultos, ocultos); pintar(); }
+    else if (k === 'ocultar-of') { ocultosOf[a.dataset.t] = +a.dataset.l || 0; sv(K.ocultosOf, ocultosOf); pintar(); }
     else if (k === 'zoom-' || k === 'zoom+') { ui.zoom = Math.min(1.4, Math.max(0.8, Math.round(((ui.zoom || 1) + (k === 'zoom+' ? 0.1 : -0.1)) * 10) / 10)); sv(K.ui, ui); aplicarTam(); }
     else if (k === 'oficiales') { e.preventDefault(); error = 'La Biblioteca de oficiales ' + PENDIENTE.toLowerCase(); pintar(); }
     else if (k === 'pam-abrir') { documento.defaultView?.open(pamUrl + '#ficha', 'pam'); }

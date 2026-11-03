@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PAM · Agente (staging)
 // @namespace    https://claudilahozbosch.github.io/PAM/staging
-// @version      0.3.2
+// @version      0.3.3
 // @description  El script mínimo de PAM: lee el foro con tu sesión, publica y edita SOLO tras tu «Aceptar» y muestra el panel «Mi PJ» de PAM. Toda la lógica está en PAM.
 // @updateURL    https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
 // @downloadURL  https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
@@ -28,7 +28,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.3.2';
+  var VERSION = '0.3.3';
   var PROTOCOLO = 1;
   // Staging: el fork de pruebas (otro dominio que PAM real, así no ve los datos de los jugadores).
   var PAM = { origen: 'https://claudilahozbosch.github.io', ruta: '/PAM/' };
@@ -107,7 +107,8 @@
     return {
       agente: VERSION, protocolo: PROTOCOLO, foro: enForo ? location.host : null,
       cuenta: enForo ? cuentaConectada() : null, ruta: enForo ? location.pathname + location.search : null, ventana: ventana(),
-      editor: enForo ? !!document.querySelector('textarea[name="message"]') : false
+      editor: enForo ? !!document.querySelector('textarea[name="message"]') : false,
+      titulo: enForo ? ((document.querySelector('h1.page-title') || {}).textContent || '').trim() : ''
     };
   }
 
@@ -372,6 +373,24 @@
     '.mipj-check small{color:var(--m-parchment-dim);font-weight:500;margin-left:auto;font-size:11px}',
     ':host([data-skin="pixel"]) .mipj-check{border-radius:0}'
   ].join('\n');
+  // La barra de arriba de los mensajes de un tema de oficial («🎓 Este oficial»), la de Mi PJ
+  var CSS_OF = [
+    ':host{display:block}',
+    '.mipj-of .of-g{color:var(--m-gold-bright)}',
+    '.mipj-of .of-av{margin-top:3px;font-size:12px;color:var(--m-gold-bright)}',
+    '.mipj-of .of-av.mal{color:var(--m-bad);font-weight:700}',
+    '.mipj-of{margin:10px 0;border-radius:14px;font:13.5px/1.5 var(--m-sans);color:var(--m-parchment);text-align:left;',
+    '  background:radial-gradient(420px 160px at 0% 0%,color-mix(in srgb,var(--m-arcane-bright) 14%,transparent),transparent 70%),var(--m-panel);border:1px solid color-mix(in srgb,var(--m-gold) 45%,transparent)}',
+    '.mipj-of summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;padding:10px 14px;font-family:var(--m-serif);font-style:italic;font-size:19px;color:var(--m-gold-bright)}',
+    '.mipj-of summary::-webkit-details-marker{display:none}',
+    '.mipj-of summary .ic{font-style:normal;font-size:15px}',
+    '.mipj-of summary small{margin-left:auto;font:600 10.5px var(--m-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--m-parchment-dim)}',
+    '.mipj-of .of-bd{padding:2px 14px 12px;display:grid;gap:4px}',
+    '.mipj-of .of-p b{color:var(--m-parchment)}',
+    '.mipj-of .dim{color:var(--m-parchment-dim);font-size:12px}',
+    '.mipj-of .of-q{display:flex;gap:6px;align-items:center;font-size:12px;margin:1px 0 4px 2px;cursor:pointer;color:var(--m-parchment-dim)}',
+    ':host([data-skin="pixel"]) .mipj-of{border-radius:0}'
+  ].join('\n');
   var estilosTema = []; // el del agente y el de cada barra del editor
   var temaActual = { css: '', skin: 'avadense' };
 
@@ -615,7 +634,7 @@
   // ---------------------------------------------------------------
   // Panel «Mi PJ» (página de PAM en un iframe que ocupa justo lo que ocupa el panel)
   // ---------------------------------------------------------------
-  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=0.3.2' });
+  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=0.3.3' });
   raiz.appendChild(iframe);
   // Si el panel no arranca (no pide tamaño), se enseña al menos su pastilla, para que nunca quede invisible.
   var panelVivo = false;
@@ -651,10 +670,62 @@
       var an = Math.max(1, Math.min(window.innerWidth, parseInt(d.ancho, 10) || 1)), al = Math.max(1, Math.min(window.innerHeight, parseInt(d.alto, 10) || 1));
       iframe.style.width = an + 'px'; iframe.style.height = al + 'px'; return { ancho: an, alto: al };
     },
-    'panel.tema': function (d) { return aplicarTema(d.tema); }
+    'panel.tema': function (d) { return aplicarTema(d.tema); },
+    'foro.oficial': function (d) { return pintarOficial(d); }
   });
   // El panel calcula su tamaño con la ventana del foro (dentro del iframe no la ve).
   window.addEventListener('resize', function () { canal.avisar('ventana.cambio', ventana()); });
+
+  // ---------------------------------------------------------------
+  // Tema de un oficial: la barra de Mi PJ arriba de los mensajes (las cuentas las hace PAM)
+  // ---------------------------------------------------------------
+  var barraOf = null;
+  function pintarOficial(d) {
+    var p0 = document.querySelector('div.post');
+    if (!p0) { return { pintada: false }; }
+    if (!barraOf) {
+      var caja = document.createElement('div'); caja.className = 'pam-agente-oficial';
+      var sombra = caja.attachShadow({ mode: 'open' });
+      var est = document.createElement('style'); est.textContent = CSS_OF; sombra.appendChild(est);
+      var estT = document.createElement('style'); estT.textContent = temaActual.css; sombra.appendChild(estT);
+      caja.setAttribute('data-skin', temaActual.skin);
+      estilosTema.push({ estilo: estT, host: caja });
+      var det = el('details', { clase: 'mipj-of' }); det.open = d.abierta !== false;
+      var peq = el('small', { texto: 'Mi PJ · leyendo…' });
+      det.appendChild(el('summary', {}, [el('span', { clase: 'ic', texto: '🎓' }), document.createTextNode('Este oficial'), peq]));
+      var cuerpo = el('div', { clase: 'of-bd' }); det.appendChild(cuerpo);
+      sombra.appendChild(det);
+      p0.parentElement.insertBefore(caja, p0);
+      det.addEventListener('toggle', function () { canal.avisar('oficial.abierta', { abierta: det.open }); });
+      det.addEventListener('change', function (e) {
+        var c = e.target.closest && e.target.closest('[data-of-cuarto]'); if (!c) { return; }
+        canal.pedir('oficial.cuarto', { tid: +c.getAttribute('data-of-cuarto'), autor: c.getAttribute('data-autor'), si: c.checked })
+          .then(function (r) { pintarOficial(r); }, function () {});
+      });
+      barraOf = { caja: caja, det: det, peq: peq, cuerpo: cuerpo };
+    }
+    var cu = barraOf.cuerpo;
+    if (d.estado === 'error') { cu.replaceChildren(el('div', { clase: 'dim', texto: 'No pude leer el tema: ' + (d.error || '') })); return { pintada: true }; }
+    if (d.estado !== 'ok' || !d.barra) { return { pintada: true }; }
+    var B = d.barra;
+    barraOf.peq.textContent = 'Mi PJ · ' + B.total + ' posts';
+    var hijos = B.filas.map(function (f) {
+      var caja = el('input', { type: 'checkbox', 'data-of-cuarto': String(B.tid), 'data-autor': f.autor }); caja.checked = !!f.cuarto;
+      if (f.cuarto) { caja.setAttribute('checked', ''); }
+      return el('div', { clase: 'of-p' }, [
+        el('b', { texto: f.autor }), document.createTextNode(' · ' + f.posts + ' ' + (f.posts === 1 ? 'post' : 'posts') + ' · '),
+        el('b', { texto: String(f.cuentan) }), document.createTextNode(' cuentan → '), el('b', { clase: 'of-g', texto: f.grageas + ' grageas' }),
+        f.cuarto ? document.createTextNode(' ') : null, f.cuarto ? el('span', { clase: 'dim', texto: '(segundo oficial, a un cuarto)' }) : null,
+        f.fuera ? document.createTextNode(' ') : null, f.fuera ? el('span', { clase: 'dim', texto: '· ' + f.fuera }) : null,
+        el('label', { clase: 'of-q' }, [caja, document.createTextNode(' Es su segundo oficial (suceso con más de dos años): cobra a un cuarto')])
+      ]);
+    });
+    hijos.push(el('div', { clase: 'dim', texto: '+60 grageas para quien envíe el Suceso de cierre (15 si está en su segundo oficial), o repartidas si así lo indica el reporte.' }));
+    if (B.aviso) { hijos.push(el('div', { clase: 'of-av' + (B.aviso.mal ? ' mal' : ''), texto: B.aviso.texto })); }
+    hijos.push(el('div', { clase: 'dim', texto: 'Topes por usuario en hora de España: 3 por día, 15 por semana (lunes a domingo), 45 por mes. Los mensajes de Tramas no se cuentan.' }));
+    cu.replaceChildren.apply(cu, hijos);
+    return { pintada: true };
+  }
 
   // ---------------------------------------------------------------
   // Editor del foro: antes de enviar, PAM lo revisa

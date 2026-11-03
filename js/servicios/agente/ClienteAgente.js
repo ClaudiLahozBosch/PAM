@@ -1,5 +1,5 @@
 // @ts-check
-import { PROTOCOLO, FOROS } from './protocolo.js?v=0.3.2';
+import { PROTOCOLO, FOROS } from './protocolo.js?v=0.3.3';
 
 /** Habla con el agente (el script de Tampermonkey). Toda la lógica está en PAM; el agente solo ejecuta. */
 export class ClienteAgente {
@@ -100,4 +100,9 @@ export class ClienteAgente {
   tamano(ancho, alto) { return this.pedir('panel.tamano', { ancho, alto }); }
   /** El tema de Mi PJ también para las puertas del agente. */
   tema(t) { return this.pedir('panel.tema', { tema: t }); }
+  /**
+   * La barra de Mi PJ arriba de los mensajes de un tema de oficial (el agente la pinta en la página del foro).
+   * @param {{ estado: 'leyendo'|'ok'|'error', abierta: boolean, barra?: any, error?: string }} d
+   */
+  oficial(d) { return this.pedir('foro.oficial', d); }
 }

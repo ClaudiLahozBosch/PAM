@@ -1,28 +1,37 @@
 // @ts-check
 // Todo lo que el panel «Mi PJ» necesita saber de la cuenta conectada, leído del foro a través del agente:
-// cuenta → perfil (enlaces a ficha y bóveda) → ficha (con el lector nuevo) → bóveda → stats de combate.
+// cuenta → perfil (enlaces a ficha y bóveda), roles y sueldo → ficha (con el lector nuevo) → bóveda → stats de combate
+// → oficiales en curso (salen de los temas de tus roles). El mismo orden que Mi PJ.
 // Cada paso que falla se apunta en `errores` y los demás siguen.
-import { leerPerfil, rutaTema, RUTA_PERFIL } from '../lectores/LectorPerfil.js?v=0.3.2';
-import { leerFichaDelForo } from './FichaDelForo.js?v=0.3.2';
-import { leerBovedaDelForo } from './BovedaDelForo.js?v=0.3.2';
-import { combate, puntos } from '../reglas/Combate.js?v=0.3.2';
+import { leerPerfil, rutaTema, RUTA_PERFIL } from '../lectores/LectorPerfil.js?v=0.3.3';
+import { leerFichaDelForo } from './FichaDelForo.js?v=0.3.3';
+import { leerBovedaDelForo } from './BovedaDelForo.js?v=0.3.3';
+import { combate, puntos } from '../reglas/Combate.js?v=0.3.3';
+import { crearActividad } from './ActividadDelForo.js?v=0.3.3';
 
 /**
  * @param {import('./agente/ClienteAgente.js').ClienteAgente} agente
- * @param {{ sistema: any, compendio: any, lector: any, foros: Record<string, any> }} dep
+ * @param {{ sistema: any, compendio: any, lector: any, foros: Record<string, any>, memoria?: import('./ActividadDelForo.js').Memoria }} dep
  */
-export async function leerMiPj(agente, { sistema, compendio, lector, foros }) {
+export async function leerMiPj(agente, { sistema, compendio, lector, foros, memoria }) {
   const errores = [];
   const hola = await agente.hola();
   const base = { leido: new Date().toISOString(), agente: hola.agente, foro: hola.foro, cuenta: hola.cuenta, errores };
   if (!hola.cuenta) return { ...base, estado: 'sinSesion' };
   const cfg = foros[hola.foro ?? ''] ?? null;
   if (!cfg) return { ...base, estado: 'foroDesconocido' };
-
   let perfil = { ficha: '', boveda: '' };
-  if (cfg.campoFicha || cfg.campoBoveda) {
-    try { perfil = leerPerfil(await agente.leer(RUTA_PERFIL), cfg); } catch (e) { errores.push('Perfil: ' + mensaje(e)); }
-  }
+
+  // roles, misiones y sueldo (como en Mi PJ, a la vez que el perfil; si fallan, el resto sigue)
+  const act = cfg.actividad && memoria ? crearActividad(agente, { yo: hola.cuenta.nombre, uid: hola.cuenta.id, origen: 'https://' + hola.foro, cfg: cfg.actividad, memoria }) : null;
+  const [, rolesYFilas, sueldo] = await Promise.all([
+    (async () => {
+      if (!(cfg.campoFicha || cfg.campoBoveda)) return;
+      try { perfil = leerPerfil(await agente.leer(RUTA_PERFIL), cfg); } catch (e) { errores.push('Perfil: ' + mensaje(e)); }
+    })(),
+    act ? act.leerRoles().catch(e => { console.warn('[Mi PJ] roles', e); return null; }) : null,
+    act ? act.leerSueldo().catch(e => { console.warn('[Mi PJ] sueldo', e); return null; }) : null
+  ]);
   const rutaF = rutaTema(perfil.ficha, hola.foro), rutaB = rutaTema(perfil.boveda, hola.foro);
   if (!rutaF) errores.push(cfg.campoFicha ? 'Tu perfil no tiene el enlace a la ficha.' : 'En este foro no sé dónde está el enlace a la ficha.');
 
@@ -37,7 +46,9 @@ export async function leerMiPj(agente, { sistema, compendio, lector, foros }) {
   if (rutaB) { try { boveda = await leerBovedaDelForo(agente, rutaB); } catch (e) { errores.push('Bóveda: ' + mensaje(e)); } }
   else if (cfg.campoBoveda) errores.push('Tu perfil no tiene el enlace a la bóveda.');
 
-  return { ...base, estado: 'ok', perfil, ficha, stats, boveda };
+  // null = no se pudo leer (el panel conserva los de la vez anterior, como Mi PJ)
+  const oficiales = act && rolesYFilas ? await act.leerMisOficiales(rolesYFilas.filas).catch(e => { console.warn('[Mi PJ] oficiales', e); return null; }) : null;
+  return { ...base, estado: 'ok', perfil, ficha, stats, boveda, roles: rolesYFilas ? rolesYFilas.roles : null, sueldo, oficiales };
 }
 
 const mensaje = e => (e instanceof Error ? e.message : String(e));
@@ -60,8 +71,9 @@ export function aDatosMiPj(r, sistema) {
     v: 2, cuenta: r.cuenta?.nombre ?? '', pj: (f?.nombre || F?.titulo || r.cuenta?.nombre || ''), uid: r.cuenta?.id ?? null, leido: r.leido,
     ficha: F ? { url: `${foro}/t${F.tema}-`, titulo: F.titulo, estado: F.estado, sello: F.sello, codigo: f.partes.map(p => p.bbcode).join('\n') } : null,
     boveda,
-    // todavía no están en PAM (fases 5c y 5d): el panel lo dice en lugar de «Tocá Actualizar»
-    roles: null, sueldo: null, oficiales: [], pendientes: ['roles', 'sueldo', 'oficiales', 'biblioteca', 'canjes'],
+    roles: r.roles ?? null, sueldo: r.sueldo ?? null, oficiales: r.oficiales ?? null,
+    // todavía no están en PAM (fases 5d y 6): el panel lo dice en lugar de «Tocá Actualizar»
+    pendientes: ['biblioteca', 'canjes'],
     rapido: f && r.stats ? rapidoDeFicha(f, r.stats, sistema, r.leido) : null,
     errores: r.errores
   };

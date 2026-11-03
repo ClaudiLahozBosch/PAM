@@ -1,8 +1,8 @@
 // @ts-check
 // Leer la bóveda de un personaje desde el foro (a través del agente): la primera página (cabecera) y las
 // dos últimas (los movimientos recientes), como hacía Mi PJ.
-import { leerPaginaTema, unirMensajes } from '../lectores/LectorTema.js?v=0.3.2';
-import { analizarBoveda } from '../lectores/LectorBoveda.js?v=0.3.2';
+import { leerPaginaTema, unirMensajes } from '../lectores/LectorTema.js?v=0.3.3';
+import { analizarBoveda } from '../lectores/LectorBoveda.js?v=0.3.3';
 
 /** Última página de un tema a partir de los enlaces de paginación («/t123p45-…»). @param {string[]} paginas */
 export function ultimaPagina(paginas) {

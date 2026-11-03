@@ -1,6 +1,6 @@
 {
  "version": 1,
- "nota": "Configuración de cada foro (sacada de pam-mi-pj.user.js 1.7.1). Lo que no se sabe del foro de pruebas queda en null.",
+ "nota": "Configuración de cada foro (sacada de pam-mi-pj.user.js 1.7.1). Lo que no se sabe del foro de pruebas queda en null. «actividad» (roles, sueldo, oficiales) es igual en los dos porque Mi PJ usaba esas constantes en cualquier foro.",
  "foros": {
   "hp-avada-kedavra.foroactivo.com": {
    "nombre": "HP Avada Kedavra",
@@ -11,6 +11,7 @@
    "forosFicha": [21, 29, 30, 31, 32, 263, 296, 33, 297, 298, 299, 300, 301, 34],
    "foroBovedas": 175,
    "grupos": { "canjes": "/g121-inspectores-de-canjes", "gringotts": "/g28-personal-de-gringotts", "aventuras": "/g81-inspectores-de-aventuras" },
+   "actividad": { "categoriaRol": 10, "noRol": [172, 175, 75, 36, 52, 272, 20, 21, 78, 193, 39, 10, 234, 192, 257], "sueldos": { "foro": "/f172-sueldos-mensuales", "formulario": "/t89-formularios-para-solicitar-sueldo" } },
    "sellos": { "0LPnzxG": "Ficha aceptada", "ne5ZhyC": "Ficha correcta" }
   },
   "test-forito.foroactivo.com": {
@@ -22,6 +23,7 @@
    "forosFicha": [],
    "foroBovedas": null,
    "grupos": {},
+   "actividad": { "categoriaRol": 10, "noRol": [172, 175, 75, 36, 52, 272, 20, 21, 78, 193, 39, 10, 234, 192, 257], "sueldos": { "foro": "/f172-sueldos-mensuales", "formulario": "/t89-formularios-para-solicitar-sueldo" } },
    "sellos": { "0LPnzxG": "Ficha aceptada", "ne5ZhyC": "Ficha correcta" }
   }
  }

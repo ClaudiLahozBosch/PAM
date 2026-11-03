@@ -2,7 +2,7 @@
 // Lee una página de tema de Foroactivo (ya convertida en Document) y saca los mensajes.
 // Sustituye a las dos copias de Mi PJ (`postsDe`) y a la del Inspector (`mensajesDe`).
 // Funciona con y sin sesión: sin sesión el foro no enlaza el perfil del autor, y entonces solo hay nombre.
-import { limpiarForo } from './LectorFicha.js?v=0.3.2';
+import { limpiarForo } from './LectorFicha.js?v=0.3.3';
 
 /**
  * @typedef {{ id: number, autorId: number|null, autor: string, fecha: string, html: string, texto: string, imgs: number }} Mensaje
@@ -56,3 +56,34 @@ export function mismoAutor(a, b) {
 }
 
 function numero(s) { const n = Number(s); return s != null && s !== '' && Number.isFinite(n) ? n : null; }
+
+/**
+ * Texto de un mensaje con espacios entre etiquetas y saltos en los bloques: el que leía Mi PJ para el sueldo,
+ * las misiones y los oficiales (sus reglas buscan frases y líneas en este texto).
+ * @param {Element} el
+ */
+export function textoDe(el) {
+  const out = []; const w = /** @type {Document} */ (el.ownerDocument).createTreeWalker(el, 1 | 4); // elementos y textos
+  let n;
+  while ((n = w.nextNode())) {
+    if (n.nodeType === 3) { if (!/^(STYLE|SCRIPT)$/.test(n.parentNode ? n.parentNode.nodeName : '')) out.push(n.nodeValue); }
+    else if (/^(BR|DIV|P|LI|TR|H\d)$/.test(n.nodeName)) out.push('\n');
+    else if (/^(TD|SPAN|STRONG|B|I|EM|FONT|DD|DT|LABEL|A)$/.test(n.nodeName)) out.push(' ');
+  }
+  return out.join('').replace(/ /g, ' ').replace(/[ \t]+/g, ' ');
+}
+
+/**
+ * Los mensajes de una página como los leía Mi PJ (`postsDe`): id en texto, autor, la fecha tal como sale
+ * («Lun 2 Mar 2026 - 10:00») y el texto de `textoDe`.
+ * @param {Document} doc
+ * @param {RegExp} fecha la expresión de FechaForo.FECHA
+ * @returns {{ id: string, autor: string, fecha: string, texto: string, imgs: number }[]}
+ */
+export function postsDeMiPj(doc, fecha) {
+  return [...doc.querySelectorAll('div.post')].filter(e => /^p\d+$/.test(e.id)).map(p => {
+    const a = p.querySelector('.author a[href*="/u"]'), au = p.querySelector('.author'), c = p.querySelector('.content') || p;
+    return { id: p.id.slice(1), autor: a ? (a.textContent ?? '').trim() : '', fecha: ((au ? au.textContent ?? '' : '').match(fecha) || [''])[0],
+      texto: textoDe(c), imgs: c.querySelectorAll('img').length };
+  });
+}
