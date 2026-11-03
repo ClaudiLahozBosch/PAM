@@ -3,11 +3,11 @@
 // cuenta → perfil (enlaces a ficha y bóveda), roles y sueldo → ficha (con el lector nuevo) → bóveda → stats de combate
 // → oficiales en curso (salen de los temas de tus roles). El mismo orden que Mi PJ.
 // Cada paso que falla se apunta en `errores` y los demás siguen.
-import { leerPerfil, rutaTema, RUTA_PERFIL } from '../lectores/LectorPerfil.js?v=0.3.7';
-import { leerFichaDelForo } from './FichaDelForo.js?v=0.3.7';
-import { leerBovedaDelForo } from './BovedaDelForo.js?v=0.3.7';
-import { combate, puntos } from '../reglas/Combate.js?v=0.3.7';
-import { crearActividad } from './ActividadDelForo.js?v=0.3.7';
+import { leerPerfil, rutaTema, RUTA_PERFIL } from '../lectores/LectorPerfil.js?v=0.3.8';
+import { leerFichaDelForo } from './FichaDelForo.js?v=0.3.8';
+import { leerBovedaDelForo } from './BovedaDelForo.js?v=0.3.8';
+import { combate, puntos } from '../reglas/Combate.js?v=0.3.8';
+import { crearActividad } from './ActividadDelForo.js?v=0.3.8';
 
 /**
  * @param {import('./agente/ClienteAgente.js').ClienteAgente} agente

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PAM · Agente (staging)
 // @namespace    https://claudilahozbosch.github.io/PAM/staging
-// @version      0.3.7
+// @version      0.3.8
 // @description  El script mínimo de PAM: lee el foro con tu sesión, publica y edita SOLO tras tu «Aceptar» y muestra el panel «Mi PJ» de PAM. Toda la lógica está en PAM.
 // @updateURL    https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
 // @downloadURL  https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
@@ -29,7 +29,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.3.7';
+  var VERSION = '0.3.8';
   var PROTOCOLO = 1;
   // Staging: el fork de pruebas (otro dominio que PAM real, así no ve los datos de los jugadores).
   var PAM = { origen: 'https://claudilahozbosch.github.io', ruta: '/PAM/' };
@@ -104,9 +104,16 @@
   }
 
   function ventana() { return { ancho: window.innerWidth, alto: window.innerHeight }; }
+  // «#escriba-publicar» (llegada desde PAM a publicar la petición): se apunta para PAM y se quita de la dirección,
+  // así al recargar no se vuelve a abrir la puerta.
+  var hashInicial = '';
+  if (enForo && /^#escriba-[a-z]{1,20}$/.test(location.hash)) {
+    hashInicial = location.hash;
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* sin historial */ }
+  }
   function hola() {
     return {
-      agente: VERSION, protocolo: PROTOCOLO, foro: enForo ? location.host : null,
+      agente: VERSION, protocolo: PROTOCOLO, foro: enForo ? location.host : null, hash: hashInicial,
       cuenta: enForo ? cuentaConectada() : null, ruta: enForo ? location.pathname + location.search : null, ventana: ventana(),
       editor: enForo ? !!document.querySelector('textarea[name="message"]') : false,
       titulo: enForo ? ((document.querySelector('h1.page-title') || {}).textContent || '').trim() : ''
@@ -635,7 +642,7 @@
   // ---------------------------------------------------------------
   // Panel «Mi PJ» (página de PAM en un iframe que ocupa justo lo que ocupa el panel)
   // ---------------------------------------------------------------
-  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=0.3.7' });
+  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=0.3.8' });
   raiz.appendChild(iframe);
   // Si el panel no arranca (no pide tamaño), se enseña al menos su pastilla, para que nunca quede invisible.
   var panelVivo = false;
@@ -673,6 +680,8 @@
     },
     'panel.tema': function (d) { return aplicarTema(d.tema); },
     'foro.oficial': function (d) { return pintarOficial(d); },
+    // Solo a rutas del propio foro (p. ej. el mensaje que se acaba de publicar).
+    'foro.ir': function (d) { var u = rutaSegura(d.ruta); setTimeout(function () { location.href = u.href; }, 0); return { ido: true }; },
     'pam.abrir': function (d) { return abrirPam(d); }
   });
   // El panel calcula su tamaño con la ventana del foro (dentro del iframe no la ve).

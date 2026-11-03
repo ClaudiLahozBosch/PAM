@@ -4,7 +4,9 @@
 // «de» es 'pam' o 'agente': en la misma ventana cada lado ignora sus propios mensajes.
 //
 // PAM → agente:
-//   hola                                   → { agente, protocolo, foro, cuenta: {id, nombre}|null, ruta, ventana: {ancho, alto} }
+//   hola                                   → { agente, protocolo, foro, cuenta: {id, nombre}|null, ruta, ventana: {ancho, alto},
+//                                              hash: «#escriba-…» con el que se abrió la página (el agente lo quita de la dirección) }
+//   foro.ir        { ruta }                lleva la página del foro a otra ruta del mismo foro
 //   foro.leer      { ruta }                → { estado, ruta, url, html }        (solo rutas del foro)
 //   foro.puerta    { titulo, explicacion, avisos, pasos: [{tipo:'publicar', tema, texto} | {tipo:'editar', post, original, nuevo, motivo}] }
 //                                          → la puerta del Escriba → { resultado, pasos: [{estado, post, …}] }

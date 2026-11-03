@@ -1,5 +1,5 @@
 // @ts-check
-import { PROTOCOLO, FOROS } from './protocolo.js?v=0.3.7';
+import { PROTOCOLO, FOROS } from './protocolo.js?v=0.3.8';
 
 /** Habla con el agente (el script de Tampermonkey). Toda la lógica está en PAM; el agente solo ejecuta. */
 export class ClienteAgente {
@@ -88,6 +88,9 @@ export class ClienteAgente {
    * @returns {Promise<{ resultado: 'aceptada'|'denegada'|'fallida'|'parcial'|'igual', pasos: any[] }>}
    */
   puerta(accion) { return this.pedir('foro.puerta', accion, 30 * 60000); }
+
+  /** Lleva la página del foro a otra ruta del mismo foro (p. ej. el mensaje que se acaba de publicar). @param {string} ruta */
+  ir(ruta) { return this.pedir('foro.ir', { ruta }); }
 
   /** @param {string} clave */
   async leerDato(clave) { return (await this.pedir('almacen.leer', { clave })).valor; }

@@ -2,8 +2,8 @@
 // El «controlador» de PAM para lo que llega del foro a través del agente. Es la única puerta de entrada:
 // lee lo que el foro dejó en el almacén del agente, lo comprueba y se lo pasa a PAM (PamActual), siempre después
 // de la puerta Aceptar / Denegar: los oficiales de la Biblioteca y los canjes (preparar la petición y cerrarla).
-import { abrirPuerta } from './ui/Puerta.js?v=0.3.7';
-import { crearCanjesPam } from './CanjesPam.js?v=0.3.7';
+import { abrirPuerta } from './ui/Puerta.js?v=0.3.8';
+import { crearCanjesPam } from './CanjesPam.js?v=0.3.8';
 
 const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 

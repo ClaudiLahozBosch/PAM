@@ -7,10 +7,10 @@
 //   · los enlaces abren la página del foro (<base target="_top"> en panel.html).
 // Las tarjetas que aún no están en PAM (canjes) lo dicen en vez de «Tocá Actualizar».
 // Arreglos: R09 (los oficiales cerrados ya no salen en curso) y R10 (✕ para ocultar un oficial hasta volver a escribir en él).
-import { aFecha } from '../../lectores/FechaForo.js?v=0.3.7';
-import { estadoSueldo } from '../../reglas/Sueldo.js?v=0.3.7';
-import { grageasOf } from '../../reglas/Oficiales.js?v=0.3.7';
-import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=0.3.7';
+import { aFecha } from '../../lectores/FechaForo.js?v=0.3.8';
+import { estadoSueldo } from '../../reglas/Sueldo.js?v=0.3.8';
+import { grageasOf } from '../../reglas/Oficiales.js?v=0.3.8';
+import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=0.3.8';
 
 const TEMA_AVADENSE = { skin: 'avadense', ink: '#171a2b', panel: '#1e2236', 'panel-2': '#262a42', parchment: '#F1EADF', 'parchment-dim': '#a7a1b6', gold: '#B49768',
   'gold-bright': '#d6bd8f', 'arcane-bright': '#cf94a3', good: '#93b8a0', bad: '#d98377', 'line-strong': 'rgba(241,234,223,.16)', 'accent-ink': '#1b1e30',
@@ -74,7 +74,7 @@ function bgsDe(R) {
  *   ventana: { ancho: number, alto: number }, pamUrl: string, cuenta?: { id: number, nombre: string } | null, ahora?: () => number,
  *   biblioteca?: { escanear: (op: any, log: (m: string) => void) => Promise<any>, origen: string, guardarEnAgente?: (k: string, v: any) => Promise<any> } | null }} dep
  */
-export function crearPanelMiPj({ root, documento, guardado = null, cargar, agente = null, ventana, pamUrl, cuenta = null, biblioteca = null, foroHost = '' }) {
+export function crearPanelMiPj({ root, documento, guardado = null, cargar, agente = null, ventana, pamUrl, cuenta = null, biblioteca = null, foroHost = '', canjes = null }) {
   const gv = (k, d) => { try { const v = guardado?.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
   const sv = (k, v) => { try { guardado?.setItem(k, JSON.stringify(v)); } catch (e) { /* sin espacio */ } };
   const YO = (cuenta && cuenta.nombre) || '', UID = (cuenta && cuenta.id) || 0;
@@ -166,13 +166,15 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
         ? `<div class="row">${rb.libres} libres · ${rb.abandonados} abandonados${rb.favs ? ` · ★ ${rb.favs}` : ''}</div><div class="dim">Último escaneo: ${esc(leidoTxt(rb.fecha))}</div>`
         : '<div class="dim">Biblioteca de sucesos de El Profeta: cuáles están libres, en curso o abandonados. Marcalos con ★ y pasalos a PAM.</div>'}
         <div class="row" style="margin-top:6px"><button class="b" data-a="oficiales">Abrir la biblioteca</button></div></div>`;
-      h += `<div class="card" id="mipj-canjes"><div class="ct">⚖ Canjes</div><div class="dim">Para pedir un canje: en PAM armá el carrito y tocá «Preparar el canje» en la pastilla Mi PJ.</div></div>`;
+      h += canjes ? '<div class="card" id="mipj-canjes"></div>' /* la tarjeta la pinta CanjesPanel */
+        : `<div class="card" id="mipj-canjes"><div class="ct">⚖ Canjes</div><div class="dim">Para pedir un canje: en PAM armá el carrito y tocá «Preparar el canje» en la pastilla Mi PJ.</div></div>`;
     }
     if (error) h += `<div class="err">${esc(error)}</div>`;
     h += `</div><div class="ft"><span class="sp">${datos ? 'Leído<br>' + esc(leidoTxt(datos.leido)) : ''}</span>
       <button class="b" data-a="act" ${cargando ? 'disabled' : ''}>${cargando ? 'Leyendo…' : 'Actualizar'}</button>
       <button class="b pri" data-a="pam" ${datos ? '' : 'disabled'} title="Abre PAM y te muestra qué se va a cambiar antes de aplicarlo">Enviar a PAM</button></div></div>`;
     root.innerHTML = h;
+    if (canjes) canjes.pintar(root.querySelector('#mipj-canjes'));
     if (ui.rapido && ui.rapidoQ) filtrarRapido(ui.rapidoQ);
     aplicarTam();
   }
@@ -423,6 +425,8 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
   pintar();
   return {
     pintar, actualizar, ponerTema,
+    /** Abre el panel (al llegar desde PAM a publicar la petición). */
+    abrir() { ui.abierto = true; sv(K.ui, ui); pintar(); },
     /** El agente avisa cuando cambia el tamaño de la ventana del foro. */
     ventana(v) { foro = { ...v }; aplicarTam(); },
     get datos() { return datos; }, get ui() { return ui; }

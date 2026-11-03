@@ -54,10 +54,10 @@ const esperarFin = async () => { for (let i = 0; i < 100 && !boton('Cerrar'); i+
 
 test('hola (con la ventana del foro), iframe sin marco y lectura del foro', async () => {
   const h = await agente.hola();
-  assert.deepEqual([h.agente, h.protocolo, h.foro, h.cuenta, h.ruta], ['0.3.7', 1, 'hp-avada-kedavra.foroactivo.com', { id: 7, nombre: 'TEST' }, '/t5-uno']);
+  assert.deepEqual([h.agente, h.protocolo, h.foro, h.cuenta, h.ruta], ['0.3.8', 1, 'hp-avada-kedavra.foroactivo.com', { id: 7, nombre: 'TEST' }, '/t5-uno']);
   assert.ok(h.ventana.ancho > 0 && h.ventana.alto > 0);
   const f = sombra().querySelector('iframe');
-  assert.equal(f.getAttribute('src'), PAM + '/PAM/panel.html?foro=' + encodeURIComponent(FORO) + '&v=0.3.7', 'con la versión: el navegador no mezcla archivos');
+  assert.equal(f.getAttribute('src'), PAM + '/PAM/panel.html?foro=' + encodeURIComponent(FORO) + '&v=0.3.8', 'con la versión: el navegador no mezcla archivos');
   assert.equal(f.className, 'marco');
   assert.equal(sombra().querySelector('.pastilla'), null, 'la pastilla es la de Mi PJ, dentro del panel');
   assert.equal((await agente.leer('/')).title, 'Foro');
@@ -254,6 +254,27 @@ test('abrir PAM desde el foro y pasarle un mensaje hasta que conteste («Enviar 
   await agente.abrirPam({ hash: 'javascript:alert(1)' });
   assert.equal(abiertas.at(-1)[0], PAM + '/PAM/', 'solo se abre PAM, sin rutas raras');
   otra.close();
+});
+
+test('foro.ir: solo rutas del propio foro', async () => {
+  for (const mala of ['//evil.com/x', 'https://evil.com/', 'javascript:alert(1)', '/\\evil.com']) await assert.rejects(agente.ir(mala), /no permitida/, mala);
+  assert.equal(new URL('/viewtopic?p=9650#9650', FORO).href, FORO + '/viewtopic?p=9650#9650');
+});
+
+test('llegada con #escriba-publicar: hola lo dice y se quita de la dirección', async () => {
+  const d2 = new JSDOM(pagina, { url: FORO + '/t34430-registro-de-canjes#escriba-publicar', runScripts: 'outside-only', pretendToBeVisual: true });
+  const W2 = d2.window;
+  W2.GM_getValue = (k, d) => d; W2.GM_setValue = () => {}; W2.GM_listValues = () => [];
+  W2.fetch = async () => ({ status: 200, ok: true, url: FORO, text: async () => '<html></html>' });
+  const bus2 = new EventTarget();
+  Object.defineProperty(W2.HTMLIFrameElement.prototype, 'contentWindow', { get() { return { postMessage: (data, destino) => { if (destino === PAM) bus2.dispatchEvent(new MessageEvent('message', { data: structuredClone(data), origin: FORO })); } }; } });
+  W2.eval(readFileSync(new URL('../../agente/pam-agente.user.js', import.meta.url), 'utf8'));
+  assert.equal(W2.location.hash, '', 'se quita: al recargar no se vuelve a abrir la puerta');
+  assert.equal(W2.location.pathname, '/t34430-registro-de-canjes');
+  const a2 = new ClienteAgente({ destino: { postMessage: (d, o) => o === FORO && W2.dispatchEvent(new W2.MessageEvent('message', { data: structuredClone(d), origin: PAM })) }, origen: FORO, escuchar: bus2 });
+  assert.equal((await a2.hola()).hash, '#escriba-publicar');
+  assert.equal((await agente.hola()).hash, '', 'sin el hash, nada');
+  W2.close();
 });
 
 test('hola dice si la página tiene editor (para releer la bóveda al escribir en ella)', async () => {

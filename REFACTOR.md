@@ -100,6 +100,15 @@ Antes, el script «Mi PJ» manejaba PAM desde fuera: pulsaba sus botones y leía
 - `js/pam/ControladorForo.js` es **la única puerta de entrada** de lo que llega del foro a través del agente (hoy, los oficiales de la Biblioteca; en la fase 6b, las peticiones de canje). Lo comprueba y lo enseña en la puerta Aceptar / Denegar de siempre (`js/pam/ui/Puerta.js`, el mismo aspecto que en el foro).
 - `js/pam/PamActual.js` es **el único archivo que conoce `index.html` por dentro** (`rrOficiales`, `showSection`…). Cuando las páginas de PAM se reescriban (fase 8), se cambia este archivo y lo demás sigue igual.
 
+## Los canjes en el foro (fase 6b·2)
+
+La tarjeta «⚖ Canjes» del panel, publicar la petición en el Registro de Canjes y encontrar la respuesta del Inspector, como Mi PJ (mismos textos, mismas páginas, misma tarjeta):
+
+- `js/reglas/Canjes.js`: el texto de la petición, los avisos y qué dice la respuesta (sin leer ni escribir nada).
+- `js/servicios/CanjesDelForo.js`: lee el registro y los grupos de Inspectores y publica a través del agente (su puerta Aceptar / Modificar / Denegar). Las peticiones de cada cuenta se guardan en el almacén del agente, `pam.cuentas.<foro>.<id>`; las del Mi PJ antiguo (`cuentas.<foro>.<id>`) se copian la primera vez.
+- `js/paginas/panel/CanjesPanel.js`: la tarjeta. Al llegar desde PAM con `#escriba-publicar`, el agente lo dice en `hola` (y lo quita de la dirección) y la puerta se abre sola; al publicar, el agente lleva la página al mensaje nuevo (`foro.ir`).
+- El registro de cada foro está en `data/foros.json` (`registroCanjes`, `grupos`). Sin registro, la tarjeta solo explica cómo pedir un canje.
+
 «Enviar a PAM» usa la ventana «Datos del foro → PAM» que ya tiene `index.html`: el agente abre PAM desde el foro y le pasa los datos, porque esa ventana solo acepta datos que vengan del foro. En la rama `refactor` acepta también el foro de pruebas (`FOROS_PRUEBA`), siempre con Aceptar / Denegar.
 
 ## Dónde guarda PAM los datos (y la sesión con código)

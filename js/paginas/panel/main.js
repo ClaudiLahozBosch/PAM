@@ -1,16 +1,18 @@
 // @ts-check
 // Arranque del panel «Mi PJ» dentro del foro (el agente lo muestra en un iframe sin marco).
-import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=0.3.7';
-import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=0.3.7';
-import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial } from '../../datos/cargar.js?v=0.3.7';
-import { LectorFicha } from '../../lectores/LectorFicha.js?v=0.3.7';
-import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=0.3.7';
-import { crearPanelMiPj } from './MiPjPanel.js?v=0.3.7';
-import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=0.3.7';
-import { crearActividad } from '../../servicios/ActividadDelForo.js?v=0.3.7';
-import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=0.3.7';
-import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=0.3.7';
-import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=0.3.7';
+import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=0.3.8';
+import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=0.3.8';
+import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial } from '../../datos/cargar.js?v=0.3.8';
+import { LectorFicha } from '../../lectores/LectorFicha.js?v=0.3.8';
+import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=0.3.8';
+import { crearPanelMiPj } from './MiPjPanel.js?v=0.3.8';
+import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=0.3.8';
+import { crearActividad } from '../../servicios/ActividadDelForo.js?v=0.3.8';
+import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=0.3.8';
+import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=0.3.8';
+import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=0.3.8';
+import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=0.3.8';
+import { crearTarjetaCanjes } from './CanjesPanel.js?v=0.3.8';
 
 const CACHE_MIN = 30; // como Mi PJ: si lo leído tiene más de media hora, se vuelve a leer al abrir
 const root = /** @type {HTMLElement} */ (document.getElementById('mipj'));
@@ -46,22 +48,47 @@ async function arrancar() {
   const cfg = foros[hola.foro ?? ''];
   // en el tema de un oficial: la barra con las cuentas, arriba de los mensajes (como Mi PJ, antes de pintar el panel)
   if (cfg?.actividad && ES_OFICIAL.test(hola.titulo || '') && /^\/t\d+/.test(hola.ruta || '')) barraOficial(agente, crearActividad(agente, { yo: hola.cuenta.nombre, uid: hola.cuenta.id, origen: 'https://' + hola.foro, cfg: cfg.actividad, memoria, cierres }), hola.ruta, memoria);
+  // los canjes en el foro: la petición que preparó PAM, publicarla y la respuesta del Inspector (solo si el foro tiene registro)
+  const servicioCanjes = cfg?.registroCanjes ? crearCanjesDelForo(agente, { foroHost: hola.foro || '', cuenta: hola.cuenta, cfg, memoria }) : null;
+  if (servicioCanjes) await traerPeticionesAntiguas(agente, servicioCanjes.clave, 'cuentas.' + hola.foro + '.' + hola.cuenta.id);
+  const canjes = servicioCanjes ? crearTarjetaCanjes({
+    documento: document, servicio: servicioCanjes, datos: () => panel?.datos,
+    actualizar: () => panel.actualizar(), abrirPanel: () => panel.abrir(), irA: ruta => agente.ir(ruta)
+  }) : null;
   panel = crearPanelMiPj({
-    root, documento: document, guardado, agente, ventana: hola.ventana, cuenta: hola.cuenta, foroHost: hola.foro || '',
+    root, documento: document, guardado, agente, ventana: hola.ventana, cuenta: hola.cuenta, foroHost: hola.foro || '', canjes,
     pamUrl: new URL('index.html', location.href).href,
     biblioteca: cfg?.actividad?.biblioteca ? (() => {
       const origen = 'https://' + hola.foro;
       const lectorBib = crearLectorBiblioteca(agente, { origen, cfg: cfg.actividad.biblioteca, store: { get: () => memoria.gv(CLAVES_BIBLIOTECA.cache, { ediciones: {}, roles: {} }), set: v => memoria.sv(CLAVES_BIBLIOTECA.cache, v) } });
       return { origen, escanear: lectorBib.escanear, guardarEnAgente: (k, v) => agente.guardarDato(k, v) };
     })() : null,
-    cargar: async () => aDatosMiPj(await leerMiPj(agente, { sistema, compendio, lector, foros, memoria, cierres }), sistema)
+    // como Mi PJ: al leer el foro también se busca la respuesta de los Inspectores a tus peticiones
+    cargar: async () => {
+      const [r] = await Promise.all([leerMiPj(agente, { sistema, compendio, lector, foros, memoria, cierres }), servicioCanjes ? servicioCanjes.actualizarAprobaciones().catch(() => {}) : null]);
+      if (canjes) canjes.recargar();
+      return aDatosMiPj(r, sistema);
+    }
   });
+  if (canjes) canjes.recargar();
   agente.atender('ventana.cambio', v => { panel.ventana(v); return {}; });
   const d = panel.datos;
   const viejo = !d || d.v !== 2 || Date.now() - new Date(d.leido).getTime() > CACHE_MIN * 60000 || (d.pendientes || []).includes('roles'); // leído por la 0.3.2, sin roles
   // como Mi PJ: escribiendo en la propia bóveda, se relee si lo leído tiene más de 2 minutos (para comparar con lo último)
   const enMiBoveda = !!(d?.boveda && hola.editor && (d.boveda.tema ?? d.boveda.tid) === temaDeRuta(hola.ruta) && Date.now() - new Date(d.leido).getTime() > 2 * 60000);
-  if (viejo || enMiBoveda) panel.actualizar();
+  // llegada desde PAM con «Ir al foro a publicar la petición»: se abre sola la puerta
+  if (canjes && hola.hash === '#escriba-publicar') canjes.alCargarForo(hola.cuenta.nombre);
+  else if (viejo || enMiBoveda) panel.actualizar();
+}
+
+/** Las peticiones de canje que guardaba el «Mi PJ» antiguo («cuentas.<foro>.<id>»), la primera vez. */
+async function traerPeticionesAntiguas(agente, clave, claveAntigua) {
+  try {
+    if (await agente.leerDato(clave)) return;
+    const L = await agente.legado();
+    const viejas = L && L[claveAntigua] && L[claveAntigua].peticiones;
+    if (Array.isArray(viejas) && viejas.length) await agente.guardarDato(clave, { peticiones: viejas });
+  } catch { /* sin datos antiguos */ }
 }
 
 /** La barra del oficial: «leyendo…» al tener la primera página, y luego las cuentas; las marcas de «segundo oficial» se guardan aquí. */
