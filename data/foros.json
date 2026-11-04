@@ -20,6 +20,7 @@
    "campoFicha": null,
    "campoBoveda": null,
    "registroCanjes": "/t6-registro-de-canjes-de-test",
+   "perfilPruebas": { "nota": "El perfil del foro de pruebas no tiene los campos «Ficha de PJ» y «Bóveda»: estos son los de la cuenta TEST (Elena Whitlock, personaje de prueba).", "ficha": "/t5-elena-whitlock", "boveda": "/t8-boveda-999-elena-whitlock" },
    "forosFicha": [],
    "foroBovedas": null,
    "grupos": {},
