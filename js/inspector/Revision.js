@@ -8,8 +8,8 @@
 //   · F05: las partes de la ficha con la regla del lector compartido (js/lectores/PartesFicha.js);
 //   · F06: «Puntos de Destino: 13» se lee 13 (antes, 1);
 //   · leerSaldos es el de Mi PJ (js/lectores/LectorBoveda.js), que era una copia (F17).
-import { leerSaldos } from '../lectores/LectorBoveda.js?v=0.6.8';
-import { partesVigentes } from '../lectores/PartesFicha.js?v=0.6.8';
+import { leerSaldos } from '../lectores/LectorBoveda.js?v=0.6.9';
+import { partesVigentes } from '../lectores/PartesFicha.js?v=0.6.9';
 
 /**
  * @param {{ leer: (ruta: string) => Promise<Document> }} dep

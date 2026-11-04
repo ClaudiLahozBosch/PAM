@@ -1,9 +1,9 @@
 // @ts-check
 // Arranque de la Tabla de Canjes y el Compendio (fase 8d). Lo importa js/pam/arranque.js en el mismo sitio en que
 // estaba dentro de index.html (la primera página). Su HTML sigue en index.html y sus estilos en css/pam.css.
-import { Almacen } from '../../core/Almacen.js?v=0.6.8';
-import { datosTabla } from './datos.js?v=0.6.8';
-import { montarTabla } from './Tabla.js?v=0.6.8';
+import { Almacen } from '../../core/Almacen.js?v=0.6.9';
+import { datosTabla } from './datos.js?v=0.6.9';
+import { montarTabla } from './Tabla.js?v=0.6.9';
 
 /** La versión de este archivo (?v=…): los datos se piden con la misma. */
 const V = new URL(import.meta.url).search;

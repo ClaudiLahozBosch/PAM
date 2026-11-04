@@ -10,10 +10,10 @@
 //     cosa o si se descuadra una etiqueta, el cambio se deshace y va a la lista «a mano». Nunca dice
 //     «hecho» sin haberlo comprobado.
 // Los campos de texto, atributos, habilidades y combate se cambian como en el PAM antiguo (funcionaba bien).
-import { analizar, balance, partesDeLinea, visible, marco } from './Etiquetas.js?v=0.6.8';
-import { limpiarForo, seccion } from '../lectores/LectorFicha.js?v=0.6.8';
-import { combate, puntos } from '../reglas/Combate.js?v=0.6.8';
-import { norm, num, aRomano, escRe } from '../core/texto.js?v=0.6.8';
+import { analizar, balance, partesDeLinea, visible, marco } from './Etiquetas.js?v=0.6.9';
+import { limpiarForo, seccion } from '../lectores/LectorFicha.js?v=0.6.9';
+import { combate, puntos } from '../reglas/Combate.js?v=0.6.9';
+import { norm, num, aRomano, escRe } from '../core/texto.js?v=0.6.9';
 
 const SKILL_LV = ['Desentrenado (+0)', 'Novato (+1)', 'Competente (+2)', 'Experto (+4)', 'Maestro (+7)', 'Legendario (+9)'];
 const NIVEL_ARC = { dom: 'doméstico', bas: 'básico', int: 'intermedio', ava: 'avanzado', leg: 'legendario' };
@@ -404,6 +404,9 @@ export class EditorFicha {
   #campos(textos, orden, antes, despues, hechos, manual) {
     const S = this.sistema;
     const CLOSE = '(?:\\s*(?:\\[\\/(?:color|b|i|u|font|size)\\]|<\\/(?:span|b|strong|i|em|font)>))*';
+    // el valor puede ir dentro de su propio formato: «→ Atletismo:[/color] [color=#316996]Novato (+1)[/color]» (ficha de Elena,
+    // pruebas en Chrome del 5/11/2026); sin esto no se encontraba, y en los atributos el número nuevo quedaba delante del viejo
+    const OPEN = '(?:\\[(?:color|b|i|u|font|size)(?:=[^\\]]*)?\\]|<(?:span|b|strong|i|em|font)\\b[^>]*>)*';
     const valor = (f, p) => { if (p === 'nombre') return f.nombre; const [o, k] = p.split('.'); const obj = o === 'd' ? f.datos : o === 'desc' ? f.descripcion : f.presentacion; return obj?.[k] ?? ''; };
     const v = x => String(x ?? '').trim();
     // aplica una sustitución en el primer mensaje donde encaje
@@ -443,20 +446,21 @@ export class EditorFicha {
       rep(/(Límites:\s*)([^)\n]*)(\))/i, (m, a, x, c) => a + despues.presentacion.limites + c, 'Límites');
     for (const at of S.atributos) {
       if (num(antes.atributos[at]) === num(despues.atributos[at])) continue;
-      const re = new RegExp(`(→\\s*${escRe(at)}\\s*:${CLOSE}[ \\t]*)([+-]?\\d*)`, 'i');
-      if (!rep(re, (m, pre) => pre + '+' + num(despues.atributos[at]), at)) manual.push(`Atributo ${at}: no lo encontré`);
+      const re = new RegExp(`(→\\s*${escRe(at)}\\s*:${CLOSE}[ \\t]*${OPEN})([+-]?\\d*)`, 'i');
+      // con «+» como el PAM antiguo, salvo si la ficha lo escribía sin él
+      if (!rep(re, (m, pre, viejo) => pre + (/^\d/.test(viejo) ? '' : '+') + num(despues.atributos[at]), at)) manual.push(`Atributo ${at}: no lo encontré`);
     }
     const LV = '(?:Desentrenad[oa]|Novat[oa]|Competente|Expert[oa]|Maestr[oa]|Legendari[oa])\\s*\\(\\+\\d+\\)(?:\\s*\\/[^\\n]*)?';
     for (const h of S.listaHabilidades.filter(x => !x.multiple)) {
       if (num(antes.habilidades[h.nombre]) === num(despues.habilidades[h.nombre])) continue;
       const nombres = [h.enFicha, h.nombre].filter(Boolean).map(escRe).join('|');
-      const re = new RegExp(`(→\\s*(?:${nombres})\\s*:${CLOSE}[ \\t]*)(${LV})`, 'i');
+      const re = new RegExp(`(→\\s*(?:${nombres})\\s*:${CLOSE}[ \\t]*${OPEN})(${LV})`, 'i');
       if (!rep(re, (m, pre) => pre + SKILL_LV[num(despues.habilidades[h.nombre])], S.nombreHabilidad(h, 'ficha'))) manual.push(`Habilidad ${S.nombreHabilidad(h, 'ficha')}: no la encontré`);
     }
     for (const x of despues.artes) {
       const old = antes.artes.find(y => norm(y.nombre) === norm(x.nombre));
       if (old && num(old.nivel) === num(x.nivel)) continue;
-      const re = new RegExp(`(→\\s*(?:Arte\\s*\\/\\s*Artesanía\\s*\\(\\s*)?${escRe(x.nombre)}\\s*\\)?\\s*:${CLOSE}[ \\t]*)(${LV})`, 'i');
+      const re = new RegExp(`(→\\s*(?:Arte\\s*\\/\\s*Artesanía\\s*\\(\\s*)?${escRe(x.nombre)}\\s*\\)?\\s*:${CLOSE}[ \\t]*${OPEN})(${LV})`, 'i');
       if (!rep(re, (m, pre) => pre + SKILL_LV[num(x.nivel)], `Arte/Artesanía (${x.nombre})`)) manual.push(`Arte/Artesanía ${x.nombre}: añádela a mano (${SKILL_LV[num(x.nivel)]})`);
     }
     for (const x of antes.artes) if (!despues.artes.some(y => norm(y.nombre) === norm(x.nombre))) manual.push(`Arte/Artesanía ${x.nombre}: la quitaste; bórrala a mano`);

@@ -201,3 +201,28 @@ test('lo que no se puede hacer va a «a mano» y no se da por hecho', () => {
   assert.ok(!r.hechos.some(h => h.includes('Algo legendario')));
   assert.equal(r.codigo, MORTIMER, 'si no se pudo, el código queda como estaba');
 });
+
+test('el valor con su propio color (ficha de Elena, test-forito): atributo y habilidad se cambian dentro del color', () => {
+  // así escribe la ficha de Elena los valores: el nivel dentro de «[color=#316996]…[/color]» (pruebas en Chrome del 5/11/2026)
+  const ELENA = `[color=#7c623e]▋ Atributos:[/color] (Límites: ____)
+[color=#7c623e]→ Vigor:[/color] [color=#316996]2[/color]
+[color=#7c623e]→ Destreza:[/color] [color=#316996]3[/color]
+
+[color=#7c623e]▋ Habilidades:[/color] 
+[spoiler=VIGOR][color=#7c623e]→ Atletismo:[/color] [color=#316996]Novato (+1)[/color]
+[color=#7c623e]→ Pelea:[/color] Desentrenado (+0)[/spoiler]
+[spoiler=DESTREZA][color=#7c623e]→ Esquiva:[/color] [color=#316996]Competente (+2)[/color]
+[color=#7c623e]→ Sigilo:[/color] [color=#316996]Novato (+1)[/color][/spoiler]
+`;
+  const antes = leer(ELENA);
+  assert.equal(antes.habilidades.Atletismo, 1);
+  const d = copia(antes); d.habilidades.Atletismo = 2; d.atributos.Vigor = 3; d.habilidades.Pelea = 1;
+  const r = E.aplicar(antes, d), cod = r.partes[0].despues;
+  assert.deepEqual(r.manual.filter(m => !/^Combate:/.test(m)), [], 'solo el combate, que este trozo de ficha no tiene');
+  assert.match(cod, /→ Atletismo:\[\/color\] \[color=#316996\]Competente \(\+2\)\[\/color\]/);
+  assert.match(cod, /→ Vigor:\[\/color\] \[color=#316996\]3\[\/color\]/, 'el número dentro del color y sin «+», como lo escribía la ficha');
+  assert.match(cod, /→ Pelea:\[\/color\] Novato \(\+1\)\[\/spoiler\]/);
+  assert.deepEqual(balance(cod), balance(ELENA));
+  const leida = leer(cod);
+  assert.equal(leida.habilidades.Atletismo, 2); assert.equal(leida.atributos.Vigor, 3); assert.equal(leida.habilidades.Pelea, 1);
+});
