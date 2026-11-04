@@ -2,7 +2,7 @@
 // Reglas y listas del Sistema Avadense (data/sistema.json), con una sola fuente para todo PAM.
 // Los nombres son los oficiales; cada «contexto» da el nombre que usa un sitio concreto:
 //   'oficial' → Esquivar (Sistema, Tabla de Canjes)   'ficha' → Esquiva (modelo de ficha del foro)
-import { norm } from '../core/texto.js?v=0.4.1';
+import { norm } from '../core/texto.js?v=0.5.0';
 
 /** @typedef {'oficial'|'ficha'|'proezas'} Contexto */
 /** @typedef {{ nombre: string, atributo: string, enFicha?: string, enProezas?: string, multiple?: boolean }} Habilidad */

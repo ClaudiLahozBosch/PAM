@@ -127,6 +127,35 @@ El script aparte «PAM · Inspector de Canjes» pasa a PAM y al mismo agente que
 
 «Enviar a PAM» usa la ventana «Datos del foro → PAM» que ya tiene `index.html`: el agente abre PAM desde el foro y le pasa los datos, porque esa ventana solo acepta datos que vengan del foro. En la rama `refactor` acepta también el foro de pruebas (`FOROS_PRUEBA`), siempre con Aceptar / Denegar.
 
+## Las páginas de PAM (fase 8)
+
+**8a (hecha): `index.html` repartido en archivos, sin cambiar el código.** PAM se ve y funciona igual; `index.html` pasa de 9.300 líneas a 200 (solo el HTML de la página).
+
+| Antes, dentro de `index.html` | Ahora |
+|---|---|
+| Los estilos (`<style>`) | `css/pam.css` |
+| Los empleos del foro y los arcanos | `data/empleos-foro.txt` y `data/arcanos.json`: los mismos archivos que ya usan el panel de Mi PJ y el Inspector. Ya no están dos veces. |
+| Datos del sistema, Tabla de Canjes y Compendio | `js/paginas/pam/tabla-canjes.js` |
+| Revisor de Empleos: Empleos, Mi Ficha, Controlador y Editor | `js/paginas/pam/revisor.js` |
+| Registro de Roles y Coloreador de Diálogos | `js/paginas/pam/registro-roles.js` |
+| Portada y navegación | `js/paginas/pam/portada.js` |
+| Temas | `js/paginas/pam/temas.js` |
+| Datos del foro → PAM (lo que manda el Mi PJ antiguo) | `js/paginas/pam/foro-antiguo.js` |
+
+- `js/pam/arranque.js` trae los datos y carga las páginas en el mismo orden que antes. Después carga `js/nube/main.js` y `js/pam/main.js`. Si algo no se puede traer, avisa arriba: «No se pudo cargar una parte de PAM (…). Probá recargar la página.».
+- `js/pam/tema-inicial.js` pone el tema elegido antes de pintar. Sin él, al cargar se vería un momento el tema Avadense, porque las páginas ahora se cargan un poco más tarde.
+- Los archivos de `js/paginas/pam/` son el código de antes, copiado por un script y sin tocar una letra. Las pruebas lo comprueban así:
+  - `tests/legado/montarPam.mjs` lo vuelve a juntar en un solo HTML;
+  - `tests/caracterizacion/arranque.test.mjs` arranca PAM de las dos maneras y compara la página, lo que PAM deja para el foro (`pamFicha`, `rrBoveda`…) y cinco secciones.
+- No cambia ninguna clave del `localStorage`.
+
+**Lo que queda**, una página cada vez. Cada página pasa a módulos con los datos y lectores compartidos, con el mismo aspecto, y se arreglan sus errores pendientes:
+
+- **8b · Registro de Roles y Coloreador:** guardado inmediato con el almacén (F14), el Coloreador recuerda lo de cada personaje (N08) y SheetJS al día en «Importar desde Excel» (F09).
+- **8c · Revisor de Empleos y Mi Ficha:** los datos del sistema de `data/sistema.json` (R07).
+- **8d · Tabla de Canjes y Compendio:** que no repinte todo por cualquier cambio (F16), carrito de trasfondos (N04), Grageas disponibles (R08).
+- **8e · Portada, temas y lo que quede:** los estilos repartidos por página y sin repetir (F17), y `js/pam/PamActual.js` cambiado a las páginas nuevas.
+
 ## Dónde guarda PAM los datos (y la sesión con código)
 
 - **En el navegador**, siempre: el `localStorage` de la página de PAM. Sin cookies.
@@ -138,13 +167,13 @@ El script aparte «PAM · Inspector de Canjes» pasa a PAM y al mismo agente que
   - `js/nube/pendiente.js`: la lista y, al cargar, los datos traídos de la nube. **F11:** todo o nada; si no caben, el navegador queda como estaba, se avisa y no se guarda lo de este navegador encima (pregunta).
   - `js/nube/Sesion.js`: el botón ☁, la caja de la portada y el guardado automático (copiados por un script).
   - El documento en Firestore es el mismo (mismos campos, mismo cifrado): las sesiones de antes se siguen trayendo, y el PAM de `main` y el de la rama conviven (el de `main` no mira la versión).
-- **Fase 8** (páginas): al cambiar cómo guarda PAM, mantener esta norma o cambiar la foto a la vez, y comprobar que una sesión vieja se sigue pudiendo traer.
+- **Fase 8** (páginas): al cambiar cómo guarda PAM, mantener esta norma o cambiar la foto a la vez, y comprobar que una sesión vieja se sigue pudiendo traer. La 8a no cambia ninguna clave: solo mueve el código a `js/paginas/pam/`.
 - **Staging:** el PAM de pruebas tiene su propio `localStorage`, pero si se carga en él un código de sesión, escribe en **la misma copia de la nube** que el PAM de verdad. Para probar, un código nuevo solo de pruebas.
 
 ## Cómo se publica una versión
 
 1. Subir el número en `agente/pam-agente.user.js` (`@version` y `VERSION`).
-2. `node scripts/versionar.mjs`: pone esa versión en todas las direcciones del panel (imports, CSS, datos y la página que abre el agente). Así el navegador nunca mezcla archivos de dos versiones: GitHub Pages los guarda 10 minutos, y si `main.js` fuera nuevo y otro módulo viejo, el panel no arrancaría.
+2. `node scripts/versionar.mjs`: pone esa versión en todas las direcciones del panel y de PAM (imports, CSS, datos, las páginas que carga `js/pam/arranque.js` y la página que abre el agente). Así el navegador nunca mezcla archivos de dos versiones: GitHub Pages los guarda 10 minutos, y si `main.js` fuera nuevo y otro módulo viejo, el panel no arrancaría.
 3. Pasar las pruebas (`cd tests && npm test`) y subir.
 
 Si aun así el panel no arranca, el agente enseña la pastilla «✦ Mi PJ» a los 15 segundos (nunca queda invisible).
@@ -161,7 +190,7 @@ La duda principal es de Chrome. Un iframe de otro dominio guarda sus datos apart
 ## Cómo afecta a `main` mientras dure
 
 - Puedes seguir trabajando como siempre (subir archivos a `main` desde la web). La rama no lo impide ni lo cambia.
-- Lo que cambies en `main` habrá que llevarlo también a la rama. Mientras `index.html` siga siendo un solo archivo es automático. Cuando ya esté repartido en módulos, hay que pasarlo a mano.
+- Lo que cambies en `main` habrá que llevarlo también a la rama. **Desde la fase 8a (4/11/2026) `index.html` está repartido en archivos en la rama**: un cambio en el `index.html` de `main` ya no pasa solo, hay que llevarlo a mano a su archivo de `js/paginas/pam/`, `css/pam.css` o `data/`. Hasta esa fecha `main` no había cambiado desde que empezó la rama. Si cambias algo de PAM en `main`, avisa para pasarlo.
 - Por eso conviene hacerlo **por fases cortas que vuelvan a `main` pronto**, en vez de una rama larga que se aleje: por ejemplo, primero sacar los datos y añadir pruebas; luego los lectores del foro; luego el panel…
 
 ## Cómo se publicaría

@@ -8,8 +8,8 @@
 //   «Influencia II: Gobierno Mágico de los Estados Unidos / MACUSA.»  el «/» es parte del nombre
 //   «Biblioteca — Medicina — Heridas mágicas III: nota», «IV Biblioteca — Medicina», «Biblioteca Medicina IV»…
 // Si no se entiende, devuelve null y quien llama guarda la línea para revisarla (nunca «nivel 0»).
-import { norm, deRomano } from '../core/texto.js?v=0.4.1';
-import { Trasfondo } from '../modelos/Trasfondo.js?v=0.4.1';
+import { norm, deRomano } from '../core/texto.js?v=0.5.0';
+import { Trasfondo } from '../modelos/Trasfondo.js?v=0.5.0';
 
 const TIPOS = ['Biblioteca', 'Influencia', 'Informantes', 'Seguidores'];
 const NIVEL = '(VI|V|IV|I{1,3}|[1-6])';

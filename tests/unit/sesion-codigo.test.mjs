@@ -26,19 +26,28 @@ test('la lista de lo que viaja con la sesión está una sola vez: js/nube/pendie
   assert.deepEqual(listas(p, 'PRE'), [['grimorio.', 'grimorioAvadense.', 'revisorEmpleos.', 'registro-roles-v1', 'cd_']]);
   assert.deepEqual(listas(p, 'EXC'), [['cd_bg']]);
   assert.deepEqual(listas(leer('index.html'), 'PRE'), [], 'index.html ya no la tiene');
-  const otros = archivos.filter(a => a !== 'js/nube/pendiente.js' && /grimorioAvadense\./.test(leer(a)));
+  // una copia: una lista con dos o más de los prefijos (las páginas sí usan claves sueltas como «grimorioAvadense.usuario»)
+  const PREFIJOS = ['grimorio.', 'grimorioAvadense.', 'revisorEmpleos.', 'registro-roles-v1', 'cd_'];
+  const copia = txt => [...txt.matchAll(/\[[^\][]*\]/g)].some(m => PREFIJOS.filter(p => m[0].includes(`'${p}'`) || m[0].includes(`"${p}"`)).length >= 2);
+  const otros = archivos.filter(a => a !== 'js/nube/pendiente.js' && (listas(leer(a), 'PRE').length || copia(leer(a))));
   assert.deepEqual(otros, [], 'nadie más la copia');
+  assert.ok(copia(leer('js/nube/pendiente.js')), 'la comprobación de copias reconoce la lista');
   assert.match(leer('index.html'), /<script src="js\/nube\/pendiente\.js[^"]*"><\/script>/, 'y va al principio de PAM, antes que la app');
-  assert.ok(leer('index.html').indexOf('js/nube/pendiente.js') < leer('index.html').indexOf('<style>'));
+  assert.ok(leer('index.html').indexOf('js/nube/pendiente.js') < leer('index.html').indexOf('css/pam.css'));
+  assert.ok(leer('index.html').indexOf('js/nube/pendiente.js') < leer('index.html').indexOf('js/pam/arranque.js'));
 });
 
 test('el código nuevo no escribe en el localStorage de PAM por su cuenta', () => {
   // permitidos: el almacén (lo usarán las páginas, con claves de la lista), el adaptador (solo lee), el panel de
   // Mi PJ (vive dentro del foro: su almacenamiento no es el de PAM) y la propia sesión (js/nube/)
-  const PERMITIDOS = ['js/core/Almacen.js', 'js/pam/PamActual.js', 'js/paginas/panel/main.js', 'js/nube/pendiente.js', 'js/nube/Sesion.js'];
-  const usan = archivos.filter(a => !PERMITIDOS.includes(a) && /localStorage/.test(leer(a)));
+  // y las páginas antiguas de PAM (js/paginas/pam/, fase 8a: el mismo código que estaba en index.html, con las mismas
+  // claves); al reescribir cada una, que guarde con el almacén y salga de esta lista
+  const PERMITIDOS = ['js/core/Almacen.js', 'js/pam/PamActual.js', 'js/pam/tema-inicial.js', 'js/paginas/panel/main.js', 'js/nube/pendiente.js', 'js/nube/Sesion.js'];
+  const ANTIGUAS = ['js/paginas/pam/tabla-canjes.js', 'js/paginas/pam/revisor.js', 'js/paginas/pam/registro-roles.js', 'js/paginas/pam/portada.js', 'js/paginas/pam/temas.js'];
+  const usan = archivos.filter(a => !PERMITIDOS.includes(a) && !ANTIGUAS.includes(a) && /localStorage/.test(leer(a)));
   assert.deepEqual(usan, [], 'si un módulo nuevo guarda datos de PAM, que use una clave con un prefijo de la lista PRE');
   assert.doesNotMatch(leer('js/pam/PamActual.js'), /localStorage\.(setItem|removeItem|clear)/, 'PamActual solo lee; para cambiar datos, las funciones de PAM');
+  assert.doesNotMatch(leer('js/pam/tema-inicial.js'), /localStorage\.(setItem|removeItem|clear)/, 'tema-inicial solo lee el tema');
   // la sesión solo escribe su propia clave («pam.sesion», que no viaja) y no tiene lista propia
   const ses = leer('js/nube/Sesion.js');
   assert.deepEqual([...ses.matchAll(/localStorage\.setItem\(([^,]+),/g)].map(m => m[1].trim()), ['K_SES']);

@@ -4,8 +4,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { tablaDeDatos } from '../../js/inspector/Tabla.js';
+import { pamEntero } from '../legado/montarPam.mjs';
 
-const html = readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
+const html = pamEntero(); // index.html con sus páginas y datos dentro, como lo leía el Inspector antiguo
 const json = f => JSON.parse(readFileSync(new URL('../../data/' + f, import.meta.url), 'utf8'));
 // extraerPAM y evaluarPAM del Inspector antiguo
 const entre = (ini, fin) => { const a = html.indexOf(ini); const b = html.indexOf(fin, a); return html.slice(a, b); };

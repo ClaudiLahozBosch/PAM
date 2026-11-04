@@ -1,12 +1,9 @@
-// Carga el PAM antiguo (index.html) en jsdom para comparar el código nuevo con el que está en uso.
+// Carga el PAM antiguo (index.html con sus páginas, ver montarPam.mjs) en jsdom para comparar el código nuevo con el que está en uso.
 // Devuelve dos evaluadores: `global(expr)` para la Tabla de Canjes (código global)
 // y `ficha(expr)` para el bloque de Mi Ficha (dentro de una función).
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
 import { JSDOM, VirtualConsole } from 'jsdom';
+import { pamEntero } from './montarPam.mjs';
 
-const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const MARCA_FICHA = "setTab(ui.tab||'empleos');";
 
 let cache = null;
@@ -14,8 +11,8 @@ let cache = null;
 /** @returns {{ w: any, global: (e: string) => any, ficha: (e: string) => any, errores: string[] }} */
 export function cargarPam() {
   if (cache) return cache;
-  let html = readFileSync(path.join(RAIZ, 'index.html'), 'utf8');
-  if (!html.includes(MARCA_FICHA)) throw new Error('No encuentro la marca del bloque de Mi Ficha en index.html');
+  let html = pamEntero(); // index.html con las páginas y los datos dentro (fase 8a)
+  if (!html.includes(MARCA_FICHA)) throw new Error('No encuentro la marca del bloque de Mi Ficha en js/paginas/pam/revisor.js');
   html = html.replace(MARCA_FICHA, MARCA_FICHA + '\nwindow.__ficha = s => eval(s);');
   const errores = [];
   const vc = new VirtualConsole();

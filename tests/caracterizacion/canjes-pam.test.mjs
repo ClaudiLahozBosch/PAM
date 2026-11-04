@@ -7,6 +7,7 @@
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { pamEntero } from '../legado/montarPam.mjs';
 import { JSDOM, VirtualConsole } from 'jsdom';
 
 const RAIZ = new URL('../../', import.meta.url);
@@ -20,7 +21,7 @@ const hasta = async (fn, ms = 15000) => { for (let t = 0; t < ms && !fn(); t += 
 
 /** Una copia de PAM (index.html) con un personaje, su bóveda y un carrito; `gm` es el almacén del script. */
 function pam(gm) {
-  const html = readFileSync(new URL('index.html', RAIZ), 'utf8').replace(/<script type="module"[^>]*><\/script>/, ''); // lo nuevo se carga a mano
+  const html = pamEntero().replace(/<script type="module"[^>]*><\/script>/, ''); // lo nuevo se carga a mano
   const vc = new VirtualConsole();
   const dom = new JSDOM(html, {
     url: 'https://jesleytherabbit-prog.github.io/PAM/', runScripts: 'dangerously', pretendToBeVisual: true, virtualConsole: vc,

@@ -95,8 +95,11 @@ test('sin paquete, sin la Bóveda de PAM o con un paquete raro: no hace nada', a
   }
 });
 
-test('index.html carga js/pam/main.js con la versión y acepta el foro de pruebas', () => {
+test('PAM carga js/pam/main.js con la versión, al final, y acepta el foro de pruebas', () => {
   const html = readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
-  assert.match(html, /<script type="module" src="js\/pam\/main\.js\?v=[\d.]+"><\/script>\s*<\/body>/);
-  assert.match(html, /FOROS_PRUEBA = \["https:\/\/test-forito\.foroactivo\.com"\]/);
+  assert.match(html, /<script type="module" src="js\/pam\/arranque\.js\?v=[\d.]+"><\/script>\s*<\/body>/);
+  const arranque = readFileSync(new URL('../../js/pam/arranque.js', import.meta.url), 'utf8');
+  assert.match(arranque, /const V = '\?v=[\d.]+';/);
+  assert.match(arranque, /await importar\('\.\.\/nube\/main\.js' \+ V\);\n  await importar\('\.\/main\.js' \+ V\);\n  return true;/);
+  assert.match(readFileSync(new URL('../../js/paginas/pam/foro-antiguo.js', import.meta.url), 'utf8'), /FOROS_PRUEBA = \["https:\/\/test-forito\.foroactivo\.com"\]/);
 });
