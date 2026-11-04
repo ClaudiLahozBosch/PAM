@@ -221,7 +221,7 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
 </section>
 
 <section>
-  <h2>Errores corregidos <span class="pill"><b>25</b> arreglos</span></h2>
+  <h2>Errores corregidos <span class="pill"><b>28</b> arreglos</span></h2>
   <p class="sub">Agrupados por dónde se notaban. El código entre paréntesis es el de la lista de errores (<code>PENDIENTES.md</code>).</p>
   <div class="grid-2">
     <div class="card">
@@ -259,6 +259,12 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
       <div class="arreglo"><span class="tag">F08</span><span class="antes">Un código del Registro de Roles manipulado podía ejecutar código dentro de PAM.</span><span class="ahora">Cada valor se comprueba al importar.</span></div>
     </div>
     <div class="card">
+      <h3>Registro de Roles y Coloreador</h3>
+      <div class="arreglo"><span class="tag">F14</span><span class="antes">El Registro guardaba un poco después de cada cambio; si se cerraba la página justo, el último cambio se perdía.</span><span class="ahora">Al cerrar o cambiar de pestaña, guarda lo que faltaba.</span></div>
+      <div class="arreglo"><span class="tag">F09</span><span class="antes">«Importar desde Excel» usaba una versión vieja del lector de Excel, con dos fallos de seguridad conocidos.</span><span class="ahora">Versión al día, de la web de sus autores.</span></div>
+      <div class="arreglo"><span class="tag">N08</span><span class="antes">El Coloreador tenía una sola configuración para todos los personajes.</span><span class="ahora">Recuerda la de cada personaje: al cambiar de personaje en Mi Ficha, vuelven sus colores, nombres, marcas y opciones.</span></div>
+    </div>
+    <div class="card">
       <h3>Panel Mi PJ, fechas y orden</h3>
       <div class="arreglo"><span class="tag">F15</span><span class="antes">Entre medianoche y la 1-2 h, la fecha salía del día anterior.</span><span class="ahora">Usa el día de cada persona.</span></div>
       <div class="arreglo"><span class="tag">R09</span><span class="antes">Oficiales cerrados salían como abiertos si el foro mostraba fechas sin año.</span><span class="ahora">Deduce el año y reconoce los avisos de cierre (lista editable a mano).</span></div>
@@ -282,6 +288,7 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
       <li><b>El Inspector</b> se activa desde el panel Mi PJ (tarjeta «🔍 Inspector de Canjes», solo para Inspectores y para Hana, Mortimer y Robert). Su pastilla pasó abajo a la <b>izquierda</b>, porque tapaba la de Mi PJ.</li>
       <li><b>Con la sesión con código en dos dispositivos</b>, si los dos guardan a la vez sale el aviso para elegir, en vez de perderse datos.</li>
       <li><b>Si PAM no puede cargar una parte</b>, lo dice arriba («Probá recargar la página») en vez de quedarse a medias.</li>
+      <li><b>El Coloreador de Diálogos recuerda lo de cada personaje.</b> Al cambiar de personaje en Mi Ficha vuelve lo que usaste la última vez con él; el texto que estás coloreando no cambia.</li>
     </ul>
   </div>
 </section>
@@ -294,7 +301,7 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
       <tr><td>Los colores y estilos</td><td><code>css/pam.css</code></td></tr>
       <tr><td>Datos del sistema, Tabla de Canjes y Compendio</td><td><code>js/paginas/pam/tabla-canjes.js</code></td></tr>
       <tr><td>Revisor de Empleos y Mi Ficha</td><td><code>js/paginas/pam/revisor.js</code></td></tr>
-      <tr><td>Registro de Roles, Bóveda y Coloreador</td><td><code>js/paginas/pam/registro-roles.js</code></td></tr>
+      <tr><td>Registro de Roles, Bóveda y Coloreador (separados por piezas: pantallas, Coloreador, listas fijas, lista de deseos, Importar Excel)</td><td><code>js/paginas/registro/</code>, con su HTML en <code>plantilla.html</code> y sus estilos en <code>css/registro.css</code></td></tr>
       <tr><td>Portada y navegación</td><td><code>js/paginas/pam/portada.js</code></td></tr>
       <tr><td>Temas</td><td><code>js/paginas/pam/temas.js</code></td></tr>
       <tr><td>Empleos del foro y arcanos</td><td><code>data/empleos-foro.txt</code> y <code>data/arcanos.json</code></td></tr>
@@ -311,8 +318,8 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
   <p class="sub">En este orden. Lo que todavía falta corregir está en <code>PENDIENTES.md</code>.</p>
   <ol class="pasos">
     <li><div class="card"><h3>Pruebas en el foro de pruebas <span class="estado">ahora</span></h3><p>Con Chrome, el foro de pruebas y la ficha de Elena Whitlock: traer la ficha a PAM, hacer un canje, publicarlo, aprobarlo como Inspector, aplicarlo y terminar en PAM; la sesión con código en dos ventanas; y que PAM arranque bien.</p></div></li>
-    <li><div class="card"><h3>Registro de Roles y Coloreador</h3><p>Que el Registro guarde al momento y al cerrar la página (F14); poner al día la herramienta de «Importar desde Excel», que tiene fallos de seguridad conocidos (F09); que el Coloreador recuerde los colores y nombres de cada personaje (N08), sin cambiar lo que se ve.</p></div></li>
-    <li><div class="card"><h3>Revisor de Empleos y Mi Ficha</h3><p>Que usen los datos del sistema compartidos (R07).</p></div></li>
+    <li><div class="card"><h3>Registro de Roles y Coloreador <span class="estado" style="color:var(--good)">hecho</span></h3><p>Separados por piezas, con los arreglos F14, F09 y N08 (versión 0.6.0).</p></div></li>
+    <li><div class="card"><h3>Revisor de Empleos y Mi Ficha</h3><p>Que usen los datos del sistema compartidos (R07). La lista de deseos del Registro tiene sus propios datos, que no coinciden del todo con los oficiales: se propondrá unificarlos, porque cambia lo que se ve.</p></div></li>
     <li><div class="card"><h3>Tabla de Canjes y Compendio</h3><p>Que no vuelva a dibujar toda la tabla por cualquier cambio (F16): irá más fluida.</p></div></li>
     <li><div class="card"><h3>Portada, temas y estilos</h3><p>Ordenar los estilos repetidos (F17).</p></div></li>
     <li><div class="card"><h3>«Tus otras cuentas» en Mi PJ</h3><p>Que no enseñe cuentas desactivadas ni temas que ya terminaron (N03). Antes hay que ver en el foro cómo se marcan.</p></div></li>
@@ -324,6 +331,6 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
 
 </main>
 
-<footer>✦ PAM · Plataforma Avadense · resumen del refactor, versión 0.5.3 (4 de noviembre de 2026) ✦</footer>
+<footer>✦ PAM · Plataforma Avadense · resumen del refactor, versión 0.6.0 (4 de noviembre de 2026) ✦</footer>
 </body>
 </html>

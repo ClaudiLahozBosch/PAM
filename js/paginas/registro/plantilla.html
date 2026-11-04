@@ -1,0 +1,113 @@
+<div class="rr-body"><div id="pumpkins"></div>
+<div class="wrap">
+  <header class="head">
+    <div>
+      <h1 id="titulo">🌷 Registro de Roles 🌷</h1>
+      <label class="owner" for="owner">de <input id="owner" placeholder="tu nombre"></label>
+    </div>
+    <div class="row" style="gap:10px"><button class="mini-face" id="miniFace" title="¿Cómo vas con los roles?" aria-label="Ver cómo vas con los roles">🙂</button><div class="status" id="status"><span class="dot local"></span><span>Guardado en este navegador</span></div></div>
+  </header>
+  <div class="skins" id="skins" role="group" aria-label="Tema"></div>
+  <nav class="tabs" id="tabs" aria-label="Secciones">
+    <a href="#inicio" data-tab="inicio">🧺 Inicio</a>
+    <a href="#personajes" data-tab="personajes">🧑‍🎨 Personajes</a>
+    <a href="#turnos" data-tab="turnos">🎮 Control de turnos</a>
+    <a href="#oficiales" data-tab="oficiales">🎀 Posibles oficiales</a>
+    <a href="#ganancias" data-tab="ganancias">🍯 Ganancias</a>
+    <a href="#boveda" data-tab="boveda">🏦 Bóveda</a>
+    <a href="#canjes" data-tab="canjes">🎁 Futuros canjes</a>
+    <a href="#coloreador" data-tab="coloreador">🖋️ Coloreador</a>
+    <a href="#copia" data-tab="copia">📥 Importar y copia</a>
+  </nav>
+  <main class="panel" id="panel"></main>
+  <section id="coloreador" class="cd-panel" hidden>
+  <header>
+    <div>
+      <h2 class="cd-h">🖋️ Coloreador de Diálogos <span class="raya">—</span></h2>
+      <p class="sub">Pegá tu post, elegí el color del personaje y copiá el BBCode. Detecta rayas, guiones y comillas, y deja afuera los incisos del narrador.</p>
+    </div>
+    <div class="cd-legend"><b>—Diálogo</b> —dijo el narrador—<b>. Más diálogo.</b></div>
+  </header>
+
+  <div class="grid">
+    <div class="col">
+      <section class="panel">
+        <div class="label"><label for="cd-src">Texto sin código</label><button id="cd-clear" type="button" style="padding:4px 10px;font-size:12px">Borrar</button></div>
+        <textarea id="cd-src" spellcheck="false">—Nombres… —repitió, frunciendo el ceño mientras rebuscaba en lo que le había rozado la cabeza—. Eran fragmentos, Miss Alpha. Dos o tres sílabas sueltas, como si alguien pronunciara un nombre desde muy lejos. Nada que pueda decirte con certeza que sea de un culpable y no de una víctima. —Hizo una mueca de frustración, de las que le salían cuando algo se le escapaba—. Lo anotaré en cuanto pueda, aunque sea incompleto. A veces lo que no se entiende hoy encaja mañana.</textarea>
+      </section>
+
+      <section class="panel">
+        <div class="label"><label for="cd-tag">Código de color</label></div>
+        <div class="colorrow">
+          <label class="swatch" title="Elegir color"><span id="cd-swatchFill"></span><input type="color" id="cd-picker" value="#e8c468" aria-label="Elegir color"></label>
+          <input type="text" id="cd-tag" value="[color=#E8C468] [/color]" spellcheck="false">
+        </div>
+        <p class="hint">Acepta <code>[color=#E8C468] [/color]</code>, solo <code>#E8C468</code>, o etiquetas combinadas como <code>[color=#E8C468][i] [/i][/color]</code>.</p>
+        <div class="recent" id="cd-recent"></div>
+        <div class="fmt" id="cd-dlgFmt"><span class="lbl">Formato del diálogo</span></div>
+      </section>
+
+      <section class="panel">
+        <div class="label">Nombres por grupo<span class="count" id="cd-ncount">0 nombres</span></div>
+        <div class="names" id="cd-names"></div>
+        <div class="actions"><button type="button" id="cd-addName">+ Agregar nombre</button></div>
+        <p class="hint">Escribí un nombre (Maximilian, Blake…) y elegí su grupo, tocá el cuadrito para un color propio, o elegí «Sin color» para dejarlo solo en negrita, cursiva, etc. Todas las veces que aparezca en el texto sale con ese color y formato, también dentro de los diálogos.</p>
+      </section>
+
+      <section class="panel">
+        <div class="label">Marcas especiales<span class="count" id="cd-mcount">0 marcas</span></div>
+        <ol class="howto">
+          <li>Elegí el símbolo que usás en tu texto, por ejemplo <code>*asteriscos*</code> para pensamientos.</li>
+          <li>Elegí el color (o «Sin color») y el formato con B, I, U, S.</li>
+          <li>Marcá <b>Quitar símbolos</b> si querés que los <code>*</code> desaparezcan del resultado.</li>
+          <li>Ejemplo: <code>*No otra vez*</code> → <code>[color=#B9A6D9][i]No otra vez[/i][/color]</code></li>
+        </ol>
+        <div class="names" id="cd-marks"></div>
+        <div class="actions"><button type="button" id="cd-addMark">+ Agregar marca</button></div>
+        <p class="hint">Las marcas se aplican antes que los diálogos: si elegís comillas acá, esas comillas dejan de contar como diálogo. Lo marcado no puede ocupar más de una línea.</p>
+      </section>
+
+      <section class="panel">
+        <div class="label">Qué cuenta como diálogo</div>
+        <div class="opts">
+          <label><input type="checkbox" id="cd-optRaya" checked> Raya (— –)</label>
+          <label><input type="checkbox" id="cd-optGuion" checked> Guion (-)</label>
+          <label><input type="checkbox" id="cd-optComillas" checked> Comillas (" " “ ” « »)</label>
+          <label><input type="checkbox" id="cd-optFix"> Convertir guiones en raya</label>
+          <label><input type="checkbox" id="cd-optCenter"> Centrar todo el texto [center]</label>
+        </div>
+        <p class="hint">El centrado va sobre el post entero: si se aplica a un tramo suelto, el foro lo parte en otra línea.</p>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="panel">
+        <div class="label"><label for="cd-out">Resultado con código</label><span class="count" id="cd-count">0 tramos</span></div>
+        <textarea id="cd-out" class="code" readonly spellcheck="false"></textarea>
+        <div class="actions">
+          <button class="primary" id="cd-copy" type="button">Copiar código</button>
+          <span class="status" id="cd-status" role="status"></span>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="label">Vista previa
+          <span class="seg" role="group" aria-label="Fondo de la vista previa">
+            <button type="button" id="cd-bgImg" aria-pressed="true">Foro</button>
+            <button type="button" id="cd-bgDark" aria-pressed="false">Oscuro</button>
+            <button type="button" id="cd-bgLight" aria-pressed="false">Claro</button>
+          </span>
+          <label class="uploadbtn">Otro fondo<input type="file" id="cd-bgFile" accept="image/*"></label>
+        </div>
+        <div class="preview img" id="cd-preview"></div>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    Reglas: una raya al inicio del párrafo (o después de punto o dos puntos) abre diálogo; la siguiente raya abre el inciso del narrador y la que lo cierra devuelve al diálogo, con la puntuación pegada dentro del color. Una raya en medio de narración se toma como aclaración, no como diálogo. Los guiones dentro de palabras (<code>anti-muggle</code>) se ignoran.
+  </footer>
+</section>
+</div>
+<div class="toast" id="toast" hidden></div>
+<div id="party" aria-hidden="true"></div></div>

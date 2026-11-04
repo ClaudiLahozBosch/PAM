@@ -1,6 +1,6 @@
 # Guía del refactor de PAM para agentes de IA
 
-Estado a **4/11/2026**, rama `refactor`, versión **0.5.3** (commit `9218963`).
+Estado a **4/11/2026**, rama `refactor`, versión **0.6.0** (fase 8b hecha).
 Este documento es para un agente de IA (o una persona programadora) que tenga que seguir trabajando en la rama sin haber estado en las sesiones anteriores. Explica qué se reorganizó, cómo funciona ahora, qué errores se corrigieron y dónde, y qué queda. Léelo entero antes de tocar nada.
 
 Documentos relacionados (en este orden de importancia):
@@ -59,8 +59,9 @@ index.html                 PAM: solo el HTML de la página (197 líneas). Antes,
 panel.html                 El panel «Mi PJ» (página de PAM que el agente mete en un iframe dentro del foro).
 pam-mi-pj.user.js          Mi PJ ANTIGUO, sin tocar (referencia de las pruebas; en la publicación lo sustituye el agente).
 pam-inspector-canjes.user.js  Inspector ANTIGUO, sin tocar (ídem).
-agente/pam-agente.user.js  El agente nuevo (975 líneas, @name «PAM · Agente (staging)», versión 0.5.3).
+agente/pam-agente.user.js  El agente nuevo (975 líneas, @name «PAM · Agente (staging)», versión 0.6.0).
 css/pam.css               Estilos de PAM (sacados de index.html, sin cambios).
+css/registro.css          Estilos del Registro de Roles y del Coloreador (van dentro de su Shadow DOM; 8b).
 css/mipj.css              Estilos del panel Mi PJ (sacados del script antiguo por scripts/extraer-css-mipj.py).
 data/
   sistema.json            Atributos, habilidades, ventajas, precios, requisitos… una sola vez y con los nombres oficiales.
@@ -83,7 +84,10 @@ js/servicios/             Hablan con el foro a través del agente: FichaDelForo,
 js/servicios/agente/      protocolo.js (el contrato) y ClienteAgente.js (postMessage con id y respuesta).
 js/paginas/panel/         El panel Mi PJ: main.js, MiPjPanel.js (moduloMiPJ portado), CanjesPanel.js, BibliotecaPanel.js.
 js/paginas/pam/           El código ANTIGUO de PAM repartido (fase 8a). Scripts clásicos, no módulos:
-                          tabla-canjes, revisor, registro-roles, portada, temas, foro-antiguo.
+                          tabla-canjes, revisor, portada, temas, foro-antiguo.
+js/paginas/registro/      Fase 8b: el Registro de Roles y el Coloreador como módulos. main.js (montar), RegistroRoles.js
+                          (las pestañas, mismo código), Coloreador.js (+N08), datos.js (listas fijas), datosDeseos.js
+                          (datos de la lista de deseos, copia propia: ver R07), importarExcel.js (F09), plantilla.html.
 js/pam/                   Lo nuevo dentro de PAM:
   arranque.js             Arranca PAM (datos, páginas, nube, puente con el foro, editor nuevo).
   tema-inicial.js         Pone el tema guardado antes de pintar (sin parpadeo).
@@ -113,7 +117,7 @@ tests/                    node:test + jsdom (ver §8).
 3. `arranque.js` (`arrancar({doc, fetch, importar})`):
    - trae `data/empleos-foro.txt` y `data/arcanos.json` y los deja como `<script id="empleos-foro">` y `<script id="arcanos-data">`, donde los buscan las páginas antiguas;
    - trae `data/sistema.json` y deja en `window.PAM_EDITOR` el editor nuevo (si falla, solo avisa en consola y PAM usa el antiguo);
-   - carga las páginas de `js/paginas/pam/` con `async=false` en el orden original (`tabla-canjes, revisor, registro-roles, portada, temas, foro-antiguo`): se ejecutan en orden y comparten variables globales como cuando estaban en un solo `<script>`;
+   - carga las páginas en el orden original (`PAGINAS = tabla-canjes, revisor, registro, portada, temas, foro-antiguo`). Las de `js/paginas/pam/` son scripts clásicos con `async=false`: se ejecutan en orden y comparten variables globales como cuando estaban en un solo `<script>`. Las que ya son módulos (`MODULOS`, desde la 8b el `registro`) se importan en su sitio y se montan con `montar(ventana, {traer})`; las clásicas se cargan por tandas entre módulo y módulo;
    - después importa `js/nube/main.js` y `js/pam/main.js`;
    - si algo no se puede traer, pinta arriba `.pam-arranque-error`: «No se pudo cargar una parte de PAM (…). Probá recargar la página.».
    - Se ejecuta solo salvo que `globalThis.__pamSinArranque` (lo usan las pruebas).
@@ -166,7 +170,8 @@ Claves de paso en el almacén del agente: `pam.oficiales` (Biblioteca → PAM), 
 - **Sesión con código** (`PAM-XXXX-…`): foto de las claves con prefijo **`grimorio.`, `grimorioAvadense.`, `revisorEmpleos.`, `registro-roles-v1`, `cd_`** (menos `cd_bg`), cifrada en el navegador (AES-GCM, llave del código) y subida a Firestore `pam-avadense` cada 4 s y al cambiar de pestaña. La lista (`PRE`/`EXC`) está **una sola vez**, en `js/nube/pendiente.js`. **Norma:** todo dato nuevo del usuario va con uno de esos prefijos o no viajará. `tests/unit/sesion-codigo.test.mjs` comprueba que nadie copia la lista y que el código nuevo no escribe en el `localStorage` de PAM por su cuenta (solo las páginas antiguas, que están en la lista blanca `ANTIGUAS`).
 - **Almacén de Tampermonkey** (`pam.*`): lo que va de paso entre el foro y PAM. No va a la nube y no tiene que ir.
 - **Cuidado con el staging:** tiene su propio `localStorage`, pero un código de sesión real escribe en **la misma nube que producción**. Para probar, un código nuevo solo de pruebas.
-- La Bóveda de PAM guarda con 700 ms de retraso (F14, pendiente): léela con `rrBoveda.get`, no del `localStorage`.
+- La Bóveda de PAM (Registro de Roles) guarda con 700 ms de retraso, aunque desde la 8b también al cerrar o esconder la página (F14): léela con `rrBoveda.get`, no del `localStorage`.
+- Desde la 8b, el Registro y el Coloreador guardan con el `Almacen` (`Almacen.de(ventana)`). El Coloreador añade `cd_pj.<id>` (N08). `cd_bg` (fondo de la vista previa) se queda fuera de la sesión a propósito, como antes.
 
 ### 5.6 El Inspector (fase 6c)
 
@@ -191,6 +196,7 @@ Claves de paso en el almacén del agente: `pam.oficiales` (Biblioteca → PAM), 
 | 8a | 0.5.0 | `index.html` repartido en archivos sin cambiar el código (§5.1). |
 | R08 | 0.5.1 | La Tabla de Canjes se guarda; el carrito se vacía al cerrar el canje. |
 | N07 | 0.5.2, 0.5.3 | Canjes editan la ficha mensaje a mensaje con el editor nuevo; «Código para el foro» de Mi Ficha con el editor nuevo. |
+| 8b | 0.6.0 | Registro de Roles y Coloreador como módulos (`js/paginas/registro/`), separados por piezas: estilos, HTML, listas fijas, datos de la lista de deseos e Importar Excel en sus archivos; las pestañas con el mismo código. F14, F09, N08, F15 (fechas de ejemplo). Quitado el modo «Guardado en tu cuenta» (código que solo funcionaba en otra aplicación). |
 
 ## 7. Correcciones (resumen; el detalle está en `PENDIENTES.md`)
 
@@ -222,7 +228,11 @@ Claves de paso en el almacén del agente: `pam.oficiales` (Biblioteca → PAM), 
 | N04 | Carrito de trasfondos: duplicados y subidas sin juntar. | Nivel actual de ficha + carrito; subidas juntas; orden fijo. | `tabla-canjes.js` («buscar N04») | `carrito-n04` |
 | N07 | Los canjes y «Código para el foro» usaban el «Personalizada» antiguo (R01–R03, F04/F07). | Editor nuevo en los dos (§5.4, §5.1). | `CambiosFicha`, `CanjesDelForo`, `EditorPam`, `revisor.js` («buscar N07») | `canjes-ficha-mensajes`, `codigo-foro` |
 
-**Sin corregir:** F09, F14 (8b), F16 (8d), F17 resto (8e), N01, N03, y las mejoras N02, N05, N06, N08 (ver §11).
+| F14 | El Registro de Roles guardaba a los 0,7 s y no al cerrar la página: se podía perder el último cambio. | Guarda con el almacén, también al cerrar o esconder la página. | `js/paginas/registro/main.js`, `Almacen` | `registro` |
+| F09 | «Importar desde Excel» usaba SheetJS 0.18.5 (dos fallos de seguridad conocidos). | SheetJS 0.20.3 de cdn.sheetjs.com. | `js/paginas/registro/importarExcel.js` | `registro` |
+| N08 | El Coloreador tenía una sola configuración para todos los personajes. | Recuerda la última de cada personaje de Mi Ficha (`cd_pj.<id>`). | `js/paginas/registro/Coloreador.js` | `registro` |
+
+**Sin corregir:** F16 (8d), F17 resto (8e), R07 en las páginas de PAM (8c), N01, N03, y las mejoras N02, N05, N06 (ver §11).
 
 ## 8. Cambios dentro del código antiguo de Hana
 
@@ -233,7 +243,8 @@ Las páginas de `js/paginas/pam/` son el código de `index.html` **copiado por s
 | `foro-antiguo.js` | `FOROS_PRUEBA = ["https://test-forito.foroactivo.com"]` también puede mandar «Datos del foro → PAM» (siempre con Aceptar / Denegar). | Probar en el foro de pruebas (6a). |
 | `revisor.js` | `window.pamFicha` gana `traerCalculadora`, `llevarCalculadora`, `codigoPersonal` (aditivas: lo que hacen los botones). | Que los canjes no pulsen botones (F13, 6b). |
 | `revisor.js` | `actualizarCodigo` usa `window.PAM_EDITOR` si está; si no o si falla, el antiguo (`actualizarCodigoAntiguo`). | N07 (0.5.3). |
-| `registro-roles.js` | `window.rrBoveda` gana `preparar` y `cerrar` (aditivas). | Canjes (6b). |
+| `registro-roles.js` (desde la 8b, `js/paginas/registro/RegistroRoles.js`) | `window.rrBoveda` gana `preparar` y `cerrar` (aditivas). | Canjes (6b). |
+| `js/paginas/registro/` | Lo que cambia respecto al código antiguo está marcado con «8b» en cada archivo: la ventana se recibe como parámetro (`const window = w, document = w.document…`, para poder montarlo en las pruebas), guardado con el almacén, fechas locales, sin el modo «Guardado en tu cuenta», SheetJS nuevo y N08. | Fase 8b. |
 | `tabla-canjes.js` | Carrito de trasfondos (N04); guardado `grimorio.canjes` y `window.pamCanjes.vaciarCarrito` (R08). | 6b·1 y 0.5.1. |
 | `index.html` | Solo HTML; los `<script>` y el `<style>` pasan a archivos (8a). | Fase 8a. |
 
@@ -243,7 +254,7 @@ Las páginas de `js/paginas/pam/` son el código de `index.html` **copiado por s
 
 ```
 cd tests && npm install   # la primera vez
-npm test                  # 212 pruebas: 211 pasan, 1 se salta (la de la ficha real de Irvin, sin la variable)
+npm test                  # 221 pruebas: 220 pasan, 1 se salta (la de la ficha real de Irvin, sin la variable)
 PAM_FICHA_IRVIN="C:\ruta\Irvin Giles.htm" npm test   # con la ficha real (no está ni puede estar en el repo)
 ```
 
@@ -251,6 +262,7 @@ PAM_FICHA_IRVIN="C:\ruta\Irvin Giles.htm" npm test   # con la ficha real (no est
 - **`tests/legado/montarPam.mjs` (`pamEntero()`)** vuelve a juntar `index.html` + `css/pam.css` + `data/` + `js/paginas/pam/*` en el HTML único de antes. Lo usan `cargarPam`, `inspector`, `inspector-tabla` y `canjes-pam`.
 - **`tests/legado/cargarPam.mjs`** carga ese PAM en jsdom y expone `global(expr)` y `ficha(expr)` (evalúa dentro del IIFE de Mi Ficha). Hace falta un `requestAnimationFrame` falso y `cerrarPam()`, o node no termina.
 - **`arranque.test.mjs`** arranca PAM desde los archivos (con un `ResourceLoader` que sirve el disco en una URL `https://jesleytherabbit-prog.github.io/PAM/`, porque jsdom con `file:` no tiene `localStorage`) y junto, con `Date.now` fijo y `Math.random` determinista, y compara la página, lo que PAM deja para el foro y cinco secciones. También que exista `PAM_EDITOR`.
+- **Desde la 8b, `tests/legado/abrirPam.mjs`** (`abrir('archivos'|'junto', {antes})`, `pagina`, `igual`): abre PAM nuevo y antiguo con los mismos datos; en «archivos» monta de verdad los módulos de páginas (en Node, con la ventana de jsdom: por eso los módulos de páginas reciben la ventana como parámetro y no tocan globales). **`tests/legado/paginas/`** guarda las copias congeladas de las páginas reescritas (hoy `registro-roles.js`), que `montarPam.mjs` usa para el PAM antiguo. **`registro.test.mjs`** compara las pestañas del Registro y el Coloreador (con datos de ejemplo y con un registro guardado), al usarlos y lo guardado.
 - **`panel-mipj.test.mjs`** ejecuta el `pam-mi-pj.user.js` antiguo entero en jsdom con los mismos datos y compara el HTML del panel.
 - **`tests/fixtures/actividad/foro.mjs`** y `profeta.mjs`: un foro inventado que leen el script antiguo y PAM.
 - **`tests/legado/sin-version.mjs`**: hook de `node --import` para cargar módulos con `?v=`.
@@ -269,9 +281,9 @@ PAM_FICHA_IRVIN="C:\ruta\Irvin Giles.htm" npm test   # con la ficha real (no est
 
 ## 11. Próximos pasos (en orden)
 
-1. **Pruebas manuales del usuario en Chrome** con el agente 0.5.3 (staging + test-forito): `PROVES-5c`, `6b1`, `6b3` (canje entero con Elena), `6c`, `7` (con un código de sesión nuevo de pruebas, dos ventanas) y `8a`. Las de 5a, 5b, 5d y 6a ya pasaron. Lo que salga, se corrige antes de seguir.
-2. **Fase 8b · Registro de Roles y Coloreador:** el Registro guarda con el `Almacen` (inmediato y al cerrar: **F14**); SheetJS al día en «Importar desde Excel» (**F09**); el Coloreador recuerda la última configuración de cada personaje (**N08**, `cd_pj.<id>`, sin cambiar nada de lo que se ve).
-3. **Fase 8c · Revisor de Empleos y Mi Ficha:** usar `data/sistema.json` y los lectores compartidos (**R07** en la parte de PAM); el «Personalizada» antiguo puede desaparecer cuando el nuevo esté probado.
+1. **Pruebas manuales del usuario en Chrome** con el agente 0.6.0 (staging + test-forito): `PROVES-5c`, `6b1`, `6b3` (canje entero con Elena), `6c`, `7` (con un código de sesión nuevo de pruebas, dos ventanas), `8a` y `8b`. Las de 5a, 5b, 5d y 6a ya pasaron. Lo que salga, se corrige antes de seguir.
+2. ~~Fase 8b~~ hecha (0.6.0).
+3. **Fase 8c · Revisor de Empleos y Mi Ficha:** separar por piezas como la 8b (copia congelada en `tests/legado/paginas/`, módulo con `montar(ventana, {traer})`, prueba que compara las pestañas con `tests/legado/abrirPam.mjs`); usar `data/sistema.json` y los lectores compartidos (**R07** en la parte de PAM); el «Personalizada» antiguo puede desaparecer cuando el nuevo esté probado. **Proponer al usuario** unificar los datos de la lista de deseos del Registro (`datosDeseos.js`) con `data/sistema.json`: cambia lo que se ve.
 4. **Fase 8d · Tabla de Canjes y Compendio:** que no repinte todo por cualquier cambio (**F16**).
 5. **Fase 8e · Portada, temas y CSS:** estilos por página y sin repetir (**F17**); `PamActual` pasa a las páginas nuevas.
 6. **N03** («Tus otras cuentas»): no mostrar cuentas inactivas ni temas cerrados. Antes, **mirar en el foro real** cómo marca una cuenta inactiva y un tema cerrado; no suponerlo.

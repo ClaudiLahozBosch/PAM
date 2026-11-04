@@ -19,6 +19,9 @@ export class Almacen {
     this.#storage = storage ?? globalThis.localStorage;
   }
 
+  /** El almacén de una ventana (el `localStorage` de esa página). */
+  static de(ventana) { return new Almacen({ storage: ventana.localStorage }); }
+
   /** Valor guardado (JSON) o `porDefecto` si no hay o está roto. */
   leer(clave, porDefecto = null) {
     if (this.#pendientes.has(clave)) return this.#pendientes.get(clave)?.valor;

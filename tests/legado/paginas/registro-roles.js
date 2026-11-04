@@ -1,5 +1,5 @@
-/* PAM · Registro de Roles y Coloreador de Diálogos.
-   Fase 8a: el mismo código que estaba dentro de index.html, sin cambios. Lo carga js/pam/arranque.js. */
+/* COPIA CONGELADA (solo para las pruebas): el Registro de Roles y el Coloreador como estaban antes de la fase 8b.
+   PAM ya no lo carga: ahora son los módulos de js/paginas/registro/. tests/legado/montarPam.mjs lo usa para comparar. */
 /* ============ Registro de Roles + Coloreador (integrados en PAM, dentro de Shadow DOM) ============ */
 (function(){
 const host=document.getElementById("rr-host");

@@ -43,7 +43,7 @@ test('el código nuevo no escribe en el localStorage de PAM por su cuenta', () =
   // y las páginas antiguas de PAM (js/paginas/pam/, fase 8a: el mismo código que estaba en index.html, con las mismas
   // claves); al reescribir cada una, que guarde con el almacén y salga de esta lista
   const PERMITIDOS = ['js/core/Almacen.js', 'js/pam/PamActual.js', 'js/pam/tema-inicial.js', 'js/paginas/panel/main.js', 'js/nube/pendiente.js', 'js/nube/Sesion.js'];
-  const ANTIGUAS = ['js/paginas/pam/tabla-canjes.js', 'js/paginas/pam/revisor.js', 'js/paginas/pam/registro-roles.js', 'js/paginas/pam/portada.js', 'js/paginas/pam/temas.js'];
+  const ANTIGUAS = ['js/paginas/pam/tabla-canjes.js', 'js/paginas/pam/revisor.js', 'js/paginas/pam/portada.js', 'js/paginas/pam/temas.js'];
   const usan = archivos.filter(a => !PERMITIDOS.includes(a) && !ANTIGUAS.includes(a) && /localStorage/.test(leer(a)));
   assert.deepEqual(usan, [], 'si un módulo nuevo guarda datos de PAM, que use una clave con un prefijo de la lista PRE');
   assert.doesNotMatch(leer('js/pam/PamActual.js'), /localStorage\.(setItem|removeItem|clear)/, 'PamActual solo lee; para cambiar datos, las funciones de PAM');

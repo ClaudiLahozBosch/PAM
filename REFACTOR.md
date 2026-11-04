@@ -140,7 +140,7 @@ El script aparte «PAM · Inspector de Canjes» pasa a PAM y al mismo agente que
 | Los empleos del foro y los arcanos | `data/empleos-foro.txt` y `data/arcanos.json`: los mismos archivos que ya usan el panel de Mi PJ y el Inspector. Ya no están dos veces. |
 | Datos del sistema, Tabla de Canjes y Compendio | `js/paginas/pam/tabla-canjes.js` |
 | Revisor de Empleos: Empleos, Mi Ficha, Controlador y Editor | `js/paginas/pam/revisor.js` |
-| Registro de Roles y Coloreador de Diálogos | `js/paginas/pam/registro-roles.js` |
+| Registro de Roles y Coloreador de Diálogos | `js/paginas/pam/registro-roles.js` (desde la 8b, `js/paginas/registro/`) |
 | Portada y navegación | `js/paginas/pam/portada.js` |
 | Temas | `js/paginas/pam/temas.js` |
 | Datos del foro → PAM (lo que manda el Mi PJ antiguo) | `js/paginas/pam/foro-antiguo.js` |
@@ -152,10 +152,28 @@ El script aparte «PAM · Inspector de Canjes» pasa a PAM y al mismo agente que
   - `tests/caracterizacion/arranque.test.mjs` arranca PAM de las dos maneras y compara la página, lo que PAM deja para el foro (`pamFicha`, `rrBoveda`…) y cinco secciones.
 - No cambia ninguna clave del `localStorage`.
 
-**Lo que queda**, una página cada vez. Cada página pasa a módulos con los datos y lectores compartidos, con el mismo aspecto, y se arreglan sus errores pendientes:
+**Después, una página cada vez** (decisión del 4/11/2026: «separar por piezas»). Cada página pasa a una carpeta de módulos: los estilos, el HTML, los datos fijos y los cálculos salen a sus archivos; las pantallas mantienen el mismo código que pinta el HTML, así se ve exactamente igual. Se arreglan sus errores pendientes. Las pruebas montan la página nueva y la antigua (una copia congelada en `tests/legado/paginas/`) con los mismos datos y comparan lo que se ve, lo que hace al usarla y lo que guarda.
 
-- **8b · Registro de Roles y Coloreador:** guardado inmediato con el almacén (F14), el Coloreador recuerda lo de cada personaje (N08) y SheetJS al día en «Importar desde Excel» (F09).
-- **8c · Revisor de Empleos y Mi Ficha:** los datos del sistema de `data/sistema.json` (R07).
+**8b (hecha, 0.6.0): Registro de Roles y Coloreador**, en `js/paginas/registro/`:
+
+| Archivo | Qué tiene |
+|---|---|
+| `main.js` | Trae los estilos y el HTML y lo monta. `js/pam/arranque.js` lo carga en el mismo sitio que antes (después de Mi Ficha, antes de la portada). |
+| `RegistroRoles.js` | Las pestañas del Registro (Resumen, Roles, Turnos, Posibles oficiales, Ganancias, Bóveda, Canjes futuros, Importar y copia), `window.rrBoveda`, `rrOficiales`, `rrSync`… como antes. |
+| `Coloreador.js` | El Coloreador de Diálogos. |
+| `datos.js` | Listas fijas: tipos de rol, estados, turnos, colores, temas… |
+| `datosDeseos.js` | Los datos de la lista de deseos (precios, talentos, arcanos…), copiados sin cambiar (ver R07 en `PENDIENTES.md`). |
+| `importarExcel.js` | «Importar desde Excel». |
+| `plantilla.html` y `css/registro.css` | El HTML y los estilos del Registro. |
+
+- **F14:** guarda con el almacén: lo pendiente se guarda al cerrar o esconder la página (antes se perdía si se cerraba antes de 0,7 s).
+- **F09:** SheetJS 0.20.3, de cdn.sheetjs.com.
+- **N08:** el Coloreador recuerda lo de cada personaje (`cd_pj.<id>`).
+- Se quitó el modo «Guardado en tu cuenta», que solo funcionaba dentro de otra aplicación y en PAM nunca se activaba. Las claves guardadas son las mismas (`registro-roles-v1`, `cd_…`) más `cd_pj.<id>`, que viaja con la sesión con código.
+
+**Lo que queda:**
+
+- **8c · Revisor de Empleos y Mi Ficha:** los datos del sistema de `data/sistema.json` (R07). La lista de deseos del Registro tiene su propia copia que no coincide con la oficial: se propondrá unificarla, porque cambia lo que se ve.
 - **8d · Tabla de Canjes y Compendio:** que no repinte todo por cualquier cambio (F16). (El carrito de trasfondos, N04, ya está desde la 6b·1, y que se guarde al recargar, R08, desde la 0.5.1.)
 - **8e · Portada, temas y lo que quede:** los estilos repartidos por página y sin repetir (F17), y `js/pam/PamActual.js` cambiado a las páginas nuevas.
 
@@ -170,7 +188,7 @@ El script aparte «PAM · Inspector de Canjes» pasa a PAM y al mismo agente que
   - `js/nube/pendiente.js`: la lista y, al cargar, los datos traídos de la nube. **F11:** todo o nada; si no caben, el navegador queda como estaba, se avisa y no se guarda lo de este navegador encima (pregunta).
   - `js/nube/Sesion.js`: el botón ☁, la caja de la portada y el guardado automático (copiados por un script).
   - El documento en Firestore es el mismo (mismos campos, mismo cifrado): las sesiones de antes se siguen trayendo, y el PAM de `main` y el de la rama conviven (el de `main` no mira la versión).
-- **Fase 8** (páginas): al cambiar cómo guarda PAM, mantener esta norma o cambiar la foto a la vez, y comprobar que una sesión vieja se sigue pudiendo traer. La 8a no cambia ninguna clave: solo mueve el código a `js/paginas/pam/`.
+- **Fase 8** (páginas): al cambiar cómo guarda PAM, mantener esta norma o cambiar la foto a la vez, y comprobar que una sesión vieja se sigue pudiendo traer. La 8a no cambia ninguna clave: solo mueve el código a `js/paginas/pam/`. La 8b guarda con el almacén y las mismas claves; la única nueva, `cd_pj.<id>` (N08), empieza por `cd_` y viaja con la sesión (prueba `registro.test.mjs`).
 - **Staging:** el PAM de pruebas tiene su propio `localStorage`, pero si se carga en él un código de sesión, escribe en **la misma copia de la nube** que el PAM de verdad. Para probar, un código nuevo solo de pruebas.
 
 ## Cómo se publica una versión
