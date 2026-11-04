@@ -8,7 +8,7 @@ Documentos relacionados (en este orden de importancia):
 | Documento | Para qué |
 |---|---|
 | `GUIA-AGENTES.md` (este) | Visión completa y técnica. |
-| `PENDIENTES.md` | **Fuente única** de errores (F01–F17, R01–R10, N01–N08): estado, fase y prueba de cada uno. Si arreglas algo, se marca ahí. |
+| `PENDIENTES.md` | **Fuente única** de errores (F01–F17, R01–R11, N01–N08): estado, fase y prueba de cada uno. Si arreglas algo, se marca ahí. |
 | `REFACTOR.md` | El plan y las decisiones, escrito para Hana Park (la dueña de PAM). |
 | `RESUMEN-REFACTOR.html` | Resumen visual para quien no programa. |
 | `tests/README.md` | Cómo pasar las pruebas y qué fichas se pueden subir. |
@@ -252,6 +252,8 @@ Claves de paso en el almacén del agente: `pam.oficiales` (Biblioteca → PAM), 
 
 | F17 | Versiones distintas en un script, CSS repetido, `leerSaldos` copiado. | Una versión (el agente); un `leerSaldos`; los estilos, un archivo por página y los efectos una sola vez. Mismos estilos calculados en un navegador real. | `css/*.css`, `js/lectores/LectorBoveda.js` | `arranque`, `registro` |
 
+| R11 | (Encontrado en las pruebas en Chrome, 0.6.9) El editor no encontraba un valor escrito dentro de su propio color (`→ Atletismo:[/color] [color=#316996]Novato (+1)[/color]`); en un atributo, el número nuevo quedaba delante del viejo. Venía del «Personalizada» antiguo. | Admite etiquetas de apertura entre la etiqueta y el valor (atributos, habilidades, artes); el atributo se escribe sin «+» si la ficha lo escribía así. | `js/bbcode/EditorFicha.js` (`OPEN`) | `editor` |
+
 **Sin corregir:** N01, N03, y las mejoras N02, N05, N06 (ver §11).
 
 ## 8. Cambios dentro del código antiguo de Hana
@@ -276,7 +278,7 @@ Las páginas de `js/paginas/pam/` son el código de `index.html` **copiado por s
 
 ```
 cd tests && npm install   # la primera vez
-npm test                  # 221 pruebas: 220 pasan, 1 se salta (la de la ficha real de Irvin, sin la variable)
+npm test                  # 240 pruebas: 239 pasan, 1 se salta (la de la ficha real de Irvin, sin la variable)
 PAM_FICHA_IRVIN="C:\ruta\Irvin Giles.htm" npm test   # con la ficha real (no está ni puede estar en el repo)
 ```
 
@@ -304,7 +306,7 @@ PAM_FICHA_IRVIN="C:\ruta\Irvin Giles.htm" npm test   # con la ficha real (no est
 
 ## 11. Próximos pasos (en orden)
 
-1. **Pruebas manuales del usuario en Chrome** con el agente 0.6.0 (staging + test-forito): `PROVES-5c`, `6b1`, `6b3` (canje entero con Elena), `6c`, `7` (con un código de sesión nuevo de pruebas, dos ventanas), `8a` y `8b`. Las de 5a, 5b, 5d y 6a ya pasaron. Lo que salga, se corrige antes de seguir.
+1. **Pruebas en Chrome (05/11, agente 0.6.9, staging + test-forito): pasadas** 6b (canje entero con Elena: petición, aprobación, aplicar los 4 pasos, «Terminar en PAM», carrito vacío), 6c, 7 (código de sesión de pruebas, dos ventanas), 8a–8e y «Enviar a PAM»; antes ya 5a, 5b, 5d y 6a. Salió R11 (arreglado). **Falta la 5c** (te toca responder, misiones, sueldo, oficiales): mejor en el foro real, solo leyendo.
 2. ~~Fase 8b~~ hecha (0.6.0).
 3. ~~Fase 8c~~ hecha (0.6.2 y 0.6.3). Pendiente de decidir: el «Personalizada» antiguo (`actualizarCodigoAntiguo`) puede desaparecer cuando el nuevo esté probado en Chrome; el cálculo de combate de Mi Ficha podría usar `js/reglas/Combate.js` (habría que pasar la ficha antigua al modelo nuevo).
 4. ~~Fase 8d~~ hecha (0.6.4–0.6.6). Las pruebas que comparan con el PAM antiguo le aplican `comoOficial()` (`tests/legado/abrirPam.mjs`): las tres diferencias del Sistema reconciliado. Desde F16, para comparar la página entera hay que abrir antes todas las pestañas de la Tabla (y el Compendio).
