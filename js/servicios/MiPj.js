@@ -26,7 +26,8 @@ export async function leerMiPj(agente, { sistema, compendio, lector, foros, memo
   const act = cfg.actividad && memoria ? crearActividad(agente, { yo: hola.cuenta.nombre, uid: hola.cuenta.id, origen: 'https://' + hola.foro, cfg: cfg.actividad, memoria, cierres }) : null;
   const [, rolesYFilas, sueldo] = await Promise.all([
     (async () => {
-      if (!(cfg.campoFicha || cfg.campoBoveda)) return;
+      // el foro de pruebas no tiene esos campos en el perfil: la ficha y la bóveda de prueba están en data/foros.json
+      if (!(cfg.campoFicha || cfg.campoBoveda)) { if (cfg.perfilPruebas) perfil = { ficha: cfg.perfilPruebas.ficha || '', boveda: cfg.perfilPruebas.boveda || '' }; return; }
       try { perfil = leerPerfil(await agente.leer(RUTA_PERFIL), cfg); } catch (e) { errores.push('Perfil: ' + mensaje(e)); }
     })(),
     act ? act.leerRoles().catch(e => { console.warn('[Mi PJ] roles', e); return null; }) : null,
