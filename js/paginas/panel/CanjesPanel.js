@@ -3,16 +3,15 @@
 // cambiar lo que se ve: los mismos elementos, clases y textos. Lo que lee y publica está en js/servicios/CanjesDelForo.js.
 // Lo que cambia: lo guardado está en el almacén del agente (se lee al abrir el panel y después de cada cambio) y,
 // al publicar, es el agente quien lleva la página del foro al mensaje nuevo (el panel está en un iframe).
-import { formato, numero, describirAprobacion } from '../../reglas/Canjes.js?v=0.3.8';
-
-/** Lo que aún no está en esta versión de prueba (fase 6b·3). */
-const PENDIENTE_APLICAR = 'Aplicar el canje y «Terminar en PAM» llegan en la próxima versión de prueba.';
+// «Terminar en PAM» abre PAM por el canal oficial en los dos foros (Mi PJ, en el de pruebas, iba por su almacén).
+import { formato, numero, describirAprobacion } from '../../reglas/Canjes.js?v=0.3.9';
 
 /**
  * @param {{ documento: Document, servicio: ReturnType<typeof import('../../servicios/CanjesDelForo.js').crearCanjesDelForo> | null,
- *   datos: () => any, actualizar: () => Promise<any>, abrirPanel: () => void, irA: (ruta: string) => Promise<any> }} dep
+ *   datos: () => any, actualizar: () => Promise<any>, abrirPanel: () => void, irA: (ruta: string) => Promise<any>,
+ *   puerta: (accion: any) => Promise<any>, enviarAPam: (op: { esperarCierre: boolean }) => void }} dep
  */
-export function crearTarjetaCanjes({ documento, servicio, datos, actualizar, abrirPanel, irA }) {
+export function crearTarjetaCanjes({ documento, servicio, datos, actualizar, abrirPanel, irA, puerta, enviarAPam }) {
   /** Lo guardado (se lee del agente): la petición preparada en PAM y las peticiones de la cuenta. */
   let captura = null, peticiones = [];
   let msgCanje = null;
@@ -84,10 +83,10 @@ export function crearTarjetaCanjes({ documento, servicio, datos, actualizar, abr
         ]));
       } else if (!p.aplicada) {
         if (!p.boveda && !p.ficha) rt.appendChild(el('div', { clase: 'dim', texto: 'Preparada sin los códigos de PAM: aplicala a mano.' }));
-        rt.appendChild(fila2([boton('Aplicar el canje', true, () => { aviso(PENDIENTE_APLICAR, true); })]));
+        rt.appendChild(fila2([boton('Aplicar el canje', true, b => { aplicar(p, b, aviso); })]));
       } else {
         rt.appendChild(el('div', { clase: 'dim', texto: 'Aplicado en el foro el ' + new Date(p.aplicada.fecha).toLocaleString('es-AR') + '.' + (p.enPAM ? ' Cerrado en PAM.' : '') }));
-        rt.appendChild(fila2([boton(p.enPAM ? 'Volver a cerrar en PAM' : 'Terminar en PAM', !p.enPAM, () => { aviso(PENDIENTE_APLICAR, true); })]));
+        rt.appendChild(fila2([boton(p.enPAM ? 'Volver a cerrar en PAM' : 'Terminar en PAM', !p.enPAM, () => { terminar(p).then(err => { if (err) aviso(err, true); }); })]));
       }
     });
     if (!capt && !pets.length) {
@@ -110,6 +109,34 @@ export function crearTarjetaCanjes({ documento, servicio, datos, actualizar, abr
 
   function confirmar(p, si) { servicio.confirmar(p, si).catch(() => {}).then(recargar); }
 
+  /**
+   * «Aplicar el canje»: la puerta del agente con bóveda, movimiento, ficha y aviso. Si todo va bien, la petición queda
+   * aplicada y se vuelve a leer el foro; con «Terminar en PAM» (en la misma puerta) se sigue en PAM.
+   */
+  async function aplicar(p, b, aviso) {
+    b.disabled = true;
+    try {
+      const accion = await servicio.accionAplicarCanje(p, datos());
+      accion.enlaceFinal = { texto: 'Terminar en PAM' };
+      const res = await puerta(accion);
+      if (res.resultado === 'aceptada' || res.resultado === 'igual') {
+        await servicio.marcarAplicada(p, res.pasos && res.pasos[1] && res.pasos[1].post);
+        // primero PAM (el navegador solo deja abrir la pestaña justo después del clic) y después se relee el foro
+        if (res.siguiente) { const err = await terminar(p); if (err) aviso(err, true); }
+        actualizar();
+      }
+    } catch (e) { aviso(e instanceof Error ? e.message : String(e), true); }
+    await recargar();
+  }
+
+  /** «Terminar en PAM»: le deja a PAM lo que necesita para cerrar el canje y lo abre; los datos nuevos van después. */
+  async function terminar(p) {
+    if (!datos()) return 'Primero tocá «Actualizar».';
+    await servicio.dejarCierre(p);
+    enviarAPam({ esperarCierre: true });
+    return null;
+  }
+
   /** Llegada desde PAM con «Ir al foro a publicar la petición» (#escriba-publicar): se abre sola la puerta. */
   async function alCargarForo(cuentaNombre) {
     if (!servicio) return;
@@ -128,5 +155,5 @@ export function crearTarjetaCanjes({ documento, servicio, datos, actualizar, abr
     if (captura) await publicar(captura, el('button'), aviso);
   }
 
-  return { pintar, recargar, alCargarForo, get captura() { return captura; }, get peticiones() { return peticiones; } };
+  return { pintar, recargar, alCargarForo, terminar, get captura() { return captura; }, get peticiones() { return peticiones; } };
 }

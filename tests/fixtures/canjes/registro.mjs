@@ -12,7 +12,10 @@ function tema(tid, slug, titulo, posts, paginas = []) {
 ${posts.map(([id, autor, fecha, html]) => `<div class="post" id="p${id}"><p class="author">por <a href="/u${U[autor] ?? 99}">${esc(autor)}</a> ${fecha}</p><div class="content">${html}</div></div>`).join('\n')}
 </body></html>`;
 }
-const editar = bb => `<html><body><form name="post" action="/post" method="post"><textarea name="message">${esc(bb)}</textarea><input type="hidden" name="mode" value="editpost"></form></body></html>`;
+/** La página «editar mensaje» de un mensaje (con su número, como el formulario del foro). */
+export const editar = (bb, p = '') => `<html><body><form name="post" action="/post" method="post"><textarea name="message">${esc(bb)}</textarea><input type="hidden" name="mode" value="editpost"><input type="hidden" name="p" value="${p}"></form></body></html>`;
+/** Un mensaje en la página de un tema (para añadirlo al publicar). */
+export const mensaje = (id, autor, fecha, html) => `<div class="post" id="p${id}"><p class="author">por <a href="/u${U[autor] ?? 99}">${esc(autor)}</a> ${fecha}</p><div class="content">${html}</div></div>`;
 
 /** El BBCode de la petición de Irvin que ya está publicada (la 9630, entre sus tres últimos mensajes del registro). */
 export const BB_PUBLICADA = '[b]Petición de canje[/b] — Irvin Giles\nBóveda: [url=https://hp-avada-kedavra.foroactivo.com/t301-]Bóveda de Irvin Giles[/url]\nGrageas actuales: 3.000 · Coste: 500 · Quedarían: 2.500\n\nESTADÍSTICAS\nVigor: 2 → 3 — 400 grageas';
@@ -23,11 +26,13 @@ export function registroDePrueba() {
   P['/profile?mode=editprofile&page_profil=informations'] = '<html><body><form><input name="profile_field_3_-10" value="/t300-ficha-de-irvin-giles"><input name="profile_field_3_24" value="https://hp-avada-kedavra.foroactivo.com/t301-boveda-de-irvin-giles#9811"></form></body></html>';
   P['/t300-ficha-de-irvin-giles'] = tema(300, 'ficha-de-irvin-giles', 'Ficha de Irvin Giles', [
     [9800, 'Irvin Giles', 'Lun 2 Mar 2026 - 10:00', 'Nombre y Apellido: Irvin Giles<br>Edad: 30']]);
-  P['/post?p=9800&mode=editpost'] = editar('Nombre y Apellido: Irvin Giles\nEdad: 30');
+  P['/post?p=9800&mode=editpost'] = editar('Nombre y Apellido: Irvin Giles\nEdad: 30', 9800);
   P['/t301-boveda-de-irvin-giles'] = tema(301, 'boveda-de-irvin-giles', 'Bóveda de Irvin Giles', [
     [9810, 'Irvin Giles', 'Lun 2 Mar 2026 - 10:05', 'Grageas Iniciales: 1.000<br>Grageas Totales: 5.000<br>Grageas Actuales: 2.000'],
     [9811, 'Irvin Giles', 'Dom 1 Nov 2026 - 10:00', 'Grageas actuales: 2.000<br>+500 por el sueldo<br>Grageas restantes: 2.500<br>Grageas totales: 5.500']]);
-  P['/post?p=9810&mode=editpost'] = editar('Grageas Iniciales: 1.000\nGrageas Totales: 5.000\nGrageas Actuales: 2.000');
+  P['/post?p=9810&mode=editpost'] = editar('[b]Grageas Iniciales:[/b] 1.000\n[b]Grageas Totales:[/b] 5.000\n[b]Grageas Actuales:[/b] 2.000', 9810);
+  P['/post?t=301&mode=reply'] = '<html><body><form name="post" action="/post" method="post"><textarea name="message"></textarea><input type="hidden" name="mode" value="reply"><input type="hidden" name="t" value="301"></form></body></html>';
+  P['/post?t=300&mode=reply'] = '<html><body><form name="post" action="/post" method="post"><textarea name="message"></textarea><input type="hidden" name="mode" value="reply"><input type="hidden" name="t" value="300"></form></body></html>';
 
   // El registro: dos páginas. En la primera, una petición antigua; en la segunda, las de ahora y sus respuestas.
   P['/t34430-registro-de-canjes'] = tema(34430, 'registro-de-canjes', 'Registro de Canjes', [

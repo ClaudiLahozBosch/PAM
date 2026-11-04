@@ -1,18 +1,18 @@
 // @ts-check
 // Arranque del panel «Mi PJ» dentro del foro (el agente lo muestra en un iframe sin marco).
-import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=0.3.8';
-import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=0.3.8';
-import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial } from '../../datos/cargar.js?v=0.3.8';
-import { LectorFicha } from '../../lectores/LectorFicha.js?v=0.3.8';
-import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=0.3.8';
-import { crearPanelMiPj } from './MiPjPanel.js?v=0.3.8';
-import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=0.3.8';
-import { crearActividad } from '../../servicios/ActividadDelForo.js?v=0.3.8';
-import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=0.3.8';
-import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=0.3.8';
-import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=0.3.8';
-import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=0.3.8';
-import { crearTarjetaCanjes } from './CanjesPanel.js?v=0.3.8';
+import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=0.3.9';
+import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=0.3.9';
+import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial } from '../../datos/cargar.js?v=0.3.9';
+import { LectorFicha } from '../../lectores/LectorFicha.js?v=0.3.9';
+import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=0.3.9';
+import { crearPanelMiPj } from './MiPjPanel.js?v=0.3.9';
+import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=0.3.9';
+import { crearActividad } from '../../servicios/ActividadDelForo.js?v=0.3.9';
+import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=0.3.9';
+import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=0.3.9';
+import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=0.3.9';
+import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=0.3.9';
+import { crearTarjetaCanjes } from './CanjesPanel.js?v=0.3.9';
 
 const CACHE_MIN = 30; // como Mi PJ: si lo leído tiene más de media hora, se vuelve a leer al abrir
 const root = /** @type {HTMLElement} */ (document.getElementById('mipj'));
@@ -53,7 +53,8 @@ async function arrancar() {
   if (servicioCanjes) await traerPeticionesAntiguas(agente, servicioCanjes.clave, 'cuentas.' + hola.foro + '.' + hola.cuenta.id);
   const canjes = servicioCanjes ? crearTarjetaCanjes({
     documento: document, servicio: servicioCanjes, datos: () => panel?.datos,
-    actualizar: () => panel.actualizar(), abrirPanel: () => panel.abrir(), irA: ruta => agente.ir(ruta)
+    actualizar: () => panel.actualizar(), abrirPanel: () => panel.abrir(), irA: ruta => agente.ir(ruta),
+    puerta: accion => agente.puerta(accion), enviarAPam: op => panel.enviarAPam(op)
   }) : null;
   panel = crearPanelMiPj({
     root, documento: document, guardado, agente, ventana: hola.ventana, cuenta: hola.cuenta, foroHost: hola.foro || '', canjes,
@@ -72,6 +73,8 @@ async function arrancar() {
   });
   if (canjes) canjes.recargar();
   agente.atender('ventana.cambio', v => { panel.ventana(v); return {}; });
+  // «Terminar en PAM»: la pestaña de PAM terminó de cerrar el canje; ahora se le mandan los datos nuevos del foro
+  agente.atender('pam.cierre', () => { panel.alCierrePam(); return {}; });
   const d = panel.datos;
   const viejo = !d || d.v !== 2 || Date.now() - new Date(d.leido).getTime() > CACHE_MIN * 60000 || (d.pendientes || []).includes('roles'); // leído por la 0.3.2, sin roles
   // como Mi PJ: escribiendo en la propia bóveda, se relee si lo leído tiene más de 2 minutos (para comparar con lo último)

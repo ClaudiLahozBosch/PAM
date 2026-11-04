@@ -54,10 +54,10 @@ const esperarFin = async () => { for (let i = 0; i < 100 && !boton('Cerrar'); i+
 
 test('hola (con la ventana del foro), iframe sin marco y lectura del foro', async () => {
   const h = await agente.hola();
-  assert.deepEqual([h.agente, h.protocolo, h.foro, h.cuenta, h.ruta], ['0.3.8', 1, 'hp-avada-kedavra.foroactivo.com', { id: 7, nombre: 'TEST' }, '/t5-uno']);
+  assert.deepEqual([h.agente, h.protocolo, h.foro, h.cuenta, h.ruta], ['0.3.9', 1, 'hp-avada-kedavra.foroactivo.com', { id: 7, nombre: 'TEST' }, '/t5-uno']);
   assert.ok(h.ventana.ancho > 0 && h.ventana.alto > 0);
   const f = sombra().querySelector('iframe');
-  assert.equal(f.getAttribute('src'), PAM + '/PAM/panel.html?foro=' + encodeURIComponent(FORO) + '&v=0.3.8', 'con la versión: el navegador no mezcla archivos');
+  assert.equal(f.getAttribute('src'), PAM + '/PAM/panel.html?foro=' + encodeURIComponent(FORO) + '&v=0.3.9', 'con la versión: el navegador no mezcla archivos');
   assert.equal(f.className, 'marco');
   assert.equal(sombra().querySelector('.pastilla'), null, 'la pastilla es la de Mi PJ, dentro del panel');
   assert.equal((await agente.leer('/')).title, 'Foro');
@@ -119,6 +119,27 @@ test('puerta con varios pasos: publicar y luego editar con «enlace del paso 1»
   assert.deepEqual(r.pasos.map(x => x.estado), ['ok', 'ok', 'igual']);
   const id = r.pasos[0].post;
   assert.equal(srv.mensajes[99], `Ficha nueva\nVer ${FORO}/viewtopic?p=${id}#${id}`);
+});
+test('puerta: pasos que no se harán, un paso ya publicado («enlace del paso n» usa su mensaje) y el botón final', async () => {
+  srv.mensajes[99] = 'Ficha vieja'; srv.peticiones.length = 0;
+  const p = agente.puerta({ titulo: 'Aplicar el canje aprobado', pasos: [
+    { tipo: 'editar', descripcion: 'primer mensaje de la bóveda', omitido: 'Sin código de bóveda de PAM.' },
+    { tipo: 'publicar', tema: 5, texto: 'movimiento', descripcion: 'movimiento', igual: 'Ya está publicado.', postExistente: '777' },
+    { tipo: 'editar', post: 99, original: 'Ficha vieja', nuevo: 'Ficha nueva\nMovimiento: «enlace del paso 2»', motivo: 'Canje' }
+  ], enlaceFinal: { texto: 'Terminar en PAM' } });
+  await espera(30);
+  assert.deepEqual(estados(), ['No se hará', 'Ya está igual', 'Pendiente']);
+  assert.match(sombra().querySelector('.puerta').textContent, /1\. Editar mensaje · primer mensaje de la bóveda.*Sin código de bóveda de PAM\./s);
+  boton('Aceptar').click();
+  for (let i = 0; i < 100 && !boton('Terminar en PAM'); i++) await espera(10);
+  assert.deepEqual(estados(), ['Omitido', 'Ya está igual', 'Hecho']);
+  assert.equal(sombra().querySelector('.p-info').textContent, 'Hecho (los pasos que ya estaban igual no se tocaron), salvo los pasos marcados como «Omitido».');
+  assert.ok(boton('Cerrar'), 'también se puede cerrar sin seguir');
+  boton('Terminar en PAM').click();
+  const r = await p;
+  assert.deepEqual([r.resultado, r.siguiente, r.pasos.map(x => x.estado), r.pasos[1].post], ['aceptada', true, ['omitido', 'igual', 'ok'], '777']);
+  assert.equal(srv.mensajes[99], `Ficha nueva\nMovimiento: ${FORO}/viewtopic?p=777#777`);
+  assert.ok(!srv.peticiones.some(x => x.metodo === 'POST' && /t=5/.test(x.cuerpo)), 'lo ya publicado no se vuelve a publicar');
 });
 test('puerta: si cambia la cuenta conectada antes de aceptar, no se hace nada', async () => {
   srv.peticiones.length = 0;
@@ -254,6 +275,25 @@ test('abrir PAM desde el foro y pasarle un mensaje hasta que conteste («Enviar 
   await agente.abrirPam({ hash: 'javascript:alert(1)' });
   assert.equal(abiertas.at(-1)[0], PAM + '/PAM/', 'solo se abre PAM, sin rutas raras');
   otra.close();
+});
+
+test('«Terminar en PAM»: PAM avisa de que cerró el canje y después se le mandan los datos a la misma pestaña', async () => {
+  const otra = new JSDOM('', { url: PAM + '/PAM/' }).window, recibidos = [], avisos = [];
+  agente.atender('pam.cierre', d => { avisos.push(d); return {}; });
+  W.open = () => otra;
+  assert.deepEqual(await agente.abrirPam({ hash: '#foro' }), { abierta: true });
+  // un aviso que no viene de esa pestaña no cuenta
+  W.dispatchEvent(new W.MessageEvent('message', { data: { escribaCierre: 1, hecho: true }, origin: PAM, source: null }));
+  W.dispatchEvent(new W.MessageEvent('message', { data: { escribaCierre: 1, hecho: true }, origin: PAM, source: otra }));
+  await espera(30);
+  assert.deepEqual(avisos, [{ hecho: true }]);
+  otra.postMessage = (m) => { recibidos.push(m); W.dispatchEvent(new W.MessageEvent('message', { data: { pamForoOk: 1 }, origin: PAM, source: otra })); };
+  const r = await agente.enviarPam({ mensaje: { pamForo: 1, data: { cuenta: 'Irvin Giles' } }, respuesta: 'pamForoOk' });
+  assert.deepEqual([r.abierta, recibidos[0]], [true, { pamForo: 1, data: { cuenta: 'Irvin Giles' } }]);
+  otra.close();
+  W.open = () => ({ closed: true, postMessage() {} }); // (jsdom no marca «closed» al cerrar)
+  await agente.abrirPam({ hash: '#foro' });
+  assert.deepEqual(await agente.enviarPam({ mensaje: {}, respuesta: 'x' }), { abierta: false }, 'si se cerró la pestaña de PAM');
 });
 
 test('foro.ir: solo rutas del propio foro', async () => {

@@ -8,7 +8,8 @@
 //   · Cierre: tras publicarlo todo en el foro («pam.aprobacion»), se ponen los dos enlaces en la Bóveda de PAM y se
 //     hace su «Ya lo publiqué».
 // La pastilla «✦ Mi PJ · Canjes» es la de siempre (abajo a la derecha de PAM).
-import { abrirPuerta, crearEl, estilos } from './ui/Puerta.js?v=0.3.8';
+import { abrirPuerta, crearEl, estilos } from './ui/Puerta.js?v=0.3.9';
+import { claveCuenta } from '../reglas/Canjes.js?v=0.3.9';
 
 const CLAVE_PAQUETE = 'pam.paquete', CLAVE_PETICION = 'pam.peticion', CLAVE_APROBACION = 'pam.aprobacion';
 const numero = txt => { const l = String(txt == null ? '' : txt).replace(/[^\d-]/g, ''); return l === '' || l === '-' ? NaN : parseInt(l, 10); };
@@ -179,7 +180,14 @@ export function crearCanjesPam({ agente, pam, doc, foros }) {
     try {
       const res = await abrirPuerta(doc, (paq.cuenta && paq.cuenta.nombre) || paq.pj, accionCierre(paq));
       await marcarUsado(CLAVE_APROBACION, paq, res);
-      avisarAlForo(paq.foro, { escribaCierre: 1, hecho: res.resultado === 'aceptada' || res.resultado === 'igual' });
+      const hecho = res.resultado === 'aceptada' || res.resultado === 'igual';
+      // como Mi PJ: la petición queda cerrada en PAM (la tarjeta del foro deja de enseñarla)
+      if (hecho && paq.cuenta) {
+        const k = claveCuenta(paq.cuenta.foro || paq.foro, paq.cuenta.id), d = (await leer(k)) || {};
+        const x = (d.peticiones || []).find(y => y.post === paq.peticion);
+        if (x) { x.enPAM = ahoraISO(); x.cerrada = true; await agente.guardarDato(k, d).catch(() => {}); }
+      }
+      avisarAlForo(paq.foro, { escribaCierre: 1, hecho });
     } finally { abierta = false; pam.verSeccion('ficha'); await pintar(); }
   }
   function mensaje(txt) { aviso = { error: null, ok: txt }; abiertoPanel = true; pintar(); }

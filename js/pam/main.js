@@ -1,11 +1,11 @@
 // @ts-check
 // Arranque de lo nuevo dentro de PAM (index.html lo carga con una sola línea). Si el script de PAM (el agente) no
 // está instalado, no hace nada y PAM funciona como siempre.
-import { ClienteAgente } from '../servicios/agente/ClienteAgente.js?v=0.3.8';
-import { PROTOCOLO } from '../servicios/agente/protocolo.js?v=0.3.8';
-import { crearPamActual } from './PamActual.js?v=0.3.8';
-import { crearControladorForo } from './ControladorForo.js?v=0.3.8';
-import { cargarForos } from '../datos/cargar.js?v=0.3.8';
+import { ClienteAgente } from '../servicios/agente/ClienteAgente.js?v=0.3.9';
+import { PROTOCOLO } from '../servicios/agente/protocolo.js?v=0.3.9';
+import { crearPamActual } from './PamActual.js?v=0.3.9';
+import { crearControladorForo } from './ControladorForo.js?v=0.3.9';
+import { cargarForos } from '../datos/cargar.js?v=0.3.9';
 
 const esperar = ms => new Promise(r => setTimeout(r, ms));
 

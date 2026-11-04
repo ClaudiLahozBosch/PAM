@@ -8,7 +8,7 @@
 //     («Ficha actualizada…», enlace al Registro de Canjes o a la bóveda). Desde ahí, lo del dueño es historial,
 //     aunque sea largo y tenga líneas que parecen trasfondos («● Biblioteca I: Cultura Muggle»).
 // Antes, Mi PJ leía solo el primer mensaje y el Inspector cogía cualquier mensaje del dueño de más de 800 caracteres.
-import { mismoAutor } from './LectorTema.js?v=0.3.8';
+import { mismoAutor } from './LectorTema.js?v=0.3.9';
 
 // Marcas típicas de una parte de ficha: etiquetas «▋ Algo:», flechas «→ Vigor:», o secciones conocidas.
 const MARCAS = /▋|→\s*[A-ZÁÉÍÓÚ][^:\n]{1,40}:|\b(?:Nombre y Apellido|Atributos|Habilidades|HECHIZOS|POCIONES|RITUALES|TRASFONDOS|Trasfondos|BIBLIOTECA|INFORMANTES|INFLUENCIA|SEGUIDORES|VENTAJAS|IDIOMAS|Idiomas|TALENTOS|Talentos|RAZA)\b/;

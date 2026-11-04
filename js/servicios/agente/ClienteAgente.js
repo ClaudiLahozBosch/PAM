@@ -1,5 +1,5 @@
 // @ts-check
-import { PROTOCOLO, FOROS } from './protocolo.js?v=0.3.8';
+import { PROTOCOLO, FOROS } from './protocolo.js?v=0.3.9';
 
 /** Habla con el agente (el script de Tampermonkey). Toda la lógica está en PAM; el agente solo ejecuta. */
 export class ClienteAgente {
@@ -115,4 +115,10 @@ export class ClienteAgente {
    * @returns {Promise<{ abierta: boolean, respuesta?: any }>}
    */
   abrirPam(d) { return this.pedir('pam.abrir', d, 45000); }
+  /**
+   * Pasa `mensaje` a la pestaña de PAM que se abrió con abrirPam, hasta que conteste con `respuesta`.
+   * @param {{ mensaje: any, respuesta: string }} d
+   * @returns {Promise<{ abierta: boolean, respuesta?: any }>}
+   */
+  enviarPam(d) { return this.pedir('pam.enviar', d, 45000); }
 }

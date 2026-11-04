@@ -109,6 +109,11 @@ La tarjeta «⚖ Canjes» del panel, publicar la petición en el Registro de Can
 - `js/paginas/panel/CanjesPanel.js`: la tarjeta. Al llegar desde PAM con `#escriba-publicar`, el agente lo dice en `hola` (y lo quita de la dirección) y la puerta se abre sola; al publicar, el agente lleva la página al mensaje nuevo (`foro.ir`).
 - El registro de cada foro está en `data/foros.json` (`registroCanjes`, `grupos`). Sin registro, la tarjeta solo explica cómo pedir un canje.
 
+Aplicar el canje y cerrarlo en PAM (fase 6b·3), también como Mi PJ:
+
+- «Aplicar el canje» abre la puerta del agente con cuatro pasos: el primer mensaje de la bóveda (grageas actuales y totales), el movimiento (el código que preparó PAM, con los enlaces de la petición y la aprobación), la ficha (el código «Personalizada» de PAM, un solo mensaje: N07) y el aviso en la ficha. Lo que no se puede hacer sale «No se hará»; lo que ya está hecho, «Ya está igual» (un reintento no repite nada).
+- Al terminar, la misma puerta ofrece «Terminar en PAM»: se deja `pam.aprobacion` y el agente abre PAM. PAM cierra el canje (su pastilla, como en la 6b·1), marca la petición como cerrada y avisa a la pestaña del foro (`escribaCierre`); el agente se lo pasa al panel (`pam.cierre`) y el panel le manda a esa misma pestaña los datos ya releídos (`pam.enviar`). Es el canal oficial en los dos foros (Mi PJ, en el de pruebas, iba por su almacén).
+
 «Enviar a PAM» usa la ventana «Datos del foro → PAM» que ya tiene `index.html`: el agente abre PAM desde el foro y le pasa los datos, porque esa ventana solo acepta datos que vengan del foro. En la rama `refactor` acepta también el foro de pruebas (`FOROS_PRUEBA`), siempre con Aceptar / Denegar.
 
 ## Dónde guarda PAM los datos (y la sesión con código)

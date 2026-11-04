@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PAM · Agente (staging)
 // @namespace    https://claudilahozbosch.github.io/PAM/staging
-// @version      0.3.8
+// @version      0.3.9
 // @description  El script mínimo de PAM: lee el foro con tu sesión, publica y edita SOLO tras tu «Aceptar» y muestra el panel «Mi PJ» de PAM. Toda la lógica está en PAM.
 // @updateURL    https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
 // @downloadURL  https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
@@ -29,7 +29,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.3.8';
+  var VERSION = '0.3.9';
   var PROTOCOLO = 1;
   // Staging: el fork de pruebas (otro dominio que PAM real, así no ve los datos de los jugadores).
   var PAM = { origen: 'https://claudilahozbosch.github.io', ruta: '/PAM/' };
@@ -468,13 +468,16 @@
   // accion = { titulo, explicacion, avisos, pasos: [{ tipo:'editar', post, original, nuevo, motivo, descripcion } |
   //                                                  { tipo:'publicar', tema, texto, descripcion }] }
   // «enlace del paso n» en un texto se cambia por el enlace al mensaje que publicó (o editó) el paso n.
-  // Devuelve { resultado: 'aceptada'|'denegada'|'fallida'|'parcial'|'igual', pasos }
+  // Un paso con `omitido` (texto) no se hará: se enseña por qué. Uno con `igual` ya está hecho (`postExistente`: su mensaje).
+  // `enlaceFinal: { texto }`: al terminar bien, un botón más; si se pulsa, la respuesta lleva `siguiente: true`.
+  // Devuelve { resultado: 'aceptada'|'denegada'|'fallida'|'parcial'|'igual', pasos, siguiente? }
   // ---------------------------------------------------------------
   function abrirPuerta(accion) {
     var cuenta = cuentaConectada();
     if (!cuenta) { return Promise.reject(new Error('No hay ninguna cuenta conectada en el foro.')); }
     if (!accion || !Array.isArray(accion.pasos) || !accion.pasos.length) { return Promise.reject(new Error('La puerta no tiene pasos.')); }
     accion.pasos.forEach(function (paso) {
+      if (paso.omitido) { if (paso.tipo !== 'editar' && paso.tipo !== 'publicar') { throw new Error('Tipo de paso desconocido: ' + paso.tipo); } return; }
       if (paso.tipo === 'editar') {
         if (!(parseInt(paso.post, 10) > 0) || typeof paso.original !== 'string' || typeof paso.nuevo !== 'string') { throw new Error('Paso de edición incompleto.'); }
         if (!paso.igual && mismoTexto(paso.original, paso.nuevo)) { paso.igual = 'El mensaje ya tiene exactamente este texto.'; }
@@ -503,6 +506,14 @@
           estados.push(estadoIgual);
           caja.appendChild(el('div', { clase: 'p-paso-cab' }, [el('span', { texto: (k + 1) + '. ' + (paso.titulo || tituloPaso) }), estadoIgual]));
           caja.appendChild(el('div', { clase: 'p-nota', texto: paso.igual + ' No se toca.' }));
+          dlg.appendChild(caja);
+          return;
+        }
+        if (paso.omitido) {
+          var estadoOm = el('span', { clase: 'p-estado mal', texto: 'No se hará' });
+          estados.push(estadoOm);
+          caja.appendChild(el('div', { clase: 'p-paso-cab' }, [el('span', { texto: (k + 1) + '. ' + tituloPaso + (paso.descripcion ? ' · ' + paso.descripcion : '') }), estadoOm]));
+          caja.appendChild(el('div', { clase: 'aviso', texto: paso.omitido }));
           dlg.appendChild(caja);
           return;
         }
@@ -559,7 +570,8 @@
         function siguiente() {
           if (k >= accion.pasos.length) { return Promise.resolve(); }
           var idx = k++, paso = accion.pasos[idx];
-          if (paso.igual) { resultados.push({ estado: 'igual', post: paso.post || null }); return siguiente(); }
+          if (paso.igual) { resultados.push({ estado: 'igual', post: paso.postExistente || paso.post || null }); return siguiente(); }
+          if (paso.omitido) { resultados.push({ estado: 'omitido' }); estados[idx].textContent = 'Omitido'; return siguiente(); }
           var faltaEnlace = null;
           var conEnlaces = function (tx) {
             return String(tx).replace(/«enlace del paso (\d+)»/g, function (m, n) {
@@ -596,19 +608,28 @@
         }
         siguiente().then(function () {
           var algunoOk = resultados.some(function (r) { return r.estado === 'ok'; });
-          var completos = resultados.length === accion.pasos.length && resultados.every(function (r) { return r.estado === 'ok' || r.estado === 'igual'; });
+          var completos = resultados.length === accion.pasos.length && resultados.every(function (r) { return r.estado === 'ok' || r.estado === 'omitido' || r.estado === 'igual'; });
           var todosOk = algunoOk && completos;
           var nadaQueHacer = !algunoOk && completos && resultados.some(function (r) { return r.estado === 'igual'; });
           var resultado = todosOk ? 'aceptada' : (nadaQueHacer ? 'igual' : (algunoOk ? 'parcial' : 'fallida'));
           if (todosOk || nadaQueHacer) {
+            var omitidos = resultados.filter(function (r) { return r.estado === 'omitido'; }).length;
             var iguales = resultados.filter(function (r) { return r.estado === 'igual'; }).length;
             info.className = 'p-info okmsg';
-            info.textContent = nadaQueHacer ? 'No había nada que cambiar.' : 'Hecho' + (iguales ? ' (los pasos que ya estaban igual no se tocaron).' : '.');
+            info.textContent = nadaQueHacer ? 'No había nada que cambiar.'
+              : 'Hecho' + (iguales ? ' (los pasos que ya estaban igual no se tocaron)' : '') + (omitidos ? ', salvo los pasos marcados como «Omitido».' : '.');
           }
           var bCerrar = el('button', { clase: 'p-btn', type: 'button', texto: 'Cerrar' });
           botones.replaceChildren(bCerrar);
           bCerrar.focus();
           bCerrar.addEventListener('click', function () { cerrar({ resultado: resultado, pasos: resultados }); });
+          // El paso siguiente (p. ej. «Terminar en PAM»): lo hace PAM cuando la puerta contesta con `siguiente`.
+          if ((todosOk || nadaQueHacer) && accion.enlaceFinal && accion.enlaceFinal.texto) {
+            var bSig = el('button', { clase: 'p-btn ok', type: 'button', texto: String(accion.enlaceFinal.texto) });
+            bSig.addEventListener('click', function () { cerrar({ resultado: resultado, pasos: resultados, siguiente: true }); });
+            botones.appendChild(bSig);
+            bSig.focus();
+          }
         });
       });
     });
@@ -642,7 +663,7 @@
   // ---------------------------------------------------------------
   // Panel «Mi PJ» (página de PAM en un iframe que ocupa justo lo que ocupa el panel)
   // ---------------------------------------------------------------
-  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=0.3.8' });
+  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=0.3.9' });
   raiz.appendChild(iframe);
   // Si el panel no arranca (no pide tamaño), se enseña al menos su pastilla, para que nunca quede invisible.
   var panelVivo = false;
@@ -682,7 +703,8 @@
     'foro.oficial': function (d) { return pintarOficial(d); },
     // Solo a rutas del propio foro (p. ej. el mensaje que se acaba de publicar).
     'foro.ir': function (d) { var u = rutaSegura(d.ruta); setTimeout(function () { location.href = u.href; }, 0); return { ido: true }; },
-    'pam.abrir': function (d) { return abrirPam(d); }
+    'pam.abrir': function (d) { return abrirPam(d); },
+    'pam.enviar': function (d) { return enviarPam(d); }
   });
   // El panel calcula su tamaño con la ventana del foro (dentro del iframe no la ve).
   window.addEventListener('resize', function () { canal.avisar('ventana.cambio', ventana()); });
@@ -691,11 +713,27 @@
   // Abrir PAM en otra pestaña y pasarle un mensaje desde el foro (p. ej. «Enviar a PAM»: PAM solo acepta
   // los datos si vienen del foro). El agente no mira el mensaje: lo reenvía hasta que PAM contesta con `respuesta`.
   // ---------------------------------------------------------------
+  // La última pestaña de PAM que se abrió desde aquí: cuando PAM termina de cerrar un canje («escribaCierre»), se avisa
+  // al panel, y el panel le manda después los datos nuevos con «pam.enviar».
+  var ventanaPam = null;
+  window.addEventListener('message', function (e) {
+    if (!ventanaPam || e.source !== ventanaPam || e.origin !== PAM.origen || !e.data || !e.data.escribaCierre) { return; }
+    canal.avisar('pam.cierre', { hecho: !!e.data.hecho });
+  });
   function abrirPam(d) {
     var hash = /^#[a-z]{0,20}$/.test(d.hash || '') ? d.hash : '';
     var w = window.open(PAM.origen + PAM.ruta + hash, 'pam');
     if (!w) { return { abierta: false }; }
+    ventanaPam = w;
     if (!d.mensaje || !d.respuesta) { return { abierta: true }; }
+    return enviarAPestana(w, d);
+  }
+  function enviarPam(d) {
+    if (!ventanaPam || ventanaPam.closed) { return { abierta: false }; }
+    if (!d.mensaje || !d.respuesta) { return { abierta: true }; }
+    return enviarAPestana(ventanaPam, d);
+  }
+  function enviarAPestana(w, d) {
     return new Promise(function (resolver) {
       var n = 0, hecho = false;
       var alResponder = function (e) {

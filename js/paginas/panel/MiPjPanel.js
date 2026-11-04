@@ -7,10 +7,10 @@
 //   · los enlaces abren la página del foro (<base target="_top"> en panel.html).
 // Las tarjetas que aún no están en PAM (canjes) lo dicen en vez de «Tocá Actualizar».
 // Arreglos: R09 (los oficiales cerrados ya no salen en curso) y R10 (✕ para ocultar un oficial hasta volver a escribir en él).
-import { aFecha } from '../../lectores/FechaForo.js?v=0.3.8';
-import { estadoSueldo } from '../../reglas/Sueldo.js?v=0.3.8';
-import { grageasOf } from '../../reglas/Oficiales.js?v=0.3.8';
-import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=0.3.8';
+import { aFecha } from '../../lectores/FechaForo.js?v=0.3.9';
+import { estadoSueldo } from '../../reglas/Sueldo.js?v=0.3.9';
+import { grageasOf } from '../../reglas/Oficiales.js?v=0.3.9';
+import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=0.3.9';
 
 const TEMA_AVADENSE = { skin: 'avadense', ink: '#171a2b', panel: '#1e2236', 'panel-2': '#262a42', parchment: '#F1EADF', 'parchment-dim': '#a7a1b6', gold: '#B49768',
   'gold-bright': '#d6bd8f', 'arcane-bright': '#cf94a3', good: '#93b8a0', bad: '#d98377', 'line-strong': 'rgba(241,234,223,.16)', 'accent-ink': '#1b1e30',
@@ -70,7 +70,7 @@ function bgsDe(R) {
 
 /**
  * @param {{ root: HTMLElement, documento: Document, guardado?: Storage|null, cargar: () => Promise<any>,
- *   agente?: { tamano(an: number, al: number): Promise<any>, tema?(t: any): Promise<any>, abrirPam?(d: any): Promise<any> } | null,
+ *   agente?: { tamano(an: number, al: number): Promise<any>, tema?(t: any): Promise<any>, abrirPam?(d: any): Promise<any>, enviarPam?(d: any): Promise<any>, guardarDato?(k: string, v: any): Promise<any> } | null,
  *   ventana: { ancho: number, alto: number }, pamUrl: string, cuenta?: { id: number, nombre: string } | null, ahora?: () => number,
  *   biblioteca?: { escanear: (op: any, log: (m: string) => void) => Promise<any>, origen: string, guardarEnAgente?: (k: string, v: any) => Promise<any> } | null }} dep
  */
@@ -308,24 +308,48 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
     else { const ta = documento.createElement('textarea'); ta.value = t; documento.body.appendChild(ta); ta.select(); try { documento.execCommand('copy'); } catch (e) { /* sin portapapeles */ } ta.remove(); ok(); }
   }
 
-  /* «Enviar a PAM»: el agente abre PAM desde el foro y le pasa los datos; PAM contesta con su tema */
-  function enviarAPam() {
+  /* «Enviar a PAM»: el agente abre PAM desde el foro y le pasa los datos; PAM contesta con su tema.
+     Con esperarCierre (tras aplicar un canje): se abre PAM ya, PAM cierra el canje y, cuando avisa, se mandan los datos. */
+  let esperandoCierre = false;
+  const mensajePam = () => ({ mensaje: { pamForo: 1, data: Object.assign({}, datos, { cuenta: datos.pj || YO }) }, respuesta: 'pamForoOk' });
+  const alResponderPam = r => {
+    if (!r || !r.abierta) { error = 'El navegador bloqueó la ventana de PAM: permití ventanas emergentes para el foro.'; pintar(); return; }
+    if (!r.respuesta) { error = 'PAM no respondió. ¿Está actualizado a la última versión?'; pintar(); return; }
+    if (r.respuesta.tema) ponerTema(r.respuesta.tema);
+  };
+  const sinRespuesta = () => { error = 'PAM no respondió. ¿Está actualizado a la última versión?'; pintar(); };
+  function enviarAPam(op) {
     if (!datos) return;
-    if (!agente || !agente.abrirPam) { error = 'PAM no respondió. ¿Está actualizado a la última versión?'; pintar(); return; }
+    if (!agente || !agente.abrirPam) { sinRespuesta(); return; }
     // el contexto para los canjes en PAM (de qué foro, cuenta y personaje es), como hacía Mi PJ
     if (agente.guardarDato && foroHost) {
       const ahora = new Date().toISOString();
       agente.guardarDato('pam.paquete', { v: 1, creado: ahora, leidoEn: datos.leido, foro: foroHost, cuenta: { id: UID, nombre: YO, foro: foroHost }, pj: datos.pj || YO, usado: { fecha: ahora, canalOficial: true } }).catch(() => {});
     }
-    agente.abrirPam({ hash: '#foro', mensaje: { pamForo: 1, data: Object.assign({}, datos, { cuenta: datos.pj || YO }) }, respuesta: 'pamForoOk' }).then(r => {
-      if (!r || !r.abierta) { error = 'El navegador bloqueó la ventana de PAM: permití ventanas emergentes para el foro.'; pintar(); return; }
-      if (!r.respuesta) { error = 'PAM no respondió. ¿Está actualizado a la última versión?'; pintar(); return; }
-      if (r.respuesta.tema) ponerTema(r.respuesta.tema);
-    }, () => { error = 'PAM no respondió. ¿Está actualizado a la última versión?'; pintar(); });
+    if (op && op.esperarCierre) {
+      esperandoCierre = true;
+      agente.abrirPam({ hash: '#foro' }).then(r => { if (!r || !r.abierta) { esperandoCierre = false; alResponderPam(r); } }, () => { esperandoCierre = false; sinRespuesta(); });
+      return;
+    }
+    agente.abrirPam({ hash: '#foro', ...mensajePam() }).then(alResponderPam, sinRespuesta);
+  }
+  /** PAM terminó de cerrar el canje: se le mandan los datos (los releídos después de aplicarlo). */
+  async function alCierrePam() {
+    if (!esperandoCierre || !agente || !agente.enviarPam) return;
+    esperandoCierre = false;
+    if (lectura) await lectura;
+    if (!datos) return;
+    agente.enviarPam(mensajePam()).then(alResponderPam, sinRespuesta);
   }
 
-  async function actualizar() {
-    if (cargando) return; cargando = true; error = ''; pintar();
+  let lectura = null;
+  function actualizar() {
+    if (cargando) return lectura;
+    lectura = leerForo().finally(() => { lectura = null; });
+    return lectura;
+  }
+  async function leerForo() {
+    cargando = true; error = ''; pintar();
     try {
       const d = await cargar();
       if (d) {
@@ -424,7 +448,7 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
   aplicarTema();
   pintar();
   return {
-    pintar, actualizar, ponerTema,
+    pintar, actualizar, ponerTema, enviarAPam, alCierrePam,
     /** Abre el panel (al llegar desde PAM a publicar la petición). */
     abrir() { ui.abierto = true; sv(K.ui, ui); pintar(); },
     /** El agente avisa cuando cambia el tamaño de la ventana del foro. */
