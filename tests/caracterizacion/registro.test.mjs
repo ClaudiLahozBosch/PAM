@@ -5,8 +5,11 @@
 // (el Coloreador recuerda lo de cada personaje), con sus pruebas abajo.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { abrir, igual } from '../legado/abrirPam.mjs';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { abrir, igual, RAIZ } from '../legado/abrirPam.mjs';
 import { XLSX_URL, parseWorkbook } from '../../js/paginas/registro/importarExcel.js';
+import { crearDatosDeseos, claveDeseo } from '../../js/paginas/registro/deseos.js';
 
 const MEDIODIA = Date.UTC(2026, 0, 15, 12); // a mediodía: el día es el mismo en UTC y aquí (F15 no cambia nada)
 function horaFija(w) {
@@ -39,8 +42,13 @@ const conDatos = { antes: w => { horaFija(w); w.localStorage.setItem('registro-r
 const raiz = w => w.document.getElementById('rr-host').shadowRoot;
 const $ = (w, sel) => raiz(w).querySelector(sel);
 /** Lo que se ve (sin los <style>, que se comparan aparte) y lo escrito en los campos (que no sale en el HTML). */
-const vista = w => [...raiz(w).children].filter(e => e.tagName !== 'STYLE').map(e => e.outerHTML).join('')
-  + '\n' + [...raiz(w).querySelectorAll('input,textarea,select')].map(e => (e.type === 'checkbox' ? e.checked : e.value)).join('|');
+// 8c: el formulario de «Canjes futuros» (lista de deseos) usa los datos oficiales y cambia a propósito: de esa pestaña
+// se compara lo demás (los deseos apuntados, los totales), y el formulario tiene su prueba abajo.
+const vista = w => {
+  const sinForm = e => { const c = e.cloneNode(true); c.querySelectorAll('.w-add').forEach(f => f.remove()); return c.outerHTML; };
+  return [...raiz(w).children].filter(e => e.tagName !== 'STYLE').map(sinForm).join('')
+    + '\n' + [...raiz(w).querySelectorAll('input,textarea,select')].filter(e => !e.closest('.w-add')).map(e => (e.type === 'checkbox' ? e.checked : e.value)).join('|');
+};
 const estilos = w => [...raiz(w).querySelectorAll('style')].map(s => s.textContent).join('');
 const TABS = ['inicio', 'personajes', 'turnos', 'oficiales', 'ganancias', 'boveda', 'canjes', 'copia', 'coloreador'];
 const esperar = ms => new Promise(r => setTimeout(r, ms));
@@ -157,6 +165,61 @@ test('8b: el Registro solo guarda claves que viajan con la sesión con código',
     assert.ok(claves.includes('registro-roles-v1') && claves.some(k => k.startsWith('cd_pj.')));
     // la lista de js/nube/pendiente.js; cd_bg (el fondo de la vista previa) se queda fuera a propósito, como antes
     for (const k of claves) if (k !== 'cd_bg') assert.ok(a.w.PAM_SESION.esDePAM(k), k);
+  } finally { a.w.close(); }
+});
+
+test('8c: la lista de deseos usa los datos oficiales y no pierde nada de la antigua', async () => {
+  const leer = f => JSON.parse(readFileSync(path.join(RAIZ, f), 'utf8'));
+  const N = crearDatosDeseos({ sistema: leer('data/sistema.json'), calculadora: leer('data/arcanos-calculadora.json'), arcanos: leer('data/arcanos.json') });
+  const V = await import('../legado/paginas/datosDeseos.js'); // la lista antigua, congelada
+  // los precios son los mismos
+  for (const k of ['ATR_COST', 'HAB_COST', 'ARTE_COST', 'VENT_COST', 'ROM', 'IDI_MAG', 'IDI_LV']) assert.deepEqual(N[k], V[k], k);
+  assert.deepEqual(N.ARC_NV.map(x => x[1]), V.ARC_NV.map(x => x[1]));
+  assert.deepEqual(N.LISTAS.quidditch, V.LISTAS.quidditch, 'el Quidditch, como estaba');
+  // cada canje de la antigua sigue estando, con el mismo precio y PL (Lazo, Unión y Vínculo son un solo talento oficial)
+  const JUNTOS = { 'Maestría en [animal o bestia]': 'Maestría en [Animal Muggle o Bestia Mágica]', 'Lazo': 'Lazo / Unión / Vínculo', 'Unión': 'Lazo / Unión / Vínculo', 'Vínculo': 'Lazo / Unión / Vínculo' };
+  for (const cat of ['talento', 'arma', 'raza', 'legendario', 'quidditch']) {
+    const nuevos = new Map(Object.values(N.LISTAS[cat]).flat().map(x => [claveDeseo(x[0]), x]));
+    for (const x of Object.values(V.LISTAS[cat]).flat()) {
+      const n = nuevos.get(claveDeseo(JUNTOS[x[0]] || x[0]));
+      assert.ok(n, `${cat}: ${x[0]}`);
+      assert.deepEqual([n[1], n[2] || 0], [x[1], x[2] || 0], `${cat}: ${x[0]} cuesta lo mismo`);
+      if (x[3]) assert.ok(n[3], `${cat}: ${x[0]} sigue con requisito`);
+    }
+  }
+  // cada arcano de la antigua (los inventados, con ✦) sigue en el mismo tipo y nivel, con su requisito si lo tenía
+  for (const [tipo, niveles] of Object.entries(V.ARC)) niveles.forEach((xs, i) => {
+    const nuevos = new Map(N.ARC[tipo][i].map(n => [claveDeseo(n), n]));
+    for (const x of xs) {
+      const n = nuevos.get(claveDeseo(x)) || [...nuevos.entries()].find(([k]) => k.startsWith(claveDeseo(x).replace(/ ✦$/, '') + ' ('))?.[1];
+      assert.ok(n, `${tipo} nivel ${i}: ${x}`);
+      if (V.ARC_REQ[x]) assert.ok(N.ARC_REQ[n], `${x}: sigue con requisito`);
+    }
+  });
+  // y gana lo que le faltaba, con los nombres y el orden oficiales
+  assert.ok(N.ARC.objeto[3].includes('Capa de Invisibilidad'));
+  assert.ok(N.ARC.objeto[1].includes('PARA (Peonza Antiapariciones de Rápida Actuación)'));
+  const leg = N.LISTAS.legendario['Características legendarias'].map(x => x[0]);
+  for (const x of ['Ventaja Legendaria', 'Trasfondo General Avanzado Legendario', 'Evolución de Trasfondos']) assert.ok(leg.includes(x), x);
+  assert.equal(N.ATRS[0], 'Vigor');
+  assert.ok(N.ESP_R.includes('Mago Oscuro') && N.CALIF.includes('Supera las Expectativas'));
+  assert.equal(N.ARC.hechizo[0].filter(n => n.endsWith(' ✦')).length + N.ARC.hechizo.slice(1).flat().filter(n => n.endsWith(' ✦')).length > 0, true);
+  assert.equal(Object.values(N.ARC).flat(2).filter(n => n.endsWith(' ✦')).length, 46, 'los 46 inventados del Compendio');
+});
+
+test('8c: en «Canjes futuros» cada tipo de canje se puede elegir y calcula su precio', async () => {
+  const a = await abrir('archivos', conDatos);
+  try {
+    const w = a.w;
+    w.rrGo('canjes');
+    const cats = [...$(w, '[data-wd="cat"]').options].map(o => o.value);
+    assert.equal(cats.length, 18);
+    for (const c of cats) {
+      const s = $(w, '[data-wd="cat"]'); s.value = c; s.dispatchEvent(new w.Event('change', { bubbles: true }));
+      if (c === 'otro') continue; // lo escribe la persona
+      assert.match($(w, '#wPrev').textContent, /grageas/, c);
+    }
+    assert.deepEqual(a.errores, []);
   } finally { a.w.close(); }
 });
 

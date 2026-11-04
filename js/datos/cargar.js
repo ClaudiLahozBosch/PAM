@@ -1,11 +1,11 @@
 // @ts-check
 // Carga los datos del sistema. En el navegador, con fetch relativo a este archivo (funciona igual en
 // producción y en el staging); en las pruebas se le pasa el lector de archivos.
-import { Sistema } from './Sistema.js?v=0.6.0';
-import { Compendio } from './Compendio.js?v=0.6.0';
+import { Sistema } from './Sistema.js?v=0.6.1';
+import { Compendio } from './Compendio.js?v=0.6.1';
 
 // La pone scripts/versionar.mjs en cada versión: así el navegador nunca usa datos de la anterior.
-const VERSION_DATOS = '0.6.0';
+const VERSION_DATOS = '0.6.1';
 const RAIZ = new URL('../../data/', import.meta.url);
 const porRed = url => fetch(url).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} en ${url}`); return r.json(); });
 const dato = f => new URL(`${f}?v=${VERSION_DATOS}`, RAIZ);

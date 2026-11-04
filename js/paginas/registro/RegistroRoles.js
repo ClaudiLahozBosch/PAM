@@ -1,23 +1,26 @@
 // @ts-nocheck
 // Registro de Roles (fase 8b): el mismo código que estaba en index.html (copia congelada en
 // tests/legado/paginas/registro-roles.js), como módulo. Lo que cambia, marcado con «8b»:
-//   · las listas fijas, los datos de la lista de deseos e «Importar desde Excel» están en sus archivos (datos.js,
-//     datosDeseos.js, importarExcel.js); los estilos en css/registro.css y el HTML en plantilla.html;
+//   · las listas fijas e «Importar desde Excel» están en sus archivos (datos.js, importarExcel.js); los estilos en
+//     css/registro.css y el HTML en plantilla.html;
+//   · 8c: los datos de la lista de deseos («Canjes futuros») son los oficiales (deseos.js, los recibe como `deseos`);
 //   · guarda con el almacén (js/core/Almacen.js): igual que antes, pero también al cerrar o esconder la página (F14);
 //   · las fechas de ejemplo, con el día de aquí y no el de Greenwich (F15);
 //   · sin el modo «Guardado en tu cuenta», que solo funcionaba dentro de otra aplicación (nunca en PAM).
 // Recibe la ventana: así las pruebas lo montan en una página de prueba junto al antiguo y comparan.
-import { TIPOS, ESTADOS, CASA_HEX, TURNOS, TONOS, OF_EST, GEST, KEY, SKINS, FLOR, DIV, BOV_LINKS, PRIO, WCATS, TRATO } from './datos.js?v=0.6.0';
-import { ATRS, ATR_COST, HABS, HAB_LV, HAB_COST, ARTE_COST, ROM, TRAS_T, TRAS_CAT, VENT, VENT_COST, ESP_R, ARC_NV, ARC, ARC_REQ, LISTAS, IDI_MAG, IDI_LV, ASIG, CALIF } from './datosDeseos.js?v=0.6.0';
-import { loadXLSX, norm, compact, pad, parseWorkbook } from './importarExcel.js?v=0.6.0';
-import { fechaISO as fechaLocalISO } from '../../core/fechas.js?v=0.6.0';
-import { montarColoreador } from './Coloreador.js?v=0.6.0';
+import { TIPOS, ESTADOS, CASA_HEX, TURNOS, TONOS, OF_EST, GEST, KEY, SKINS, FLOR, DIV, BOV_LINKS, PRIO, WCATS, TRATO } from './datos.js?v=0.6.1';
+import { loadXLSX, norm, compact, pad, parseWorkbook } from './importarExcel.js?v=0.6.1';
+import { fechaISO as fechaLocalISO } from '../../core/fechas.js?v=0.6.1';
+import { montarColoreador } from './Coloreador.js?v=0.6.1';
 
 /**
  * @param {Window} w la ventana de PAM
- * @param {{ css: string, html: string, almacen: import('../../core/Almacen.js').Almacen }} o
+ * @param {{ css: string, html: string, almacen: import('../../core/Almacen.js').Almacen,
+ *   deseos: ReturnType<typeof import('./deseos.js').crearDatosDeseos> }} o
  */
-export function montarRegistro(w, { css, html, almacen }) {
+export function montarRegistro(w, { css, html, almacen, deseos }) {
+/* 8c: los datos de la lista de deseos, de los oficiales (deseos.js) */
+const { ATRS, ATR_COST, HABS, HAB_LV, HAB_COST, ARTE_COST, ROM, TRAS_T, TRAS_CAT, VENT, VENT_COST, ESP_R, ARC_NV, ARC, ARC_REQ, LISTAS, IDI_MAG, IDI_LV, ASIG, CALIF } = deseos;
 /* 8b: lo del navegador sale de la ventana que se recibe (en PAM, la misma) */
 const window = w, document = w.document, navigator = w.navigator, alert = (...a) => w.alert(...a), MutationObserver = w.MutationObserver,
   requestAnimationFrame = (...a) => w.requestAnimationFrame(...a), URL = w.URL, FileReader = w.FileReader, Image = w.Image, Node = w.Node,

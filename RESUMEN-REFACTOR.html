@@ -221,7 +221,7 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
 </section>
 
 <section>
-  <h2>Errores corregidos <span class="pill"><b>28</b> arreglos</span></h2>
+  <h2>Errores corregidos <span class="pill"><b>29</b> arreglos</span></h2>
   <p class="sub">Agrupados por dónde se notaban. El código entre paréntesis es el de la lista de errores (<code>PENDIENTES.md</code>).</p>
   <div class="grid-2">
     <div class="card">
@@ -262,6 +262,7 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
       <h3>Registro de Roles y Coloreador</h3>
       <div class="arreglo"><span class="tag">F14</span><span class="antes">El Registro guardaba un poco después de cada cambio; si se cerraba la página justo, el último cambio se perdía.</span><span class="ahora">Al cerrar o cambiar de pestaña, guarda lo que faltaba.</span></div>
       <div class="arreglo"><span class="tag">F09</span><span class="antes">«Importar desde Excel» usaba una versión vieja del lector de Excel, con dos fallos de seguridad conocidos.</span><span class="ahora">Versión al día, de la web de sus autores.</span></div>
+      <div class="arreglo"><span class="tag">R07</span><span class="antes">La lista de deseos («Canjes futuros») tenía su propia copia de precios, talentos y arcanos, con nombres distintos, y le faltaban la Capa de Invisibilidad, otros 4 objetos avanzados y 3 canjes legendarios.</span><span class="ahora">Usa los mismos datos que la Tabla de Canjes, con los arcanos inventados (✦). Lo que solo tenía ella (el Quidditch, «Evolución de Trasfondos») sigue saliendo.</span></div>
       <div class="arreglo"><span class="tag">N08</span><span class="antes">El Coloreador tenía una sola configuración para todos los personajes.</span><span class="ahora">Recuerda la de cada personaje: al cambiar de personaje en Mi Ficha, vuelven sus colores, nombres, marcas y opciones.</span></div>
     </div>
     <div class="card">
@@ -288,6 +289,7 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
       <li><b>El Inspector</b> se activa desde el panel Mi PJ (tarjeta «🔍 Inspector de Canjes», solo para Inspectores y para Hana, Mortimer y Robert). Su pastilla pasó abajo a la <b>izquierda</b>, porque tapaba la de Mi PJ.</li>
       <li><b>Con la sesión con código en dos dispositivos</b>, si los dos guardan a la vez sale el aviso para elegir, en vez de perderse datos.</li>
       <li><b>Si PAM no puede cargar una parte</b>, lo dice arriba («Probá recargar la página») en vez de quedarse a medias.</li>
+      <li><b>La lista de deseos («Canjes futuros» del Registro)</b> muestra los nombres oficiales (como la Tabla de Canjes), los atributos en el orden de la ficha y los canjes que le faltaban. Los deseos que ya tenías apuntados no cambian.</li>
       <li><b>El Coloreador de Diálogos recuerda lo de cada personaje.</b> Al cambiar de personaje en Mi Ficha vuelve lo que usaste la última vez con él; el texto que estás coloreando no cambia.</li>
     </ul>
   </div>
@@ -319,7 +321,7 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
   <ol class="pasos">
     <li><div class="card"><h3>Pruebas en el foro de pruebas <span class="estado">ahora</span></h3><p>Con Chrome, el foro de pruebas y la ficha de Elena Whitlock: traer la ficha a PAM, hacer un canje, publicarlo, aprobarlo como Inspector, aplicarlo y terminar en PAM; la sesión con código en dos ventanas; y que PAM arranque bien.</p></div></li>
     <li><div class="card"><h3>Registro de Roles y Coloreador <span class="estado" style="color:var(--good)">hecho</span></h3><p>Separados por piezas, con los arreglos F14, F09 y N08 (versión 0.6.0).</p></div></li>
-    <li><div class="card"><h3>Revisor de Empleos y Mi Ficha</h3><p>Que usen los datos del sistema compartidos (R07). La lista de deseos del Registro tiene sus propios datos, que no coinciden del todo con los oficiales: se propondrá unificarlos, porque cambia lo que se ve.</p></div></li>
+    <li><div class="card"><h3>Revisor de Empleos y Mi Ficha</h3><p>Que usen los datos del sistema compartidos (R07), como ya hace la lista de deseos del Registro.</p></div></li>
     <li><div class="card"><h3>Tabla de Canjes y Compendio</h3><p>Que no vuelva a dibujar toda la tabla por cualquier cambio (F16): irá más fluida.</p></div></li>
     <li><div class="card"><h3>Portada, temas y estilos</h3><p>Ordenar los estilos repetidos (F17).</p></div></li>
     <li><div class="card"><h3>«Tus otras cuentas» en Mi PJ</h3><p>Que no enseñe cuentas desactivadas ni temas que ya terminaron (N03). Antes hay que ver en el foro cómo se marcan.</p></div></li>
@@ -331,6 +333,6 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
 
 </main>
 
-<footer>✦ PAM · Plataforma Avadense · resumen del refactor, versión 0.6.0 (4 de noviembre de 2026) ✦</footer>
+<footer>✦ PAM · Plataforma Avadense · resumen del refactor, versión 0.6.1 (4 de noviembre de 2026) ✦</footer>
 </body>
 </html>

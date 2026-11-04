@@ -6,8 +6,8 @@
 //   · las líneas nuevas van dentro de su desplegable (R01), al quitar no se lleva los cierres (R02) y quedan en orden (R03);
 //   · también idiomas, trasfondos, ventajas, especializaciones, talentos y títulos (R06);
 //   · cada cambio se comprueba volviendo a leer el código; lo que no queda, a «Revisá a mano».
-import { EditorFicha } from '../bbcode/EditorFicha.js?v=0.6.0';
-import { aplicarEdicion, yaAvisado } from '../reglas/CambiosFicha.js?v=0.6.0';
+import { EditorFicha } from '../bbcode/EditorFicha.js?v=0.6.1';
+import { aplicarEdicion, yaAvisado } from '../reglas/CambiosFicha.js?v=0.6.1';
 
 /**
  * @param {{ sistema: import('../datos/Sistema.js').Sistema, compendio: import('../datos/Compendio.js').Compendio,

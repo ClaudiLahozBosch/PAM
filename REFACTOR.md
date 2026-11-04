@@ -162,7 +162,7 @@ El script aparte «PAM · Inspector de Canjes» pasa a PAM y al mismo agente que
 | `RegistroRoles.js` | Las pestañas del Registro (Resumen, Roles, Turnos, Posibles oficiales, Ganancias, Bóveda, Canjes futuros, Importar y copia), `window.rrBoveda`, `rrOficiales`, `rrSync`… como antes. |
 | `Coloreador.js` | El Coloreador de Diálogos. |
 | `datos.js` | Listas fijas: tipos de rol, estados, turnos, colores, temas… |
-| `datosDeseos.js` | Los datos de la lista de deseos (precios, talentos, arcanos…), copiados sin cambiar (ver R07 en `PENDIENTES.md`). |
+| `deseos.js` y `deseosExtra.js` | Los datos de la lista de deseos («Canjes futuros»). Desde la 0.6.1 salen de los oficiales (`data/sistema.json`, los arcanos de la calculadora y los inventados del Compendio); lo que solo tenía la lista antigua (el Quidditch, «Evolución de Trasfondos», algunos requisitos) está en `deseosExtra.js` y sigue saliendo. |
 | `importarExcel.js` | «Importar desde Excel». |
 | `plantilla.html` y `css/registro.css` | El HTML y los estilos del Registro. |
 
@@ -173,7 +173,8 @@ El script aparte «PAM · Inspector de Canjes» pasa a PAM y al mismo agente que
 
 **Lo que queda:**
 
-- **8c · Revisor de Empleos y Mi Ficha:** los datos del sistema de `data/sistema.json` (R07). La lista de deseos del Registro tiene su propia copia que no coincide con la oficial: se propondrá unificarla, porque cambia lo que se ve.
+- **0.6.1 · Lista de deseos del Registro con los datos oficiales** (decisión del 4/11/2026): mismos nombres y orden que la Tabla de Canjes y la ficha; aparecen la Capa de Invisibilidad y los legendarios que faltaban; no se pierde nada de lo que tenía.
+- **8c · Revisor de Empleos y Mi Ficha:** los datos del sistema de `data/sistema.json` (R07).
 - **8d · Tabla de Canjes y Compendio:** que no repinte todo por cualquier cambio (F16). (El carrito de trasfondos, N04, ya está desde la 6b·1, y que se guarde al recargar, R08, desde la 0.5.1.)
 - **8e · Portada, temas y lo que quede:** los estilos repartidos por página y sin repetir (F17), y `js/pam/PamActual.js` cambiado a las páginas nuevas.
 
