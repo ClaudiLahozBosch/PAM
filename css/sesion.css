@@ -1,0 +1,62 @@
+/* PAM · Sesión con código. Desde la fase 8e (F17), un archivo por página; index.html los carga en este orden. */
+/* ---------- sesión con código ---------- */
+.ses-btn .ses-ic{width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;flex:none;font-style:normal;font-size:13px;color:var(--gold-bright);background:var(--panel-2);border:1px solid var(--line-strong)}
+.ses-btn .ses-dot{width:7px;height:7px;border-radius:50%;background:var(--parchment-dim);flex:none}
+.ses-btn.on .ses-dot{background:var(--good)}
+.ses-btn.busy .ses-dot{background:var(--gold-bright);animation:sesPulse 1s ease-in-out infinite}
+.ses-btn.err .ses-dot,.ses-btn.conf .ses-dot{background:var(--bad)}
+@keyframes sesPulse{50%{opacity:.25}}
+.ses-list{padding:14px;width:min(360px,calc(100vw - 32px))}
+.ses-list h3{margin:0 0 6px;font-family:var(--serif);font-style:italic;font-weight:500;font-size:1.3rem;color:var(--parchment)}
+.ses-list p{margin:0 0 12px;color:var(--parchment-dim);font-size:.84rem;line-height:1.45}
+.ses-list .ses-fine{font-size:.76rem;margin:12px 0 0}
+.ses-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ses-list button.ses-b{font:600 .82rem var(--sans);border-radius:999px;padding:8px 14px;cursor:pointer;border:1px solid var(--line-strong);background:var(--panel-2);color:var(--parchment)}
+.ses-list button.ses-b:hover{border-color:var(--gold)}
+.ses-list button.ses-b.pri{background:var(--gold);border-color:var(--gold);color:var(--accent-ink)}
+.ses-list button.ses-b.warn{color:var(--bad)}
+.ses-list button.ses-b:disabled{opacity:.55;cursor:default}
+.ses-list input.ses-in{flex:1;min-width:0;font:600 .9rem "Courier Prime",ui-monospace,monospace;letter-spacing:.04em;text-transform:uppercase;padding:8px 10px}
+.ses-or{display:flex;align-items:center;gap:10px;margin:14px 0 10px;color:var(--parchment-dim);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase}
+.ses-or::before,.ses-or::after{content:"";flex:1;height:1px;background:var(--line-strong)}
+.ses-code{font:700 1.02rem "Courier Prime",ui-monospace,monospace;letter-spacing:.06em;color:var(--gold-bright);background:var(--panel-2);border:1px dashed color-mix(in srgb,var(--gold) 55%,transparent);border-radius:var(--radius-sm);padding:10px 12px;text-align:center;margin:0 0 10px;user-select:all;word-break:break-all}
+.ses-new{border:1px solid color-mix(in srgb,var(--gold) 55%,transparent);background:color-mix(in srgb,var(--gold) 9%,transparent);border-radius:var(--radius-sm);padding:10px 12px;margin:0 0 12px;font-size:.84rem;color:var(--parchment)}
+.ses-st{font-size:.8rem;color:var(--parchment-dim);margin:0 0 10px;display:flex;gap:6px;align-items:center}
+.ses-st b{color:var(--parchment);font-weight:600}
+.ses-msg{font-size:.82rem;margin:10px 0 0;color:var(--bad)}
+.ses-msg.ok{color:var(--good)}
+.ses-conf{border:1px solid color-mix(in srgb,var(--bad) 55%,transparent);background:color-mix(in srgb,var(--bad) 9%,transparent);border-radius:var(--radius-sm);padding:10px 12px;margin:0 0 12px;font-size:.84rem;color:var(--parchment)}
+.home-ses{max-width:560px;margin:0 auto 34px;padding:14px 16px;border:1px solid var(--line-strong);border-radius:var(--radius);background:color-mix(in srgb,var(--panel) 80%,transparent);text-align:left}
+.home-ses .hs-t{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-style:italic;font-size:1.15rem;color:var(--parchment);margin:0 0 4px}
+.home-ses .hs-t .ses-ic{width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;font-style:normal;font-size:13px;color:var(--gold-bright);background:var(--panel-2);border:1px solid var(--line-strong)}
+.home-ses p{margin:0 0 10px;color:var(--parchment-dim);font-size:.84rem}
+.home-ses .ses-row{display:flex;gap:8px;flex-wrap:wrap}
+.home-ses input{flex:1;min-width:200px;font:600 .9rem "Courier Prime",ui-monospace,monospace;letter-spacing:.04em;text-transform:uppercase;padding:8px 10px}
+.home-ses button{font:600 .82rem var(--sans);border-radius:999px;padding:8px 14px;cursor:pointer;border:1px solid var(--line-strong);background:var(--panel-2);color:var(--parchment)}
+.home-ses button.pri{background:var(--gold);border-color:var(--gold);color:var(--accent-ink)}
+.home-ses .hs-link{background:none;border:0;padding:0;color:var(--gold-bright);text-decoration:underline;text-underline-offset:3px;font-weight:600;cursor:pointer}
+.home-ses .hs-msg{color:var(--bad);font-size:.82rem;margin:8px 0 0}
+:root[data-skin="pixel"] .home-ses,:root[data-skin="pixel"] .home-ses button:not(.hs-link){border-radius:0}
+:root[data-skin="pixel"] .ses-list button.ses-b,:root[data-skin="pixel"] .ses-code,:root[data-skin="pixel"] .ses-btn .ses-ic{border-radius:0}
+
+/* menú único desplegable */
+.mainnav{justify-content:center}
+.mainnav .nav-all{display:inline-flex;align-items:center;gap:8px;border-color:var(--line-strong);background:color-mix(in srgb,var(--panel) 75%,transparent);color:var(--parchment);max-width:100%}
+.mainnav .nav-all.active{border-color:color-mix(in srgb,var(--gold) 50%,transparent)}
+.nav-ham{color:var(--gold-bright);font-size:1rem;line-height:1}
+.nav-cur{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-cur .nc-g{color:var(--parchment-dim);font-weight:600}
+.nav-mega{flex-direction:row;flex-wrap:wrap;gap:6px 14px;width:min(860px,calc(100vw - 32px));padding:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.nav-mega[hidden]{display:none}
+.nm-col{display:flex;flex-direction:column;gap:2px;min-width:0}
+.nm-h{font-family:var(--serif);font-style:italic;font-size:1.05rem;color:var(--parchment);padding:4px 10px 6px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.nm-h span{color:var(--gold-bright);font-style:normal;font-size:.85em}
+.mainnav .nav-mega button{white-space:normal}
+@media(max-width:860px){.nav-mega{width:auto;grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.nav-mega{grid-template-columns:1fr;max-height:70vh;overflow:auto}.nav-cur .nc-g{display:none}}
+
+#re-app .to-canjes{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px dashed var(--re-line)}
+.canjes-aviso{max-width:1100px;margin:16px auto 0;padding:10px 14px;display:flex;gap:12px;align-items:center;border:1px solid color-mix(in srgb,var(--gold) 55%,transparent);background:color-mix(in srgb,var(--gold) 10%,var(--panel));border-radius:var(--radius-sm);color:var(--parchment);font-size:.9rem;position:relative;z-index:2}
+.canjes-aviso span{flex:1}
+.canjes-aviso button{background:none;border:0;color:var(--parchment-dim);cursor:pointer;font-size:1rem}
+@media(max-width:1148px){.canjes-aviso{margin-left:24px;margin-right:24px}}

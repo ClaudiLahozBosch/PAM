@@ -61,7 +61,9 @@ test('8b: el Registro nuevo se ve igual que el antiguo en todas sus pestañas (d
   try {
     assert.equal(a.ok, true);
     assert.deepEqual(a.errores, b.errores);
-    assert.equal(estilos(a.w).trimEnd(), estilos(b.w).trimEnd(), 'los mismos estilos (ahora en css/registro.css)');
+    // los mismos estilos (en css/registro.css; desde la 8e, las partículas y las calabazas de css/efectos.css, juntas)
+    const reglas = css => css.split('\n').map(l => l.trim()).filter(Boolean).sort();
+    assert.deepEqual(reglas(estilos(a.w)), reglas(estilos(b.w)), 'los mismos estilos');
     for (const t of TABS) { a.w.rrGo(t); b.w.rrGo(t); igual(vista(a.w), vista(b.w), t); }
   } finally { cerrar(a, b); }
 });

@@ -120,6 +120,13 @@ test('F16: un cambio pinta lo que se ve; las otras pestañas, al abrirlas (con l
     pestana(w, 'carrito');
     assert.ok(repintadas().includes('carrito'), 'el carrito se pinta al abrirlo');
     assert.match(panel('carrito').textContent, /Vigor|Destreza|Carisma|Voluntad|Percepción|Inteligencia|Poder/, 'y muestra lo que se añadió');
+    // lo que lee PAM para preparar un canje (js/pam/PamActual.js, tablaCanjes) está al día aunque no se vea
+    const { crearPamActual } = await import('../../js/pam/PamActual.js');
+    pestana(w, 'stats'); d(w).querySelector('#panel-stats button.btn:not(.ghost)').click();
+    const tc = crearPamActual(w).tablaCanjes();
+    assert.equal(tc.texto, panel('resumen').querySelector('.summary-box').textContent.trim());
+    assert.match(tc.texto, /grageas/);
+    assert.equal(tc.gastadas, d(w).getElementById('valGastadas').textContent.trim());
     const antes2 = panel('talentos').firstElementChild;
     pestana(w, 'stats');
     assert.equal(panel('talentos').firstElementChild, antes2, 'talentos sigue sin pintar mientras no se abre');

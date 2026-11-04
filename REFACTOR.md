@@ -136,14 +136,14 @@ El script aparte «PAM · Inspector de Canjes» pasa a PAM y al mismo agente que
 
 | Antes, dentro de `index.html` | Ahora |
 |---|---|
-| Los estilos (`<style>`) | `css/pam.css` |
+| Los estilos (`<style>`) | `css/pam.css` (desde la 8e, un archivo por página en `css/`) |
 | Los empleos del foro y los arcanos | `data/empleos-foro.txt` y `data/arcanos.json`: los mismos archivos que ya usan el panel de Mi PJ y el Inspector. Ya no están dos veces. |
 | Datos del sistema, Tabla de Canjes y Compendio | `js/paginas/pam/tabla-canjes.js` (desde la 8d, `js/paginas/canjes/`; los datos, de `data/`) |
 | Revisor de Empleos: Empleos, Mi Ficha, Controlador y Editor | `js/paginas/pam/revisor.js` (desde la 8c, `js/paginas/revisor/`) |
 | Registro de Roles y Coloreador de Diálogos | `js/paginas/pam/registro-roles.js` (desde la 8b, `js/paginas/registro/`) |
-| Portada y navegación | `js/paginas/pam/portada.js` |
-| Temas | `js/paginas/pam/temas.js` |
-| Datos del foro → PAM (lo que manda el Mi PJ antiguo) | `js/paginas/pam/foro-antiguo.js` |
+| Portada y navegación | `js/paginas/pam/portada.js` (desde la 8e, `js/paginas/inicio/portada.js`) |
+| Temas | `js/paginas/pam/temas.js` (desde la 8e, `js/paginas/inicio/temas.js`) |
+| Datos del foro → PAM (lo que manda el Mi PJ antiguo) | `js/paginas/pam/foro-antiguo.js` (desde la 8e, `js/paginas/inicio/foroAntiguo.js`) |
 
 - `js/pam/arranque.js` trae los datos y carga las páginas en el mismo orden que antes. Después carga `js/nube/main.js` y `js/pam/main.js`. Si algo no se puede traer, avisa arriba: «No se pudo cargar una parte de PAM (…). Probá recargar la página.».
 - `js/pam/tema-inicial.js` pone el tema elegido antes de pintar. Sin él, al cargar se vería un momento el tema Avadense, porque las páginas ahora se cargan un poco más tarde.
@@ -187,7 +187,12 @@ El script aparte «PAM · Inspector de Canjes» pasa a PAM y al mismo agente que
   - 0.6.5 (R07): los datos salen de `data/*.json` (`datos.js`, igual que el Inspector). Cambian «Personal no-docente», el orden alfabético de los tipos de trasfondo y «Arte/Artesanía» en las Proezas.
   - 0.6.6 (F16): al cambiar algo se pinta lo que se ve, y las demás pestañas al abrirlas. El Compendio se arma la primera vez que se abre.
   - El carrito de trasfondos (N04) ya estaba desde la 6b·1, y que la Tabla se guarde al recargar (R08) desde la 0.5.1.
-- **8e · Portada, temas y lo que quede:** los estilos repartidos por página y sin repetir (F17), y `js/pam/PamActual.js` cambiado a las páginas nuevas.
+- **8e (hecha) · Portada, temas y estilos:**
+  - 0.6.7: la portada, los temas y «Datos del foro → PAM» como módulos (`js/paginas/inicio/`). Ya no queda ninguna página antigua: `js/pam/arranque.js` monta todas en orden y avisa si una no arranca.
+  - 0.6.8 (F17): los estilos, un archivo por página (`css/*.css`), en el mismo orden. Las partículas y las calabazas, una sola vez (`css/efectos.css`, también para el Registro). En un navegador real, todos los estilos calculados son idénticos a los de antes.
+  - `js/pam/PamActual.js` no ha tenido que cambiar: las páginas nuevas ofrecen las mismas funciones en `window`.
+
+**La fase 8 está terminada.** Todo PAM está en módulos, con los datos del sistema una sola vez (`data/`). Las copias congeladas de las páginas antiguas (`tests/legado/paginas/`) quedan para que las pruebas comparen.
 
 ## Dónde guarda PAM los datos (y la sesión con código)
 

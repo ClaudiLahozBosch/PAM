@@ -1,0 +1,41 @@
+/* PAM · Navegación por categorías. Desde la fase 8e (F17), un archivo por página; index.html los carga en este orden. */
+/* ---------- navegación por categorías ---------- */
+.mainnav{gap:2px}
+.nav-grp{position:relative}
+.ng-s{display:none}
+.mainnav .nav-g .car{font-size:.7em;opacity:.7;margin-left:2px}
+.nav-menu{position:absolute;left:50%;transform:translateX(-50%);top:calc(100% + 8px);z-index:70;min-width:230px;padding:6px;display:flex;flex-direction:column;gap:2px;background:var(--panel);border:1px solid var(--line-strong);border-radius:var(--radius-sm);box-shadow:var(--shadow-2),0 20px 50px -20px rgba(0,0,0,.45)}
+.nav-menu[hidden]{display:none}
+.mainnav .nav-menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border-radius:var(--radius-sm);padding:8px 12px;color:var(--parchment);white-space:nowrap}
+.mainnav .nav-menu button:hover{background:var(--panel-2)}
+.mainnav .nav-menu button.active{border-color:color-mix(in srgb,var(--gold) 45%,transparent);background:color-mix(in srgb,var(--gold) 10%,transparent)}
+.nm-g{width:18px;text-align:center;color:var(--gold-bright);flex:none}
+.subnav{position:relative;z-index:2;max-width:1100px;margin:2px auto 0;padding:0 24px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;align-items:center}
+.subnav[hidden],body[data-sec="home"] .subnav{display:none}
+.subnav .sn-lbl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--parchment-dim);margin-right:4px}
+.subnav button{background:color-mix(in srgb,var(--panel) 70%,transparent);border:1px solid var(--line);color:var(--parchment-dim);font:600 .8rem var(--sans);padding:6px 13px;border-radius:999px;cursor:pointer;transition:all .2s ease}
+.subnav button:hover{color:var(--parchment);border-color:var(--line-strong)}
+.subnav button.active{color:var(--parchment);border-color:color-mix(in srgb,var(--gold) 55%,transparent);background:color-mix(in srgb,var(--gold) 14%,var(--panel))}
+:root[data-skin="pixel"] .subnav button,:root[data-skin="pixel"] .nav-menu{border-radius:0}
+.home-groups{display:flex;flex-direction:column;gap:30px;text-align:left}
+.hg-title{font-family:var(--serif);font-style:italic;font-weight:500;font-size:1.35rem;margin:0 0 12px;color:var(--parchment);display:flex;align-items:center;gap:10px}
+.hg-title span{color:var(--gold-bright);font-style:normal;font-size:.9em}
+.hg-title::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--gold-dim),transparent)}
+.home-groups .home-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.home-groups .home-grid.g2{grid-template-columns:repeat(2,1fr)}
+.home-groups .home-grid.g5{grid-template-columns:repeat(5,1fr)}
+@media(max-width:860px){.home-groups .home-grid,.home-groups .home-grid.g5{grid-template-columns:repeat(2,1fr)}}
+.home-groups .home-card,.home-groups .home-card:nth-child(4),.home-groups .home-card:last-child{grid-column:auto}
+.home-groups .home-card{padding:16px 16px 18px}
+.home-groups .hc-title{font-size:1.3rem}
+#sec-rr .content{padding-top:18px}
+#sec-rr .sec-head{padding-bottom:0}
+@media(max-width:860px){
+  .mainnav{overflow:visible;flex-wrap:wrap;justify-content:center}
+  .nav-grp{position:static}
+  .nav-menu{left:12px;right:12px;transform:none;top:auto;margin-top:6px;position:absolute}
+  .subnav{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;padding:2px 16px 6px;scrollbar-width:none}
+  .subnav::-webkit-scrollbar{display:none}
+  .subnav button{white-space:nowrap;flex:none}
+}
+@media(max-width:520px){.ng-l{display:none}.ng-s{display:inline}.mainnav{flex-wrap:nowrap}.mainnav .nav-g{padding:6px 9px;font-size:.8rem;white-space:nowrap}.subnav .sn-lbl{display:none}.home-groups .home-grid{grid-template-columns:1fr 1fr}.home-groups .hc-desc{display:none}.home-groups .home-card{padding:14px 10px}.home-groups .hc-title{font-size:1.1rem}}

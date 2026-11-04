@@ -1,0 +1,11 @@
+/* PAM · Efectos de los temas: partículas y calabazas (los usa también el Registro de Roles, en su Shadow DOM). Desde la fase 8e (F17), un archivo por página; index.html los carga en este orden. */
+#fx span{position:absolute;top:-10%;font-size:var(--sz,18px);filter:saturate(.8)}
+@media (prefers-reduced-motion:no-preference){#fx span{animation:caer var(--dur,22s) linear var(--del,0s) infinite}}
+@keyframes caer{from{transform:translate(0,0) rotate(0)}50%{transform:translate(var(--dx,20px),60vh) rotate(20deg)}to{transform:translate(0,120vh) rotate(-10deg)}}
+@media (prefers-reduced-motion:reduce){#fx span{top:var(--y,40%)}}
+#pumpkins{position:absolute;left:0;top:0;width:100%;pointer-events:none;z-index:5;overflow:hidden}
+.pk{position:absolute;pointer-events:auto;cursor:pointer;line-height:1;filter:drop-shadow(0 0 8px rgba(255,140,30,.55));transform:rotate(var(--rot,0deg));background:none;border:0;padding:0}
+.pk:hover{filter:drop-shadow(0 0 14px rgba(255,160,40,.9))}
+@media (prefers-reduced-motion:no-preference){.pk{animation:pkin .5s cubic-bezier(.2,1.6,.4,1) both, pkglow 2.6s ease-in-out infinite .5s}}
+@keyframes pkin{from{transform:scale(0) rotate(var(--rot,0deg))}to{transform:scale(1) rotate(var(--rot,0deg))}}
+@keyframes pkglow{0%,100%{filter:drop-shadow(0 0 6px rgba(255,140,30,.45))}50%{filter:drop-shadow(0 0 14px rgba(255,150,40,.85))}}

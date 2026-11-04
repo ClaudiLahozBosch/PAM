@@ -72,3 +72,18 @@ test('el orden y los datos son los de index.html antes de la fase 8a', () => {
   assert.ok(idx.indexOf('js/nube/pendiente.js') < idx.indexOf('js/pam/tema-inicial.js'), 'el tema, después de traer la sesión');
   assert.ok(idx.indexOf('js/pam/tema-inicial.js') < idx.indexOf('css/pam.css'));
 });
+
+test('F17: los estilos de PAM, un archivo por página, son los de antes y en el mismo orden; los efectos, una sola vez', () => {
+  const idx = readFileSync(path.join(RAIZ, 'index.html'), 'utf8');
+  const archivos = [...idx.matchAll(/<link rel="stylesheet" href="(css\/[\w-]+\.css)\?v=[^"]*">/g)].map(m => m[1]);
+  assert.deepEqual(archivos, JSON.parse(readFileSync(path.join(RAIZ, 'scripts/css-pam.json'), 'utf8')).map(f => 'css/' + f));
+  const sinCabecera = f => readFileSync(path.join(RAIZ, f), 'utf8').replace(/^\/\* PAM · .*\*\/\n/, '');
+  const juntos = archivos.map(sinCabecera).join('');
+  const antes = readFileSync(path.join(RAIZ, 'tests/legado/pam.css'), 'utf8');
+  // lo único que cambia de sitio: las dos reglas de .pk-bar pasan delante de los efectos (no se tocan entre sí)
+  const pkBar = antes.split('\n').filter(l => l.startsWith('.pk-bar')).join('\n') + '\n';
+  const sinPk = s => s.replace(pkBar, '').replace(/\n{2,}/g, '\n'); // (y sin líneas en blanco)
+  assert.equal(sinPk(juntos), sinPk(antes));
+  const reg = readFileSync(path.join(RAIZ, 'css/registro.css'), 'utf8');
+  for (const l of sinCabecera('css/efectos.css').split('\n').filter(Boolean)) assert.ok(!reg.includes(l), 'el Registro ya no los copia: ' + l.slice(0, 40));
+});

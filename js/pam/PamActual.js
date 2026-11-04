@@ -1,8 +1,11 @@
 // @ts-check
-// Adaptador del PAM actual (index.html de Hana Park). Es el ÚNICO archivo que conoce sus funciones por dentro
-// (window.rrOficiales, window.pamFicha, window.rrBoveda, window.showSection…) y lo que guarda en el navegador.
-// El controlador habla con PAM solo a través de esto; cuando las páginas de PAM se reescriban (fase 8), se cambia
-// este archivo y nada más. Nunca pulsa botones ni escribe en campos de PAM: usa sus funciones.
+// Adaptador de las páginas de PAM. Es el ÚNICO archivo de lo que llega del foro (js/pam/) que conoce lo que ofrecen
+// las páginas (window.rrOficiales, window.pamFicha, window.rrBoveda, window.pamCanjes, window.showSection…) y lo que
+// guardan en el navegador (solo lo lee). El controlador habla con PAM solo a través de esto. Nunca pulsa botones ni
+// escribe en campos de PAM: usa sus funciones.
+// Fase 8 (8b–8e): las páginas ya son módulos (js/paginas/), con las mismas funciones en window, así que este archivo
+// no cambió. El «Texto para copiar» de la Tabla de Canjes (tablaCanjes) siempre está al día: desde F16 la Tabla lo
+// pinta con cada cambio aunque no esté a la vista (prueba en tests/caracterizacion/tabla.test.mjs).
 
 const normNombre = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
 

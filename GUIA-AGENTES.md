@@ -1,6 +1,6 @@
 # Guía del refactor de PAM para agentes de IA
 
-Estado a **4/11/2026**, rama `refactor`, versión **0.6.6** (fases 8b, 8c y 8d hechas: Registro, Coloreador, Mi Ficha, Revisor, Tabla de Canjes y Compendio como módulos, con los datos oficiales; queda la 8e).
+Estado a **4/11/2026**, rama `refactor`, versión **0.6.8**. **Las fases 0 a 8 están hechas**: todo PAM en módulos, con los datos del sistema una sola vez. Falta que el usuario lo pruebe en Chrome y la publicación (§11).
 Este documento es para un agente de IA (o una persona programadora) que tenga que seguir trabajando en la rama sin haber estado en las sesiones anteriores. Explica qué se reorganizó, cómo funciona ahora, qué errores se corrigieron y dónde, y qué queda. Léelo entero antes de tocar nada.
 
 Documentos relacionados (en este orden de importancia):
@@ -60,8 +60,11 @@ panel.html                 El panel «Mi PJ» (página de PAM que el agente mete
 pam-mi-pj.user.js          Mi PJ ANTIGUO, sin tocar (referencia de las pruebas; en la publicación lo sustituye el agente).
 pam-inspector-canjes.user.js  Inspector ANTIGUO, sin tocar (ídem).
 agente/pam-agente.user.js  El agente nuevo (975 líneas, @name «PAM · Agente (staging)», versión 0.6.0).
-css/pam.css               Estilos de PAM (sacados de index.html, sin cambios).
-css/registro.css          Estilos del Registro de Roles y del Coloreador (van dentro de su Shadow DOM; 8b).
+css/*.css                 Estilos de PAM, un archivo por página (8e, F17), en este orden (scripts/css-pam.json): pam (común),
+                          canjes, revisor, portada, ficha, temas, efectos (partículas y calabazas, también para el
+                          Registro), navegacion, sesion, foro. Juntos son el pam.css antiguo (tests/legado/pam.css).
+css/registro.css          Estilos del Registro de Roles y del Coloreador (van dentro de su Shadow DOM; 8b). Lleva una marca
+                          «@efectos» donde js/paginas/registro/main.js pone css/efectos.css.
 css/mipj.css              Estilos del panel Mi PJ (sacados del script antiguo por scripts/extraer-css-mipj.py).
 data/
   sistema.json            Atributos, habilidades, ventajas, precios, requisitos… una sola vez y con los nombres oficiales.
@@ -83,8 +86,9 @@ js/servicios/             Hablan con el foro a través del agente: FichaDelForo,
                           BibliotecaDelForo, CanjesDelForo, MiPj, MigracionLegado (lee los datos antiguos, no borra).
 js/servicios/agente/      protocolo.js (el contrato) y ClienteAgente.js (postMessage con id y respuesta).
 js/paginas/panel/         El panel Mi PJ: main.js, MiPjPanel.js (moduloMiPJ portado), CanjesPanel.js, BibliotecaPanel.js.
-js/paginas/pam/           El código ANTIGUO de PAM repartido (fase 8a). Scripts clásicos, no módulos:
-                          portada (lo de la Tabla, por window.pamTabla), temas, foro-antiguo.
+js/paginas/inicio/        Fase 8e: portada.js (portada y navegación, window.showSection), temas.js (window.aplicarTema),
+                          foroAntiguo.js («Datos del foro → PAM», FOROS_PRUEBA). Cada uno exporta montar(ventana).
+                          (js/paginas/pam/, donde la 8a dejó las páginas antiguas, ya no existe.)
 js/paginas/canjes/        Fase 8d: Tabla de Canjes y Compendio. main.js, Tabla.js (mismo código; ofrece window.pamTabla
                           y window.pamCanjes; F16: pinta lo que se ve), datos.js (de data/*.json con tablaDeDatos()).
 js/paginas/revisor/       Fase 8c: Mi Ficha, Controlador de stats, Revisor y Editor de empleos como módulos. main.js,
@@ -120,14 +124,14 @@ tests/                    node:test + jsdom (ver §8).
 
 ### 5.1 PAM (`index.html`)
 
-1. En el `<head>`: `js/nube/pendiente.js` (aplica, todo o nada, los datos traídos de la nube antes de que nadie lea el `localStorage`), `js/pam/tema-inicial.js` y `css/pam.css`.
+1. En el `<head>`: `js/nube/pendiente.js` (aplica, todo o nada, los datos traídos de la nube antes de que nadie lea el `localStorage`), `js/pam/tema-inicial.js` y los `css/*.css` en orden.
 2. Al final del `<body>`: **un solo** `<script type="module" src="js/pam/arranque.js?v=…">`.
 3. `arranque.js` (`arrancar({doc, fetch, importar})`):
    - trae `data/empleos-foro.txt` y `data/arcanos.json` y los deja como `<script id="empleos-foro">` y `<script id="arcanos-data">`, donde los buscan las páginas antiguas;
    - trae `data/sistema.json` y deja en `window.PAM_EDITOR` el editor nuevo (si falla, solo avisa en consola y PAM usa el antiguo);
-   - carga las páginas en el orden original (`PAGINAS = tabla-canjes, revisor, registro, portada, temas, foro-antiguo`). Las de `js/paginas/pam/` son scripts clásicos con `async=false`: se ejecutan en orden y comparten variables globales como cuando estaban en un solo `<script>`. Las que ya son módulos (`MODULOS`: `revisor` desde la 8c, `registro` desde la 8b) se importan en su sitio y se montan con `montar(ventana, {traer})`; las clásicas se cargan por tandas entre módulo y módulo. **Un módulo no ve las variables de un script clásico en las pruebas** (en el navegador sí): lo que necesita de otra página llega por un objeto en `window` (p. ej. `window.pamTabla`, con getters porque `state` se reasigna);
+   - monta las páginas una tras otra, en el orden original (`PAGINAS = tabla-canjes, revisor, registro, portada, temas, foro-antiguo`; `MODULOS` dice dónde está cada una). Desde la 8e todas son módulos con `montar(ventana, {traer})`. Reciben la ventana y no usan variables globales: lo que una necesita de otra va por un objeto en `window` (`window.pamTabla` con getters porque `state` se reasigna, `pamFicha`, `pamPjs`, `rrBoveda`, `rrOficiales`, `showSection`, `aplicarTema`…). Así las pruebas las montan en Node con la ventana de jsdom;
    - después importa `js/nube/main.js` y `js/pam/main.js`;
-   - si algo no se puede traer, pinta arriba `.pam-arranque-error`: «No se pudo cargar una parte de PAM (…). Probá recargar la página.».
+   - si algo no se puede traer o una página no arranca, pinta arriba `.pam-arranque-error`: «No se pudo cargar una parte de PAM (…). Probá recargar la página.».
    - Se ejecuta solo salvo que `globalThis.__pamSinArranque` (lo usan las pruebas).
 4. `js/pam/main.js` saluda al agente (`hola`, tres intentos: 0, 1,5 y 4 s). Si no hay agente o el protocolo no es 1, no hace nada y PAM funciona como siempre. Si lo hay, crea `ControladorForo` con `PamActual` y vigila: oficiales llegados de la Biblioteca, la pastilla de canjes, la importación de la ficha.
 
@@ -246,7 +250,9 @@ Claves de paso en el almacén del agente: `pam.oficiales` (Biblioteca → PAM), 
 | R07 (Tabla de Canjes) | La Tabla tenía escritos a mano todos los datos del sistema. | Salen de `data/*.json` con `tablaDeDatos()`; las diferencias son las del Sistema reconciliado. | `js/paginas/canjes/datos.js` | `tabla` |
 | F16 | Cualquier cambio en la Tabla volvía a pintar las 13 pestañas y el Compendio. | Se pinta lo que se ve; lo demás, al abrirlo. | `js/paginas/canjes/Tabla.js` (`pintar`, `sinPintar`) | `tabla` |
 
-**Sin corregir:** F17 resto (8e), N01, N03, y las mejoras N02, N05, N06 (ver §11).
+| F17 | Versiones distintas en un script, CSS repetido, `leerSaldos` copiado. | Una versión (el agente); un `leerSaldos`; los estilos, un archivo por página y los efectos una sola vez. Mismos estilos calculados en un navegador real. | `css/*.css`, `js/lectores/LectorBoveda.js` | `arranque`, `registro` |
+
+**Sin corregir:** N01, N03, y las mejoras N02, N05, N06 (ver §11).
 
 ## 8. Cambios dentro del código antiguo de Hana
 
@@ -302,7 +308,7 @@ PAM_FICHA_IRVIN="C:\ruta\Irvin Giles.htm" npm test   # con la ficha real (no est
 2. ~~Fase 8b~~ hecha (0.6.0).
 3. ~~Fase 8c~~ hecha (0.6.2 y 0.6.3). Pendiente de decidir: el «Personalizada» antiguo (`actualizarCodigoAntiguo`) puede desaparecer cuando el nuevo esté probado en Chrome; el cálculo de combate de Mi Ficha podría usar `js/reglas/Combate.js` (habría que pasar la ficha antigua al modelo nuevo).
 4. ~~Fase 8d~~ hecha (0.6.4–0.6.6). Las pruebas que comparan con el PAM antiguo le aplican `comoOficial()` (`tests/legado/abrirPam.mjs`): las tres diferencias del Sistema reconciliado. Desde F16, para comparar la página entera hay que abrir antes todas las pestañas de la Tabla (y el Compendio).
-5. **Fase 8e · Portada, temas y CSS:** estilos por página y sin repetir (**F17**); `PamActual` pasa a las páginas nuevas.
+5. ~~Fase 8e~~ hecha (0.6.7 y 0.6.8). `PamActual` no tuvo que cambiar (las páginas ofrecen las mismas funciones en `window`).
 6. **N03** («Tus otras cuentas»): no mostrar cuentas inactivas ni temas cerrados. Antes, **mirar en el foro real** cómo marca una cuenta inactiva y un tema cerrado; no suponerlo.
 7. **N01** (reglas de Firestore: que no se pueda listar ni borrar documentos ajenos): solo con permiso de Hana; no tocar ni sondear su Firestore sin él.
 8. Mejoras apuntadas: **N05** (icono animado mientras escanea la Biblioteca: cambio visual pedido), **N02** (más listas editables en `data/`), **N06** (escaneo por partes, por decidir tras medir).

@@ -1,7 +1,7 @@
 // Pone la versión del agente en todas las direcciones del panel, para que el navegador nunca mezcle archivos
 // de dos versiones (GitHub Pages los guarda 10 minutos: si main.js es nuevo y MiPj.js viejo, el panel no arranca).
 //   · cada «import … from './x.js'» de js/ pasa a «'./x.js?v=VERSION'»;
-//   · panel.html: main.js y mipj.css con ?v=VERSION; index.html: pendiente.js, tema-inicial.js, css/pam.css y arranque.js con ?v=VERSION;
+//   · panel.html: main.js y mipj.css con ?v=VERSION; index.html: pendiente.js, tema-inicial.js, los css/*.css (8e: uno por página) y arranque.js con ?v=VERSION;
 //   · js/pam/arranque.js: const V (los datos y los módulos de las páginas que monta);
 //   · js/datos/cargar.js: los JSON con ?v=VERSION;
 //   · el agente pide panel.html?…&v=VERSION.
@@ -28,7 +28,7 @@ n += cambiar('panel.html', s => s.replace(/(src="js\/paginas\/panel\/main\.js)(?
 // 2b. index.html: el arranque de js/pam/ y los de la sesión con código (js/nube/)
 // (desde la fase 8a: la sesión, el tema, los estilos y el arranque; el arranque carga lo demás con su V)
 n += cambiar('index.html', s => s.replace(/(src="js\/(?:nube\/pendiente|pam\/tema-inicial|pam\/arranque)\.js)(?:\?v=[^"]*)?"/g, `$1${v}"`)
-  .replace(/(href="css\/pam\.css)(?:\?v=[^"]*)?"/, `$1${v}"`));
+  .replace(/(href="css\/[\w-]+\.css)(?:\?v=[^"]*)?"/g, `$1${v}"`)); // 8e: un css por página
 n += cambiar('js/pam/arranque.js', s => s.replace(/const V = '[^']*';/, `const V = '${v}';`));
 // 3. datos
 n += cambiar('js/datos/cargar.js', s => s.replace(/const VERSION_DATOS = '[^']*';/, `const VERSION_DATOS = '${VERSION}';`));

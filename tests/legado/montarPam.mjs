@@ -26,11 +26,12 @@ let cache = null;
 export function pamEntero() {
   if (cache) return cache;
   let html = leer('index.html');
-  const css = html.match(/<link rel="stylesheet" href="css\/pam\.css(\?v=[^"]*)?">\n/);
+  // los estilos (desde la 8e, un archivo por página): el pam.css de antes, congelado en tests/legado/pam.css
+  const css = html.match(/(<link rel="stylesheet" href="css\/[\w-]+\.css(\?v=[^"]*)?">\n)+/);
   const arr = html.match(/<script type="module" src="js\/pam\/arranque\.js(\?v=[^"]*)?"><\/script>\n/);
-  if (!css || !arr) throw new Error('index.html ya no carga css/pam.css o js/pam/arranque.js como se esperaba');
+  if (!css || !arr) throw new Error('index.html ya no carga css/*.css o js/pam/arranque.js como se esperaba');
   const v = arr[1] || '';
-  html = html.replace(css[0], () => `<style>\n${leer('css/pam.css')}</style>\n`);
+  html = html.replace(css[0], () => `<style>\n${leer('tests/legado/pam.css')}</style>\n`);
   const cuerpo = DATOS.map(d => `<script${d.tipo === 'text/plain' ? ' type="text/plain"' : ''} id="${d.id}"${d.tipo === 'text/plain' ? '' : ` type="${d.tipo}"`}>${leer(d.src)}</script>\n`).join('')
     + PAGINAS.map(p => `<script>\n${codigoPagina(p)}</script>\n`).join('')
     + `<script type="module" src="js/nube/main.js${v}"></script>\n<script type="module" src="js/pam/main.js${v}"></script>\n`;

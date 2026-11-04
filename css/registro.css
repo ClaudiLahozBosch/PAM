@@ -319,12 +319,7 @@ select.cell.chip{padding-right:12px}
 :host([data-skin="tealplum"]) .panel,:host([data-skin="tealplum"]) .cd-panel{box-shadow:inset 0 3px 0 #7A2A5A}
 :host([data-skin="peony"]) h1,:host([data-skin="bubble"]) h1{letter-spacing:.04em}
 :host([data-skin="bubble"]) h1{text-transform:uppercase;font-size:clamp(1.5rem,3.6vw,2.2rem)}
-#pumpkins{position:absolute;left:0;top:0;width:100%;pointer-events:none;z-index:5;overflow:hidden}
-.pk{position:absolute;pointer-events:auto;cursor:pointer;line-height:1;filter:drop-shadow(0 0 8px rgba(255,140,30,.55));transform:rotate(var(--rot,0deg));background:none;border:0;padding:0}
-.pk:hover{filter:drop-shadow(0 0 14px rgba(255,160,40,.9))}
-@media (prefers-reduced-motion:no-preference){.pk{animation:pkin .5s cubic-bezier(.2,1.6,.4,1) both, pkglow 2.6s ease-in-out infinite .5s}}
-@keyframes pkin{from{transform:scale(0) rotate(var(--rot,0deg))}to{transform:scale(1) rotate(var(--rot,0deg))}}
-@keyframes pkglow{0%,100%{filter:drop-shadow(0 0 6px rgba(255,140,30,.45))}50%{filter:drop-shadow(0 0 14px rgba(255,150,40,.85))}}
+/* @efectos: aquí va css/efectos.css (lo pone js/paginas/registro/main.js) */
 .pk-bar{display:inline-flex;gap:6px;align-items:center;margin-left:6px}
 .pk-bar button{font-size:.82rem;padding:4px 10px}
 .skin-toggle{display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 5px}
@@ -363,11 +358,7 @@ select.cell.chip{padding-right:12px}
 @media (max-width:520px){.mood{grid-template-columns:1fr;justify-items:center;text-align:center}.mood .pend,.trato{justify-content:center}}
 /* partículas decorativas */
 #fx{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;opacity:var(--fx-op)}
-#fx span{position:absolute;top:-10%;font-size:var(--sz,18px);filter:saturate(.8)}
 .wrap{position:relative;z-index:1}
-@media (prefers-reduced-motion:no-preference){#fx span{animation:caer var(--dur,22s) linear var(--del,0s) infinite}}
-@keyframes caer{from{transform:translate(0,0) rotate(0)}50%{transform:translate(var(--dx,20px),60vh) rotate(20deg)}to{transform:translate(0,120vh) rotate(-10deg)}}
-@media (prefers-reduced-motion:reduce){#fx span{top:var(--y,40%)}}
 /* selector de tema */
 .skins{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;align-items:center}
 .skins .lbl{font-family:var(--ff-head);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-right:4px}

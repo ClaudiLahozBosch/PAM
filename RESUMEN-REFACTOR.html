@@ -273,7 +273,7 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
       <div class="arreglo"><span class="tag">R10</span><span class="antes">No se podía ocultar un oficial de «Oficiales en curso».</span><span class="ahora">Botón ✕, como en «Te toca responder».</span></div>
       <div class="arreglo"><span class="tag">R07</span><span class="antes">Datos del sistema repetidos con nombres distintos («Esquivar» / «Esquiva») y tres listas de personajes.</span><span class="ahora">Una sola vez. Mi Ficha, la lista de deseos y la Tabla de Canjes usan los oficiales; ya no queda ninguna copia escrita a mano. (A Mi Ficha le faltaba «Gobierno mágico de (X país)»; en la Tabla cambian «Personal no-docente» y el orden de los tipos de trasfondo.)</span></div>
       <div class="arreglo"><span class="tag">F13</span><span class="antes">Mi PJ manejaba PAM pulsando sus botones: cualquier cambio en PAM lo rompía.</span><span class="ahora">Hablan con mensajes.</span></div>
-      <div class="arreglo"><span class="tag">F17</span><span class="antes">Código repetido en Mi PJ y en el Inspector.</span><span class="ahora">En parte: el lector de la bóveda ya es uno solo. Ordenar los estilos queda para la fase 8.</span></div>
+      <div class="arreglo"><span class="tag">F17</span><span class="antes">Código y estilos repetidos en Mi PJ, el Inspector y PAM.</span><span class="ahora">El lector de la bóveda es uno solo y los estilos están en un archivo por página, sin repetir los efectos. Se comprobó en el navegador que todo se ve exactamente igual.</span></div>
     </div>
   </div>
 </section>
@@ -301,13 +301,12 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
   <p class="sub">Para quien edite PAM con ayuda de una IA. Lo que antes estaba dentro de <code>index.html</code>:</p>
   <div class="card">
     <table class="donde">
-      <tr><td>Los colores y estilos</td><td><code>css/pam.css</code></td></tr>
+      <tr><td>Los colores y estilos (uno por página: común, canjes, revisor, portada, ficha, temas, efectos, navegación, sesión y foro)</td><td><code>css/</code></td></tr>
       <tr><td>Tabla de Canjes y Compendio</td><td><code>js/paginas/canjes/</code></td></tr>
       <tr><td>Datos del sistema (precios, habilidades, talentos, arcanos…): una sola vez, para todo PAM, Mi PJ y el Inspector</td><td><code>data/sistema.json</code>, <code>data/arcanos.json</code>, <code>data/arcanos-calculadora.json</code></td></tr>
       <tr><td>Revisor de Empleos y Mi Ficha (separados por piezas: pantallas, datos fijos, ficha de ejemplo, lector de empleos)</td><td><code>js/paginas/revisor/</code></td></tr>
       <tr><td>Registro de Roles, Bóveda y Coloreador (separados por piezas: pantallas, Coloreador, listas fijas, lista de deseos, Importar Excel)</td><td><code>js/paginas/registro/</code>, con su HTML en <code>plantilla.html</code> y sus estilos en <code>css/registro.css</code></td></tr>
-      <tr><td>Portada y navegación</td><td><code>js/paginas/pam/portada.js</code></td></tr>
-      <tr><td>Temas</td><td><code>js/paginas/pam/temas.js</code></td></tr>
+      <tr><td>Portada, navegación, temas y «Datos del foro → PAM»</td><td><code>js/paginas/inicio/</code></td></tr>
       <tr><td>Empleos del foro y arcanos</td><td><code>data/empleos-foro.txt</code> y <code>data/arcanos.json</code></td></tr>
       <tr><td>Configuración de cada foro (registro de canjes, grupos, desarrolladores…)</td><td><code>data/foros.json</code> (se edita a mano)</td></tr>
       <tr><td>Frases que cierran un oficial</td><td><code>data/cierres-oficial.json</code> (se edita a mano)</td></tr>
@@ -325,7 +324,7 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
     <li><div class="card"><h3>Registro de Roles y Coloreador <span class="estado" style="color:var(--good)">hecho</span></h3><p>Separados por piezas, con los arreglos F14, F09 y N08 (versión 0.6.0).</p></div></li>
     <li><div class="card"><h3>Revisor de Empleos y Mi Ficha <span class="estado" style="color:var(--good)">hecho</span></h3><p>Separados por piezas y con los datos del sistema compartidos (R07), versiones 0.6.2 y 0.6.3.</p></div></li>
     <li><div class="card"><h3>Tabla de Canjes y Compendio <span class="estado" style="color:var(--good)">hecho</span></h3><p>Separados por piezas, con los datos oficiales y más fluidos (F16), versiones 0.6.4 a 0.6.6.</p></div></li>
-    <li><div class="card"><h3>Portada, temas y estilos</h3><p>Ordenar los estilos repetidos (F17).</p></div></li>
+    <li><div class="card"><h3>Portada, temas y estilos <span class="estado" style="color:var(--good)">hecho</span></h3><p>Las últimas páginas, como las demás, y los estilos ordenados por página (F17), versiones 0.6.7 y 0.6.8. Con esto todo PAM está reorganizado.</p></div></li>
     <li><div class="card"><h3>«Tus otras cuentas» en Mi PJ</h3><p>Que no enseñe cuentas desactivadas ni temas que ya terminaron (N03). Antes hay que ver en el foro cómo se marcan.</p></div></li>
     <li><div class="card"><h3>Con permiso de Hana</h3><p>Revisar las reglas de la nube (Firestore) para que nadie pueda listar ni borrar sesiones ajenas (N01).</p></div></li>
     <li><div class="card"><h3>Mejoras apuntadas</h3><p>Un icono animado mientras la Biblioteca de oficiales busca (N05); más listas editables a mano (N02); que la Biblioteca no lo lea todo de golpe (N06, por decidir).</p></div></li>
@@ -335,6 +334,6 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
 
 </main>
 
-<footer>✦ PAM · Plataforma Avadense · resumen del refactor, versión 0.6.6 (4 de noviembre de 2026) ✦</footer>
+<footer>✦ PAM · Plataforma Avadense · resumen del refactor, versión 0.6.8 (4 de noviembre de 2026) ✦</footer>
 </body>
 </html>
