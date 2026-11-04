@@ -1,22 +1,22 @@
 // @ts-check
 // Arranque del panel «Mi PJ» dentro del foro (el agente lo muestra en un iframe sin marco).
-import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=0.6.9';
-import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=0.6.9';
-import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=0.6.9';
-import { LectorFicha } from '../../lectores/LectorFicha.js?v=0.6.9';
-import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=0.6.9';
-import { crearPanelMiPj } from './MiPjPanel.js?v=0.6.9';
-import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=0.6.9';
-import { crearActividad } from '../../servicios/ActividadDelForo.js?v=0.6.9';
-import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=0.6.9';
-import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=0.6.9';
-import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=0.6.9';
-import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=0.6.9';
-import { crearTarjetaCanjes } from './CanjesPanel.js?v=0.6.9';
-import { crearRevision } from '../../inspector/Revision.js?v=0.6.9';
-import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=0.6.9';
-import { crearInspector } from '../../inspector/Inspector.js?v=0.6.9';
-import { normNombre } from '../../core/texto.js?v=0.6.9';
+import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=0.7.0';
+import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=0.7.0';
+import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=0.7.0';
+import { LectorFicha } from '../../lectores/LectorFicha.js?v=0.7.0';
+import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=0.7.0';
+import { crearPanelMiPj } from './MiPjPanel.js?v=0.7.0';
+import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=0.7.0';
+import { crearActividad } from '../../servicios/ActividadDelForo.js?v=0.7.0';
+import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=0.7.0';
+import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=0.7.0';
+import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=0.7.0';
+import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=0.7.0';
+import { crearTarjetaCanjes } from './CanjesPanel.js?v=0.7.0';
+import { crearRevision } from '../../inspector/Revision.js?v=0.7.0';
+import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=0.7.0';
+import { crearInspector } from '../../inspector/Inspector.js?v=0.7.0';
+import { normNombre } from '../../core/texto.js?v=0.7.0';
 
 const CACHE_MIN = 30; // como Mi PJ: si lo leído tiene más de media hora, se vuelve a leer al abrir
 const root = /** @type {HTMLElement} */ (document.getElementById('mipj'));

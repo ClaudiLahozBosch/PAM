@@ -7,9 +7,12 @@
 //     compartidas: un módulo no las ve en las pruebas;
 //   · guarda con el almacén (js/core/Almacen.js), con las mismas claves y el mismo formato.
 // Recibe la ventana: así las pruebas lo montan en una página de prueba junto al antiguo y comparan.
-import { RANKS, RANK_SHORT, SKILL_LV, SKILL_NAME, ATTRS, ART, SKILLS, ALL_SKILLS, BG_TYPES, ADVS, cats, SUELDOS, SK_MAP } from './datos.js?v=0.6.9';
-import { ETAPAS, ESP_RAMAS, IDIOMA_NIV, VINC, emptyFicha, normFicha, exampleFicha } from './modelo.js?v=0.6.9';
-import { A, S, sanador, parseEmpleosDSL } from './empleos.js?v=0.6.9';
+// 0.7.0: sin el «Personalizada» antiguo (el «Código para el foro» usa solo el editor nuevo) y con los cálculos de
+// combate y puntos de js/reglas/Combate.js (buscar «0.7.0»).
+import { RANKS, RANK_SHORT, SKILL_LV, SKILL_NAME, ATTRS, ART, SKILLS, ALL_SKILLS, BG_TYPES, ADVS, cats, SUELDOS, SK_MAP } from './datos.js?v=0.7.0';
+import { ETAPAS, ESP_RAMAS, IDIOMA_NIV, VINC, emptyFicha, normFicha, exampleFicha } from './modelo.js?v=0.7.0';
+import { A, S, sanador, parseEmpleosDSL } from './empleos.js?v=0.7.0';
+import { combate as combateReglas, puntos as puntosReglas } from '../../reglas/Combate.js?v=0.7.0';
 
 /**
  * @param {Window} w la ventana de PAM
@@ -351,7 +354,6 @@ function renderJob(j){
 
 /* ============ Panel: Ficha ============ */
 const BONUS = [0,1,2,4,7,9];
-const LV_IDX = v => Math.min(4, num(v));             // 1 Novato … 4 Maestro (para Herbivicus, etc.)
 let fichaTab = almacen.leerTexto('grimorio.fichaTab') || 'datos'; /* 8c: con el almacén (texto suelto, como antes) */
 function opts(list,sel){ return list.map(x=>`<option ${x===sel?'selected':''}>${esc(x)}</option>`).join(''); }
 function lvOpts(sel,max=5){ return SKILL_LV.slice(0,max+1).map((x,i)=>`<option value="${i}" ${+sel===i?'selected':''}>${x}</option>`).join(''); }
@@ -365,61 +367,21 @@ const sk = s => num(ficha.skills[s]);
 /* ---- cálculos de combate y puntos ---- */
 /* Reglas del Sistema Avadense + Calculadora de Stats de Combate (raza, objetos y pociones de escena) */
 let combOpt = {warlock:null, herbivicus:null, fuerza:0, actividad:false, lic:false};
-function modsFicha(){
-  const r = norm(ficha.d.raza||'').replace(/[^a-z]/g,'');
-  return { semiD:r.includes('semiduend'), semiG:r.includes('semigigant'),
-    carstein:hasArc('Anillo de los Carstein'), warlockObj:hasArc('Armadura de Warlock'),
-    maletin:hasArc('Maletín del pocionista inquieto'), bisu:hasArc('Bisutería Arcana'), herbiObj:hasArc('Herbivicus'),
-    herbicida:hasArc('Poción herbicida'), vitae:hasArc('Planta Vitae'), solucion:hasArc('Solución del ritualista'), altar:hasArc('Altar del ritualista') };
+/* 0.7.0: los cálculos son los de js/reglas/Combate.js (una sola copia, la misma que usan el editor y Mi PJ; mismos
+   números y textos que el código de antes, comprobado en tests/caracterizacion/combate-mi-ficha.test.mjs). Aquí solo
+   se le pasa esta ficha con los nombres del modelo nuevo. */
+const ETAPA_REGLAS = { etapa: n => { const e = ETAPAS[n]; return e ? { pa: e.pa, umbral: e.u, heridas: e.h } : null; } };
+function fichaReglas(){
+  const habilidades = Object.assign({}, ficha.skills);
+  Object.entries(SK_MAP).forEach(([oficial, enFicha]) => { habilidades[oficial] = ficha.skills[enFicha]; }); // Esquivar ← Esquiva…
+  return { atributos: ficha.attrs, habilidades, datos: { raza: ficha.d.raza, etapa: ficha.d.etapa },
+    arcanos: ficha.arcanos.map(a => ({ nombre: a.name })), artes: ficha.artes.map(x => ({ nivel: x.v })) };
 }
 function combate(opt){
   opt = Object.assign({}, opt===undefined ? {warlock:combOpt.warlock} : opt);
-  const A=ficha.attrs, E=etapaOf(), b=s=>BONUS[sk(s)]||0, M=modsFicha();
-  const warl = (opt.warlock===null||opt.warlock===undefined) ? false : !!opt.warlock && M.warlockObj;
-  const fz = num(opt.fuerza), act = opt.actividad?1:0, L4 = opt.lic?4:0;
-  const P=num(A['Percepción']), V=num(A.Vigor)+fz, D=num(A.Destreza), W=num(A.Voluntad), Po=num(A.Poder);
-  const vUmb = M.semiD ? Math.floor(V/2) : V;
-  const vPA = M.carstein ? 0 : vUmb*(M.semiG?3:1);
-  const extra = (n,l) => n ? ` ${n>0?'+':'−'} ${Math.abs(n)} (${l})` : '';
-  const ini = P + b('Iniciativa') + L4 - (warl?2:0) + act;
-  const atkF = V + b('Pelea') + L4 + (M.semiG?2:0);
-  const def = 5 + D + b('Esquiva') + L4 - (warl?2:0) + act;
-  const atkM = Po + b('Duelo');
-  const r = x => Math.round(x);
-  const luchaFx = (atkF + def - 5 + ini)/3, luchaMx = (atkM + def - 5 + ini)/3;
-  const pa = (E.pa + vPA + W) * (opt.lic?2:1), umbral = E.u + vUmb + L4, heridas = E.h + W + (opt.lic?2:0);
-  const vigTxt = fz ? `Vigor (${num(A.Vigor)} + ${fz} poción)` : `Vigor (${num(A.Vigor)})`;
-  const t = {
-    ini: `Percepción (${P}) + Iniciativa (${b('Iniciativa')})` + extra(-(warl?2:0),'Armadura de Warlock') + extra(act,'Poción de actividad') + extra(L4,'Licantropía'),
-    atkF: `${vigTxt} + Pelea (${b('Pelea')})` + extra(M.semiG?2:0,'Semigigante') + extra(L4,'Licantropía'),
-    luchaF: `(Ataque Físico (${atkF}) + Defensa (${def}) - 5 + Iniciativa (${ini})) / 3`,
-    atkM: `Poder (${Po}) + Duelo (${b('Duelo')})`,
-    luchaM: `(Ataque Mágico (${atkM}) + Defensa (${def}) - 5 + Iniciativa (${ini})) / 3`,
-    def: `5 + Destreza (${D}) + Esquiva (${b('Esquiva')})` + extra(-(warl?2:0),'Armadura de Warlock') + extra(act,'Poción de actividad') + extra(L4,'Licantropía'),
-    pa: (opt.lic?'(':'') + (E.none ? 'Base (sin etapa) + ' : `Base (${E.pa}) + `) + (M.carstein ? `Vigor (0, Anillo de los Carstein)` : M.semiG ? `Vigor × 3 (${vPA}, Semigigante)` : M.semiD ? `Vigor ÷ 2 (${vPA}, Semiduende)` : vigTxt) + ` + Voluntad (${W})` + (opt.lic?') × 2 (Licantropía)':''),
-    umbral: (E.none ? 'Base (sin etapa) + ' : `Base (${E.u}) + `) + (M.semiD ? `Vigor ÷ 2 (${vUmb}, Semiduende)` : vigTxt) + extra(L4,'Licantropía'),
-    heridas: (E.none ? 'Base (sin etapa)' : `Base (${E.h})`) + ` + Voluntad (${W})` + extra(opt.lic?2:0,'Licantropía')
-  };
-  return { ini, atkF, def, atkM, luchaF:r(luchaFx), luchaM:r(luchaMx), luchaFx, luchaMx, pa, umbral, heridas, E, t, M, warl };
+  return Object.assign(combateReglas(fichaReglas(), ETAPA_REGLAS, opt), { E: etapaOf() });
 }
-function puntos(opt){
-  opt = Object.assign({herbivicus:combOpt.herbivicus}, opt||{});
-  const M=modsFicha();
-  const P=num(ficha.attrs.Poder), bp=BONUS[sk('Pociones')]||0, br=BONUS[sk('Rituales')]||0;
-  let pp = P + bp, ppTxt = [`Poder (${P})`, `Pociones (${bp})`];
-  if(M.maletin){ pp *= 2; ppTxt = [`(${ppTxt.join(' + ')}) × 2 (Maletín del pocionista inquieto)`]; }
-  const herb = LV_IDX(sk('Herbología')), rit = LV_IDX(sk('Rituales'));
-  const herbiOn = M.herbiObj && (opt.herbivicus===null||opt.herbivicus===undefined ? true : !!opt.herbivicus);
-  if(herbiOn && herb){ pp += herb; ppTxt.push(`${herb} (Herbivicus)`); }
-  if(M.herbicida && herb){ pp += herb; ppTxt.push(`${herb} (Poción Herbicida)`); }
-  if(M.vitae && rit){ pp += rit; ppTxt.push(`${rit} (Planta Vitae)`); }
-  let pr = P + br, prTxt = [`Poder (${P})`, `Rituales (${br})`];
-  if(M.bisu){ pr = P + br*2; prTxt = [`Poder (${P})`, `Rituales (${br}) × 2 (Bisutería Arcana)`]; }
-  if(M.solucion && bp){ pr += bp; prTxt.push(`${bp} (Solución del ritualista)`); }
-  const art = LV_IDX(ficha.artes.reduce((m,x)=>Math.max(m,num(x.v)),0));
-  if(M.altar && art){ pr += art; prTxt.push(`${art} (Altar del ritualista)`); }
-  return {pp, ppTxt:ppTxt.join(' + '), pr, prTxt:prTxt.join(' + ')};
-}
+function puntos(opt){ return puntosReglas(fichaReglas(), Object.assign({herbivicus:combOpt.herbivicus}, opt||{})); }
 
 /* ---- para Mi PJ (script del foro): cada ficha con sus stats ya calculados ---- */
 window.pamRapido = function(){
@@ -1254,7 +1216,6 @@ $('#dlg-ok').onclick=()=>{
 };
 
 /* ============ Código de la ficha para el foro (compacta, extendida o personalizada) ============ */
-const withF = (f, fn) => { const o = ficha; ficha = f; try { return fn(); } finally { ficha = o; } };
 const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI'];
 function plantillaDe(f) { f.plantilla = f.plantilla || { modo: 'compacta', codigo: '', base: null }; return f.plantilla; }
 
@@ -1359,205 +1320,14 @@ function codigoExtendido() {
 }
 
 /* ---- Ficha personalizada: se edita el código guardado sólo donde cambió algo ---- */
-const reEsc = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const CLOSE = '(?:\\s*(?:\\[\\/(?:color|b|i|u|font|size)\\]|<\\/(?:span|b|strong|i|em|font)>))*';
-const plain = s => String(s || '').replace(/\[[^\]]*\]/g, '').replace(/<[^>]*>/g, '').trim();
-const BULLET = /^[\s✦•→\-*✿❀◆·❁✾✧▸►»]+/;
-const lineKey = l => plain(l).replace(BULLET, '').trim();
 const fichaClone = f => JSON.parse(JSON.stringify(f));
 
-// campos de una línea / varias líneas
-const CAMPOS = [
-  ['nombre', 'Nombre y Apellido'], ['d.avatar', 'Avatar/PB'], ['d.avatar', 'Avatar'], ['d.multicuenta', 'Multicuentas?'],
-  ['d.nacimiento', 'Lugar de Nacimiento'], ['d.residencia', 'Lugar de Residencia'], ['d.clase', 'Clase Social'],
-  ['d.fechaNac', 'Fecha de Nacimiento'], ['d.edad', 'Edad'], ['d.etapa', 'Etapa'], ['d.orientacion', 'Orientación Sexual'],
-  ['d.sangre', 'Tipo de Sangre'], ['d.raza', 'Raza'], ['d.casa', 'Casa'], ['d.curso', 'Curso'], ['d.faccion', 'Facción'],
-  ['d.quidditch', 'Equipo de Quidditch'], ['desc.fuerte', 'Puntos? Fuertes?'], ['desc.debil', 'Puntos? Débil(?:es)?'],
-  ['desc.gustos', 'Gustos ?\\/ ?Aficiones'], ['desc.fobias', 'Fobias ?\\/ ?[Mm]anías'], ['desc.mascota', 'Mascotas?'],
-  ['extra.pdPerdida', 'Pérdida de Puntos de Destino']
-];
-const CAMPOS_LARGOS = [['desc.fisica', 'Descripción Física'], ['desc.psico', 'Descripción Psicológica'], ['desc.historia', 'Historia'], ['desc.familia', 'Familia']];
-const getPath = (f, p) => p === 'nombre' ? f.nombre : p.split('.').reduce((o, k) => o ? o[k] : '', f);
-
-/* N07: con el editor nuevo (js/pam/EditorPam.js, lo deja js/pam/arranque.js); si no está o falla, el de antes */
+/* N07: con el editor nuevo (js/pam/EditorPam.js, lo deja js/pam/arranque.js). 0.7.0: el «Personalizada» antiguo ya no
+   está (el nuevo hace todo lo que hacía y más); si el editor no está o falla, el código queda como estaba y se avisa. */
 function actualizarCodigo(codigo, base, cur) {
-  if (window.PAM_EDITOR) { try { return window.PAM_EDITOR.actualizar(codigo, base, cur); } catch (e) { console.warn('[PAM] editor nuevo del código, uso el de antes:', e); } }
-  return actualizarCodigoAntiguo(codigo, base, cur);
-}
-function actualizarCodigoAntiguo(codigo, base, cur) {
-  let code = String(codigo);
-  const hechos = [], manual = [];
-  const rep = (re, fn, what) => { let n = 0; code = code.replace(re, (...m) => { n++; return fn(...m); }); if (n) hechos.push(what); return n; };
-  const valOk = v => String(v ?? '').trim();
-  // 1. campos simples
-  const vistos = new Set();
-  CAMPOS.forEach(([p, lab]) => {
-    if (vistos.has(p)) return;
-    const a = valOk(getPath(base, p)), b = valOk(getPath(cur, p));
-    if (a === b) return;
-    const re = new RegExp(`(▋\\s*(?:${lab})\\s*:${CLOSE}[ \\t]*)([^\\n<]*?)([ \\t]*)(?=\\n|<|\\[\\/spoiler\\]|$)`, 'i');
-    if (rep(re, (m, pre, v, sp) => pre + (b || '-') + sp, labelDe(p))) vistos.add(p);
-    else if (!/Avatar$/.test(lab)) manual.push(`${labelDe(p)}: no encontré dónde va en tu código (nuevo valor: ${b || '-'})`);
-  });
-  // 2. campos largos (hasta la siguiente etiqueta ▋ o el cierre del bloque)
-  CAMPOS_LARGOS.forEach(([p, lab]) => {
-    const a = valOk(getPath(base, p)), b = valOk(getPath(cur, p));
-    if (a === b) return;
-    const re = new RegExp(`(▋\\s*${lab}\\s*:${CLOSE}[ \\t]*)([\\s\\S]*?)(?=\\n[^\\n]*▋|<\\/div>|\\[\\/spoiler\\]|<\\/details>|$)`, 'i');
-    if (!rep(re, (m, pre, seg) => pre + mezclarLineas(seg, b || '-'), labelDe(p))) manual.push(`${labelDe(p)}: no la encontré en tu código`);
-  });
-  // 3. cabecera: foto, apodo, ocupación (se reemplaza el texto viejo exacto)
-  [['extra.foto', 'Imagen'], ['extra.kicker', 'Nombre en su idioma'], ['extra.ocupacion', 'Ocupación'], ['extra.frase', 'Frase']].forEach(([p, l]) => {
-    const a = valOk(getPath(base, p)), b = valOk(getPath(cur, p));
-    if (a === b || !b) return;
-    if (a.length >= 3 && code.includes(a)) { code = code.split(a).join(b); hechos.push(l); }
-    else manual.push(`${l}: cambiala a mano (nuevo: ${b})`);
-  });
-  // límites
-  if (valOk(base.extra.limites) !== valOk(cur.extra.limites) && cur.extra.limites)
-    rep(/(Límites:\s*)([^)\n]*)(\))/i, (m, a, v, c) => a + cur.extra.limites + c, 'Límites');
-  // 4. atributos
-  ATTRS.forEach(at => {
-    if (num(base.attrs[at]) === num(cur.attrs[at])) return;
-    const re = new RegExp(`(→\\s*${reEsc(at)}\\s*:${CLOSE}[ \\t]*)([+-]?\\d*)`, 'i');
-    if (!rep(re, (m, pre) => pre + '+' + num(cur.attrs[at]), at)) manual.push(`Atributo ${at}: no lo encontré`);
-  });
-  // 5. habilidades
-  const LV = '(?:Desentrenad[oa]|Novat[oa]|Competente|Expert[oa]|Maestr[oa]|Legendari[oa])\\s*\\(\\+\\d+\\)(?:\\s*\\/[^\\n]*)?';
-  Object.keys(cur.skills).forEach(s => {
-    if (num(base.skills[s]) === num(cur.skills[s])) return;
-    const re = new RegExp(`(→\\s*${reEsc(s)}\\s*:${CLOSE}[ \\t]*)(${LV})`, 'i');
-    if (!rep(re, (m, pre) => pre + SKILL_LV[num(cur.skills[s])], s)) manual.push(`Habilidad ${s}: no la encontré`);
-  });
-  cur.artes.forEach(x => {
-    const old = base.artes.find(y => norm(y.n) === norm(x.n));
-    if (old && num(old.v) === num(x.v)) return;
-    const re = new RegExp(`(→\\s*(?:Arte\\s*\\/\\s*Artesanía\\s*\\(\\s*)?${reEsc(x.n)}\\s*\\)?\\s*:${CLOSE}[ \\t]*)(${LV})`, 'i');
-    if (!rep(re, (m, pre) => pre + SKILL_LV[num(x.v)], `Arte/Artesanía (${x.n})`)) manual.push(`Arte/Artesanía ${x.n}: agregala a mano (${SKILL_LV[num(x.v)]})`);
-  });
-  base.artes.forEach(x => { if (!cur.artes.some(y => norm(y.n) === norm(x.n))) manual.push(`Arte/Artesanía ${x.n}: la quitaste, borrala a mano`); });
-  // 6. combate y puntos: se recalculan si cambió algo de lo que los compone
-  const cB = withF(base, combate), cC = withF(cur, combate), pB = withF(base, puntos), pC = withF(cur, puntos);
-  const C2 = cur.attrs, bb = s => BONUS[num(cur.skills[s])] || 0;
-  const comb = [
-    ['Iniciativa', `${cC.t.ini} = [b]${cC.ini}[/b]`, cB.t.ini !== cC.t.ini],
-    ['Ataque Físico', `${cC.t.atkF} = [b]${cC.atkF}[/b]`, cB.t.atkF !== cC.t.atkF],
-    ['Lucha Física', `${cC.t.luchaF} = [b]${cC.luchaF}[/b]`, cB.t.luchaF !== cC.t.luchaF],
-    ['Ataque Mágico', `${cC.t.atkM} = [b]${cC.atkM}[/b]`, cB.t.atkM !== cC.t.atkM],
-    ['Lucha Mágica', `${cC.t.luchaM} = [b]${cC.luchaM}[/b]`, cB.t.luchaM !== cC.t.luchaM],
-    ['Defensa', `${cC.t.def} = [b]${cC.def}[/b]`, cB.t.def !== cC.t.def],
-    ['PAs', `${cC.t.pa} = [b]${cC.pa}[/b]`, cB.t.pa !== cC.t.pa],
-    ['Umbral de heridas', `${cC.t.umbral} = [b]${cC.umbral}[/b]`, cB.t.umbral !== cC.t.umbral],
-    ['Heridas', `${cC.t.heridas} = [b]${cC.heridas}[/b]`, cB.t.heridas !== cC.t.heridas]
-  ];
-  const ci = code.search(/▋\s*Combate/i);
-  if (ci >= 0) {
-    let head = code.slice(0, ci), tail = code.slice(ci);
-    comb.forEach(([l, v, changed]) => {
-      if (!changed && !(cur.plantilla && cur.plantilla.forzarCombate)) return;
-      const re = new RegExp(`(→\\s*${reEsc(l)}\\s*:${CLOSE}[ \\t]*)([^\\n<]*)`, 'i');
-      let n = 0; tail = tail.replace(re, (m, pre) => { n++; return pre + v; });
-      if (n) hechos.push(`Combate: ${l}`); else manual.push(`Combate ${l}: no lo encontré (${v.replace(/\[\/?b\]/g, '')})`);
-    });
-    code = head + tail;
-  } else if (comb.some(x => x[2]) || (cur.plantilla && cur.plantilla.forzarCombate)) manual.push('Combate: no encontré el bloque «▋ Combate» para recalcularlo');
-  const FZ = !!(cur.plantilla && cur.plantilla.forzarCombate);
-  if (FZ || pB.pp !== pC.pp || pB.ppTxt !== pC.ppTxt) rep(/(▋\s*Puntos de Pociones\s*:(?:\s*(?:\[\/color\]|<\/span>|<\/b>))*[ \t]*)([^\n<]*)/i, (m, pre) => pre + `${pC.ppTxt} = [b]${pC.pp}[/b]`, 'Puntos de Pociones');
-  if (FZ || pB.pr !== pC.pr || pB.prTxt !== pC.prTxt) rep(/(▋\s*Puntos de Rituales\s*:(?:\s*(?:\[\/color\]|<\/span>|<\/b>))*[ \t]*)([^\n<]*)/i, (m, pre) => pre + `${pC.prTxt} = [b]${pC.pr}[/b]`, 'Puntos de Rituales');
-  if (num(base.extra.pd) !== num(cur.extra.pd)) rep(/(▋\s*Puntos de Destino\s*:(?:\s*(?:\[\/color\]|<\/span>|<\/b>))*[ \t]*)(?:\[b\])?\d+(?:\[\/b\])?/i, (m, pre) => pre + `[b]${num(cur.extra.pd)}[/b]`, 'Puntos de Destino');
-  // 7. listas (arcanos, trasfondos, idiomas, talentos...): por líneas
-  let lines = code.split('\n');
-  const findLine = (name, from) => { const n = norm(name); for (let i = 0; i < lines.length; i++) { const k = norm(lineKey(lines[i])); if (k === n || k.startsWith(n + ':') || k.startsWith(n + ' :') || k.startsWith(n + ' —') || k.startsWith(n + ' -') || k.startsWith(n + '.')) return i; } return -1; };
-  const cloneLine = (i, oldName, newText) => {
-    const l = lines[i]; const at = l.indexOf(oldName);
-    if (at < 0) return null;
-    const suf = (l.match(/((?:\[\/\w+\]|<\/\w+>)\s*)+$/) || [''])[0];
-    const pre = l.slice(0, at);
-    // si el prefijo abre etiquetas que se cierran justo tras el nombre ([b]Nombre[/b]: nota), respetarlas
-    const afterName = l.slice(at + oldName.length).match(/^((?:\[\/\w+\]|<\/\w+>)*)/)[1];
-    return pre + newText.name + afterName + (newText.rest || '') + (afterName ? '' : suf);
-  };
-  // arcanos
-  const kA = a => norm(a.name);
-  const quitados = base.arcanos.filter(a => !cur.arcanos.some(b => kA(b) === kA(a)));
-  const nuevos = cur.arcanos.filter(a => !base.arcanos.some(b => kA(b) === kA(a)));
-  quitados.forEach(a => { const i = findLine(a.name); if (i >= 0) { lines.splice(i, 1); hechos.push(`Quitado: ${a.name}`); } else manual.push(`Arcano ${a.name}: lo quitaste, borralo a mano`); });
-  nuevos.forEach(a => {
-    const sib = [...cur.arcanos].reverse().find(b => b !== a && b.type === a.type && b.tier === a.tier && base.arcanos.some(x => kA(x) === kA(b)) && findLine(b.name) >= 0)
-      || null;
-    if (!sib) { manual.push(`Arcano nuevo ${a.name} (${tierLbl(a.type, a.tier)}): agregalo a mano, no encontré otro del mismo tipo y nivel`); return; }
-    const i = findLine(sib.name);
-    const nl = cloneLine(i, sib.name, { name: a.name, rest: a.nota ? ': ' + a.nota : '' });
-    if (nl == null) { manual.push(`Arcano nuevo ${a.name}: agregalo a mano`); return; }
-    lines.splice(i + 1, 0, nl); hechos.push(`Agregado: ${a.name}`);
-  });
-  cur.arcanos.forEach(a => { const o = base.arcanos.find(b => kA(b) === kA(a)); if (o && (o.tier !== a.tier || o.type !== a.type)) manual.push(`Arcano ${a.name}: cambió de tipo o nivel, movelo a mano`); });
-  // trasfondos
-  const kB = x => norm(`${x.t}|${x.c}|${x.e}`);
-  const bgLine = x => { for (let i = 0; i < lines.length; i++) { const k = norm(lineKey(lines[i])); if (k.includes(norm(x.t)) && k.includes(norm(x.c)) && (x.e ? k.includes(norm(x.e)) : !/(—|>|-)\s*\S+\s+(i|ii|iii|iv|v|vi)\b.*(—|>|-)/.test(k)) && /\b(i|ii|iii|iv|v|vi)\b/.test(k)) { if (!x.e) { const tail = k.split(norm(x.c))[1] || ''; if (/^\s*(—|>|-)\s*[a-z]/.test(tail)) continue; } return i; } } return -1; };
-  cur.bgs.forEach(x => {
-    const o = base.bgs.find(y => kB(y) === kB(x));
-    if (o && num(o.v) === num(x.v)) return;
-    if (o) { const i = bgLine(o); if (i >= 0) { const l = lines[i]; const re = new RegExp(`(${reEsc(o.e || o.c)}[^IVX\\n]{0,12}?)\\b(${ROMAN[num(o.v)]})\\b`); if (re.test(l)) { lines[i] = l.replace(re, (m, a) => a + ROMAN[num(x.v)]); hechos.push(`Trasfondo ${x.t} ${x.c}${x.e ? ' > ' + x.e : ''}`); return; } } }
-    if (!o) {
-      const sibs = base.bgs.filter(y => cur.bgs.some(z => kB(z) === kB(y)));
-      const sib = [...sibs].reverse().find(y => y.t === x.t && y.c === x.c) || [...sibs].reverse().find(y => y.t === x.t) || sibs[sibs.length - 1];
-      const i = sib ? bgLine(sib) : -1;
-      if (i >= 0) {
-        const l = lines[i], st = l.indexOf(sib.t), rm = new RegExp(`\\b${ROMAN[num(sib.v)]}\\b`), rest = st >= 0 ? l.slice(st) : '', mm = rest.match(rm);
-        if (st >= 0 && mm) {
-          const seg = rest.slice(0, mm.index), sep = (seg.match(/\s(—|>|-|–)\s/) || [' — ', '—'])[1];
-          const after = rest.slice(mm.index + mm[0].length).match(/^((?:\[\/\w+\]|<\/\w+>)*)/)[1];
-          const txt = [x.t, x.c, x.e].filter(Boolean).join(` ${sep} `) + ' ' + ROMAN[num(x.v)];
-          lines.splice(i + 1, 0, l.slice(0, st) + txt + after + (x.nota ? ': ' + x.nota : ''));
-          hechos.push(`Agregado: ${x.t} ${x.c}${x.e ? ' > ' + x.e : ''}`); return;
-        }
-      }
-    }
-    manual.push(`Trasfondo ${x.t} — ${x.c}${x.e ? ' — ' + x.e : ''} ${ROMAN[num(x.v)]}: ${o ? 'cambialo' : 'agregalo'} a mano`);
-  });
-  base.bgs.forEach(x => { if (!cur.bgs.some(y => kB(y) === kB(x))) manual.push(`Trasfondo ${x.t} — ${x.c}${x.e ? ' — ' + x.e : ''}: lo quitaste, borralo a mano`); });
-  // idiomas
-  cur.idiomas.forEach(x => {
-    const o = base.idiomas.find(y => norm(y.n) === norm(x.n));
-    if (o && o.nivel === x.nivel) return;
-    if (o) { const i = findLine(o.n); if (i >= 0 && lines[i].includes(o.nivel)) { lines[i] = lines[i].replace(o.nivel, x.nivel); hechos.push(`Idioma ${x.n}`); return; } }
-    manual.push(`Idioma ${x.n} (${x.nivel}): ${o ? 'cambialo' : 'agregalo'} a mano`);
-  });
-  // ventajas y especializaciones
-  ADVS.forEach(a => { if (num(base.adv[a]) !== num(cur.adv[a])) { const i = lines.findIndex(l => new RegExp(`${reEsc(a)}\\s+(I|II|III|IV|V)\\b`).test(plain(l))); if (i >= 0 && num(cur.adv[a]) > 0) { lines[i] = lines[i].replace(new RegExp(`(${reEsc(a)}\\s+)(I|II|III|IV|V)\\b`), (m, p) => p + ROMAN[num(cur.adv[a])]); hechos.push(a); } else manual.push(`Ventaja ${a} ${ROMAN[num(cur.adv[a])] || '(quitada)'}: a mano`); } });
-  ESP_RAMAS.forEach(r => { if (num(base.esp[r]) !== num(cur.esp[r])) manual.push(`Especialización ${r}: ahora ${ROMAN[num(cur.esp[r])] || 'ninguna'}, revisala a mano`); });
-  // talentos y vínculos
-  cur.talentos.forEach(x => { if (!base.talentos.some(y => norm(y.n) === norm(x.n) && norm(y.nota) === norm(x.nota))) manual.push(`Talento ${x.n}${x.nota ? ' (' + x.nota + ')' : ''}: agregalo a mano`); });
-  base.talentos.forEach(x => { if (!cur.talentos.some(y => norm(y.n) === norm(x.n))) manual.push(`Talento ${x.n}: lo quitaste, borralo a mano`); });
-  cur.vinculos.forEach(x => { if (!base.vinculos.some(y => norm(y.pj) === norm(x.pj) && y.tipo === x.tipo)) manual.push(`${x.tipo} con ${x.pj}: agregalo a mano`); });
-  if (norm(base.titulos) !== norm(cur.titulos)) manual.push('Títulos académicos: cambiaron, revisalos a mano');
-  code = lines.join('\n');
-  return { code, hechos: [...new Set(hechos)], manual };
-}
-// Junta el texto nuevo con el código viejo línea a línea: las líneas que no cambiaron conservan sus enlaces, colores e imágenes.
-function mezclarLineas(seg, nuevo) {
-  const nk = s => norm(plain(String(s).replace(/\[img[^\]]*\][\s\S]*?\[\/img\]/gi, '').replace(/<img[^>]*>/gi, ''))).replace(/\s+/g, ' ');
-  const O = seg.split('\n'), N = nuevo.split('\n').filter(l => l.trim());
-  const oi = O.map((l, i) => ({ l, i, k: nk(l) })).filter(x => x.k), nkN = N.map(nk);
-  const n = oi.length, m = N.length, L = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
-  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = oi[i].k === nkN[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
-  const match = new Map(); let i = 0, j = 0;
-  while (i < n && j < m) { if (oi[i].k === nkN[j]) { match.set(oi[i].i, j); i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) i++; else j++; }
-  const out = []; let nj = 0;
-  O.forEach((l, idx) => {
-    const k = nk(l);
-    if (!k) { out.push(l); return; }
-    if (match.has(idx)) { const jj = match.get(idx); while (nj < jj) out.push(N[nj++]); out.push(l); nj = jj + 1; }
-  });
-  // lo nuevo que quedó al final va antes de las líneas vacías del cierre
-  let tailBlank = []; while (out.length && !out[out.length - 1].trim()) tailBlank.unshift(out.pop());
-  while (nj < m) out.push(N[nj++]);
-  return out.concat(tailBlank).join('\n');
-}
-function labelDe(p) {
-  const m = { nombre: 'Nombre y Apellido', 'd.avatar': 'Avatar/PB', 'd.multicuenta': 'Multicuenta', 'd.nacimiento': 'Lugar de Nacimiento', 'd.residencia': 'Lugar de Residencia', 'd.clase': 'Clase Social', 'd.fechaNac': 'Fecha de Nacimiento', 'd.edad': 'Edad', 'd.etapa': 'Etapa', 'd.orientacion': 'Orientación Sexual', 'd.sangre': 'Tipo de Sangre', 'd.raza': 'Raza', 'd.casa': 'Casa', 'd.curso': 'Curso', 'd.faccion': 'Facción', 'd.quidditch': 'Equipo de Quidditch', 'desc.fuerte': 'Punto Fuerte', 'desc.debil': 'Punto Débil', 'desc.gustos': 'Gustos/Aficiones', 'desc.fobias': 'Fobias/manías', 'desc.mascota': 'Mascota', 'extra.pdPerdida': 'Pérdida de Puntos de Destino', 'desc.fisica': 'Descripción Física', 'desc.psico': 'Descripción Psicológica', 'desc.historia': 'Historia', 'desc.familia': 'Familia' };
-  return m[p] || p;
+  const igual = () => ({ code: String(codigo), hechos: [], manual: ['No pude actualizar tu código: queda como estaba. Recargá la página y, si sigue, avisá.'] });
+  if (!window.PAM_EDITOR) return igual();
+  try { return window.PAM_EDITOR.actualizar(codigo, base, cur); } catch (e) { console.warn('[PAM] editor del código:', e); return igual(); }
 }
 const esCodigoForo = t => /\[color=|\[spoiler|<div|<span|<center|\[b\]/i.test(t || '');
 function guardarPlantilla(raw, baseFicha) {
@@ -1714,7 +1484,7 @@ function renderControl(){
 
 /* ---- Referencias: cómo se calcula cada stat y qué lo modifica ---- */
 function abrirReferencias(){
-  const M = modsFicha(), dl = $('#ct-ref'); if(!dl) return;
+  const M = combate().M, dl = $('#ct-ref'); if(!dl) return; /* 0.7.0: los modificadores, de js/reglas/Combate.js */
   const tuya = on => on ? ' <span class="ct-ref-mine">en tu ficha</span>' : '';
   const tabla = (cab, filas) => `<div class="tablewrap"><table class="req ct-ref-t"><thead><tr>${cab.map((c,i)=>`<th class="${i===cab.length-1?'l':'l'}">${c}</th>`).join('')}</tr></thead><tbody>${filas.map(f=>`<tr>${f.map((c,i)=>`<td class="l${i===0?' n':''}">${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
   const item = (nombre, on, txt, fuente) => `<li><b>${nombre}</b>${tuya(on)}: ${txt}${fuente?` <span class="muted">Fuente: ${fuente}.</span>`:''}</li>`;

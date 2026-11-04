@@ -221,7 +221,7 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
 </section>
 
 <section>
-  <h2>Errores corregidos <span class="pill"><b>30</b> arreglos</span></h2>
+  <h2>Errores corregidos <span class="pill"><b>31</b> arreglos</span></h2>
   <p class="sub">Agrupados por dónde se notaban. El código entre paréntesis es el de la lista de errores (<code>PENDIENTES.md</code>).</p>
   <div class="grid-2">
     <div class="card">
@@ -239,7 +239,8 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
       <div class="arreglo"><span class="tag">R02</span><span class="antes">Quitar el último elemento de una lista se llevaba el cierre del desplegable.</span><span class="ahora">El cierre se queda.</span></div>
       <div class="arreglo"><span class="tag">R03</span><span class="antes">Varios arcanos nuevos del mismo nivel quedaban al revés.</span><span class="ahora">Quedan en orden.</span></div>
       <div class="arreglo"><span class="tag">R06</span><span class="antes">Idiomas, trasfondos nuevos, ventajas, talentos y títulos había que ponerlos siempre a mano, y PAM decía «Agregado» aunque quedara mal.</span><span class="ahora">Se ponen solos, y cada cambio se comprueba; lo que no queda bien sale en «Revisá a mano».</span></div>
-      <div class="arreglo"><span class="tag">N07</span><span class="antes">Los canjes y la pestaña «Código para el foro» usaban el editor antiguo, con todos los errores de arriba.</span><span class="ahora">Los dos usan el editor nuevo. En los canjes se lee la ficha del foro tal como está, y lo que alguien cambió después no se pisa.</span></div>
+      <div class="arreglo"><span class="tag">N07</span><span class="antes">Los canjes y la pestaña «Código para el foro» usaban el editor antiguo, con todos los errores de arriba.</span><span class="ahora">Los dos usan el editor nuevo. En los canjes se lee la ficha del foro tal como está, y lo que alguien cambió después no se pisa. El editor antiguo ya no está.</span></div>
+      <div class="arreglo"><span class="tag">R11</span><span class="antes">(Salió en las pruebas.) Si el nivel de una habilidad estaba dentro de su propio color, como en la ficha de Elena, el canje no lo encontraba.</span><span class="ahora">Lo encuentra y lo cambia sin tocar el color.</span></div>
     </div>
     <div class="card">
       <h3>Canjes y Tabla de Canjes</h3>
@@ -287,6 +288,7 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
       <li><b>El carrito de trasfondos</b> no deja elegir un nivel que ya tenés, junta las subidas («0 → I» y «I → II» pasan a ser «0 → II») y siempre sale ordenado.</li>
       <li><b>Al aplicar un canje, la ficha</b> se edita mensaje a mensaje y solo en los que cambian. Ya no hace falta tener la ficha en modo «Personalizada».</li>
       <li><b>«Código para el foro»</b> en modo «Personalizada» ahora también pone idiomas, trasfondos, ventajas, talentos y títulos, y avisa de lo que no pudo hacer.</li>
+      <li><b>Los stats de combate</b> se calculan en un solo sitio para Mi Ficha, el Controlador, los canjes y Mi PJ. Dan exactamente lo mismo que antes (comprobado con las normas y con 60 fichas de prueba).</li>
       <li><b>El Inspector</b> se activa desde el panel Mi PJ (tarjeta «🔍 Inspector de Canjes», solo para Inspectores y para Hana, Mortimer y Robert). Su pastilla pasó abajo a la <b>izquierda</b>, porque tapaba la de Mi PJ.</li>
       <li><b>Con la sesión con código en dos dispositivos</b>, si los dos guardan a la vez sale el aviso para elegir, en vez de perderse datos.</li>
       <li><b>Si PAM no puede cargar una parte</b>, lo dice arriba («Probá recargar la página») en vez de quedarse a medias.</li>
@@ -318,13 +320,16 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
 
 <section>
   <h2>Próximos pasos</h2>
-  <p class="sub">En este orden. Lo que todavía falta corregir está en <code>PENDIENTES.md</code>.</p>
+  <p class="sub">En este orden. La lista completa para publicar (qué, quién y qué bloquea) está arriba del todo en <code>PENDIENTES.md</code>.</p>
   <ol class="pasos">
-    <li><div class="card"><h3>Pruebas en el foro de pruebas <span class="estado">ahora</span></h3><p>Con Chrome, el foro de pruebas y la ficha de Elena Whitlock: traer la ficha a PAM, hacer un canje, publicarlo, aprobarlo como Inspector, aplicarlo y terminar en PAM; la sesión con código en dos ventanas; y que PAM arranque bien.</p></div></li>
+    <li><div class="card"><h3>Pruebas en el foro de pruebas <span class="estado" style="color:var(--good)">hecho</span></h3><p>Con Chrome, el foro de pruebas y la ficha de Elena Whitlock: traer la ficha a PAM, hacer un canje, publicarlo, aprobarlo como Inspector, aplicarlo y terminar en PAM; la sesión con código en dos ventanas; y todas las páginas de PAM. Todo bien; el único error que salió (R11) ya está corregido.</p></div></li>
     <li><div class="card"><h3>Registro de Roles y Coloreador <span class="estado" style="color:var(--good)">hecho</span></h3><p>Separados por piezas, con los arreglos F14, F09 y N08 (versión 0.6.0).</p></div></li>
     <li><div class="card"><h3>Revisor de Empleos y Mi Ficha <span class="estado" style="color:var(--good)">hecho</span></h3><p>Separados por piezas y con los datos del sistema compartidos (R07), versiones 0.6.2 y 0.6.3.</p></div></li>
     <li><div class="card"><h3>Tabla de Canjes y Compendio <span class="estado" style="color:var(--good)">hecho</span></h3><p>Separados por piezas, con los datos oficiales y más fluidos (F16), versiones 0.6.4 a 0.6.6.</p></div></li>
     <li><div class="card"><h3>Portada, temas y estilos <span class="estado" style="color:var(--good)">hecho</span></h3><p>Las últimas páginas, como las demás, y los estilos ordenados por página (F17), versiones 0.6.7 y 0.6.8. Con esto todo PAM está reorganizado.</p></div></li>
+    <li><div class="card"><h3>Prueba en el foro de verdad <span class="estado">antes de publicar</span></h3><p>«Te toca responder», misiones, sueldo y oficiales con una cuenta real (en el foro de pruebas no hay actividad). Solo se mira: no se publica nada.</p></div></li>
+    <li><div class="card"><h3>Aviso «actualizá el script» <span class="estado">antes de publicar</span></h3><p>Que PAM avise si alguien tiene el script en otra versión (N12). Hoy simplemente no aparecería nada.</p></div></li>
+    <li><div class="card"><h3>Dos reglas para decidir con Hana</h3><p>PAM calcula los puntos igual que siempre, pero en dos casos no coincide del todo con el texto oficial: Herbivicus debería bloquear un punto de Rituales (N10) y el Altar del ritualista solo debería contar las Artesanías de construcción (N11). No se ha cambiado nada; se decide antes de tocarlo.</p></div></li>
     <li><div class="card"><h3>«Tus otras cuentas» en Mi PJ</h3><p>Que no enseñe cuentas desactivadas ni temas que ya terminaron (N03). Antes hay que ver en el foro cómo se marcan.</p></div></li>
     <li><div class="card"><h3>Con permiso de Hana</h3><p>Revisar las reglas de la nube (Firestore) para que nadie pueda listar ni borrar sesiones ajenas (N01).</p></div></li>
     <li><div class="card"><h3>Mejoras apuntadas</h3><p>Un icono animado mientras la Biblioteca de oficiales busca (N05); más listas editables a mano (N02); que la Biblioteca no lo lea todo de golpe (N06, por decidir).</p></div></li>
@@ -334,6 +339,6 @@ footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;c
 
 </main>
 
-<footer>✦ PAM · Plataforma Avadense · resumen del refactor, versión 0.6.8 (4 de noviembre de 2026) ✦</footer>
+<footer>✦ PAM · Plataforma Avadense · resumen del refactor, versión 0.7.0 (5 de noviembre de 2026) ✦</footer>
 </body>
 </html>

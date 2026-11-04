@@ -4,12 +4,14 @@
 //   · lo que el antiguo ya hacía bien (atributos, habilidades, combate, datos) da el mismo código;
 //   · lo que hacía mal: líneas nuevas fuera de su desplegable (R01), cierres que se van al quitar (R02), orden (R03);
 //   · lo que dejaba «a mano»: idiomas y trasfondos nuevos (R06);
-//   · si el editor nuevo falla, PAM sigue con el antiguo.
+//   · desde 0.7.0 el antiguo ya no está en PAM (sigue en la copia congelada, para comparar): si el editor nuevo falla,
+//     el código queda como estaba y se avisa.
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { JSDOM, VirtualConsole } from 'jsdom';
 import { pamEntero } from '../legado/montarPam.mjs';
+import { abrir } from '../legado/abrirPam.mjs';
 import { crearEditorPam } from '../../js/pam/EditorPam.js';
 import { Sistema } from '../../js/datos/Sistema.js';
 import { Compendio } from '../../js/datos/Compendio.js';
@@ -109,11 +111,19 @@ test('sin cambios: el código es el guardado y no dice que haya hecho nada', () 
   assert.deepEqual(manual, []);
 });
 
-test('si el editor nuevo falla, PAM sigue con el «Personalizada» antiguo', () => {
-  const n = pam({ actualizar() { throw new Error('roto'); } }), v = viejo();
-  n.w.console.warn = () => {};
-  n.cambiar('ficha.attrs.Vigor = 5'); v.cambiar('ficha.attrs.Vigor = 5');
-  assert.equal(n.codigo().codigo, v.codigo().codigo);
+test('0.7.0: ya no está el «Personalizada» antiguo; si el editor nuevo falla o no está, el código queda igual y se avisa', async () => {
+  // con el Mi Ficha de ahora (módulos, js/paginas/revisor/Revisor.js), no con la copia congelada
+  const { w } = await abrir('archivos', { antes: x => { x.confirm = () => true; x.alert = () => {}; } });
+  abiertas.push(w);
+  w.console.warn = () => {};
+  w.pamFicha.importar(MORTIMER, 'Mortimer Gaunt');
+  assert.equal(typeof w.PAM_EDITOR?.actualizar, 'function', 'lo deja js/pam/arranque.js');
+  for (const editor of [{ actualizar() { throw new Error('roto'); } }, undefined]) {
+    w.PAM_EDITOR = editor;
+    const { codigo, manual } = w.pamFicha.codigoPersonal();
+    assert.equal(codigo, MORTIMER);
+    assert.match(manual.join(' '), /No pude actualizar tu código: queda como estaba/);
+  }
 });
 
 test('la pestaña «Código para el foro» enseña lo del editor nuevo', () => {

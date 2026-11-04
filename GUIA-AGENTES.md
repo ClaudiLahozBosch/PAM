@@ -8,7 +8,7 @@ Documentos relacionados (en este orden de importancia):
 | Documento | Para qué |
 |---|---|
 | `GUIA-AGENTES.md` (este) | Visión completa y técnica. |
-| `PENDIENTES.md` | **Fuente única** de errores (F01–F17, R01–R11, N01–N08): estado, fase y prueba de cada uno. Si arreglas algo, se marca ahí. |
+| `PENDIENTES.md` | **Fuente única** de errores (F01–F17, R01–R11, N01–N12): estado, fase y prueba de cada uno. Si arreglas algo, se marca ahí. Arriba del todo, **la lista de lo que falta antes de publicar en `main`**. |
 | `REFACTOR.md` | El plan y las decisiones, escrito para Hana Park (la dueña de PAM). |
 | `RESUMEN-REFACTOR.html` | Resumen visual para quien no programa. |
 | `tests/README.md` | Cómo pasar las pruebas y qué fichas se pueden subir. |
@@ -128,7 +128,7 @@ tests/                    node:test + jsdom (ver §8).
 2. Al final del `<body>`: **un solo** `<script type="module" src="js/pam/arranque.js?v=…">`.
 3. `arranque.js` (`arrancar({doc, fetch, importar})`):
    - trae `data/empleos-foro.txt` y `data/arcanos.json` y los deja como `<script id="empleos-foro">` y `<script id="arcanos-data">`, donde los buscan las páginas antiguas;
-   - trae `data/sistema.json` y deja en `window.PAM_EDITOR` el editor nuevo (si falla, solo avisa en consola y PAM usa el antiguo);
+   - trae `data/sistema.json` y deja en `window.PAM_EDITOR` el editor nuevo (si falla, solo avisa en consola; desde 0.7.0 no hay editor antiguo de recambio: «Código para el foro» deja el código como estaba y avisa);
    - monta las páginas una tras otra, en el orden original (`PAGINAS = tabla-canjes, revisor, registro, portada, temas, foro-antiguo`; `MODULOS` dice dónde está cada una). Desde la 8e todas son módulos con `montar(ventana, {traer})`. Reciben la ventana y no usan variables globales: lo que una necesita de otra va por un objeto en `window` (`window.pamTabla` con getters porque `state` se reasigna, `pamFicha`, `pamPjs`, `rrBoveda`, `rrOficiales`, `showSection`, `aplicarTema`…). Así las pruebas las montan en Node con la ventana de jsdom;
    - después importa `js/nube/main.js` y `js/pam/main.js`;
    - si algo no se puede traer o una página no arranca, pinta arriba `.pam-arranque-error`: «No se pudo cargar una parte de PAM (…). Probá recargar la página.».
@@ -252,9 +252,11 @@ Claves de paso en el almacén del agente: `pam.oficiales` (Biblioteca → PAM), 
 
 | F17 | Versiones distintas en un script, CSS repetido, `leerSaldos` copiado. | Una versión (el agente); un `leerSaldos`; los estilos, un archivo por página y los efectos una sola vez. Mismos estilos calculados en un navegador real. | `css/*.css`, `js/lectores/LectorBoveda.js` | `arranque`, `registro` |
 
+| N09 | Mi Ficha tenía su propia copia del cálculo de combate y puntos. | Usa `js/reglas/Combate.js` (comprobado con las normas y con 60 fichas al azar). | `js/paginas/revisor/Revisor.js` («0.7.0») | `combate-mi-ficha` |
+
 | R11 | (Encontrado en las pruebas en Chrome, 0.6.9) El editor no encontraba un valor escrito dentro de su propio color (`→ Atletismo:[/color] [color=#316996]Novato (+1)[/color]`); en un atributo, el número nuevo quedaba delante del viejo. Venía del «Personalizada» antiguo. | Admite etiquetas de apertura entre la etiqueta y el valor (atributos, habilidades, artes); el atributo se escribe sin «+» si la ficha lo escribía así. | `js/bbcode/EditorFicha.js` (`OPEN`) | `editor` |
 
-**Sin corregir:** N01, N03, y las mejoras N02, N05, N06 (ver §11).
+**Sin corregir:** N01, N03, N10, N11, N12 y las mejoras N02, N05, N06 (ver §11 y `PENDIENTES.md`).
 
 ## 8. Cambios dentro del código antiguo de Hana
 
@@ -264,7 +266,8 @@ Las páginas de `js/paginas/pam/` son el código de `index.html` **copiado por s
 |---|---|---|
 | `foro-antiguo.js` | `FOROS_PRUEBA = ["https://test-forito.foroactivo.com"]` también puede mandar «Datos del foro → PAM» (siempre con Aceptar / Denegar). | Probar en el foro de pruebas (6a). |
 | `revisor.js` | `window.pamFicha` gana `traerCalculadora`, `llevarCalculadora`, `codigoPersonal` (aditivas: lo que hacen los botones). | Que los canjes no pulsen botones (F13, 6b). |
-| `revisor.js` | `actualizarCodigo` usa `window.PAM_EDITOR` si está; si no o si falla, el antiguo (`actualizarCodigoAntiguo`). | N07 (0.5.3). |
+| `revisor.js` | `actualizarCodigo` usa `window.PAM_EDITOR`. Desde 0.7.0 (en `js/paginas/revisor/Revisor.js`) ya no está el antiguo (`actualizarCodigoAntiguo` y sus ayudantes): si el editor no está o falla, el código queda igual y se avisa. | N07 (0.5.3, 0.7.0). |
+| `js/paginas/revisor/Revisor.js` | `combate()` y `puntos()` llaman a `js/reglas/Combate.js` con la ficha de Mi Ficha traducida (`fichaReglas()`: `Esquiva` → `Esquivar`…) y añaden `E` (la etapa); el diálogo de referencias toma los modificadores de ahí. | N09 (0.7.0). |
 | `registro-roles.js` (desde la 8b, `js/paginas/registro/RegistroRoles.js`) | `window.rrBoveda` gana `preparar` y `cerrar` (aditivas). | Canjes (6b). |
 | `revisor.js` (desde la 8c, `js/paginas/revisor/Revisor.js`) | Lo de la Tabla de Canjes por `window.pamTabla` (`TC.state`, `TC.addToCart`…); guarda con el almacén (`leerTexto`/`guardarTexto` para `grimorio.fichaTab`, que es texto suelto). | Fase 8c. |
 | `tabla-canjes.js` | Ofrece `window.pamTabla` (getters, siempre al día). | Fase 8c. |
@@ -278,7 +281,7 @@ Las páginas de `js/paginas/pam/` son el código de `index.html` **copiado por s
 
 ```
 cd tests && npm install   # la primera vez
-npm test                  # 240 pruebas: 239 pasan, 1 se salta (la de la ficha real de Irvin, sin la variable)
+npm test                  # 241 pruebas: 240 pasan, 1 se salta (la de la ficha real de Irvin, sin la variable)
 PAM_FICHA_IRVIN="C:\ruta\Irvin Giles.htm" npm test   # con la ficha real (no está ni puede estar en el repo)
 ```
 
@@ -308,7 +311,7 @@ PAM_FICHA_IRVIN="C:\ruta\Irvin Giles.htm" npm test   # con la ficha real (no est
 
 1. **Pruebas en Chrome (05/11, agente 0.6.9, staging + test-forito): pasadas** 6b (canje entero con Elena: petición, aprobación, aplicar los 4 pasos, «Terminar en PAM», carrito vacío), 6c, 7 (código de sesión de pruebas, dos ventanas), 8a–8e y «Enviar a PAM»; antes ya 5a, 5b, 5d y 6a. Salió R11 (arreglado). **Falta la 5c** (te toca responder, misiones, sueldo, oficiales): mejor en el foro real, solo leyendo.
 2. ~~Fase 8b~~ hecha (0.6.0).
-3. ~~Fase 8c~~ hecha (0.6.2 y 0.6.3). Pendiente de decidir: el «Personalizada» antiguo (`actualizarCodigoAntiguo`) puede desaparecer cuando el nuevo esté probado en Chrome; el cálculo de combate de Mi Ficha podría usar `js/reglas/Combate.js` (habría que pasar la ficha antigua al modelo nuevo).
+3. ~~Fase 8c~~ hecha (0.6.2 y 0.6.3). Decisiones tomadas el 5/11 (0.7.0): fuera el «Personalizada» antiguo y un solo cálculo de combate (`js/reglas/Combate.js`, N09). Quedan por decidir con Hana dos reglas de los puntos que no coinciden del todo con el texto oficial (N10 Herbivicus, N11 Altar del ritualista).
 4. ~~Fase 8d~~ hecha (0.6.4–0.6.6). Las pruebas que comparan con el PAM antiguo le aplican `comoOficial()` (`tests/legado/abrirPam.mjs`): las tres diferencias del Sistema reconciliado. Desde F16, para comparar la página entera hay que abrir antes todas las pestañas de la Tabla (y el Compendio).
 5. ~~Fase 8e~~ hecha (0.6.7 y 0.6.8). `PamActual` no tuvo que cambiar (las páginas ofrecen las mismas funciones en `window`).
 6. **N03** («Tus otras cuentas»): no mostrar cuentas inactivas ni temas cerrados. Antes, **mirar en el foro real** cómo marca una cuenta inactiva y un tema cerrado; no suponerlo.
@@ -318,9 +321,13 @@ PAM_FICHA_IRVIN="C:\ruta\Irvin Giles.htm" npm test   # con la ficha real (no est
 
 ### Para publicar en `main` (al final)
 
+La lista completa, en orden y con quién lo hace, está arriba del todo en `PENDIENTES.md` («Antes de publicar en `main`»). En resumen:
+
+
 - Pull request de `refactor` a `main`, que acepta Hana. Antes, llevar a la rama lo que Hana haya cambiado en `main`.
 - El agente pasa a `pam-mi-pj.user.js` con el **mismo `@name` y `@namespace` que Mi PJ** y un `@version` mayor: Tampermonkey lo actualiza solo y conserva los datos (el panel los migra con `almacen.legado`). Cambiar `PAM.origen` del staging a la web de Hana y quitar el `@match` del staging.
-- **Por hacer:** que PAM avise «actualizá el script» si el agente es de otra versión (hoy, si el protocolo no coincide, simplemente no hace nada).
+- **Por hacer (N12):** que PAM avise «actualizá el script» si el agente es de otra versión (hoy, si el protocolo no coincide, simplemente no hace nada).
+- **Antes:** la prueba 5c en el foro real, solo leyendo (`poc-agente/PROVES-5c.md`).
 - Los Inspectores tienen que **desinstalar el script antiguo del Inspector** (si no, verán dos barras).
 - Marcha atrás: «Revert» del pull request; la migración no borra datos antiguos.
 
