@@ -8,12 +8,12 @@
 // Si algo no se puede traer, PAM avisa arriba en vez de quedarse a medias sin decir nada.
 // N07 (0.5.3): antes de las páginas deja en window.PAM_EDITOR el editor nuevo del «Código para el foro» (js/pam/EditorPam.js),
 // con data/sistema.json y los arcanos. Si eso falla, PAM sigue con el «Personalizada» antiguo.
-import { Sistema } from '../datos/Sistema.js?v=0.6.1';
-import { Compendio } from '../datos/Compendio.js?v=0.6.1';
-import { LectorFicha } from '../lectores/LectorFicha.js?v=0.6.1';
-import { crearEditorPam } from './EditorPam.js?v=0.6.1';
+import { Sistema } from '../datos/Sistema.js?v=0.6.2';
+import { Compendio } from '../datos/Compendio.js?v=0.6.2';
+import { LectorFicha } from '../lectores/LectorFicha.js?v=0.6.2';
+import { crearEditorPam } from './EditorPam.js?v=0.6.2';
 
-const V = '?v=0.6.1'; // lo pone scripts/versionar.mjs
+const V = '?v=0.6.2'; // lo pone scripts/versionar.mjs
 
 /** Los datos que las páginas antiguas leen de la página, en orden. */
 export const DATOS = [
@@ -23,8 +23,8 @@ export const DATOS = [
 /** Las páginas, en el orden en que estaban en index.html: las antiguas (js/paginas/pam/<nombre>.js, scripts normales)
  *  y las que ya son módulos (MODULOS). */
 export const PAGINAS = ['tabla-canjes', 'revisor', 'registro', 'portada', 'temas', 'foro-antiguo'];
-/** Fase 8b: el Registro de Roles y el Coloreador ya son módulos (js/paginas/registro/). */
-export const MODULOS = { registro: '../paginas/registro/main.js' };
+/** Las que ya son módulos: el Registro de Roles y el Coloreador (8b), Mi Ficha y el Revisor de Empleos (8c). */
+export const MODULOS = { revisor: '../paginas/revisor/main.js', registro: '../paginas/registro/main.js' };
 
 export const urlPagina = p => `js/paginas/pam/${p}.js${V}`;
 

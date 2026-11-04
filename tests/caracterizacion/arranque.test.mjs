@@ -16,7 +16,7 @@ test('arrancar desde los archivos deja el mismo PAM que cuando todo estaba en in
   const a = await abrir('archivos'), b = await abrir('junto');
   try {
     assert.equal(a.ok, true);
-    assert.deepEqual(a.importados, ['../paginas/registro/main.js', '../nube/main.js', './main.js'], 'el Registro en su sitio y después lo nuevo, en el mismo orden');
+    assert.deepEqual(a.importados, ['../paginas/revisor/main.js', '../paginas/registro/main.js', '../nube/main.js', './main.js'], 'Mi Ficha y el Registro en su sitio y después lo nuevo, en el mismo orden');
     for (const g of GLOBALES) assert.equal(typeof a.w[g], typeof b.w[g], g);
     assert.notEqual(typeof a.w.pamFicha, 'undefined');
     igual(pagina(a.w), pagina(b.w));
@@ -56,7 +56,7 @@ test('si no se puede traer el Registro de Roles, PAM lo dice arriba', async () =
 
 test('el orden y los datos son los de index.html antes de la fase 8a', () => {
   assert.deepEqual(PAGINAS, ['tabla-canjes', 'revisor', 'registro', 'portada', 'temas', 'foro-antiguo']);
-  assert.deepEqual(Object.keys(MODULOS), ['registro']);
+  assert.deepEqual(Object.keys(MODULOS), ['revisor', 'registro']);
   assert.deepEqual(DATOS.map(d => d.src), ['data/empleos-foro.txt', 'data/arcanos.json']);
   const idx = readFileSync(path.join(RAIZ, 'index.html'), 'utf8');
   assert.doesNotMatch(idx, /<script>|<style>/, 'index.html ya no lleva código ni estilos dentro');

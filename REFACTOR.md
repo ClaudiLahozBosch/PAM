@@ -139,7 +139,7 @@ El script aparte «PAM · Inspector de Canjes» pasa a PAM y al mismo agente que
 | Los estilos (`<style>`) | `css/pam.css` |
 | Los empleos del foro y los arcanos | `data/empleos-foro.txt` y `data/arcanos.json`: los mismos archivos que ya usan el panel de Mi PJ y el Inspector. Ya no están dos veces. |
 | Datos del sistema, Tabla de Canjes y Compendio | `js/paginas/pam/tabla-canjes.js` |
-| Revisor de Empleos: Empleos, Mi Ficha, Controlador y Editor | `js/paginas/pam/revisor.js` |
+| Revisor de Empleos: Empleos, Mi Ficha, Controlador y Editor | `js/paginas/pam/revisor.js` (desde la 8c, `js/paginas/revisor/`) |
 | Registro de Roles y Coloreador de Diálogos | `js/paginas/pam/registro-roles.js` (desde la 8b, `js/paginas/registro/`) |
 | Portada y navegación | `js/paginas/pam/portada.js` |
 | Temas | `js/paginas/pam/temas.js` |
@@ -174,7 +174,14 @@ El script aparte «PAM · Inspector de Canjes» pasa a PAM y al mismo agente que
 **Lo que queda:**
 
 - **0.6.1 · Lista de deseos del Registro con los datos oficiales** (decisión del 4/11/2026): mismos nombres y orden que la Tabla de Canjes y la ficha; aparecen la Capa de Invisibilidad y los legendarios que faltaban; no se pierde nada de lo que tenía.
-- **8c · Revisor de Empleos y Mi Ficha:** los datos del sistema de `data/sistema.json` (R07).
+- **8c · Revisor de Empleos y Mi Ficha.** Primera parte hecha (0.6.2): `js/paginas/revisor/`, separado por piezas como el Registro:
+  - `Revisor.js` tiene las pantallas, con el mismo código: Mi Ficha, el Controlador de stats, el Revisor y el Editor de empleos.
+  - `datos.js` (rangos, habilidades, trasfondos, sueldos), `modelo.js` (la ficha vacía y la de ejemplo) y `empleos.js` (el lector de los empleos del foro).
+  - Lo que Mi Ficha usa de la Tabla de Canjes (el carrito, los precios…) ya no son variables compartidas: la Tabla lo ofrece en `window.pamTabla`.
+  - Guarda con el almacén, con las mismas claves y el mismo formato.
+  - Su HTML sigue en `index.html` y sus estilos en `css/pam.css`.
+
+  Queda: que use los datos de `data/sistema.json` y las reglas de combate compartidas (R07).
 - **8d · Tabla de Canjes y Compendio:** que no repinte todo por cualquier cambio (F16). (El carrito de trasfondos, N04, ya está desde la 6b·1, y que se guarde al recargar, R08, desde la 0.5.1.)
 - **8e · Portada, temas y lo que quede:** los estilos repartidos por página y sin repetir (F17), y `js/pam/PamActual.js` cambiado a las páginas nuevas.
 

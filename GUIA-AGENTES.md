@@ -1,6 +1,6 @@
 # Guía del refactor de PAM para agentes de IA
 
-Estado a **4/11/2026**, rama `refactor`, versión **0.6.1** (fase 8b hecha; lista de deseos con los datos oficiales).
+Estado a **4/11/2026**, rama `refactor`, versión **0.6.2** (fase 8b hecha; lista de deseos con los datos oficiales; 8c, primera parte: Mi Ficha y el Revisor como módulos).
 Este documento es para un agente de IA (o una persona programadora) que tenga que seguir trabajando en la rama sin haber estado en las sesiones anteriores. Explica qué se reorganizó, cómo funciona ahora, qué errores se corrigieron y dónde, y qué queda. Léelo entero antes de tocar nada.
 
 Documentos relacionados (en este orden de importancia):
@@ -84,7 +84,10 @@ js/servicios/             Hablan con el foro a través del agente: FichaDelForo,
 js/servicios/agente/      protocolo.js (el contrato) y ClienteAgente.js (postMessage con id y respuesta).
 js/paginas/panel/         El panel Mi PJ: main.js, MiPjPanel.js (moduloMiPJ portado), CanjesPanel.js, BibliotecaPanel.js.
 js/paginas/pam/           El código ANTIGUO de PAM repartido (fase 8a). Scripts clásicos, no módulos:
-                          tabla-canjes, revisor, portada, temas, foro-antiguo.
+                          tabla-canjes (desde la 8c ofrece window.pamTabla), portada, temas, foro-antiguo.
+js/paginas/revisor/       Fase 8c: Mi Ficha, Controlador de stats, Revisor y Editor de empleos como módulos. main.js,
+                          Revisor.js (pantallas, mismo código; lo de la Tabla por window.pamTabla como «TC.…»),
+                          datos.js, modelo.js (ficha vacía y de ejemplo), empleos.js (lector de empleos del foro).
 js/paginas/registro/      Fase 8b: el Registro de Roles y el Coloreador como módulos. main.js (montar), RegistroRoles.js
                           (las pestañas, mismo código), Coloreador.js (+N08), datos.js (listas fijas), deseos.js
                           (datos de la lista de deseos desde los oficiales, 0.6.1) + deseosExtra.js (lo que solo tenía
@@ -118,7 +121,7 @@ tests/                    node:test + jsdom (ver §8).
 3. `arranque.js` (`arrancar({doc, fetch, importar})`):
    - trae `data/empleos-foro.txt` y `data/arcanos.json` y los deja como `<script id="empleos-foro">` y `<script id="arcanos-data">`, donde los buscan las páginas antiguas;
    - trae `data/sistema.json` y deja en `window.PAM_EDITOR` el editor nuevo (si falla, solo avisa en consola y PAM usa el antiguo);
-   - carga las páginas en el orden original (`PAGINAS = tabla-canjes, revisor, registro, portada, temas, foro-antiguo`). Las de `js/paginas/pam/` son scripts clásicos con `async=false`: se ejecutan en orden y comparten variables globales como cuando estaban en un solo `<script>`. Las que ya son módulos (`MODULOS`, desde la 8b el `registro`) se importan en su sitio y se montan con `montar(ventana, {traer})`; las clásicas se cargan por tandas entre módulo y módulo;
+   - carga las páginas en el orden original (`PAGINAS = tabla-canjes, revisor, registro, portada, temas, foro-antiguo`). Las de `js/paginas/pam/` son scripts clásicos con `async=false`: se ejecutan en orden y comparten variables globales como cuando estaban en un solo `<script>`. Las que ya son módulos (`MODULOS`: `revisor` desde la 8c, `registro` desde la 8b) se importan en su sitio y se montan con `montar(ventana, {traer})`; las clásicas se cargan por tandas entre módulo y módulo. **Un módulo no ve las variables de un script clásico en las pruebas** (en el navegador sí): lo que necesita de otra página llega por un objeto en `window` (p. ej. `window.pamTabla`, con getters porque `state` se reasigna);
    - después importa `js/nube/main.js` y `js/pam/main.js`;
    - si algo no se puede traer, pinta arriba `.pam-arranque-error`: «No se pudo cargar una parte de PAM (…). Probá recargar la página.».
    - Se ejecuta solo salvo que `globalThis.__pamSinArranque` (lo usan las pruebas).
@@ -247,6 +250,8 @@ Las páginas de `js/paginas/pam/` son el código de `index.html` **copiado por s
 | `revisor.js` | `window.pamFicha` gana `traerCalculadora`, `llevarCalculadora`, `codigoPersonal` (aditivas: lo que hacen los botones). | Que los canjes no pulsen botones (F13, 6b). |
 | `revisor.js` | `actualizarCodigo` usa `window.PAM_EDITOR` si está; si no o si falla, el antiguo (`actualizarCodigoAntiguo`). | N07 (0.5.3). |
 | `registro-roles.js` (desde la 8b, `js/paginas/registro/RegistroRoles.js`) | `window.rrBoveda` gana `preparar` y `cerrar` (aditivas). | Canjes (6b). |
+| `revisor.js` (desde la 8c, `js/paginas/revisor/Revisor.js`) | Lo de la Tabla de Canjes por `window.pamTabla` (`TC.state`, `TC.addToCart`…); guarda con el almacén (`leerTexto`/`guardarTexto` para `grimorio.fichaTab`, que es texto suelto). | Fase 8c. |
+| `tabla-canjes.js` | Ofrece `window.pamTabla` (getters, siempre al día). | Fase 8c. |
 | `js/paginas/registro/` | Lo que cambia respecto al código antiguo está marcado con «8b» en cada archivo: la ventana se recibe como parámetro (`const window = w, document = w.document…`, para poder montarlo en las pruebas), guardado con el almacén, fechas locales, sin el modo «Guardado en tu cuenta», SheetJS nuevo y N08. | Fase 8b. |
 | `tabla-canjes.js` | Carrito de trasfondos (N04); guardado `grimorio.canjes` y `window.pamCanjes.vaciarCarrito` (R08). | 6b·1 y 0.5.1. |
 | `index.html` | Solo HTML; los `<script>` y el `<style>` pasan a archivos (8a). | Fase 8a. |
@@ -265,7 +270,8 @@ PAM_FICHA_IRVIN="C:\ruta\Irvin Giles.htm" npm test   # con la ficha real (no est
 - **`tests/legado/montarPam.mjs` (`pamEntero()`)** vuelve a juntar `index.html` + `css/pam.css` + `data/` + `js/paginas/pam/*` en el HTML único de antes. Lo usan `cargarPam`, `inspector`, `inspector-tabla` y `canjes-pam`.
 - **`tests/legado/cargarPam.mjs`** carga ese PAM en jsdom y expone `global(expr)` y `ficha(expr)` (evalúa dentro del IIFE de Mi Ficha). Hace falta un `requestAnimationFrame` falso y `cerrarPam()`, o node no termina.
 - **`arranque.test.mjs`** arranca PAM desde los archivos (con un `ResourceLoader` que sirve el disco en una URL `https://jesleytherabbit-prog.github.io/PAM/`, porque jsdom con `file:` no tiene `localStorage`) y junto, con `Date.now` fijo y `Math.random` determinista, y compara la página, lo que PAM deja para el foro y cinco secciones. También que exista `PAM_EDITOR`.
-- **Desde la 8b, `tests/legado/abrirPam.mjs`** (`abrir('archivos'|'junto', {antes})`, `pagina`, `igual`): abre PAM nuevo y antiguo con los mismos datos; en «archivos» monta de verdad los módulos de páginas (en Node, con la ventana de jsdom: por eso los módulos de páginas reciben la ventana como parámetro y no tocan globales). **`tests/legado/paginas/`** guarda las copias congeladas de las páginas reescritas (hoy `registro-roles.js`), que `montarPam.mjs` usa para el PAM antiguo. **`registro.test.mjs`** compara las pestañas del Registro y el Coloreador (con datos de ejemplo y con un registro guardado), al usarlos y lo guardado.
+- **Desde la 8b, `tests/legado/abrirPam.mjs`** (`abrir('archivos'|'junto', {antes})`, `pagina`, `igual`): abre PAM nuevo y antiguo con los mismos datos; en «archivos» monta de verdad los módulos de páginas (en Node, con la ventana de jsdom: por eso los módulos de páginas reciben la ventana como parámetro y no tocan globales). **`tests/legado/paginas/`** guarda las copias congeladas de las páginas reescritas (hoy `registro-roles.js`), que `montarPam.mjs` usa para el PAM antiguo. **`registro.test.mjs`** compara las pestañas del Registro y el Coloreador (con datos de ejemplo y con un registro guardado), al usarlos y lo guardado. **`revisor.test.mjs`** (8c) compara Mi Ficha (las seis pestañas), el Revisor, el Controlador y el Editor sin ficha, con la de ejemplo y con la de Mortimer importada, más `grimorioFicha`, `pamRapido`, `pamPjs`, `codigoPersonal`, «Llevar/Traer de la calculadora» y lo guardado.
+- **Cómo se reparte una página antigua (8b, 8c):** un script copia sus líneas a módulos (sin cambiar el código) y hace sustituciones exactas que fallan si no encuentran el texto. Para cambiar nombres solo en el código (no en textos ni plantillas) se usa un analizador léxico pequeño. Ojo con las variables locales del código antiguo: en la 8c el prefijo `T.` chocaba con una variable `T` y lo detectó la prueba (se usa `TC.`).
 - **`panel-mipj.test.mjs`** ejecuta el `pam-mi-pj.user.js` antiguo entero en jsdom con los mismos datos y compara el HTML del panel.
 - **`tests/fixtures/actividad/foro.mjs`** y `profeta.mjs`: un foro inventado que leen el script antiguo y PAM.
 - **`tests/legado/sin-version.mjs`**: hook de `node --import` para cargar módulos con `?v=`.

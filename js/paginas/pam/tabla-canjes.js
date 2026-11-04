@@ -1,6 +1,7 @@
 /* PAM · Datos del sistema, Tabla de Canjes y Compendio.
    Fase 8a: el mismo código que estaba dentro de index.html. Lo carga js/pam/arranque.js.
-   Cambios desde entonces (buscar «R08»): la Tabla de Canjes se guarda en el navegador y se vacía el carrito al cerrar un canje. */
+   Cambios desde entonces (buscar «R08» y «8c»): la Tabla de Canjes se guarda en el navegador y se vacía el carrito al cerrar
+   un canje; window.pamTabla para Mi Ficha (que ya es un módulo). */
 /* =========================================================
    DATOS  (según los documentos del Sistema Avadense)
    ========================================================= */
@@ -1926,3 +1927,17 @@ document.addEventListener("click", e=>{
 buildTabs();
 document.getElementById("re-mount").innerHTML = document.getElementById("re-template").innerHTML;
 renderAll();
+
+/* 8c: lo que Mi Ficha y el Revisor de Empleos (js/paginas/revisor/, ya un módulo) usan de esta página. Un módulo no ve
+   las variables de un script normal en las pruebas, así que se las pasa este objeto, siempre al día (state cambia). */
+window.pamTabla = {
+  get state(){ return state; },
+  get SKILL_GROUPS(){ return SKILL_GROUPS; }, get SKILL_LVL(){ return SKILL_LVL; }, get STAT_ACUM(){ return STAT_ACUM; },
+  get SKILL_ACUM(){ return SKILL_ACUM; }, get TGEN_ACUM(){ return TGEN_ACUM; }, get TESP_ACUM(){ return TESP_ACUM; },
+  get VENT_ACUM(){ return VENT_ACUM; }, get VENT_LABELS(){ return VENT_LABELS; }, get ARCANOS(){ return ARCANOS; },
+  get DESC(){ return DESC; }, get TALENTOS(){ return TALENTOS; }, get COMP(){ return COMP; },
+  fmt: (...a) => fmt(...a), precioTexto: (...a) => precioTexto(...a), costoSubida: (...a) => costoSubida(...a),
+  addToCart: (...a) => addToCart(...a), espLevel: (...a) => espLevel(...a), activateTab: (...a) => activateTab(...a),
+  renderAll: (...a) => renderAll(...a), statNotes: (...a) => statNotes(...a), skillNotes: (...a) => skillNotes(...a),
+  compResults: (...a) => compResults(...a)
+};

@@ -31,6 +31,18 @@ export class Almacen {
     } catch { return porDefecto; }
   }
 
+  /** El texto guardado tal cual (sin JSON), o `porDefecto`. Para claves antiguas que guardan texto suelto. */
+  leerTexto(clave, porDefecto = null) {
+    try { const t = this.#storage.getItem(clave); return t == null ? porDefecto : t; } catch { return porDefecto; }
+  }
+
+  /** Guarda un texto tal cual (sin JSON). */
+  guardarTexto(clave, texto) {
+    this.#cancelar(clave);
+    try { this.#storage.setItem(clave, String(texto)); return { ok: true }; }
+    catch (e) { return { ok: false, error: e instanceof Error ? e.message : String(e) }; }
+  }
+
   /** Guarda ya. Devuelve `{ok}` o `{ok:false, error}` (p. ej. sin espacio). */
   guardar(clave, valor) {
     this.#cancelar(clave);
