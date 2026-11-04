@@ -7,10 +7,10 @@
 //   grimorio.personajes  { activa, lista: [{ id, ficha }] }       las fichas (Mi Ficha)
 //   revisorEmpleos.ficha  ficha suelta (antes de que hubiera varios personajes)
 //   registro-roles-v1     { personajes: [{ id, pamId, nombre, roles, ganancias, wish, boveda, … }], … }
-import { Personaje } from '../modelos/Personaje.js?v=0.4.0';
-import { Ficha } from '../modelos/Ficha.js?v=0.4.0';
-import { Boveda } from '../modelos/Boveda.js?v=0.4.0';
-import { normNombre } from '../core/texto.js?v=0.4.0';
+import { Personaje } from '../modelos/Personaje.js?v=0.4.1';
+import { Ficha } from '../modelos/Ficha.js?v=0.4.1';
+import { Boveda } from '../modelos/Boveda.js?v=0.4.1';
+import { normNombre } from '../core/texto.js?v=0.4.1';
 
 export const CLAVES_LEGADO = { personajes: 'grimorio.personajes', fichaSuelta: 'revisorEmpleos.ficha', registro: 'registro-roles-v1' };
 
