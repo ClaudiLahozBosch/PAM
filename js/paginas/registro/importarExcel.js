@@ -1,7 +1,7 @@
 // @ts-nocheck
 // Registro de Roles: «Importar desde Excel». Leer la planilla (SheetJS) y pasarla a personajes, roles, oficiales,
 // turnos y ganancias. Copiado del Registro antiguo (fase 8b); cambia la versión de SheetJS (F09).
-import { TIPOS, ESTADOS, TURNOS, OF_EST } from './datos.js?v=0.6.3';
+import { TIPOS, ESTADOS, TURNOS, OF_EST } from './datos.js?v=0.6.4';
 
 /* F09: SheetJS 0.20.3, de su propia web (la 0.18.5 de cdnjs tiene dos fallos de seguridad y ya no se actualiza allí) */
 export const XLSX_URL="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js";

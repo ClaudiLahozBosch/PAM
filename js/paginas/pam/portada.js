@@ -1,5 +1,6 @@
 /* PAM · Portada y navegación principal.
-   Fase 8a: el mismo código que estaba dentro de index.html, sin cambios. Lo carga js/pam/arranque.js. */
+   Fase 8a: el mismo código que estaba dentro de index.html. Lo carga js/pam/arranque.js.
+   Cambios desde entonces (buscar «8d»): lo de la Tabla de Canjes, por window.pamTabla (ya es un módulo). */
 /* ============ Portada y navegación principal ============ */
 (function(){
   const K_USER = "grimorioAvadense.usuario";
@@ -85,14 +86,15 @@
   inN.addEventListener("input", ()=>{ user.n = inN.value; saveUser(); });
   fitG(); paintGreet();
   const hc = document.getElementById("hcArcanos");
-  if(hc && typeof ARCANOS!=="undefined") hc.textContent = `${ARCANOS.length} hechizos, pociones, rituales y objetos, con buscador y filtros.`;
+  const TC = window.pamTabla || {}; /* 8d: la Tabla de Canjes ya es un módulo */
+  if(hc && typeof TC.ARCANOS!=="undefined") hc.textContent = `${TC.ARCANOS.length} hechizos, pociones, rituales y objetos, con buscador y filtros.`;
 
   window.showSection = function(key, push=true){
     if(!SECS[key]) key = "home";
     document.querySelectorAll(".app-sec").forEach(s=>s.classList.toggle("active", s.id===SECS[key]));
     document.body.dataset.sec = key;
     document.getElementById("ledgerWrap").style.display = (key==="canjes"||key==="compendio") ? "" : "none";
-    if(key==="canjes"||key==="compendio"){ try{ if(typeof renderAll==="function") renderAll(); if(typeof COMP!=="undefined" && COMP.built) compResults(); }catch(e){} }
+    if(key==="canjes"||key==="compendio"){ try{ const TC = window.pamTabla || {}; /* 8d */ if(typeof TC.renderAll==="function") TC.renderAll(); if(typeof TC.COMP!=="undefined" && TC.COMP.built) TC.compResults(); }catch(e){} }
     if(RR_TAB[key]){
       document.getElementById("rrTitle").textContent = RR_INFO[key][0];
       document.getElementById("rrSub").textContent = RR_INFO[key][1];

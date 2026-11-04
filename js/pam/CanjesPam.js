@@ -9,9 +9,9 @@
 //   · Cierre: tras publicarlo todo en el foro («pam.aprobacion»), se ponen los dos enlaces en la Bóveda de PAM y se
 //     hace su «Ya lo publiqué».
 // La pastilla «✦ Mi PJ · Canjes» es la de siempre (abajo a la derecha de PAM).
-import { abrirPuerta, crearEl, estilos } from './ui/Puerta.js?v=0.6.3';
-import { claveCuenta } from '../reglas/Canjes.js?v=0.6.3';
-import { cambiosDeCanje } from '../reglas/CambiosFicha.js?v=0.6.3';
+import { abrirPuerta, crearEl, estilos } from './ui/Puerta.js?v=0.6.4';
+import { claveCuenta } from '../reglas/Canjes.js?v=0.6.4';
+import { cambiosDeCanje } from '../reglas/CambiosFicha.js?v=0.6.4';
 
 const CLAVE_PAQUETE = 'pam.paquete', CLAVE_PETICION = 'pam.peticion', CLAVE_APROBACION = 'pam.aprobacion';
 const numero = txt => { const l = String(txt == null ? '' : txt).replace(/[^\d-]/g, ''); return l === '' || l === '-' ? NaN : parseInt(l, 10); };

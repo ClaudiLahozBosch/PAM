@@ -7,9 +7,9 @@
 //     compartidas: un módulo no las ve en las pruebas;
 //   · guarda con el almacén (js/core/Almacen.js), con las mismas claves y el mismo formato.
 // Recibe la ventana: así las pruebas lo montan en una página de prueba junto al antiguo y comparan.
-import { RANKS, RANK_SHORT, SKILL_LV, SKILL_NAME, ATTRS, ART, SKILLS, ALL_SKILLS, BG_TYPES, ADVS, cats, SUELDOS, SK_MAP } from './datos.js?v=0.6.3';
-import { ETAPAS, ESP_RAMAS, IDIOMA_NIV, VINC, emptyFicha, normFicha, exampleFicha } from './modelo.js?v=0.6.3';
-import { A, S, sanador, parseEmpleosDSL } from './empleos.js?v=0.6.3';
+import { RANKS, RANK_SHORT, SKILL_LV, SKILL_NAME, ATTRS, ART, SKILLS, ALL_SKILLS, BG_TYPES, ADVS, cats, SUELDOS, SK_MAP } from './datos.js?v=0.6.4';
+import { ETAPAS, ESP_RAMAS, IDIOMA_NIV, VINC, emptyFicha, normFicha, exampleFicha } from './modelo.js?v=0.6.4';
+import { A, S, sanador, parseEmpleosDSL } from './empleos.js?v=0.6.4';
 
 /**
  * @param {Window} w la ventana de PAM

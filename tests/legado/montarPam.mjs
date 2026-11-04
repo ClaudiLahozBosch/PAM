@@ -12,7 +12,7 @@ import { DATOS, PAGINAS, MODULOS } from '../../js/pam/arranque.js';
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const leer = f => readFileSync(path.join(RAIZ, f), 'utf8');
 /** Las páginas que ya son módulos, como eran antes de reescribirlas. */
-export const LEGADO = { revisor: 'tests/legado/paginas/revisor.js', registro: 'tests/legado/paginas/registro-roles.js' };
+export const LEGADO = { 'tabla-canjes': 'tests/legado/paginas/tabla-canjes.js', revisor: 'tests/legado/paginas/revisor.js', registro: 'tests/legado/paginas/registro-roles.js' };
 const codigoPagina = p => (MODULOS[p] ? leer(LEGADO[p]) : leer(`js/paginas/pam/${p}.js`));
 
 let cache = null;

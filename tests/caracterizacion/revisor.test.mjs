@@ -65,7 +65,7 @@ test('8c: al importar una ficha real (Mortimer) todo igual: pantallas, lo que ve
     assert.deepEqual(fuera(a.w.pamTabla.state), fuera(b.w.pamTabla.state), 'la Tabla de Canjes tras «Llevar a la calculadora»');
     // un canje en el carrito y «Traer de la calculadora»: la ficha queda igual
     for (const w of [a.w, b.w]) {
-      w.eval('addToCart("ESTADÍSTICAS", "Vigor: 4 → 5 — 300 grageas", 300, 0, null, {kind:"stat", name:"Vigor", from:4, to:5}); state.statsBase.Vigor = 5;');
+      w.pamTabla.addToCart('ESTADÍSTICAS', 'Vigor: 4 → 5 — 300 grageas', 300, 0, null, { kind: 'stat', name: 'Vigor', from: 4, to: 5 }); w.pamTabla.state.statsBase.Vigor = 5;
       w.pamFicha.traerCalculadora();
     }
     assert.deepEqual(fuera(a.w.grimorioFicha()), fuera(b.w.grimorioFicha()), 'la ficha tras «Traer de la calculadora»');
