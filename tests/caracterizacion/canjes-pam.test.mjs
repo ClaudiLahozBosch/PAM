@@ -127,6 +127,7 @@ test('«Canje publicado → PAM»: la misma puerta, y PAM cierra el movimiento c
   n.ctl.canjes.revisarPendientes(); // se abre sola (la promesa termina al cerrar la puerta)
   await hasta(() => v.w.document.querySelector('.puerta') && n.w.document.querySelector('.puerta'));
   mismoHtml(n.w.document.querySelector('.puerta').outerHTML, v.w.document.querySelector('.puerta').outerHTML);
+  assert.ok(n.w.eval('state.cart.length') > 0, 'con el carrito del canje');
   for (const P of [v, n]) clic(P.w, '.puerta button', 'Aceptar');
   await hasta(() => [v, n].every(P => /^Hecho/.test(P.w.document.querySelector('.puerta .p-info')?.textContent || '')));
   const bov = P => (({ act, ini, tot, delta, pet, ace, log }) => ({ act, ini, tot, delta, pet, ace, ultimo: log && (({ d, act: a, pet: p, ace: c }) => ({ d, act: a, pet: p, ace: c }))(log[0]) }))(P.w.rrBoveda.get(P.id));
@@ -134,4 +135,6 @@ test('«Canje publicado → PAM»: la misma puerta, y PAM cierra el movimiento c
   assert.deepEqual(bov(n).ultimo, { d: -300, act: 700, pet: ap.pet, ace: ap.ace });
   clic(n.w, '.puerta button', 'Cerrar'); await hasta(() => n.gm['pam.aprobacion'].usado);
   assert.equal(n.gm['pam.aprobacion'].usado.resultado, 'aceptada', 'como Mi PJ: se marca al cerrar la puerta');
+  await hasta(() => n.w.eval('state.cart.length') === 0);
+  assert.equal(n.w.eval('state.cart.length'), 0, 'R08: el canje está cerrado y el carrito queda vacío (el antiguo lo dejaba hasta recargar)');
 });

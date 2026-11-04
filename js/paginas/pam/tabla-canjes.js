@@ -1,5 +1,6 @@
 /* PAM · Datos del sistema, Tabla de Canjes y Compendio.
-   Fase 8a: el mismo código que estaba dentro de index.html, sin cambios. Lo carga js/pam/arranque.js. */
+   Fase 8a: el mismo código que estaba dentro de index.html. Lo carga js/pam/arranque.js.
+   Cambios desde entonces (buscar «R08»): la Tabla de Canjes se guarda en el navegador y se vacía el carrito al cerrar un canje. */
 /* =========================================================
    DATOS  (según los documentos del Sistema Avadense)
    ========================================================= */
@@ -725,7 +726,31 @@ function makeInitialState(){
 }
 let state = makeInitialState();
 let uid = 1;
-const ui = (k,def)=>{ if(!(k in state.ui)) state.ui[k]=def; return state.ui[k]; };
+/* R08: lo de la Tabla de Canjes (grageas disponibles, carrito, niveles, armas) se guarda en este navegador y, por
+   empezar por «grimorio.», viaja con la sesión con código. Antes se perdía al recargar PAM. */
+const K_CANJES = "grimorio.canjes";
+function guardarCanjes(){ try{ localStorage.setItem(K_CANJES, JSON.stringify(state)); }catch(_){} }
+(function cargarCanjes(){
+  let g = null;
+  try{ g = JSON.parse(localStorage.getItem(K_CANJES)||"null"); }catch(_){ g = null; }
+  if(!g || typeof g!=="object" || Array.isArray(g)) return;
+  const st = makeInitialState(), obj = v => v && typeof v==="object" && !Array.isArray(v);
+  Object.keys(g).forEach(k=>{
+    if(!(k in st)) st[k] = g[k];                                   // p. ej. bgsBase (lo pone «Llevar a la calculadora»)
+    else if(obj(st[k]) && obj(g[k])) Object.assign(st[k], g[k]);
+    else if(Array.isArray(st[k]) ? Array.isArray(g[k]) : typeof st[k]===typeof g[k]) st[k] = g[k];
+  });
+  if(!st.armas.length) st.armas = [newArma(1)];
+  state = st;
+  uid = state.cart.reduce((m,i)=>Math.max(m, Number(i.id)||0), 0) + 1;
+  document.getElementById("inpDisponibles").value = state.disponibles;
+  document.getElementById("inpPL").value = state.plDisponibles;
+})();
+addEventListener("pagehide", guardarCanjes);
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="hidden") guardarCanjes(); });
+/* R08: al cerrar un canje en PAM (Mi PJ), lo comprado ya está en la ficha: el carrito y las armas quedan vacíos */
+window.pamCanjes = { vaciarCarrito(){ state.cart = []; state.armas = [newArma(1)]; renderAll(); } };
+const ui =(k,def)=>{ if(!(k in state.ui)) state.ui[k]=def; return state.ui[k]; };
 
 function addToCart(cat, line, cost, pl=0, key=null, meta={}){
   state.cart.push({id:uid++, cat, line, cost, pl, key, meta});
@@ -902,6 +927,7 @@ function renderLedger(){
   const pr = state.plDisponibles - plTotal();
   const pe = document.getElementById("valPLRestantes");
   pe.textContent = fmt(pr); pe.parentElement.classList.toggle("negative", pr<0);
+  guardarCanjes(); // R08: todo cambio de la Tabla de Canjes termina aquí
 }
 document.getElementById("inpDisponibles").addEventListener("input", e=>{ state.disponibles = Number(e.target.value)||0; renderLedger(); });
 document.getElementById("inpPL").addEventListener("input", e=>{ state.plDisponibles = Number(e.target.value)||0; renderLedger(); });

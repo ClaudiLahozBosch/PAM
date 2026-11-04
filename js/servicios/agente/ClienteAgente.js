@@ -1,5 +1,5 @@
 // @ts-check
-import { PROTOCOLO, FOROS } from './protocolo.js?v=0.5.0';
+import { PROTOCOLO, FOROS } from './protocolo.js?v=0.5.1';
 
 /** Habla con el agente (el script de Tampermonkey). Toda la lógica está en PAM; el agente solo ejecuta. */
 export class ClienteAgente {

@@ -41,7 +41,7 @@ Todo lo marcado como «comprobado» se ha verificado contra el código de `main`
 | R05 | Los rituales «Nombre \| Latín» se renombran «Nombre (Latín)» y luego no se encuentran ni para añadir ni para quitar. | comprobado | ✔ fase 3 · el nombre queda como en la ficha («Nombre | Latín») y se enlaza al Compendio por id |
 | R06 | La pestaña «Otros» (idiomas, trasfondos nuevos, ventajas, especializaciones, talentos, títulos) queda siempre para hacer a mano, y PAM dice «Agregado» aunque la línea quede mal puesta. | comprobado | ✔ fase 4 · idiomas, trasfondos, ventajas, especializaciones, talentos y títulos; cada cambio se comprueba releyendo la ficha y, si no queda bien, se deshace y va a «a mano» |
 | R07 | Datos del sistema duplicados con nombres distintos («Esquivar»/«Esquiva», «Volar»/«Vuelo», «Seducir»/«Seducción»), unidos por una tabla de traducción; tres listas de personajes distintas. | comprobado | ✔ fases 1–2 · datos unificados (`Sistema`) y una sola lista de personajes (`leerLegado` une fichas y Registro por id) |
-| R08 | La bóveda llega siempre a 0 al mandar desde el foro: «Grageas disponibles» de la Tabla de Canjes no se guarda. | comprobado | 2 · ✔ `Boveda` dentro del `Personaje`; 6 · que la Tabla de Canjes la use |
+| R08 | La bóveda llega siempre a 0 al mandar desde el foro: «Grageas disponibles» de la Tabla de Canjes no se guarda. | comprobado | 2 · ✔ `Boveda` dentro del `Personaje`. ✔ 0.5.1 · la Tabla de Canjes se guarda en el navegador (`grimorio.canjes`, viaja con la sesión): grageas disponibles, carrito, niveles y armas siguen al recargar; al cerrar un canje en PAM el carrito queda vacío (prueba `canjes-guardado.test.mjs`) |
 
 ## Después
 

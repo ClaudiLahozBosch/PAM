@@ -8,8 +8,8 @@
 //   · Cierre: tras publicarlo todo en el foro («pam.aprobacion»), se ponen los dos enlaces en la Bóveda de PAM y se
 //     hace su «Ya lo publiqué».
 // La pastilla «✦ Mi PJ · Canjes» es la de siempre (abajo a la derecha de PAM).
-import { abrirPuerta, crearEl, estilos } from './ui/Puerta.js?v=0.5.0';
-import { claveCuenta } from '../reglas/Canjes.js?v=0.5.0';
+import { abrirPuerta, crearEl, estilos } from './ui/Puerta.js?v=0.5.1';
+import { claveCuenta } from '../reglas/Canjes.js?v=0.5.1';
 
 const CLAVE_PAQUETE = 'pam.paquete', CLAVE_PETICION = 'pam.peticion', CLAVE_APROBACION = 'pam.aprobacion';
 const numero = txt => { const l = String(txt == null ? '' : txt).replace(/[^\d-]/g, ''); return l === '' || l === '-' ? NaN : parseInt(l, 10); };
@@ -187,6 +187,7 @@ export function crearCanjesPam({ agente, pam, doc, foros }) {
         const x = (d.peticiones || []).find(y => y.post === paq.peticion);
         if (x) { x.enPAM = ahoraISO(); x.cerrada = true; await agente.guardarDato(k, d).catch(() => {}); }
       }
+      if (hecho && pam.vaciarCarrito) pam.vaciarCarrito(); // R08: la Tabla de Canjes ya se guarda; lo de este canje no tiene que quedar en el carrito
       avisarAlForo(paq.foro, { escribaCierre: 1, hecho });
     } finally { abierta = false; pam.verSeccion('ficha'); await pintar(); }
   }

@@ -75,6 +75,8 @@ export function crearPamActual(w) {
     prepararBoveda: (id, v) => w.rrBoveda.preparar(id, v),
     /** «Ya lo publiqué»: { act } o null. */
     cerrarBoveda: (id, v) => w.rrBoveda.cerrar(id, v),
+    /** R08: el canje ya está cerrado: el carrito (y las armas) de la Tabla de Canjes quedan vacíos. */
+    vaciarCarrito: () => { try { if (w.pamCanjes) w.pamCanjes.vaciarCarrito(); } catch (e) { /* PAM sin Tabla de Canjes */ } },
 
     /** Enseña una sección de PAM («oficiales», «ficha», «boveda»…). */
     verSeccion: nombre => { try { w.showSection(nombre); } catch (e) { /* esta versión de PAM no la tiene */ } }
