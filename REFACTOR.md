@@ -153,7 +153,7 @@ El script aparte «PAM · Inspector de Canjes» pasa a PAM y al mismo agente que
 
 - **8b · Registro de Roles y Coloreador:** guardado inmediato con el almacén (F14), el Coloreador recuerda lo de cada personaje (N08) y SheetJS al día en «Importar desde Excel» (F09).
 - **8c · Revisor de Empleos y Mi Ficha:** los datos del sistema de `data/sistema.json` (R07).
-- **8d · Tabla de Canjes y Compendio:** que no repinte todo por cualquier cambio (F16), carrito de trasfondos (N04), Grageas disponibles (R08).
+- **8d · Tabla de Canjes y Compendio:** que no repinte todo por cualquier cambio (F16) y que guarde «Grageas disponibles» y el carrito al recargar (R08). (El carrito de trasfondos, N04, ya está desde la 6b·1.)
 - **8e · Portada, temas y lo que quede:** los estilos repartidos por página y sin repetir (F17), y `js/pam/PamActual.js` cambiado a las páginas nuevas.
 
 ## Dónde guarda PAM los datos (y la sesión con código)
