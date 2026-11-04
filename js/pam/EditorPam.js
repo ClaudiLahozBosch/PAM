@@ -1,13 +1,13 @@
 // @ts-check
 // N07: el «Código para el foro» de Mi Ficha (modo «Personalizada») con el editor nuevo (js/bbcode/EditorFicha.js).
-// La página antigua de PAM (js/paginas/pam/revisor.js, actualizarCodigo) lo usa si está: js/pam/arranque.js lo deja en
+// Mi Ficha (js/paginas/revisor/Revisor.js, actualizarCodigo) lo usa si está: js/pam/arranque.js lo deja en
 // window.PAM_EDITOR antes de cargar las páginas. Si no está (o falla), PAM sigue con el «Personalizada» antiguo.
 // Mismo resultado que antes ({ code, hechos, manual }), pero:
 //   · las líneas nuevas van dentro de su desplegable (R01), al quitar no se lleva los cierres (R02) y quedan en orden (R03);
 //   · también idiomas, trasfondos, ventajas, especializaciones, talentos y títulos (R06);
 //   · cada cambio se comprueba volviendo a leer el código; lo que no queda, a «Revisá a mano».
-import { EditorFicha } from '../bbcode/EditorFicha.js?v=0.6.6';
-import { aplicarEdicion, yaAvisado } from '../reglas/CambiosFicha.js?v=0.6.6';
+import { EditorFicha } from '../bbcode/EditorFicha.js?v=0.6.7';
+import { aplicarEdicion, yaAvisado } from '../reglas/CambiosFicha.js?v=0.6.7';
 
 /**
  * @param {{ sistema: import('../datos/Sistema.js').Sistema, compendio: import('../datos/Compendio.js').Compendio,

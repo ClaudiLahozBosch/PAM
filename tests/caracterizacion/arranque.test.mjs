@@ -1,4 +1,4 @@
-// Fase 8a: index.html ya no lleva dentro el código ni los datos; js/pam/arranque.js los carga de js/paginas/pam/ y data/.
+// Fase 8a: index.html ya no lleva dentro el código ni los datos; js/pam/arranque.js trae data/ y monta las páginas (js/paginas/).
 // Aquí se arranca PAM de las dos maneras en jsdom (tests/legado/abrirPam.mjs) y se compara lo que queda en la página:
 //   · «archivos»: el index.html de ahora, sus scripts de la cabecera y arrancar() (como en el navegador);
 //   · «junto»: tests/legado/montarPam.mjs, todo dentro de un HTML, como estaba index.html antes de la fase 8a.
@@ -25,7 +25,7 @@ test('arrancar desde los archivos deja el mismo PAM que cuando todo estaba en in
   for (const w of [a.w, b.w]) { abrirTodas(w); w.pamTabla.renderAll(); abrirTodas(w); w.showSection('compendio'); w.showSection('home'); }
   try {
     assert.equal(a.ok, true);
-    assert.deepEqual(a.importados, ['../paginas/canjes/main.js', '../paginas/revisor/main.js', '../paginas/registro/main.js', '../nube/main.js', './main.js'], 'la Tabla, Mi Ficha y el Registro en su sitio y después lo nuevo, en el mismo orden');
+    assert.deepEqual(a.importados, ['../paginas/canjes/main.js', '../paginas/revisor/main.js', '../paginas/registro/main.js', '../paginas/inicio/portada.js', '../paginas/inicio/temas.js', '../paginas/inicio/foroAntiguo.js', '../nube/main.js', './main.js'], 'las páginas en su orden y después lo nuevo');
     for (const g of GLOBALES) assert.equal(typeof a.w[g], typeof b.w[g], g);
     assert.notEqual(typeof a.w.pamFicha, 'undefined');
     igual(pagina(a.w), pagina(b.w));
@@ -65,7 +65,7 @@ test('si no se puede traer el Registro de Roles, PAM lo dice arriba', async () =
 
 test('el orden y los datos son los de index.html antes de la fase 8a', () => {
   assert.deepEqual(PAGINAS, ['tabla-canjes', 'revisor', 'registro', 'portada', 'temas', 'foro-antiguo']);
-  assert.deepEqual(Object.keys(MODULOS), ['tabla-canjes', 'revisor', 'registro']);
+  assert.deepEqual(Object.keys(MODULOS), PAGINAS, 'desde la 8e todas son módulos');
   assert.deepEqual(DATOS.map(d => d.src), ['data/empleos-foro.txt', 'data/arcanos.json']);
   const idx = readFileSync(path.join(RAIZ, 'index.html'), 'utf8');
   assert.doesNotMatch(idx, /<script>|<style>/, 'index.html ya no lleva código ni estilos dentro');

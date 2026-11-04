@@ -8,12 +8,12 @@
 //   «pam.cuentas.<foro>.<id de cuenta>»   { peticiones } de esa cuenta (Mi PJ lo guardaba en «cuentas.<foro>.<id>»).
 // Los Inspectores de cada grupo se guardan un día en la memoria del panel («grupos.<foro>»).
 import { numero, formato, esNumero, mismoTexto, enlacePost, temaNumero, peticionCapturada, textoPeticion, avisosPeticion, clasificarRespuesta, normNombre,
-  claveCuenta, paqueteCierre, cambiarNumeroTras, descuadres, codigoConEnlaces } from '../reglas/Canjes.js?v=0.6.6';
-import { leerSaldos } from '../lectores/LectorBoveda.js?v=0.6.6';
-import { revisar } from '../reglas/RevisorBoveda.js?v=0.6.6';
-import { leerFichaDelForo } from './FichaDelForo.js?v=0.6.6';
-import { EditorFicha } from '../bbcode/EditorFicha.js?v=0.6.6';
-import { aplicarCanje, yaAvisado } from '../reglas/CambiosFicha.js?v=0.6.6';
+  claveCuenta, paqueteCierre, cambiarNumeroTras, descuadres, codigoConEnlaces } from '../reglas/Canjes.js?v=0.6.7';
+import { leerSaldos } from '../lectores/LectorBoveda.js?v=0.6.7';
+import { revisar } from '../reglas/RevisorBoveda.js?v=0.6.7';
+import { leerFichaDelForo } from './FichaDelForo.js?v=0.6.7';
+import { EditorFicha } from '../bbcode/EditorFicha.js?v=0.6.7';
+import { aplicarCanje, yaAvisado } from '../reglas/CambiosFicha.js?v=0.6.7';
 
 export const CLAVE_APROBACION = 'pam.aprobacion';
 const aNum = v => (typeof v === 'number' ? v : NaN);

@@ -2,7 +2,7 @@
 // de dos versiones (GitHub Pages los guarda 10 minutos: si main.js es nuevo y MiPj.js viejo, el panel no arranca).
 //   · cada «import … from './x.js'» de js/ pasa a «'./x.js?v=VERSION'»;
 //   · panel.html: main.js y mipj.css con ?v=VERSION; index.html: pendiente.js, tema-inicial.js, css/pam.css y arranque.js con ?v=VERSION;
-//   · js/pam/arranque.js: const V (los datos, las páginas de js/paginas/pam/ y los módulos que carga);
+//   · js/pam/arranque.js: const V (los datos y los módulos de las páginas que monta);
 //   · js/datos/cargar.js: los JSON con ?v=VERSION;
 //   · el agente pide panel.html?…&v=VERSION.
 // Uso (antes de subir): node scripts/versionar.mjs

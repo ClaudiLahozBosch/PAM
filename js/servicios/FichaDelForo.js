@@ -2,9 +2,9 @@
 // Leer la ficha de un personaje desde el foro, de principio a fin, a través del agente:
 //   tema → mensajes → partes vigentes → código de cada parte → Ficha → a qué personaje corresponde.
 // Lo usarán Mi PJ (tu ficha) y el Inspector (fichas de otros), con el mismo lector.
-import { leerPaginaTema, unirMensajes, mismoAutor } from '../lectores/LectorTema.js?v=0.6.6';
-import { partesVigentes } from '../lectores/PartesFicha.js?v=0.6.6';
-import { normNombre } from '../core/texto.js?v=0.6.6';
+import { leerPaginaTema, unirMensajes, mismoAutor } from '../lectores/LectorTema.js?v=0.6.7';
+import { partesVigentes } from '../lectores/PartesFicha.js?v=0.6.7';
+import { normNombre } from '../core/texto.js?v=0.6.7';
 
 const FORO_FICHAS_PENDIENTES = 21; // «Solicitud de Ficha de Personaje»
 

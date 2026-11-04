@@ -101,5 +101,5 @@ test('PAM carga js/pam/main.js con la versión, al final, y acepta el foro de pr
   const arranque = readFileSync(new URL('../../js/pam/arranque.js', import.meta.url), 'utf8');
   assert.match(arranque, /const V = '\?v=[\d.]+';/);
   assert.match(arranque, /await importar\('\.\.\/nube\/main\.js' \+ V\);\n  await importar\('\.\/main\.js' \+ V\);\n  return true;/);
-  assert.match(readFileSync(new URL('../../js/paginas/pam/foro-antiguo.js', import.meta.url), 'utf8'), /FOROS_PRUEBA = \["https:\/\/test-forito\.foroactivo\.com"\]/);
+  assert.match(readFileSync(new URL('../../js/paginas/inicio/foroAntiguo.js', import.meta.url), 'utf8'), /FOROS_PRUEBA = \["https:\/\/test-forito\.foroactivo\.com"\]/);
 });

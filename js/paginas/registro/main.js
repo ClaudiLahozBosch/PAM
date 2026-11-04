@@ -1,9 +1,9 @@
 // @ts-check
 // Arranque del Registro de Roles y del Coloreador (fase 8b). Lo importa js/pam/arranque.js entre las páginas antiguas,
 // en el mismo sitio en que estaba el Registro dentro de index.html (después de Mi Ficha, antes de la portada).
-import { Almacen } from '../../core/Almacen.js?v=0.6.6';
-import { montarRegistro } from './RegistroRoles.js?v=0.6.6';
-import { crearDatosDeseos } from './deseos.js?v=0.6.6';
+import { Almacen } from '../../core/Almacen.js?v=0.6.7';
+import { montarRegistro } from './RegistroRoles.js?v=0.6.7';
+import { crearDatosDeseos } from './deseos.js?v=0.6.7';
 
 /** La versión de este archivo (?v=…): los estilos, la plantilla y los datos se piden con la misma. */
 const V = new URL(import.meta.url).search;

@@ -1,33 +1,36 @@
-// Arranque de PAM (fase 8a). index.html ya no lleva dentro ni el código ni los datos; este módulo:
+// Arranque de PAM. index.html no lleva dentro ni el código ni los datos (fase 8a); este módulo:
 //   1. trae los datos de data/ (los mismos archivos que usan el panel de Mi PJ y el Inspector) y los deja en la página
-//      donde los buscan las páginas antiguas (#empleos-foro, #arcanos-data);
-//   2. carga las páginas en el mismo orden que tenían dentro de index.html. Las de js/paginas/pam/ son scripts normales
-//      (no módulos): comparten sus variables como antes. Las que ya se reescribieron (fase 8b: el Registro de Roles)
-//      son módulos con una función montar(ventana, {traer}) y se cargan en su mismo sitio;
+//      (#empleos-foro, #arcanos-data), donde los buscan las páginas;
+//   2. monta las páginas, una tras otra y en el mismo orden que tenían dentro de index.html. Desde la fase 8e todas
+//      son módulos (js/paginas/<carpeta>/) con una función montar(ventana, {traer}). Lo que una página usa de otra
+//      va por un objeto en window (window.pamTabla, window.pamFicha, window.rrBoveda…);
 //   3. y después lo nuevo: la sesión con código (js/nube/) y lo que llega del foro (js/pam/), como antes, al final.
-// Si algo no se puede traer, PAM avisa arriba en vez de quedarse a medias sin decir nada.
+// Si algo no se puede traer o una página no arranca, PAM avisa arriba en vez de quedarse a medias sin decir nada.
 // N07 (0.5.3): antes de las páginas deja en window.PAM_EDITOR el editor nuevo del «Código para el foro» (js/pam/EditorPam.js),
-// con data/sistema.json y los arcanos. Si eso falla, PAM sigue con el «Personalizada» antiguo.
-import { Sistema } from '../datos/Sistema.js?v=0.6.6';
-import { Compendio } from '../datos/Compendio.js?v=0.6.6';
-import { LectorFicha } from '../lectores/LectorFicha.js?v=0.6.6';
-import { crearEditorPam } from './EditorPam.js?v=0.6.6';
+// con data/sistema.json y los arcanos. Si eso falla, Mi Ficha sigue con el «Personalizada» antiguo.
+import { Sistema } from '../datos/Sistema.js?v=0.6.7';
+import { Compendio } from '../datos/Compendio.js?v=0.6.7';
+import { LectorFicha } from '../lectores/LectorFicha.js?v=0.6.7';
+import { crearEditorPam } from './EditorPam.js?v=0.6.7';
 
-const V = '?v=0.6.6'; // lo pone scripts/versionar.mjs
+const V = '?v=0.6.7'; // lo pone scripts/versionar.mjs
 
-/** Los datos que las páginas antiguas leen de la página, en orden. */
+/** Los datos que las páginas leen de la página, en orden. */
 export const DATOS = [
   { id: 'empleos-foro', tipo: 'text/plain', src: 'data/empleos-foro.txt' },
   { id: 'arcanos-data', tipo: 'application/json', src: 'data/arcanos.json' },
 ];
-/** Las páginas, en el orden en que estaban en index.html: las antiguas (js/paginas/pam/<nombre>.js, scripts normales)
- *  y las que ya son módulos (MODULOS). */
+/** Las páginas, en el orden en que estaban en index.html. */
 export const PAGINAS = ['tabla-canjes', 'revisor', 'registro', 'portada', 'temas', 'foro-antiguo'];
-/** Las que ya son módulos: el Registro de Roles y el Coloreador (8b), Mi Ficha y el Revisor de Empleos (8c), la Tabla
- *  de Canjes y el Compendio (8d). */
-export const MODULOS = { 'tabla-canjes': '../paginas/canjes/main.js', revisor: '../paginas/revisor/main.js', registro: '../paginas/registro/main.js' };
-
-export const urlPagina = p => `js/paginas/pam/${p}.js${V}`;
+/** Dónde está cada una (fases 8b–8e). */
+export const MODULOS = {
+  'tabla-canjes': '../paginas/canjes/main.js',   // Tabla de Canjes y Compendio (8d)
+  revisor: '../paginas/revisor/main.js',          // Mi Ficha, Controlador, Revisor y Editor de empleos (8c)
+  registro: '../paginas/registro/main.js',        // Registro de Roles, Bóveda y Coloreador (8b)
+  portada: '../paginas/inicio/portada.js',        // portada y navegación (8e)
+  temas: '../paginas/inicio/temas.js',            // kit de temas (8e)
+  'foro-antiguo': '../paginas/inicio/foroAntiguo.js' // «Datos del foro → PAM» (8e)
+};
 
 /**
  * @param {{doc?: Document, fetch?: typeof fetch, importar?: (ruta: string) => Promise<any>}} [o]
@@ -58,25 +61,13 @@ export async function arrancar({ doc = document, fetch: traer = (...a) => fetch(
       /** @type {any} */ (doc.defaultView).PAM_EDITOR = crearEditorPam({ sistema, compendio, lector: new LectorFicha(sistema, compendio) });
     }
   } catch (e) { console.warn('[PAM] sin el editor nuevo del «Código para el foro»:', e); }
-  // Las antiguas, por tandas entre módulo y módulo: las de una tanda a la vez (se descargan en paralelo) y async=false,
-  // así se ejecutan en este orden, como dentro de index.html. Si una falla al ejecutarse, las demás siguen, como antes.
-  const tanda = ps => Promise.all(ps.map(p => new Promise(listo => {
-    const s = doc.createElement('script');
-    s.src = urlPagina(p); s.async = false;
-    s.onload = () => listo();
-    s.onerror = () => { errores.push(urlPagina(p)); listo(); };
-    doc.body.appendChild(s);
-  })));
-  let antiguas = [];
+  // Una tras otra, en orden. Si una falla, las demás siguen (como antes) y al final se avisa.
   for (const p of PAGINAS) {
-    if (!MODULOS[p]) { antiguas.push(p); continue; }
-    await tanda(antiguas); antiguas = [];
     try {
       const m = await importar(MODULOS[p] + V);
       await m.montar(doc.defaultView, { traer });
     } catch (e) { console.error(`[PAM] ${p}:`, e); errores.push(`${p} (${e && e.message || e})`); }
   }
-  await tanda(antiguas);
   if (errores.length) return fallo(doc, new Error(errores.join(', ')));
   await importar('../nube/main.js' + V);
   await importar('./main.js' + V);

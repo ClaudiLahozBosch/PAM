@@ -7,10 +7,10 @@
 //     añade (un reintento no repite nada, y lo que en el foro ya está más alto se queda). Los textos no se tocan.
 //   · «Código para el foro» de Mi Ficha (aplicarEdicion): «antes» = la ficha de cuando guardaste tu código,
 //     «despues» = la de ahora. Todo lo que cambiaste: textos, niveles que suben o bajan, lo que añadiste o quitaste.
-import { Ficha } from '../modelos/Ficha.js?v=0.6.6';
-import { Trasfondo } from '../modelos/Trasfondo.js?v=0.6.6';
-import { Arcano } from '../modelos/Arcano.js?v=0.6.6';
-import { norm, num, aRomano } from '../core/texto.js?v=0.6.6';
+import { Ficha } from '../modelos/Ficha.js?v=0.6.7';
+import { Trasfondo } from '../modelos/Trasfondo.js?v=0.6.7';
+import { Arcano } from '../modelos/Arcano.js?v=0.6.7';
+import { norm, num, aRomano } from '../core/texto.js?v=0.6.7';
 
 const CAMPOS = ['nombre', 'attrs', 'skills', 'artes', 'bgs', 'adv', 'esp', 'arcanos', 'idiomas', 'talentos', 'vinculos', 'titulos'];
 

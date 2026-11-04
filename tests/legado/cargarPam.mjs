@@ -12,7 +12,7 @@ let cache = null;
 export function cargarPam() {
   if (cache) return cache;
   let html = pamEntero(); // index.html con las páginas y los datos dentro (fase 8a)
-  if (!html.includes(MARCA_FICHA)) throw new Error('No encuentro la marca del bloque de Mi Ficha en js/paginas/pam/revisor.js');
+  if (!html.includes(MARCA_FICHA)) throw new Error('No encuentro la marca del bloque de Mi Ficha en tests/legado/paginas/revisor.js');
   html = html.replace(MARCA_FICHA, MARCA_FICHA + '\nwindow.__ficha = s => eval(s);');
   const errores = [];
   const vc = new VirtualConsole();
