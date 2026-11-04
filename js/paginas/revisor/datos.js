@@ -1,47 +1,53 @@
-// @ts-nocheck
-// Mi Ficha y Revisor de Empleos: datos fijos (rangos, habilidades, trasfondos, ventajas, sueldos). Copiados tal cual
-// del código antiguo (fase 8c).
-export const RANKS = ['No cumple','Novato','Competente','Experto','Maestro','Legendario'];
-export const RANK_SHORT = ['—','Nov.','Comp.','Exp.','Maes.','Leg.'];
-export const SKILL_LV = ['Desentrenado (+0)','Novato (+1)','Competente (+2)','Experto (+4)','Maestro (+7)','Legendario (+9)'];
-export const SKILL_NAME = ['Desentrenado','Novato','Competente','Experto','Maestro','Legendario'];
-export const ATTRS = ['Vigor','Destreza','Carisma','Voluntad','Percepción','Inteligencia','Poder'];
-export const ART = 'Arte/Artesanía';
-export const SKILLS = {
-  'Vigor':['Atletismo','Pelea'],
-  'Destreza':['Esquiva','Latrocinio','Sigilo','Vuelo'],
-  'Carisma':['Coordinación','Intimidación','Oratoria','Seducción','Subterfugio'],
-  'Voluntad':[ART,'Estilo','Frialdad'],
-  'Percepción':['Alerta','Consciencia','Empatía','Iniciativa','Investigación'],
-  'Inteligencia':['Adivinación','Arcanismo','Callejeo','Cultura Mágica','Cultura Muggle','Herbología','Magizoología','Medicina','Política','Supervivencia'],
-  'Poder':['Duelo','Pociones','Rituales']
-};
-export const ALL_SKILLS = Object.values(SKILLS).flat();
-export const BG_TYPES = ['Biblioteca','Influencia','Informantes','Seguidores'];
-export const ADVS = ['Fama','Orden de Merlín','Patrón','Recursos'];
-export const CAT_CONOC = {
-  'Adivinación':['Métodos adivinatorios','Profecías'],
-  'Arcanismo':['Arcanos','Artes oscuras','No-Seres','Objetos mágicos','Otros planos'],
-  'Callejeo':['Contrabando','Criminales','Localizaciones'],
-  'Cultura Mágica':['Deportes mágicos','Historia de la magia','Hogwarts','Mundo del corazón'],
-  'Cultura Muggle':['Arte muggle','Deportes muggles','Tecnología'],
-  'Herbología':['Pociones','Plantas naturales'],
-  'Magizoología':['Animales muggles','Bestias mágicas','Espíritus','Seres racionales'],
-  'Medicina':['Enfermedades mágicas','Experimental','Heridas mágicas','Medicina muggle'],
-  'Política':['Ley mágica','Ministerio de Magia'],
-  'Supervivencia':['Caza','Entornos hostiles','Orientarse']
-};
-export const CAT_SOC = {
-  'Académicos':['Adivinadores y oráculos','Arcanistas','Arqueólogos e historiadores','Biólogos e investigadores médicos','Herbólogos y pocionistas','Magizoólogos','Muggleólogos'],
-  'Bajos fondos':['Contrabandistas','Estafadores','Evanescedores','Falsificadores','Ladrones','Sanadores ilegales','Soplones'],
-  'Hogwarts':['Gryffindor','Hufflepuff','Ravenclaw','Slytherin','Fauna de Hogwarts','Personal no-docente','Profesorado'],
-  'Política':['Azkaban','Bastión Woodcroft','Confederación Internacional de Magos','Gringotts','Hogsmeade','Ministerio de Magia','San Mungo'],
-  'Seres mágicos':['Arpías','Centauros','Duendes','Gente del Agua','Gigantes','Hombres Lobo','Vampiros'],
-  'Sociedad':['Alta sociedad','Deportes','Fantasmas','La Reserva','Muggles','Negocios','Prensa']
-};
-export const cats = t => t === 'Biblioteca' ? CAT_CONOC : CAT_SOC;
-export const SUELDOS = {
-  'Muy Bajo':[15,25,40,60,100], 'Bajo':[30,50,80,120,200], 'Medio':[45,75,125,175,300],
-  'Alto':[60,100,160,250,400], 'Muy Alto':[75,125,200,300,500]
-};
+// @ts-check
+// Mi Ficha y Revisor de Empleos: los datos del sistema (rangos, habilidades, trasfondos, ventajas, sueldos, etapas…).
+// Desde la 8c (R07) salen de data/sistema.json, los mismos que usan la Tabla de Canjes, el panel de Mi PJ y el
+// Inspector: iniciarDatos() los rellena al arrancar (js/paginas/revisor/main.js), antes de montar las pantallas.
+// Son los mismos valores que tenía Mi Ficha, con los nombres de la ficha (Esquiva, Vuelo, Seducción), más
+// «Gobierno mágico de (X país)» en Política, que le faltaba (texto oficial).
 
+/** @type {string[]} */ export let RANKS = [];
+/** @type {string[]} */ export let RANK_SHORT = [];
+/** Niveles de habilidad con su bonificador: «Novato (+1)»… @type {string[]} */ export let SKILL_LV = [];
+/** @type {string[]} */ export let SKILL_NAME = [];
+/** @type {string[]} */ export let ATTRS = [];
+/** Habilidades por atributo, con el nombre de la ficha. @type {Record<string, string[]>} */ export let SKILLS = {};
+/** @type {string[]} */ export let ALL_SKILLS = [];
+/** @type {string[]} */ export let BG_TYPES = [];
+/** @type {string[]} */ export let ADVS = [];
+/** @type {Record<string, string[]>} */ export let CAT_CONOC = {};
+/** @type {Record<string, string[]>} */ export let CAT_SOC = {};
+/** @type {Record<string, number[]>} */ export let SUELDOS = {};
+/** Puntos de atributo, umbral, heridas y límites de cada etapa. @type {Record<string, {pa:number,u:number,h:number,lim:string}>} */
+export let ETAPAS = {};
+/** @type {string[]} */ export let ESP_RAMAS = [];
+/** @type {string[]} */ export let IDIOMA_NIV = [];
+/** @type {string[]} */ export let VINC = [];
+/** Nombre de la habilidad en la Tabla de Canjes → en la ficha (Esquivar → Esquiva…). @type {Record<string, string>} */
+export let SK_MAP = {};
+
+export const ART = 'Arte/Artesanía';
+/** @param {string} t */
+export const cats = t => (t === 'Biblioteca' ? CAT_CONOC : CAT_SOC);
+
+const copia = x => JSON.parse(JSON.stringify(x));
+
+/** @param {any} S el contenido de data/sistema.json */
+export function iniciarDatos(S) {
+  RANKS = [...S.empleos.rangos];
+  RANK_SHORT = [...S.empleos.rangosCortos];
+  SKILL_NAME = S.nivelesHabilidad.map(n => n.nombre);
+  SKILL_LV = S.nivelesHabilidad.map(n => `${n.nombre} (+${n.bonus})`);
+  ATTRS = [...S.atributos];
+  SKILLS = Object.fromEntries(ATTRS.map(a => [a, S.habilidades.filter(h => h.atributo === a).map(h => h.enFicha || h.nombre)]));
+  ALL_SKILLS = Object.values(SKILLS).flat();
+  BG_TYPES = [...S.trasfondos.tipos];
+  ADVS = S.ventajas.map(v => v.nombre);
+  CAT_CONOC = copia(S.trasfondos.categoriasConocimiento);
+  CAT_SOC = copia(S.trasfondos.categoriasSociales);
+  SUELDOS = copia(S.empleos.sueldos);
+  ETAPAS = Object.fromEntries(Object.entries(S.etapas).map(([k, e]) => [k, { pa: e.pa, u: e.umbral, h: e.heridas, lim: e.limites }]));
+  ESP_RAMAS = S.especializaciones.map(e => e.nombre ?? e);
+  IDIOMA_NIV = [...S.idiomas.nivelesFicha];
+  VINC = S.vinculos.map(v => v.nombre ?? v);
+  SK_MAP = Object.fromEntries(S.habilidades.filter(h => h.enFicha).map(h => [h.nombre, h.enFicha]));
+}

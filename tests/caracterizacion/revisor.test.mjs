@@ -18,7 +18,10 @@ const antes = w => {
 
 const raiz = w => w.document.getElementById('re-app');
 const $ = (w, s) => raiz(w).querySelector(s);
-const vista = w => raiz(w).outerHTML + '\n' + [...raiz(w).querySelectorAll('input,textarea,select')].map(e => (e.type === 'checkbox' ? e.checked : e.value)).join('|');
+// R07 (8c): Mi Ficha usa data/sistema.json, que añade «Gobierno mágico de (X país)» a las categorías de Política (le
+// faltaba; texto oficial). Es la única diferencia a propósito: se quita para comparar y se comprueba aparte.
+const GOBIERNO = /<option(?: [^>]*)?value="Gobierno mágico de \(X país\)"[^>]*>[^<]*<\/option>|<option[^>]*>Gobierno mágico de \(X país\)<\/option>/g;
+const vista = w => raiz(w).outerHTML.replace(GOBIERNO, '') + '\n' + [...raiz(w).querySelectorAll('input,textarea,select')].map(e => (e.type === 'checkbox' ? e.checked : e.value)).join('|');
 const fuera = v => (v === undefined ? undefined : JSON.parse(JSON.stringify(v)));
 const esperar = ms => new Promise(r => setTimeout(r, ms));
 const PESTANAS = ['empleos', 'ficha', 'control', 'editor'];
@@ -92,6 +95,17 @@ test('8c: el Revisor de Empleos y el Controlador, al usarlos, hacen lo mismo', a
     for (const w of [a.w, b.w]) { $(w, 'nav.re-tabs button[data-tab="editor"]').click(); $(w, '#e-new')?.click(); }
     igual(vista(a.w), vista(b.w), 'editor');
     assert.deepEqual(a.errores, b.errores);
+  } finally { cerrar(a, b); }
+});
+
+test('R07: Mi Ficha usa los datos oficiales (data/sistema.json): igual que antes, más «Gobierno mágico de (X país)»', async () => {
+  const [a, b] = await par();
+  try {
+    for (const w of [a.w, b.w]) { importar(w, MORTIMER); $(w, 'nav.re-tabs button[data-tab="ficha"]').click(); $(w, '#fx-tabs button[data-ft="otros"]').click(); }
+    assert.match(raiz(a.w).innerHTML, GOBIERNO, 'el nuevo la tiene');
+    assert.doesNotMatch(raiz(b.w).innerHTML, GOBIERNO, 'al antiguo le faltaba');
+    const src = readFileSync(path.join(RAIZ, 'js/paginas/revisor/datos.js'), 'utf8');
+    assert.doesNotMatch(src, /'Esquiva'|'Mago Oscuro'|'Combatiente'|'Infante'/, 'sin listas escritas a mano: salen de data/sistema.json');
   } finally { cerrar(a, b); }
 });
 

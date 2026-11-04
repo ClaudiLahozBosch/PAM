@@ -7,9 +7,9 @@
 //     compartidas: un módulo no las ve en las pruebas;
 //   · guarda con el almacén (js/core/Almacen.js), con las mismas claves y el mismo formato.
 // Recibe la ventana: así las pruebas lo montan en una página de prueba junto al antiguo y comparan.
-import { RANKS, RANK_SHORT, SKILL_LV, SKILL_NAME, ATTRS, ART, SKILLS, ALL_SKILLS, BG_TYPES, ADVS, cats, SUELDOS } from './datos.js?v=0.6.2';
-import { ETAPAS, ESP_RAMAS, IDIOMA_NIV, VINC, emptyFicha, normFicha, exampleFicha } from './modelo.js?v=0.6.2';
-import { A, S, sanador, parseEmpleosDSL } from './empleos.js?v=0.6.2';
+import { RANKS, RANK_SHORT, SKILL_LV, SKILL_NAME, ATTRS, ART, SKILLS, ALL_SKILLS, BG_TYPES, ADVS, cats, SUELDOS, SK_MAP } from './datos.js?v=0.6.3';
+import { ETAPAS, ESP_RAMAS, IDIOMA_NIV, VINC, emptyFicha, normFicha, exampleFicha } from './modelo.js?v=0.6.3';
+import { A, S, sanador, parseEmpleosDSL } from './empleos.js?v=0.6.3';
 
 /**
  * @param {Window} w la ventana de PAM
@@ -1199,8 +1199,8 @@ function fichaBBCode(){
 }
 
 /* ============ Calculadora <-> ficha ============ */
-const SK_MAP = {'Esquivar':'Esquiva','Volar':'Vuelo','Seducir':'Seducción'};
-const SK_BACK = {'Esquiva':'Esquivar','Vuelo':'Volar','Seducción':'Seducir'};
+/* R07 (8c): la traducción de nombres (Esquivar → Esquiva…) sale de data/sistema.json (SK_MAP de datos.js) */
+const SK_BACK = Object.fromEntries(Object.entries(SK_MAP).map(([k,v])=>[v,k]));
 function traerCalculadora(){
   if(typeof TC.state==='undefined'){ toast('No encuentro la calculadora'); return; }
   ATTRS.forEach(a=>{ if(TC.state.statsBase[a]!==undefined) ficha.attrs[a]=Math.max(num(ficha.attrs[a]), TC.state.statsBase[a]); });

@@ -1,6 +1,6 @@
 # Guía del refactor de PAM para agentes de IA
 
-Estado a **4/11/2026**, rama `refactor`, versión **0.6.2** (fase 8b hecha; lista de deseos con los datos oficiales; 8c, primera parte: Mi Ficha y el Revisor como módulos).
+Estado a **4/11/2026**, rama `refactor`, versión **0.6.3** (fases 8b y 8c hechas: Registro, Coloreador, Mi Ficha y Revisor como módulos, con los datos oficiales).
 Este documento es para un agente de IA (o una persona programadora) que tenga que seguir trabajando en la rama sin haber estado en las sesiones anteriores. Explica qué se reorganizó, cómo funciona ahora, qué errores se corrigieron y dónde, y qué queda. Léelo entero antes de tocar nada.
 
 Documentos relacionados (en este orden de importancia):
@@ -87,7 +87,9 @@ js/paginas/pam/           El código ANTIGUO de PAM repartido (fase 8a). Scripts
                           tabla-canjes (desde la 8c ofrece window.pamTabla), portada, temas, foro-antiguo.
 js/paginas/revisor/       Fase 8c: Mi Ficha, Controlador de stats, Revisor y Editor de empleos como módulos. main.js,
                           Revisor.js (pantallas, mismo código; lo de la Tabla por window.pamTabla como «TC.…»),
-                          datos.js, modelo.js (ficha vacía y de ejemplo), empleos.js (lector de empleos del foro).
+                          datos.js (de data/sistema.json: iniciarDatos() al arrancar; los demás leen sus `export let`,
+                          que se actualizan solos), modelo.js (ficha vacía y de ejemplo), empleos.js (lector de empleos).
+                          OJO: todos tienen que importar datos.js con la misma ?v= (si no, serían dos copias sin datos).
 js/paginas/registro/      Fase 8b: el Registro de Roles y el Coloreador como módulos. main.js (montar), RegistroRoles.js
                           (las pestañas, mismo código), Coloreador.js (+N08), datos.js (listas fijas), deseos.js
                           (datos de la lista de deseos desde los oficiales, 0.6.1) + deseosExtra.js (lo que solo tenía
@@ -236,9 +238,10 @@ Claves de paso en el almacén del agente: `pam.oficiales` (Biblioteca → PAM), 
 | F09 | «Importar desde Excel» usaba SheetJS 0.18.5 (dos fallos de seguridad conocidos). | SheetJS 0.20.3 de cdn.sheetjs.com. | `js/paginas/registro/importarExcel.js` | `registro` |
 | N08 | El Coloreador tenía una sola configuración para todos los personajes. | Recuerda la última de cada personaje de Mi Ficha (`cd_pj.<id>`). | `js/paginas/registro/Coloreador.js` | `registro` |
 
+| R07 (Mi Ficha) | Mi Ficha tenía su propia copia de los datos del sistema y una tabla de traducción (Esquivar → Esquiva). | Salen de `data/sistema.json`; mismos valores, más «Gobierno mágico de (X país)». | `js/paginas/revisor/datos.js` | `revisor` |
 | R07 (lista de deseos) | La lista de deseos del Registro tenía su propia copia de los datos del sistema, distinta de la oficial (nombres, orden, faltaban 5 objetos avanzados y 3 legendarios). | Sale de los datos oficiales y de los inventados del Compendio; lo que solo tenía ella, de `deseosExtra.js`. Nada se pierde. | `js/paginas/registro/deseos.js` | `registro` |
 
-**Sin corregir:** F16 (8d), F17 resto (8e), R07 en las páginas de PAM (8c), N01, N03, y las mejoras N02, N05, N06 (ver §11).
+**Sin corregir:** F16 (8d), F17 resto (8e), R07 en la Tabla de Canjes (8d), N01, N03, y las mejoras N02, N05, N06 (ver §11).
 
 ## 8. Cambios dentro del código antiguo de Hana
 
@@ -292,7 +295,7 @@ PAM_FICHA_IRVIN="C:\ruta\Irvin Giles.htm" npm test   # con la ficha real (no est
 
 1. **Pruebas manuales del usuario en Chrome** con el agente 0.6.0 (staging + test-forito): `PROVES-5c`, `6b1`, `6b3` (canje entero con Elena), `6c`, `7` (con un código de sesión nuevo de pruebas, dos ventanas), `8a` y `8b`. Las de 5a, 5b, 5d y 6a ya pasaron. Lo que salga, se corrige antes de seguir.
 2. ~~Fase 8b~~ hecha (0.6.0).
-3. **Fase 8c · Revisor de Empleos y Mi Ficha:** separar por piezas como la 8b (copia congelada en `tests/legado/paginas/`, módulo con `montar(ventana, {traer})`, prueba que compara las pestañas con `tests/legado/abrirPam.mjs`); usar `data/sistema.json` y los lectores compartidos (**R07** en la parte de PAM); el «Personalizada» antiguo puede desaparecer cuando el nuevo esté probado. (La lista de deseos del Registro ya usa los datos oficiales desde la 0.6.1.)
+3. ~~Fase 8c~~ hecha (0.6.2 y 0.6.3). Pendiente de decidir: el «Personalizada» antiguo (`actualizarCodigoAntiguo`) puede desaparecer cuando el nuevo esté probado en Chrome; el cálculo de combate de Mi Ficha podría usar `js/reglas/Combate.js` (habría que pasar la ficha antigua al modelo nuevo).
 4. **Fase 8d · Tabla de Canjes y Compendio:** que no repinte todo por cualquier cambio (**F16**).
 5. **Fase 8e · Portada, temas y CSS:** estilos por página y sin repetir (**F17**); `PamActual` pasa a las páginas nuevas.
 6. **N03** («Tus otras cuentas»): no mostrar cuentas inactivas ni temas cerrados. Antes, **mirar en el foro real** cómo marca una cuenta inactiva y un tema cerrado; no suponerlo.

@@ -181,7 +181,7 @@ El script aparte «PAM · Inspector de Canjes» pasa a PAM y al mismo agente que
   - Guarda con el almacén, con las mismas claves y el mismo formato.
   - Su HTML sigue en `index.html` y sus estilos en `css/pam.css`.
 
-  Queda: que use los datos de `data/sistema.json` y las reglas de combate compartidas (R07).
+  Segunda parte (0.6.3, R07): los datos de Mi Ficha salen de `data/sistema.json` (`datos.js`, que los rellena al arrancar). Son los mismos que tenía, más «Gobierno mágico de (X país)» en Política, que le faltaba.
 - **8d · Tabla de Canjes y Compendio:** que no repinte todo por cualquier cambio (F16). (El carrito de trasfondos, N04, ya está desde la 6b·1, y que se guarde al recargar, R08, desde la 0.5.1.)
 - **8e · Portada, temas y lo que quede:** los estilos repartidos por página y sin repetir (F17), y `js/pam/PamActual.js` cambiado a las páginas nuevas.
 
