@@ -36,6 +36,8 @@ export function crearPamActual(w) {
     },
     /** La ficha activa de «Mi Ficha» (lo guardado): { id, ficha } o null. */
     fichaActiva: () => activa(),
+    /** La ficha activa tal como la tiene PAM ahora mismo (una copia, en el formato antiguo), o null. */
+    fichaEnMemoria: () => { try { const f = w.grimorioFicha && w.grimorioFicha(); return f ? JSON.parse(JSON.stringify(f)) : null; } catch (e) { return null; } },
     /** «Traer de la calculadora»: los canjes del carrito pasan a la ficha de PAM. */
     traerCalculadora: () => w.pamFicha.traerCalculadora(),
     /** «Llevar a la calculadora»: la ficha de PAM pasa a ser el nivel actual de la Tabla de Canjes. */

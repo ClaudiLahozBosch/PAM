@@ -2,9 +2,9 @@
 // Oficiales: posts que cuentan y recompensas. De Mi PJ (pam-mi-pj.user.js 1.7.1) tal cual, más el arreglo R09.
 // 20 grageas por post, con tope de 3 por día, 15 por semana (lunes a domingo) y 45 por mes, por usuario y en hora
 // de España; +60 por el Suceso de cierre. Un segundo oficial (suceso de más de dos años) se cobra a un cuarto.
-import { normPalabras as norm, fmtForo as fmt } from '../core/texto.js?v=0.5.1';
-import { clavesMadrid } from '../lectores/FechaForo.js?v=0.5.1';
-import { esBot } from './Misiones.js?v=0.5.1';
+import { normPalabras as norm, fmtForo as fmt } from '../core/texto.js?v=0.5.2';
+import { clavesMadrid } from '../lectores/FechaForo.js?v=0.5.2';
+import { esBot } from './Misiones.js?v=0.5.2';
 
 export const ES_OFICIAL = /\[\s*(?:rol(?:eo)?\s+)?oficial\s*\]|\boficial\b\s*[\]|:·•-]/i;
 export const TOPE = { dia: 3, semana: 15, mes: 45 };

@@ -6,10 +6,10 @@
 //     Compendio por id;
 //   · los trasfondos con el lector nuevo, teniendo en cuenta los encabezados (F02);
 //   · lo que parece un trasfondo pero no se entiende se guarda para revisar, no se pierde (regla 3).
-import { norm, num } from '../core/texto.js?v=0.5.1';
-import { Ficha, ParteFicha, EntradaDesconocida } from '../modelos/Ficha.js?v=0.5.1';
-import { Arcano } from '../modelos/Arcano.js?v=0.5.1';
-import { LectorTrasfondo } from './LectorTrasfondo.js?v=0.5.1';
+import { norm, num } from '../core/texto.js?v=0.5.2';
+import { Ficha, ParteFicha, EntradaDesconocida } from '../modelos/Ficha.js?v=0.5.2';
+import { Arcano } from '../modelos/Arcano.js?v=0.5.2';
+import { LectorTrasfondo } from './LectorTrasfondo.js?v=0.5.2';
 
 /** Texto de un mensaje sin HTML ni BBCode, una línea por línea de la ficha (como cleanForo). */
 export function limpiarForo(raw) {

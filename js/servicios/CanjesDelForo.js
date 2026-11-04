@@ -8,9 +8,12 @@
 //   «pam.cuentas.<foro>.<id de cuenta>»   { peticiones } de esa cuenta (Mi PJ lo guardaba en «cuentas.<foro>.<id>»).
 // Los Inspectores de cada grupo se guardan un día en la memoria del panel («grupos.<foro>»).
 import { numero, formato, esNumero, mismoTexto, enlacePost, temaNumero, peticionCapturada, textoPeticion, avisosPeticion, clasificarRespuesta, normNombre,
-  claveCuenta, paqueteCierre, cambiarNumeroTras, descuadres, codigoConEnlaces } from '../reglas/Canjes.js?v=0.5.1';
-import { leerSaldos } from '../lectores/LectorBoveda.js?v=0.5.1';
-import { revisar } from '../reglas/RevisorBoveda.js?v=0.5.1';
+  claveCuenta, paqueteCierre, cambiarNumeroTras, descuadres, codigoConEnlaces } from '../reglas/Canjes.js?v=0.5.2';
+import { leerSaldos } from '../lectores/LectorBoveda.js?v=0.5.2';
+import { revisar } from '../reglas/RevisorBoveda.js?v=0.5.2';
+import { leerFichaDelForo } from './FichaDelForo.js?v=0.5.2';
+import { EditorFicha } from '../bbcode/EditorFicha.js?v=0.5.2';
+import { aplicarCanje } from '../reglas/CambiosFicha.js?v=0.5.2';
 
 export const CLAVE_APROBACION = 'pam.aprobacion';
 const aNum = v => (typeof v === 'number' ? v : NaN);
@@ -64,9 +67,10 @@ export function postsDe(doc) {
 /**
  * @param {{ leer(ruta: string): Promise<Document>, leerDato(k: string): Promise<any>, guardarDato(k: string, v: any): Promise<any>,
  *   puerta(accion: any): Promise<any> }} agente
- * @param {{ foroHost: string, cuenta: { id: number, nombre: string }, cfg: any, memoria: { gv(k: string, d: any): any, sv(k: string, v: any): void } }} op
+ * @param {{ foroHost: string, cuenta: { id: number, nombre: string }, cfg: any, memoria: { gv(k: string, d: any): any, sv(k: string, v: any): void },
+ *   ficha?: { sistema: any, compendio: any, lector: any } | null }} op  `ficha`: para editar la ficha por mensajes (N07)
  */
-export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria }) {
+export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, ficha: datosFicha = null }) {
   const origen = 'https://' + foroHost;
   // (el agente solo acepta letras, números, «.», «_» y «-» en las claves: un foro con puerto, como el banco local, lleva «:»)
   const CLAVE_CUENTA = claveCuenta(foroHost, cuenta.id);
@@ -155,7 +159,9 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria }) {
         post: String(post), enlace: enlace(post), creado: ahoraISO(), fecha: fecha || '',
         pj: pet.pj, gastadas: numero(pet.gastadas), estado: 'esperando', aprobacion: null, descartadas: [],
         // Textos que generó PAM al preparar el canje (para aplicarlo sin volver a PAM).
-        ficha: pet.ficha || null, boveda: pet.boveda || null
+        ficha: pet.ficha || null, boveda: pet.boveda || null,
+        // N07 (0.5.2): qué cambia en la ficha, para editarla mensaje a mensaje
+        ...(pet.cambiosFicha ? { cambiosFicha: pet.cambiosFicha } : {})
       });
       if (d.peticiones.length > 20) d.peticiones = d.peticiones.slice(-20);
     });
@@ -344,6 +350,39 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria }) {
     return { post: primero.id, bbcode: await leerBBCode(primero.id) };
   }
 
+  /**
+   * N07: los pasos de la ficha con el editor por mensajes. Se lee la ficha del foro como está ahora (todas sus partes),
+   * se le aplica lo que cambió en PAM con el canje y solo se editan los mensajes que cambian. Lo que el editor no pudo
+   * hacer solo, o lo que al volver a leer la ficha no quedó, va a los avisos para hacerlo a mano.
+   */
+  async function pasosFichaPorMensajes(pet, urlFicha, avisos) {
+    if (!datosFicha) throw new Error('Faltan los datos del sistema para editar la ficha: recargá la página.');
+    const { sistema, compendio, lector } = datosFicha;
+    const r = await leerFichaDelForo(agente, urlFicha, { lector, cuentaId: cuenta.id });
+    if (!r.propia) throw new Error('La ficha del perfil no es de esta cuenta: no se tocó nada.');
+    if (r.ficha.partes.some(p => p.seccion !== 'bbcode')) throw new Error('No pude leer el código de todos los mensajes de tu ficha. No se tocó nada: probá de nuevo.');
+    const { despues, manual, comprobar } = aplicarCanje(r.ficha, pet.cambiosFicha, { sistema, compendio });
+    const ed = new EditorFicha(sistema, compendio, lector).aplicar(r.ficha, despues, { tema: r.tema });
+    // nunca «hecho» sin verlo: la ficha tal como quedaría, leída otra vez
+    const final = lector.leer(ed.partes.map(p => ({ post: p.post, bbcode: p.despues })), { tema: r.tema }).ficha;
+    const aMano = [...manual, ...ed.manual];
+    const sinTipo = q => normNombre(q.replace(/^(Atributo|Habilidad|Ventaja|Especialización|Arte\/Artesanía|Arcano|Trasfondo|Idioma|Talento|Título)\s+/, '').replace(/[«»]/g, ''));
+    for (const q of comprobar(final)) if (!aMano.some(m => normNombre(m).includes(sinTipo(q)))) aMano.push(q + ': no quedó en la ficha; hacelo a mano');
+    if (aMano.length) avisos.push('Esto de la ficha no se pudo cambiar solo; hacelo a mano («Modificar» en el paso de la ficha, o editándola después): ' + aMano.join(' · ') + '.');
+    const n = r.ficha.partes.length, hechos = ed.hechos.join(' · ');
+    const cambian = ed.partes.filter(p => p.antes !== p.despues);
+    if (!cambian.length) {
+      const p0 = ed.partes[0];
+      return [aMano.length
+        ? { tipo: 'editar', post: p0.post, descripcion: 'ficha', omitido: 'No hay nada de la ficha que se pueda cambiar solo: mirá los avisos de arriba.' }
+        : { tipo: 'editar', post: p0.post, original: p0.antes, nuevo: p0.antes, descripcion: 'ficha', igual: 'Tu ficha ya tiene estos canjes.' }];
+    }
+    return cambian.map((p, i) => ({
+      tipo: 'editar', post: p.post, original: p.antes, nuevo: p.despues, motivo: 'Canjes aprobados',
+      descripcion: 'ficha' + (n > 1 ? ', mensaje ' + (ed.partes.findIndex(x => x.post === p.post) + 1) + ' de ' + n : '') + (i === 0 && hechos ? ' (' + hechos + ')' : '')
+    }));
+  }
+
   /** Tu último mensaje de un tema (sin contar el primero) cuyo BBCode cumple `cond`, o null. */
   async function buscarMensajePropio(urlTema, cond) {
     const t = await leerTema(urlTema);
@@ -353,13 +392,15 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria }) {
   }
 
   /**
-   * La puerta «Aplicar el canje aprobado»: primer mensaje de la bóveda, movimiento, ficha y aviso, con los textos
-   * que preparó PAM (aquí no se calcula nada). `datos` es lo que leyó el panel (dónde están la bóveda y la ficha).
+   * La puerta «Aplicar el canje aprobado»: primer mensaje de la bóveda, movimiento, ficha (uno o más mensajes) y aviso.
+   * La bóveda, con los textos que preparó PAM. La ficha, desde la 0.5.2, con el editor por mensajes sobre la ficha de
+   * ahora (`pet.cambiosFicha`, N07); las peticiones preparadas antes llevan el código «Personalizada» entero (`pet.ficha`)
+   * y se aplican como entonces. `datos` es lo que leyó el panel (dónde están la bóveda y la ficha).
    */
   async function accionAplicarCanje(pet, datos) {
     const a = pet.aprobacion;
     if (!a || !a.confirmada) throw new Error('La aprobación todavía no está confirmada.');
-    if (!pet.boveda && !pet.ficha) throw new Error('Esta petición se preparó sin los códigos de PAM (versión anterior): aplicala a mano.');
+    if (!pet.boveda && !pet.ficha && !pet.cambiosFicha) throw new Error('Esta petición se preparó sin los códigos de PAM (versión anterior): aplicala a mano.');
     if (esNumero(a.importe) && a.importe !== pet.gastadas) {
       throw new Error('El revisor corrigió el importe (' + formato(pet.gastadas) + ' → ' + formato(a.importe) + '). Los códigos de PAM son del importe original: aplicalo a mano o volvé a preparar el canje en PAM.');
     }
@@ -367,7 +408,8 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria }) {
     const avisos = [], pasos = [];
     const ruta = u => { const x = new URL(u, origen); return x.pathname; };
     const urlBov = ruta(datos.boveda.url), urlFicha = ruta(datos.ficha.url);
-    const [bov, fic] = await Promise.all([leerBoveda(urlBov), leerFicha(urlFicha)]);
+    const antigua = !pet.cambiosFicha && !!pet.ficha; // preparada antes de la 0.5.2: el primer mensaje entero
+    const [bov, fic] = await Promise.all([leerBoveda(urlBov), antigua ? leerFicha(urlFicha) : null]);
     const bbBov = await leerBBCode(bov.post);
     // 1 y 2. Bóveda
     if (pet.boveda) {
@@ -398,8 +440,16 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria }) {
       pasos.push({ tipo: 'editar', descripcion: 'primer mensaje de la bóveda', omitido: 'Sin código de bóveda de PAM.' });
       pasos.push({ tipo: 'publicar', descripcion: 'movimiento en la bóveda', omitido: 'Sin código de bóveda de PAM.' });
     }
+    const pasoMov = pasos[1];
     // 3 y 4. Ficha
-    if (pet.ficha) {
+    /** @type {any} */ let pasoAviso;
+    const aviso = () => (pet.boveda
+      ? { tipo: 'publicar', tema: temaNumero(urlFicha), texto: 'Ficha actualizada con los canjes aprobados.\nMovimiento en la bóveda: [url=«enlace del paso 2»]enlace[/url]', descripcion: 'aviso en la ficha («enlace del paso 2» se cambia por el enlace real del movimiento al publicar)' }
+      : { tipo: 'publicar', descripcion: 'aviso en la ficha', omitido: 'Sin movimiento de bóveda no hay enlace que poner.' });
+    if (pet.cambiosFicha) {
+      pasos.push(...await pasosFichaPorMensajes(pet, urlFicha, avisos));
+      pasos.push(pasoAviso = aviso());
+    } else if (pet.ficha && fic) {
       if (!mismoTexto(fic.bbcode, pet.ficha.base) && !mismoTexto(fic.bbcode, pet.ficha.codigo)) {
         throw new Error('Tu ficha del foro cambió desde que preparaste el canje en PAM, y editarla ahora borraría esos cambios. No se tocó nada: en el foro tocá «Enviar a PAM» y volvé a preparar el canje.');
       }
@@ -407,30 +457,30 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria }) {
       if (desc.length) avisos.push('El código de la ficha que generó PAM descuadra etiquetas respecto a tu ficha actual (' + desc.join(' · ') + '). Puede verse algo como «[/spoiler]» suelto: revisá la comparación y tocá «Modificar» si hay que arreglarlo.');
       if (pet.ficha.manual && pet.ficha.manual.length) avisos.push('PAM pide revisar a mano en la ficha: ' + pet.ficha.manual.join(' · ') + '. Tocá «Modificar» y corregilo antes de aceptar.');
       pasos.push({ tipo: 'editar', post: fic.post, original: fic.bbcode, nuevo: pet.ficha.codigo, motivo: 'Canjes aprobados', descripcion: 'ficha' + (pet.ficha.hechos ? ' (' + pet.ficha.hechos + ')' : '') });
-      pasos.push(pet.boveda
-        ? { tipo: 'publicar', tema: temaNumero(urlFicha), texto: 'Ficha actualizada con los canjes aprobados.\nMovimiento en la bóveda: [url=«enlace del paso 2»]enlace[/url]', descripcion: 'aviso en la ficha («enlace del paso 2» se cambia por el enlace real del movimiento al publicar)' }
-        : { tipo: 'publicar', descripcion: 'aviso en la ficha', omitido: 'Sin movimiento de bóveda no hay enlace que poner.' });
+      pasos.push(pasoAviso = aviso());
     } else {
       avisos.push('No hay código de ficha de PAM: la ficha no se toca.');
       pasos.push({ tipo: 'editar', descripcion: 'ficha', omitido: 'Sin código de ficha de PAM.' });
-      pasos.push({ tipo: 'publicar', descripcion: 'aviso en la ficha', omitido: 'Sin código de ficha de PAM.' });
+      pasos.push(pasoAviso = { tipo: 'publicar', descripcion: 'aviso en la ficha', omitido: 'Sin código de ficha de PAM.' });
     }
     // ¿Movimiento ya publicado? (mismo texto en tus últimos mensajes de la bóveda)
-    if (!pasos[1].omitido) {
-      const movYa = await buscarMensajePropio(urlBov, bb => mismoTexto(bb, pasos[1].texto));
+    if (!pasoMov.omitido) {
+      const movYa = await buscarMensajePropio(urlBov, bb => mismoTexto(bb, pasoMov.texto));
       if (movYa) {
-        pasos[1].igual = 'El movimiento ya está publicado en tu bóveda.';
-        pasos[1].postExistente = movYa.id;
-        if (!pasos[3].omitido) {
+        pasoMov.igual = 'El movimiento ya está publicado en tu bóveda.';
+        pasoMov.postExistente = movYa.id;
+        if (!pasoAviso.omitido) {
           const enlaceMov = enlace(movYa.id);
           const avYa = await buscarMensajePropio(urlFicha, bb => bb.indexOf(enlaceMov) !== -1 || bb.indexOf('#' + movYa.id) !== -1);
-          if (avYa) { pasos[3].igual = 'El aviso ya está publicado en tu ficha.'; pasos[3].postExistente = avYa.id; }
+          if (avYa) { pasoAviso.igual = 'El aviso ya está publicado en tu ficha.'; pasoAviso.postExistente = avYa.id; }
         }
       }
     }
     return {
       titulo: 'Aplicar el canje aprobado',
-      explicacion: 'Aprobado por ' + a.autor + ' (' + a.fecha + '). Se edita la bóveda, se publica el movimiento, se edita la ficha y se publica el aviso, con los textos que preparó PAM. Solo se editan mensajes tuyos.',
+      explicacion: pet.cambiosFicha
+        ? 'Aprobado por ' + a.autor + ' (' + a.fecha + '). Se edita la bóveda, se publica el movimiento, se edita la ficha (solo los mensajes donde está lo que cambia) y se publica el aviso. Solo se editan mensajes tuyos.'
+        : 'Aprobado por ' + a.autor + ' (' + a.fecha + '). Se edita la bóveda, se publica el movimiento, se edita la ficha y se publica el aviso, con los textos que preparó PAM. Solo se editan mensajes tuyos.',
       avisos,
       pasos
     };

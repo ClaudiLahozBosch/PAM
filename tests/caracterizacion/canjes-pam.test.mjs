@@ -42,7 +42,7 @@ function pam(gm) {
   w.rrSync();
   const id = w.pamFicha.buscar(PJ).id;
   w.rrBoveda.set(id, { ini: 1000, tot: 5000, act: 1000 });
-  w.eval(`addToCart("ESTADÍSTICAS", "Vigor: 2 → 3 — 300 grageas", 300, 0, null, {kind:"stat", name:"Vigor", from:2, to:3}); state.statsBase.Vigor = 3;
+  w.eval(`addToCart("ESTADÍSTICAS", "Vigor: 4 → 5 — 300 grageas", 300, 0, null, {kind:"stat", name:"Vigor", from:4, to:5}); state.statsBase.Vigor = 5;
     document.getElementById("inpDisponibles").value = 1000; document.getElementById("inpDisponibles").dispatchEvent(new Event("input", {bubbles:true})); renderAll();`);
   w.GM_getValue = (k, d) => (k in gm ? gm[k] : d); w.GM_setValue = (k, v) => { gm[k] = JSON.parse(JSON.stringify(v)); }; w.GM_listValues = () => Object.keys(gm);
   w.unsafeWindow = w;
@@ -94,7 +94,12 @@ test('la pastilla «Mi PJ» de PAM y la tarjeta de canjes, iguales', async () =>
 test('«Preparar el canje»: la misma puerta', async () => {
   clic(viejo.w, '#esc-pam button', 'Preparar el canje'); clic(nuevo.w, '#esc-pam button', 'Preparar el canje');
   await hasta(() => viejo.w.document.querySelector('.puerta') && nuevo.w.document.querySelector('.puerta'));
-  assert.equal(sinFechas(nuevo.w.document.querySelector('.puerta').outerHTML), sinFechas(viejo.w.document.querySelector('.puerta').outerHTML));
+  // N07 (0.5.2): la única diferencia, la nota del paso de la ficha (ya no se usa el código «Personalizada»)
+  const NOTA_VIEJA = 'Se pulsa «Traer de la calculadora»: los canjes del carrito pasan a la ficha de PAM, y PAM actualiza tu código del foro (modelo «Personalizada»). En el foro no se toca nada hasta que el canje esté aprobado.';
+  const NOTA_NUEVA = 'Se pulsa «Traer de la calculadora»: los canjes del carrito pasan a la ficha de PAM y se apunta qué cambia. Cuando el canje esté aprobado, Mi PJ hace lo mismo en tu ficha del foro, solo en los mensajes donde está cada cosa. En el foro no se toca nada hasta entonces.';
+  const htmlViejo = viejo.w.document.querySelector('.puerta').outerHTML;
+  assert.ok(htmlViejo.includes(NOTA_VIEJA));
+  assert.equal(sinFechas(nuevo.w.document.querySelector('.puerta').outerHTML), sinFechas(htmlViejo.replace(NOTA_VIEJA, NOTA_NUEVA)));
   assert.match(nuevo.w.document.querySelector('.puerta').textContent, /Mi Ficha · aplicar el carrito a la ficha.*Bóveda de PAM · grageas que se quitan/s);
 });
 
@@ -102,13 +107,18 @@ test('Aceptar: PAM queda igual y se guarda la misma petición para el foro', asy
   for (const P of [viejo, nuevo]) clic(P.w, '.puerta button', 'Aceptar');
   await hasta(() => [viejo, nuevo].every(P => [...P.w.document.querySelectorAll('.puerta a, .puerta button')].some(b => b.textContent === 'Ir al foro a publicar la petición')));
   for (const P of [viejo, nuevo]) assert.match(P.w.document.querySelector('.puerta .p-info').textContent, /^Hecho/);
-  const sin = p => { const { creado, ...r } = p; return r; };
+  // N07 (0.5.2): en vez del código «Personalizada» entero (ficha), qué cambia en la ficha (cambiosFicha)
+  const sin = p => { const { creado, ficha, cambiosFicha, ...r } = p; return r; };
   assert.deepEqual(sin(nuevo.gm['pam.peticion']), sin(viejo.gm['pam.peticion']));
   const pet = nuevo.gm['pam.peticion'];
   assert.equal(pet.pj, PJ);
   assert.match(pet.texto, /Vigor/);
   assert.equal(pet.gastadas, '300');
-  assert.ok(pet.ficha.codigo.length > 1000 && pet.ficha.base.length > 1000, 'el código «Personalizada» y el de antes');
+  assert.ok(viejo.gm['pam.peticion'].ficha.codigo.length > 1000, 'el antiguo guardaba el código entero');
+  assert.equal(pet.ficha, undefined);
+  assert.equal(pet.cambiosFicha.v, 1);
+  assert.equal(pet.cambiosFicha.despues.attrs.Vigor, pet.cambiosFicha.antes.attrs.Vigor + 1, 'Vigor sube uno con el canje');
+  assert.equal(pet.cambiosFicha.despues.desc, undefined, 'sin descripciones ni historia');
   assert.deepEqual(pet.boveda.numeros, { iniciales: 1000, cambio: -300, actuales: 700, totales: 5000 });
   assert.match(pet.boveda.html, /Grageas que se añaden\/quitan»<\/span> -300/);
   // PAM, igual en las dos copias: la ficha con el carrito y el movimiento preparado

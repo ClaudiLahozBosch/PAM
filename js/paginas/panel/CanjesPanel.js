@@ -4,7 +4,7 @@
 // Lo que cambia: lo guardado está en el almacén del agente (se lee al abrir el panel y después de cada cambio) y,
 // al publicar, es el agente quien lleva la página del foro al mensaje nuevo (el panel está en un iframe).
 // «Terminar en PAM» abre PAM por el canal oficial en los dos foros (Mi PJ, en el de pruebas, iba por su almacén).
-import { formato, numero, describirAprobacion } from '../../reglas/Canjes.js?v=0.5.1';
+import { formato, numero, describirAprobacion } from '../../reglas/Canjes.js?v=0.5.2';
 
 /**
  * @param {{ documento: Document, servicio: ReturnType<typeof import('../../servicios/CanjesDelForo.js').crearCanjesDelForo> | null,
@@ -82,7 +82,7 @@ export function crearTarjetaCanjes({ documento, servicio, datos, actualizar, abr
           boton('Es la aprobación', true, () => { confirmar(p, true); })
         ]));
       } else if (!p.aplicada) {
-        if (!p.boveda && !p.ficha) rt.appendChild(el('div', { clase: 'dim', texto: 'Preparada sin los códigos de PAM: aplicala a mano.' }));
+        if (!p.boveda && !p.ficha && !p.cambiosFicha) rt.appendChild(el('div', { clase: 'dim', texto: 'Preparada sin los códigos de PAM: aplicala a mano.' }));
         rt.appendChild(fila2([boton('Aplicar el canje', true, b => { aplicar(p, b, aviso); })]));
       } else {
         rt.appendChild(el('div', { clase: 'dim', texto: 'Aplicado en el foro el ' + new Date(p.aplicada.fecha).toLocaleString('es-AR') + '.' + (p.enPAM ? ' Cerrado en PAM.' : '') }));

@@ -3,8 +3,8 @@
 // revisarUno, decidir, repintarPanel), dentro de PAM. PAM lee la página a través del agente, revisa y arma lo que
 // se ve; el agente lo pinta en el foro y le devuelve los clics (`accion`). Solo lee: no publica ni edita nada
 // («Pegar en la respuesta rápida» lo deja en el editor del foro, sin enviar; eso lo hace el agente).
-import { tablaDeDatos, prepararTabla } from './Tabla.js?v=0.5.1';
-import { CSS_INSPECTOR } from './estilosInspector.js?v=0.5.1';
+import { tablaDeDatos, prepararTabla } from './Tabla.js?v=0.5.2';
+import { CSS_INSPECTOR } from './estilosInspector.js?v=0.5.2';
 
 /**
  * @param {{ agente: { leer(ruta: string): Promise<Document>, pedir(tipo: string, datos?: any, ms?: number): Promise<any> },

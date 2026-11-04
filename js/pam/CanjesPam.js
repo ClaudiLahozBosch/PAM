@@ -2,14 +2,16 @@
 // Los canjes dentro de PAM (Mi PJ 1.7.1, «hitos 4 y 5 en PAM», montarPuentePAM), con el mismo aspecto y los mismos
 // textos, pero sin pulsar botones de PAM: todo pasa por PamActual (las funciones de pamFicha y rrBoveda).
 //   · Preparar el canje: con el carrito hecho, se aplica a la ficha de PAM («Traer de la calculadora»), se deja en la
-//     Bóveda de PAM el movimiento con las grageas que se quitan y se guardan los textos que genera PAM (petición,
-//     código «Personalizada» de la ficha y código de la bóveda) en el almacén del agente («pam.peticion»). Con eso el
-//     foro aplica el canje sin volver a pasar por PAM.
+//     Bóveda de PAM el movimiento con las grageas que se quitan y se guardan en el almacén del agente («pam.peticion»)
+//     la petición, el código de la bóveda y qué cambia en la ficha (N07: la ficha como se importó del foro y con el
+//     carrito, js/reglas/CambiosFicha.js). Con eso el foro aplica el canje sin volver a pasar por PAM, editando solo
+//     los mensajes de la ficha donde está cada cosa.
 //   · Cierre: tras publicarlo todo en el foro («pam.aprobacion»), se ponen los dos enlaces en la Bóveda de PAM y se
 //     hace su «Ya lo publiqué».
 // La pastilla «✦ Mi PJ · Canjes» es la de siempre (abajo a la derecha de PAM).
-import { abrirPuerta, crearEl, estilos } from './ui/Puerta.js?v=0.5.1';
-import { claveCuenta } from '../reglas/Canjes.js?v=0.5.1';
+import { abrirPuerta, crearEl, estilos } from './ui/Puerta.js?v=0.5.2';
+import { claveCuenta } from '../reglas/Canjes.js?v=0.5.2';
+import { cambiosDeCanje } from '../reglas/CambiosFicha.js?v=0.5.2';
 
 const CLAVE_PAQUETE = 'pam.paquete', CLAVE_PETICION = 'pam.peticion', CLAVE_APROBACION = 'pam.aprobacion';
 const numero = txt => { const l = String(txt == null ? '' : txt).replace(/[^\d-]/g, ''); return l === '' || l === '-' ? NaN : parseInt(l, 10); };
@@ -62,23 +64,24 @@ export function crearCanjesPam({ agente, pam, doc, foros }) {
 
   /* ---------- Preparar el canje ---------- */
   function accionPreparar(pet, captura) {
-    const a = pam.fichaActiva();
-    const P = a && a.ficha && a.ficha.plantilla;
-    const personal = P && P.modo === 'personal' && P.codigo;
     const gastadas = numero(pet.gastadas);
     const busca = pam.pjBoveda(pet.pj);
-    const pasoFicha = personal ? {
+    // N07: ya no hace falta el código «Personalizada»: se apunta qué cambia y en el foro se edita mensaje a mensaje
+    const pasoFicha = {
       tipo: 'pam', titulo: 'Mi Ficha · aplicar el carrito a la ficha',
-      vista: el('div', { clase: 'p-nota', texto: 'Se pulsa «Traer de la calculadora»: los canjes del carrito pasan a la ficha de PAM, y PAM actualiza tu código del foro (modelo «Personalizada»). En el foro no se toca nada hasta que el canje esté aprobado.' }),
+      vista: el('div', { clase: 'p-nota', texto: 'Se pulsa «Traer de la calculadora»: los canjes del carrito pasan a la ficha de PAM y se apunta qué cambia. Cuando el canje esté aprobado, Mi PJ hace lo mismo en tu ficha del foro, solo en los mensajes donde está cada cosa. En el foro no se toca nada hasta entonces.' }),
       ejecutar: () => {
+        const previa = pam.fichaEnMemoria();
         pam.traerCalculadora();
-        const f = pam.codigoPersonal();
+        const ahora = pam.fichaEnMemoria();
         pam.verSeccion('ficha');
-        if (!f) throw new Error('No encuentro tu código en «Código para el foro» (¿está en «Personalizada»?).');
-        captura.ficha = f;
+        if (!ahora) throw new Error('No encuentro la ficha activa de PAM.');
+        // «antes»: la ficha como se importó del foro (así preparar dos veces da lo mismo); si no se importó, la de un momento antes
+        const base = ahora.plantilla && ahora.plantilla.base;
+        captura.cambiosFicha = cambiosDeCanje(base || previa, ahora);
         return { estado: 'ok' };
       }
-    } : { tipo: 'pam', titulo: 'Mi Ficha · aplicar el carrito a la ficha', omitido: 'Tu ficha de PAM no tiene guardado el código del foro (modelo «Personalizada»), así que Mi PJ no va a poder actualizar la ficha del foro. Para tenerlo: en el foro tocá «Enviar a PAM» y volvé a preparar el canje.' };
+    };
 
     let pasoBoveda;
     if (busca.omitido) pasoBoveda = { tipo: 'pam', titulo: 'Bóveda de PAM · grageas que se quitan', omitido: busca.omitido };
@@ -130,7 +133,7 @@ export function crearCanjesPam({ agente, pam, doc, foros }) {
     accion.enlaceFinal = { texto: 'Ir al foro a publicar la petición', href: 'https://' + pet.foro + cfg.registroCanjes + '#escriba-publicar' };
     accion.antesDelEnlace = () => agente.guardarDato(CLAVE_PETICION, {
       v: 2, creado: ahoraISO(), foro: pet.foro, cuenta: pet.cuenta, pj: pet.pj, texto: pet.texto,
-      disponibles: pet.disponibles, gastadas: pet.gastadas, restantes: pet.restantes, ficha: captura.ficha || null, boveda: captura.boveda || null
+      disponibles: pet.disponibles, gastadas: pet.gastadas, restantes: pet.restantes, cambiosFicha: captura.cambiosFicha || null, boveda: captura.boveda || null
     });
     try { await abrirPuerta(doc, pet.cuenta.nombre, accion); }
     catch (e) { aviso = { error: e instanceof Error ? e.message : String(e), ok: null }; }

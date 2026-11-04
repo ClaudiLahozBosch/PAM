@@ -6,7 +6,7 @@
 //   3. y después lo nuevo: la sesión con código (js/nube/) y lo que llega del foro (js/pam/), como antes, al final.
 // Si algo no se puede traer, PAM avisa arriba en vez de quedarse a medias sin decir nada.
 
-const V = '?v=0.5.1'; // lo pone scripts/versionar.mjs
+const V = '?v=0.5.2'; // lo pone scripts/versionar.mjs
 
 /** Los datos que las páginas antiguas leen de la página, en orden. */
 export const DATOS = [
