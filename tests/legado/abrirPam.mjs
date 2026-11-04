@@ -70,6 +70,18 @@ export async function abrir(como, { tema, fetch, antes } = {}) {
   return { w, errores, ok, importados, skinAlCargar };
 }
 
+/**
+ * El HTML del PAM antiguo con las tres diferencias a propósito de la 8d (R07: la Tabla de Canjes usa data/sistema.json,
+ * ver sistema.json → reconciliado): los tipos de trasfondo en orden alfabético, «Personal no-docente» y
+ * «Arte/Artesanía» en las Proezas. Así se compara todo lo demás.
+ */
+export const comoOficial = html => html
+  .replace(/(<option value="Informantes"( selected="")?>Informantes<\/option>)(<option value="Influencia"( selected="")?>Influencia<\/option>)/g, '$3$1')
+  .replace(/Personal no docente/g, 'Personal no-docente')
+  .replace(/value="Arte \/ Artesanía"/g, 'value="Arte/Artesanía"').replace(/>Arte \/ Artesanía<\/option>/g, '>Arte/Artesanía</option>')
+  .replace(/Arte \/ Artesanía \(Voluntad\)/g, 'Arte/Artesanía (Voluntad)') // el valor de la Proeza: «habilidad (atributo)»
+  .replace(/"Arte \/ Artesanía"/g, '"Arte/Artesanía"'); // en los datos (JSON)
+
 /** El HTML de la página sin los <script>. */
 export const pagina = w => {
   const c = w.document.body.cloneNode(true);

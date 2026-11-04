@@ -8,12 +8,16 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { DATOS, PAGINAS, MODULOS } from '../../js/pam/arranque.js';
-import { abrir, pagina, igual, RAIZ } from '../legado/abrirPam.mjs';
+import { abrir, pagina as paginaDe, igual, RAIZ, comoOficial } from '../legado/abrirPam.mjs';
+
+// 8d (R07): la Tabla de Canjes usa data/sistema.json; el antiguo se pasa a esa forma (tres diferencias conocidas)
+const pagina = w => (w.__pamAntiguo ? comoOficial(paginaDe(w)) : paginaDe(w));
 
 const GLOBALES =['pamFicha', 'pamPjs', 'rrBoveda', 'rrOficiales', 'rrSync', 'rrGo', 'showSection', 'aplicarTema', 'reSetTab', 'grimorioFicha', 'pamRapido', 'pamForoListo'];
 
 test('arrancar desde los archivos deja el mismo PAM que cuando todo estaba en index.html', async () => {
   const a = await abrir('archivos'), b = await abrir('junto');
+  b.w.__pamAntiguo = true;
   try {
     assert.equal(a.ok, true);
     assert.deepEqual(a.importados, ['../paginas/canjes/main.js', '../paginas/revisor/main.js', '../paginas/registro/main.js', '../nube/main.js', './main.js'], 'la Tabla, Mi Ficha y el Registro en su sitio y después lo nuevo, en el mismo orden');

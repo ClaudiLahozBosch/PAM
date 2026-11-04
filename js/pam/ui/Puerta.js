@@ -7,7 +7,7 @@
 // paso   = { tipo: 'pam', titulo, vista?: Node, editar?(), recoger?(), ejecutar(avisar) → Promise<{ estado, detalle? }>,
 //            omitido?: texto, igual?: texto }
 // Devuelve { resultado: 'aceptada'|'denegada'|'fallida'|'parcial'|'igual', pasos }.
-import { CSS_PAM_VARS, CSS_PUERTA } from './estilosPuerta.js?v=0.6.4';
+import { CSS_PAM_VARS, CSS_PUERTA } from './estilosPuerta.js?v=0.6.5';
 
 /** Los estilos de la puerta y de la pastilla (una vez). @param {Document} doc */
 export function estilos(doc) {

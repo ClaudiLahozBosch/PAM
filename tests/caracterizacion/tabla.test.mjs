@@ -5,7 +5,11 @@
 // copiar, la cabecera de grageas y la barra de pestañas): desde F16 las pestañas ocultas se pintan al abrirlas.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { abrir, igual } from '../legado/abrirPam.mjs';
+import { abrir, igual as igualTal, comoOficial } from '../legado/abrirPam.mjs';
+
+// R07 (8d): la nueva usa data/sistema.json; a la antigua se le aplican las tres diferencias conocidas (comoOficial)
+// y se compara todo lo demás. Abajo, una prueba que comprueba esas diferencias y que los datos son los mismos.
+const igual = (a, b, que) => igualTal(a, comoOficial(b), que);
 
 const MEDIODIA = Date.UTC(2026, 0, 15, 12);
 const antes = w => {
@@ -58,9 +62,9 @@ test('8d: al usarla (añadir, quitar, grageas) hace, muestra y guarda lo mismo',
     igual(vista(a.w), vista(b.w), 'carrito tras quitar');
     for (const w of [a.w, b.w]) pestana(w, 'resumen');
     igual(vista(a.w), vista(b.w), 'texto para copiar');
-    assert.deepEqual(fuera(a.w.pamTabla.state), fuera(b.w.pamTabla.state), 'el estado');
+    assert.deepEqual(fuera(a.w.pamTabla.state), JSON.parse(comoOficial(JSON.stringify(b.w.pamTabla.state))), 'el estado');
     for (const w of [a.w, b.w]) w.dispatchEvent(new w.Event('pagehide'));
-    assert.equal(a.w.localStorage.getItem('grimorio.canjes'), b.w.localStorage.getItem('grimorio.canjes'), 'lo guardado (R08)');
+    assert.equal(a.w.localStorage.getItem('grimorio.canjes'), comoOficial(b.w.localStorage.getItem('grimorio.canjes')), 'lo guardado (R08)');
     // vaciar el carrito al cerrar un canje (R08)
     for (const w of [a.w, b.w]) w.pamCanjes.vaciarCarrito();
     igual(vista(a.w), vista(b.w), 'carrito vacío');
@@ -78,6 +82,26 @@ test('8d: el Compendio busca y filtra igual', async () => {
       igual(comp(a.w).outerHTML, comp(b.w).outerHTML, 'búsqueda ' + q);
     }
   } finally { cerrar(a, b); }
+});
+
+test('R07: los datos de la Tabla salen de data/*.json y son los de antes (salvo lo reconciliado con el texto oficial)', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { datosTabla } = await import('../../js/paginas/canjes/datos.js');
+  const { pamEntero } = await import('../legado/montarPam.mjs');
+  const json = f => JSON.parse(readFileSync(new URL('../../data/' + f, import.meta.url), 'utf8'));
+  // las constantes de la página antigua, ejecutando su zona de datos (como hacía el Inspector antiguo)
+  const html = pamEntero(), a = html.indexOf('const STATS = ['), z = html.indexOf('/* =========================================================\n   UTILIDADES', a);
+  const arcanosTxt = html.match(/<script id="arcanos-data" type="application\/json">([\s\S]*?)<\/script>/)[1];
+  const N = datosTabla({ sistema: json('sistema.json'), calculadora: json('arcanos-calculadora.json'), arcanos: JSON.parse(arcanosTxt) });
+  const nombres = Object.keys(N).filter(k => !['SKILL_STAT'].includes(k));
+  const V = new Function('document', html.slice(a, z) + '\nreturn {' + nombres.join(',') + ', SKILL_STAT};')({ getElementById: () => ({ textContent: arcanosTxt }) });
+  const plano = v => JSON.parse(comoOficial(JSON.stringify(v)));
+  for (const k of nombres) {
+    if (k === 'TIPOS_TRASF') { assert.deepEqual(N[k], ['Biblioteca', 'Influencia', 'Informantes', 'Seguidores']); assert.deepEqual([...N[k]].sort(), [...V[k]].sort()); continue; }
+    assert.deepEqual(JSON.parse(JSON.stringify(N[k])), plano(V[k]), k);
+  }
+  const src = readFileSync(new URL('../../js/paginas/canjes/Tabla.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(src, /const ARC_RAW|const TALENTOS = \[|const STAT_ACUM/, 'sin los datos escritos a mano');
 });
 
 test('8d: la Tabla guarda con el almacén y lo que usan los demás está en window.pamTabla', async () => {

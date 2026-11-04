@@ -25,7 +25,7 @@ function parseInvReqs(txt) {
    salvo en las legendarias («price», que además conservan «nombre»). */
 const ANTES = { grupo: 'g', nombre: 'n', precio: 'p', ejemplo: 'ph', multiple: 'multi', requisito: 'req', descripcionHtml: 'desc', campo: 'field',
   tipo: 'type', etiqueta: 'label', limite: 'limit', maximoPorAno: 'maxPerYear', limitePorPD: 'pdLimit', clave: 'key', huecos: 'slots', maximo: 'max', arcanos: 'arc' };
-const deshacer = (v, extra = {}) => Array.isArray(v) ? v.map(x => deshacer(x, extra))
+export const deshacer = (v, extra = {}) => Array.isArray(v) ? v.map(x => deshacer(x, extra))
   : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k in extra ? extra[k] : (ANTES[k] || k), deshacer(x)])) : v;
 
 /**
