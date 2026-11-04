@@ -3,7 +3,8 @@
 // tests/legado/paginas/tabla-canjes.js), como módulo. Lo que cambia, marcado con «8d»:
 //   · guarda con el almacén (js/core/Almacen.js), con la misma clave (grimorio.canjes);
 //   · R07: los datos del sistema (precios, habilidades, arcanos, talentos…) le llegan de data/*.json (datos.js);
-//   · sus variables ya no son de toda la página: lo que usan Mi Ficha y la portada está en window.pamTabla.
+//   · sus variables ya no son de toda la página: lo que usan Mi Ficha y la portada está en window.pamTabla;
+//   · F16: renderAll() pinta lo que se ve; las demás pestañas, al abrirlas (activateTab).
 // Recibe la ventana: así las pruebas lo montan en una página de prueba junto al antiguo y comparan.
 
 /**
@@ -303,9 +304,16 @@ const RENDERERS = {};
 let activeTab = "stats";
 function activateTab(id){
   activeTab = id;
+  pintar(id); /* F16 (8d): si cambió algo desde la última vez que se pintó, se pinta ahora */
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.toggle("active", b.dataset.tab===id));
   document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active", p.id==="panel-"+id));
 }
+/* F16 (8d): antes, cualquier cambio volvía a pintar las 13 pestañas y el Compendio. Ahora se pinta lo que se ve (la
+   pestaña abierta, el «Texto para copiar», que PAM lee para los canjes, y el Compendio si está abierto); las demás
+   quedan marcadas y se pintan al abrirlas, con el mismo resultado. */
+const sinPintar = new Set();
+function pintar(id){ if(sinPintar.has(id) && RENDERERS[id]){ sinPintar.delete(id); RENDERERS[id](); } }
+const compendioAbierto = () => { const s=document.getElementById("sec-compendio"); return !!(s && s.classList.contains("active")); };
 function buildTabs(){
   const bar = document.getElementById("tabBar"), content = document.getElementById("tabContent");
   TABS.forEach((t,i)=>{
@@ -328,7 +336,8 @@ function renderAll(){
   syncEspec();
   // conservar el scroll al re-renderizar
   const y = window.scrollY;
-  Object.values(RENDERERS).forEach(fn=>fn());
+  Object.keys(RENDERERS).forEach(id=>sinPintar.add(id)); /* F16 (8d) */
+  pintar(activeTab); pintar("resumen"); if(compendioAbierto()) pintar("compendio");
   renderLedger();
   window.scrollTo(0,y);
 }

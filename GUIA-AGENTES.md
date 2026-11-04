@@ -1,6 +1,6 @@
 # Guía del refactor de PAM para agentes de IA
 
-Estado a **4/11/2026**, rama `refactor`, versión **0.6.3** (fases 8b y 8c hechas: Registro, Coloreador, Mi Ficha y Revisor como módulos, con los datos oficiales).
+Estado a **4/11/2026**, rama `refactor`, versión **0.6.6** (fases 8b, 8c y 8d hechas: Registro, Coloreador, Mi Ficha, Revisor, Tabla de Canjes y Compendio como módulos, con los datos oficiales; queda la 8e).
 Este documento es para un agente de IA (o una persona programadora) que tenga que seguir trabajando en la rama sin haber estado en las sesiones anteriores. Explica qué se reorganizó, cómo funciona ahora, qué errores se corrigieron y dónde, y qué queda. Léelo entero antes de tocar nada.
 
 Documentos relacionados (en este orden de importancia):
@@ -84,7 +84,9 @@ js/servicios/             Hablan con el foro a través del agente: FichaDelForo,
 js/servicios/agente/      protocolo.js (el contrato) y ClienteAgente.js (postMessage con id y respuesta).
 js/paginas/panel/         El panel Mi PJ: main.js, MiPjPanel.js (moduloMiPJ portado), CanjesPanel.js, BibliotecaPanel.js.
 js/paginas/pam/           El código ANTIGUO de PAM repartido (fase 8a). Scripts clásicos, no módulos:
-                          tabla-canjes (desde la 8c ofrece window.pamTabla), portada, temas, foro-antiguo.
+                          portada (lo de la Tabla, por window.pamTabla), temas, foro-antiguo.
+js/paginas/canjes/        Fase 8d: Tabla de Canjes y Compendio. main.js, Tabla.js (mismo código; ofrece window.pamTabla
+                          y window.pamCanjes; F16: pinta lo que se ve), datos.js (de data/*.json con tablaDeDatos()).
 js/paginas/revisor/       Fase 8c: Mi Ficha, Controlador de stats, Revisor y Editor de empleos como módulos. main.js,
                           Revisor.js (pantallas, mismo código; lo de la Tabla por window.pamTabla como «TC.…»),
                           datos.js (de data/sistema.json: iniciarDatos() al arrancar; los demás leen sus `export let`,
@@ -241,7 +243,10 @@ Claves de paso en el almacén del agente: `pam.oficiales` (Biblioteca → PAM), 
 | R07 (Mi Ficha) | Mi Ficha tenía su propia copia de los datos del sistema y una tabla de traducción (Esquivar → Esquiva). | Salen de `data/sistema.json`; mismos valores, más «Gobierno mágico de (X país)». | `js/paginas/revisor/datos.js` | `revisor` |
 | R07 (lista de deseos) | La lista de deseos del Registro tenía su propia copia de los datos del sistema, distinta de la oficial (nombres, orden, faltaban 5 objetos avanzados y 3 legendarios). | Sale de los datos oficiales y de los inventados del Compendio; lo que solo tenía ella, de `deseosExtra.js`. Nada se pierde. | `js/paginas/registro/deseos.js` | `registro` |
 
-**Sin corregir:** F16 (8d), F17 resto (8e), R07 en la Tabla de Canjes (8d), N01, N03, y las mejoras N02, N05, N06 (ver §11).
+| R07 (Tabla de Canjes) | La Tabla tenía escritos a mano todos los datos del sistema. | Salen de `data/*.json` con `tablaDeDatos()`; las diferencias son las del Sistema reconciliado. | `js/paginas/canjes/datos.js` | `tabla` |
+| F16 | Cualquier cambio en la Tabla volvía a pintar las 13 pestañas y el Compendio. | Se pinta lo que se ve; lo demás, al abrirlo. | `js/paginas/canjes/Tabla.js` (`pintar`, `sinPintar`) | `tabla` |
+
+**Sin corregir:** F17 resto (8e), N01, N03, y las mejoras N02, N05, N06 (ver §11).
 
 ## 8. Cambios dentro del código antiguo de Hana
 
@@ -296,7 +301,7 @@ PAM_FICHA_IRVIN="C:\ruta\Irvin Giles.htm" npm test   # con la ficha real (no est
 1. **Pruebas manuales del usuario en Chrome** con el agente 0.6.0 (staging + test-forito): `PROVES-5c`, `6b1`, `6b3` (canje entero con Elena), `6c`, `7` (con un código de sesión nuevo de pruebas, dos ventanas), `8a` y `8b`. Las de 5a, 5b, 5d y 6a ya pasaron. Lo que salga, se corrige antes de seguir.
 2. ~~Fase 8b~~ hecha (0.6.0).
 3. ~~Fase 8c~~ hecha (0.6.2 y 0.6.3). Pendiente de decidir: el «Personalizada» antiguo (`actualizarCodigoAntiguo`) puede desaparecer cuando el nuevo esté probado en Chrome; el cálculo de combate de Mi Ficha podría usar `js/reglas/Combate.js` (habría que pasar la ficha antigua al modelo nuevo).
-4. **Fase 8d · Tabla de Canjes y Compendio:** que no repinte todo por cualquier cambio (**F16**).
+4. ~~Fase 8d~~ hecha (0.6.4–0.6.6). Las pruebas que comparan con el PAM antiguo le aplican `comoOficial()` (`tests/legado/abrirPam.mjs`): las tres diferencias del Sistema reconciliado. Desde F16, para comparar la página entera hay que abrir antes todas las pestañas de la Tabla (y el Compendio).
 5. **Fase 8e · Portada, temas y CSS:** estilos por página y sin repetir (**F17**); `PamActual` pasa a las páginas nuevas.
 6. **N03** («Tus otras cuentas»): no mostrar cuentas inactivas ni temas cerrados. Antes, **mirar en el foro real** cómo marca una cuenta inactiva y un tema cerrado; no suponerlo.
 7. **N01** (reglas de Firestore: que no se pueda listar ni borrar documentos ajenos): solo con permiso de Hana; no tocar ni sondear su Firestore sin él.

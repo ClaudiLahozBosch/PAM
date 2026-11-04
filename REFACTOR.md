@@ -138,7 +138,7 @@ El script aparte «PAM · Inspector de Canjes» pasa a PAM y al mismo agente que
 |---|---|
 | Los estilos (`<style>`) | `css/pam.css` |
 | Los empleos del foro y los arcanos | `data/empleos-foro.txt` y `data/arcanos.json`: los mismos archivos que ya usan el panel de Mi PJ y el Inspector. Ya no están dos veces. |
-| Datos del sistema, Tabla de Canjes y Compendio | `js/paginas/pam/tabla-canjes.js` |
+| Datos del sistema, Tabla de Canjes y Compendio | `js/paginas/pam/tabla-canjes.js` (desde la 8d, `js/paginas/canjes/`; los datos, de `data/`) |
 | Revisor de Empleos: Empleos, Mi Ficha, Controlador y Editor | `js/paginas/pam/revisor.js` (desde la 8c, `js/paginas/revisor/`) |
 | Registro de Roles y Coloreador de Diálogos | `js/paginas/pam/registro-roles.js` (desde la 8b, `js/paginas/registro/`) |
 | Portada y navegación | `js/paginas/pam/portada.js` |
@@ -182,7 +182,11 @@ El script aparte «PAM · Inspector de Canjes» pasa a PAM y al mismo agente que
   - Su HTML sigue en `index.html` y sus estilos en `css/pam.css`.
 
   Segunda parte (0.6.3, R07): los datos de Mi Ficha salen de `data/sistema.json` (`datos.js`, que los rellena al arrancar). Son los mismos que tenía, más «Gobierno mágico de (X país)» en Política, que le faltaba.
-- **8d · Tabla de Canjes y Compendio:** que no repinte todo por cualquier cambio (F16). (El carrito de trasfondos, N04, ya está desde la 6b·1, y que se guarde al recargar, R08, desde la 0.5.1.)
+- **8d (hecha) · Tabla de Canjes y Compendio**, en `js/paginas/canjes/`:
+  - 0.6.4: `Tabla.js`, el mismo código como módulo. Guarda con el almacén. Lo que usan Mi Ficha y la portada está en `window.pamTabla`.
+  - 0.6.5 (R07): los datos salen de `data/*.json` (`datos.js`, igual que el Inspector). Cambian «Personal no-docente», el orden alfabético de los tipos de trasfondo y «Arte/Artesanía» en las Proezas.
+  - 0.6.6 (F16): al cambiar algo se pinta lo que se ve, y las demás pestañas al abrirlas. El Compendio se arma la primera vez que se abre.
+  - El carrito de trasfondos (N04) ya estaba desde la 6b·1, y que la Tabla se guarde al recargar (R08) desde la 0.5.1.
 - **8e · Portada, temas y lo que quede:** los estilos repartidos por página y sin repetir (F17), y `js/pam/PamActual.js` cambiado a las páginas nuevas.
 
 ## Dónde guarda PAM los datos (y la sesión con código)

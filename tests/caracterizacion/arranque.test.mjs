@@ -18,6 +18,11 @@ const GLOBALES =['pamFicha', 'pamPjs', 'rrBoveda', 'rrOficiales', 'rrSync', 'rrG
 test('arrancar desde los archivos deja el mismo PAM que cuando todo estaba en index.html', async () => {
   const a = await abrir('archivos'), b = await abrir('junto');
   b.w.__pamAntiguo = true;
+  // F16 (8d): la Tabla de Canjes pinta cada pestaña al abrirla; se abren todas para comparar la página entera
+  // (y el Compendio, que desde F16 se arma la primera vez que se abre)
+  // (dos veces, como el antiguo al cargar: la segunda marca «selected» la opción que la primera dejó elegida)
+  const abrirTodas = w => { w.document.querySelectorAll('.tab-btn').forEach(x => x.click()); w.document.querySelector('.tab-btn').click(); };
+  for (const w of [a.w, b.w]) { abrirTodas(w); w.pamTabla.renderAll(); abrirTodas(w); w.showSection('compendio'); w.showSection('home'); }
   try {
     assert.equal(a.ok, true);
     assert.deepEqual(a.importados, ['../paginas/canjes/main.js', '../paginas/revisor/main.js', '../paginas/registro/main.js', '../nube/main.js', './main.js'], 'la Tabla, Mi Ficha y el Registro en su sitio y después lo nuevo, en el mismo orden');

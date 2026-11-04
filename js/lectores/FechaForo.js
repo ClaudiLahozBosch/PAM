@@ -7,7 +7,7 @@
 // cerrado hace un año salía como reciente. Ahora el año se deduce del día de la semana: el año más reciente
 // (sin pasarse de hoy) en el que ese día cae en ese día de la semana.
 
-import { norm } from '../core/texto.js?v=0.6.5';
+import { norm } from '../core/texto.js?v=0.6.6';
 
 /** Una fecha del foro dentro de un texto (la cabecera de un mensaje, la columna «último mensaje»…). */
 export const FECHA = /((?:Lun|Mar|Mi[ée]r?|Jue|Vie|S[áa]b|Dom)\.?\s+\d{1,2}\s+[A-Za-zé]+\.?(?:\s+\d{4})?\s*(?:,|-)\s*\d{1,2}:\d{2}(?::\d{2})?(?:\s*[ap]\.?\s?m\.?)?|(?:Hoy|Ayer)\s+a\s+las\s+\d{1,2}:\d{2}(?::\d{2})?(?:\s*[ap]\.?\s?m\.?)?)/i;

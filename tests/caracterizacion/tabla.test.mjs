@@ -104,6 +104,28 @@ test('R07: los datos de la Tabla salen de data/*.json y son los de antes (salvo 
   assert.doesNotMatch(src, /const ARC_RAW|const TALENTOS = \[|const STAT_ACUM/, 'sin los datos escritos a mano');
 });
 
+test('F16: un cambio pinta lo que se ve; las otras pestañas, al abrirlas (con lo último)', async () => {
+  const a = await abrir('archivos', { antes });
+  try {
+    const w = a.w, panel = id => d(w).getElementById('panel-' + id);
+    for (const t of TABS) pestana(w, t); // todas pintadas una vez
+    pestana(w, 'stats');
+    for (const t of TABS) panel(t).dataset.marca = '1'; // la marca se pierde si se vuelve a pintar el panel (innerHTML)
+    const marcadas = () => TABS.filter(t => panel(t).firstElementChild && panel(t).querySelector('*') && panel(t).innerHTML && !panel(t).__repintado);
+    const hijos = Object.fromEntries(TABS.map(t => [t, panel(t).firstElementChild]));
+    const repintadas = () => TABS.filter(t => panel(t).firstElementChild !== hijos[t]);
+    d(w).querySelector('#panel-stats button.btn:not(.ghost)').click(); // añadir algo al carrito
+    assert.deepEqual(repintadas().sort(), ['resumen', 'stats'], 'solo la pestaña abierta y el texto para copiar');
+    assert.ok(marcadas().length >= 0);
+    pestana(w, 'carrito');
+    assert.ok(repintadas().includes('carrito'), 'el carrito se pinta al abrirlo');
+    assert.match(panel('carrito').textContent, /Vigor|Destreza|Carisma|Voluntad|Percepción|Inteligencia|Poder/, 'y muestra lo que se añadió');
+    const antes2 = panel('talentos').firstElementChild;
+    pestana(w, 'stats');
+    assert.equal(panel('talentos').firstElementChild, antes2, 'talentos sigue sin pintar mientras no se abre');
+  } finally { a.w.close(); }
+});
+
 test('8d: la Tabla guarda con el almacén y lo que usan los demás está en window.pamTabla', async () => {
   const { readFileSync } = await import('node:fs');
   const src = readFileSync(new URL('../../js/paginas/canjes/Tabla.js', import.meta.url), 'utf8');
