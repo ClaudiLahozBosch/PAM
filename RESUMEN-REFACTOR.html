@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PAM · Qué cambió</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#171a2b; --panel:#1e2236; --panel-2:#262a42;
+  --gold:#B49768; --gold-bright:#d6bd8f; --gold-dim:#8f7a58;
+  --arcane:#A96879; --arcane-bright:#cf94a3; --lavender:#827B9A;
+  --parchment:#F1EADF; --parchment-dim:#a7a1b6;
+  --good:#93b8a0; --bad:#d98377;
+  --line:color-mix(in srgb,var(--parchment) 9%,transparent);
+  --line-strong:color-mix(in srgb,var(--parchment) 16%,transparent);
+  --serif:"Cormorant Garamond","Iowan Old Style",Georgia,serif;
+  --sans:"Nunito",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --radius:16px; --radius-sm:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(900px 500px at 50% -180px,color-mix(in srgb,var(--arcane) 16%,transparent),transparent 70%),
+    radial-gradient(700px 400px at 100% 10%,color-mix(in srgb,var(--lavender) 10%,transparent),transparent 70%),
+    var(--ink);
+  color:var(--parchment);font-family:var(--sans);font-size:15px;line-height:1.55;min-height:100vh;position:relative;overflow-x:hidden;
+}
+body::before,body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-repeat:repeat}
+body::before{
+  background-image:
+    radial-gradient(1px 1px at 20px 30px,color-mix(in srgb,var(--parchment) 55%,transparent),transparent 60%),
+    radial-gradient(1px 1px at 140px 90px,color-mix(in srgb,var(--parchment) 35%,transparent),transparent 60%),
+    radial-gradient(1.4px 1.4px at 260px 160px,color-mix(in srgb,var(--gold-bright) 60%,transparent),transparent 60%),
+    radial-gradient(1px 1px at 90px 230px,color-mix(in srgb,var(--arcane-bright) 45%,transparent),transparent 60%);
+  background-size:380px 280px;opacity:.55;
+}
+body::after{
+  background-image:
+    radial-gradient(1.3px 1.3px at 60px 120px,color-mix(in srgb,var(--parchment) 70%,transparent),transparent 60%),
+    radial-gradient(1px 1px at 210px 20px,color-mix(in srgb,var(--gold-bright) 70%,transparent),transparent 60%);
+  background-size:520px 360px;animation:twinkle 6s ease-in-out infinite alternate;
+}
+@keyframes twinkle{from{opacity:.15}to{opacity:.7}}
+@media (prefers-reduced-motion:reduce){body::after{animation:none}}
+main,header,footer{position:relative;z-index:1}
+a{color:var(--gold-bright)}
+::selection{background:color-mix(in srgb,var(--arcane) 45%,transparent)}
+
+/* cabecera */
+header{padding:56px 16px 30px;text-align:center;max-width:1000px;margin:0 auto}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:.7rem;text-transform:uppercase;letter-spacing:.32em;color:var(--lavender);margin-bottom:14px}
+.eyebrow::before,.eyebrow::after{content:"✦";color:var(--gold);font-size:.6rem;letter-spacing:0}
+h1{font-family:var(--serif);font-weight:500;font-style:italic;font-size:clamp(2.3rem,7vw,3.4rem);line-height:1.05;margin:0 0 14px;
+  background:linear-gradient(100deg,var(--gold-bright) 10%,var(--parchment) 50%,var(--arcane-bright) 90%);-webkit-background-clip:text;background-clip:text;color:transparent}
+header p{margin:0 auto;color:var(--parchment-dim);max-width:620px}
+.moon-rule{display:flex;align-items:center;justify-content:center;gap:12px;margin:22px auto 0;color:var(--gold);font-size:.8rem;max-width:260px}
+.moon-rule::before,.moon-rule::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold-dim),transparent)}
+
+main{max-width:1000px;margin:0 auto;padding:0 16px 40px}
+section{margin:46px 0 0}
+h2{font-family:var(--serif);font-weight:500;font-style:italic;font-size:clamp(1.7rem,5vw,2.1rem);margin:0 0 4px;padding-bottom:12px;
+  background:linear-gradient(90deg,var(--gold-dim),transparent 70%) bottom/100% 1px no-repeat}
+.sub{color:var(--parchment-dim);font-size:.9rem;margin:12px 0 22px;max-width:720px}
+h3{font-family:var(--serif);font-size:1.3rem;font-weight:600;margin:0 0 6px;color:var(--parchment)}
+
+.card{background:linear-gradient(180deg,color-mix(in srgb,var(--parchment) 2.5%,transparent),transparent),var(--panel);
+  border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;transition:border-color .25s,box-shadow .25s}
+.card:hover{border-color:color-mix(in srgb,var(--gold) 35%,transparent);box-shadow:0 0 0 4px color-mix(in srgb,var(--gold) 4%,transparent)}
+.card p{margin:6px 0 0;color:var(--parchment-dim);font-size:.92rem}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:820px){.grid,.grid-2{grid-template-columns:1fr}}
+
+.destacado{border-color:color-mix(in srgb,var(--gold) 40%,transparent);background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 9%,transparent),transparent 60%),var(--panel)}
+.destacado p{color:var(--parchment);font-size:1rem}
+
+/* antes → ahora */
+.antes-ahora{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.fila{display:grid;grid-template-columns:72px 1fr;gap:8px;align-items:start;font-size:.9rem}
+.fila .et{font-size:.68rem;text-transform:uppercase;letter-spacing:.14em;padding:3px 0;color:var(--parchment-dim)}
+.fila.ahora .et{color:var(--gold-bright)}
+.fila .tx{color:var(--parchment-dim)}
+.fila.ahora .tx{color:var(--parchment)}
+
+/* esquema */
+.esquema{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch}
+.flecha{display:flex;flex-direction:column;justify-content:center;align-items:center;color:var(--gold);font-size:.75rem;text-align:center;gap:4px;min-width:90px}
+.flecha b{font-size:1.6rem;line-height:1;font-weight:400}
+@media(max-width:820px){.esquema{grid-template-columns:1fr}.flecha{flex-direction:row;min-width:0}.flecha b{transform:rotate(90deg)}}
+ul.lista{margin:8px 0 0;padding:0;list-style:none}
+ul.lista li{position:relative;padding:4px 0 4px 20px;font-size:.92rem;color:var(--parchment)}
+ul.lista li::before{content:"✦";position:absolute;left:0;top:5px;color:var(--gold);font-size:.7rem}
+ul.lista li small{color:var(--parchment-dim)}
+
+/* errores */
+.tag{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.06em;padding:1px 8px;border-radius:999px;border:1px solid var(--line-strong);color:var(--gold-bright);margin-right:6px;vertical-align:1px;white-space:nowrap}
+.arreglo{padding:9px 0;border-top:1px solid var(--line);font-size:.92rem}
+.arreglo:first-of-type{border-top:none}
+.arreglo .antes{color:var(--parchment-dim)}
+.arreglo .ahora{color:var(--parchment);display:block;margin-top:2px}
+.arreglo .ahora::before{content:"→ ";color:var(--good)}
+.pill{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line-strong);border-radius:999px;padding:3px 12px;font-size:.74rem;color:var(--parchment-dim);font-family:var(--sans);font-style:normal;vertical-align:middle}
+.pill b{color:var(--gold-bright)}
+
+/* tabla dónde está */
+.donde{width:100%;border-collapse:collapse;font-size:.9rem}
+.donde td{padding:8px 10px;border-top:1px solid var(--line);vertical-align:top}
+.donde tr:first-child td{border-top:none}
+.donde td:first-child{color:var(--parchment);width:46%}
+.donde code{font-family:ui-monospace,Consolas,monospace;font-size:.82rem;color:var(--gold-bright);word-break:break-all}
+
+/* pasos */
+ol.pasos{counter-reset:p;list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+ol.pasos li{counter-increment:p;display:grid;grid-template-columns:38px 1fr;gap:12px;align-items:start}
+ol.pasos li::before{content:counter(p);display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;
+  border:1px solid var(--gold-dim);color:var(--gold-bright);font-family:var(--serif);font-size:1.15rem;font-weight:600}
+ol.pasos li .card{padding:12px 16px}
+.estado{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--arcane-bright);margin-left:6px}
+
+.aviso{border-left:3px solid var(--arcane);padding:10px 14px;background:color-mix(in srgb,var(--arcane) 8%,transparent);border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:.92rem;margin-top:14px}
+footer{max-width:1000px;margin:0 auto;padding:30px 16px 50px;text-align:center;color:var(--parchment-dim);font-size:.82rem}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="eyebrow">PAM · rama refactor · noviembre de 2026</span>
+  <h1>Qué cambió en PAM</h1>
+  <p>Un resumen, sin tecnicismos, de cómo se reorganizaron PAM, el script «Mi PJ» y el Inspector de Canjes, qué errores se arreglaron por el camino y qué falta.</p>
+  <div class="moon-rule">☾</div>
+</header>
+
+<main>
+
+<section>
+  <div class="card destacado">
+    <h3>En pocas palabras</h3>
+    <p>PAM <b>se ve y se usa igual</b>, pero por dentro está ordenado en archivos pequeños, uno para cada cosa. El script del foro ahora es un ayudante pequeño: <b>todo lo que piensa está en PAM</b>. Así, un arreglo en PAM les llega a todos sin reinstalar nada. Por el camino se corrigieron más de veinte errores, cada uno con su prueba automática.</p>
+    <p style="margin-top:10px;color:var(--parchment-dim);font-size:.88rem">Todo esto está en la rama <b>refactor</b> y en una copia de pruebas (<a href="https://claudilahozbosch.github.io/PAM/">claudilahozbosch.github.io/PAM</a>). La web de verdad (<b>main</b>) no se tocó: solo cambiará cuando Hana acepte la propuesta.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Antes y ahora</h2>
+  <p class="sub">Las tres piezas, y qué hace cada una ahora.</p>
+  <div class="grid">
+    <div class="card">
+      <h3>PAM</h3>
+      <div class="antes-ahora">
+        <div class="fila"><span class="et">Antes</span><span class="tx">Un solo archivo de 9.500 líneas con todo dentro: la página, los colores, los datos y el código.</span></div>
+        <div class="fila ahora"><span class="et">Ahora</span><span class="tx">El <code>index.html</code> solo tiene la página (200 líneas). Los estilos, los datos y cada sección están en su propio archivo.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Mi PJ</h3>
+      <div class="antes-ahora">
+        <div class="fila"><span class="et">Antes</span><span class="tx">Un script de 4.000 líneas que lo hacía todo, y que manejaba PAM pulsando sus botones desde fuera.</span></div>
+        <div class="fila ahora"><span class="et">Ahora</span><span class="tx">Un «agente» pequeño. El panel que se ve en el foro es una página de PAM, idéntica a la de antes.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Inspector de Canjes</h3>
+      <div class="antes-ahora">
+        <div class="fila"><span class="et">Antes</span><span class="tx">Otro script aparte, que descargaba PAM y ejecutaba trozos para saber los precios.</span></div>
+        <div class="fila ahora"><span class="et">Ahora</span><span class="tx">Vive dentro de PAM y usa el mismo agente y los mismos datos. Se activa desde el panel Mi PJ.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Cómo funciona ahora</h2>
+  <p class="sub">El agente es el único que toca el foro; PAM decide. Nada se publica sin que la persona pulse «Aceptar».</p>
+  <div class="esquema">
+    <div class="card">
+      <h3>El agente (en el foro)</h3>
+      <ul class="lista">
+        <li>Lee páginas del foro con tu sesión.</li>
+        <li>Publica y edita, <b>solo</b> después de su ventana Aceptar / Modificar / Denegar.</li>
+        <li>Guarda lo que pasa del foro a PAM.</li>
+        <li>Muestra el panel Mi PJ y abre PAM.</li>
+      </ul>
+      <p style="margin-top:8px">No sabe nada de fichas ni de canjes.</p>
+    </div>
+    <div class="flecha"><b>⇄</b>mensajes<br>con número de versión</div>
+    <div class="card">
+      <h3>PAM (la web)</h3>
+      <ul class="lista">
+        <li>Lee las fichas, la bóveda, los roles y las misiones.</li>
+        <li>Calcula los canjes y prepara lo que hay que publicar.</li>
+        <li>Revisa la bóveda antes de enviar.</li>
+        <li>Hace la revisión del Inspector.</li>
+      </ul>
+      <p style="margin-top:8px">Si se arregla algo aquí, les llega a todos al momento.</p>
+    </div>
+  </div>
+  <div class="grid-2" style="margin-top:14px">
+    <div class="card">
+      <h3>Lo que no cambia</h3>
+      <ul class="lista">
+        <li>El aspecto, los textos y los temas de PAM y del panel.</li>
+        <li>Lo que cada uno tiene guardado: mismas claves, nada se borra.</li>
+        <li>La «Sesión con código» y su documento en la nube: las sesiones de antes se siguen trayendo.</li>
+        <li>Se sigue subiendo a GitHub desde la web, sin programas ni compilar.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Lo que se gana</h3>
+      <ul class="lista">
+        <li>Los datos del sistema (atributos, habilidades, precios…) están <b>una sola vez</b>, con los nombres oficiales.</li>
+        <li>Un solo lector de fichas para PAM, Mi PJ y el Inspector.</li>
+        <li>Más de 200 pruebas automáticas que comparan lo nuevo con lo de antes.</li>
+        <li>Algunas listas se cambian sin tocar código (por ejemplo, las frases que cierran un oficial).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Errores corregidos <span class="pill"><b>25</b> arreglos</span></h2>
+  <p class="sub">Agrupados por dónde se notaban. El código entre paréntesis es el de la lista de errores (<code>PENDIENTES.md</code>).</p>
+  <div class="grid-2">
+    <div class="card">
+      <h3>Leer las fichas del foro</h3>
+      <div class="arreglo"><span class="tag">F01</span><span class="antes">Mi PJ leía solo el primer mensaje de la ficha: en fichas de varias partes se perdían atributos, magia y trasfondos.</span><span class="ahora">Lee todas las partes de la ficha.</span></div>
+      <div class="arreglo"><span class="tag">F02</span><span class="antes">Trasfondos escritos «Biblioteca V: Arcanismo» se descartaban sin avisar.</span><span class="ahora">Se reconocen todos los formatos.</span></div>
+      <div class="arreglo"><span class="tag">F03</span><span class="antes">El personaje se reconocía por el nombre: «Irvin Giles.» con punto creaba otro.</span><span class="ahora">Se reconoce por su tema de ficha en el foro.</span></div>
+      <div class="arreglo"><span class="tag">R04</span><span class="antes">Los arcanos nuevos salían sin descripción.</span><span class="ahora">Se guarda la descripción de todos.</span></div>
+      <div class="arreglo"><span class="tag">R05</span><span class="antes">Los rituales «Nombre | Latín» cambiaban de nombre y luego no se encontraban.</span><span class="ahora">Quedan como en la ficha.</span></div>
+    </div>
+    <div class="card">
+      <h3>Escribir en la ficha (canjes y «Código para el foro»)</h3>
+      <div class="arreglo"><span class="tag">F04/F07</span><span class="antes">Al aplicar un canje se editaba siempre el primer mensaje, aunque el dato estuviera en otro.</span><span class="ahora">Se edita solo el mensaje donde está cada cosa.</span></div>
+      <div class="arreglo"><span class="tag">R01</span><span class="antes">Una línea nueva quedaba fuera de su desplegable, o duplicaba el cierre y rompía lo de abajo.</span><span class="ahora">Va dentro de su desplegable.</span></div>
+      <div class="arreglo"><span class="tag">R02</span><span class="antes">Quitar el último elemento de una lista se llevaba el cierre del desplegable.</span><span class="ahora">El cierre se queda.</span></div>
+      <div class="arreglo"><span class="tag">R03</span><span class="antes">Varios arcanos nuevos del mismo nivel quedaban al revés.</span><span class="ahora">Quedan en orden.</span></div>
+      <div class="arreglo"><span class="tag">R06</span><span class="antes">Idiomas, trasfondos nuevos, ventajas, talentos y títulos había que ponerlos siempre a mano, y PAM decía «Agregado» aunque quedara mal.</span><span class="ahora">Se ponen solos, y cada cambio se comprueba; lo que no queda bien sale en «Revisá a mano».</span></div>
+      <div class="arreglo"><span class="tag">N07</span><span class="antes">Los canjes y la pestaña «Código para el foro» usaban el editor antiguo, con todos los errores de arriba.</span><span class="ahora">Los dos usan el editor nuevo. En los canjes se lee la ficha del foro tal como está, y lo que alguien cambió después no se pisa.</span></div>
+    </div>
+    <div class="card">
+      <h3>Canjes y Tabla de Canjes</h3>
+      <div class="arreglo"><span class="tag">R08</span><span class="antes">La Tabla de Canjes no se guardaba: al recargar se perdía el carrito y la bóveda llegaba a 0 desde el foro.</span><span class="ahora">Se guarda (también en la sesión con código) y el carrito se vacía solo al cerrar el canje.</span></div>
+      <div class="arreglo"><span class="tag">N04</span><span class="antes">Con los trasfondos, el carrito dejaba añadir lo mismo dos veces y no juntaba las subidas.</span><span class="ahora">Sabe el nivel que ya tenés, junta las subidas y ordena el carrito.</span></div>
+    </div>
+    <div class="card">
+      <h3>Inspector de Canjes</h3>
+      <div class="arreglo"><span class="tag">F05</span><span class="antes">Tomaba como ficha cualquier mensaje largo del dueño, mezclando canjes viejos.</span><span class="ahora">Usa la misma regla que Mi PJ.</span></div>
+      <div class="arreglo"><span class="tag">F06</span><span class="antes">«Puntos de Destino: 13» lo leía como 1.</span><span class="ahora">Lee el número entero.</span></div>
+      <div class="arreglo"><span class="tag">F12</span><span class="antes">Descargaba PAM y ejecutaba trozos para sacar precios: cualquier cambio lo rompía.</span><span class="ahora">Lee los mismos archivos de datos que PAM.</span></div>
+    </div>
+    <div class="card">
+      <h3>Sesión con código y seguridad</h3>
+      <div class="arreglo"><span class="tag">F10</span><span class="antes">Con dos dispositivos a la vez, uno podía borrar lo del otro en la nube.</span><span class="ahora">Si el otro guardó antes, sale el aviso «Traer los de la nube / Guardar los de acá».</span></div>
+      <div class="arreglo"><span class="tag">F11</span><span class="antes">Al traer de la nube se borraba todo antes de escribir; si fallaba, quedaba a medias.</span><span class="ahora">Todo o nada: si falla, queda como estaba y avisa.</span></div>
+      <div class="arreglo"><span class="tag">F08</span><span class="antes">Un código del Registro de Roles manipulado podía ejecutar código dentro de PAM.</span><span class="ahora">Cada valor se comprueba al importar.</span></div>
+    </div>
+    <div class="card">
+      <h3>Panel Mi PJ, fechas y orden</h3>
+      <div class="arreglo"><span class="tag">F15</span><span class="antes">Entre medianoche y la 1-2 h, la fecha salía del día anterior.</span><span class="ahora">Usa el día de cada persona.</span></div>
+      <div class="arreglo"><span class="tag">R09</span><span class="antes">Oficiales cerrados salían como abiertos si el foro mostraba fechas sin año.</span><span class="ahora">Deduce el año y reconoce los avisos de cierre (lista editable a mano).</span></div>
+      <div class="arreglo"><span class="tag">R10</span><span class="antes">No se podía ocultar un oficial de «Oficiales en curso».</span><span class="ahora">Botón ✕, como en «Te toca responder».</span></div>
+      <div class="arreglo"><span class="tag">R07</span><span class="antes">Datos del sistema repetidos con nombres distintos («Esquivar» / «Esquiva») y tres listas de personajes.</span><span class="ahora">Una sola vez. (Algunas secciones antiguas de PAM todavía usan los suyos: se cambian en la fase 8.)</span></div>
+      <div class="arreglo"><span class="tag">F13</span><span class="antes">Mi PJ manejaba PAM pulsando sus botones: cualquier cambio en PAM lo rompía.</span><span class="ahora">Hablan con mensajes.</span></div>
+      <div class="arreglo"><span class="tag">F17</span><span class="antes">Código repetido en Mi PJ y en el Inspector.</span><span class="ahora">En parte: el lector de la bóveda ya es uno solo. Ordenar los estilos queda para la fase 8.</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Cambios que se notan al usarlo</h2>
+  <p class="sub">El aspecto es el mismo. Esto es lo que funciona distinto.</p>
+  <div class="card">
+    <ul class="lista">
+      <li><b>La Tabla de Canjes se acuerda</b> del carrito, las grageas disponibles, los niveles y las armas al recargar. Al cerrar un canje, el carrito queda vacío.</li>
+      <li><b>El carrito de trasfondos</b> no deja elegir un nivel que ya tenés, junta las subidas («0 → I» y «I → II» pasan a ser «0 → II») y siempre sale ordenado.</li>
+      <li><b>Al aplicar un canje, la ficha</b> se edita mensaje a mensaje y solo en los que cambian. Ya no hace falta tener la ficha en modo «Personalizada».</li>
+      <li><b>«Código para el foro»</b> en modo «Personalizada» ahora también pone idiomas, trasfondos, ventajas, talentos y títulos, y avisa de lo que no pudo hacer.</li>
+      <li><b>El Inspector</b> se activa desde el panel Mi PJ (tarjeta «🔍 Inspector de Canjes», solo para Inspectores y para Hana, Mortimer y Robert). Su pastilla pasó abajo a la <b>izquierda</b>, porque tapaba la de Mi PJ.</li>
+      <li><b>Con la sesión con código en dos dispositivos</b>, si los dos guardan a la vez sale el aviso para elegir, en vez de perderse datos.</li>
+      <li><b>Si PAM no puede cargar una parte</b>, lo dice arriba («Probá recargar la página») en vez de quedarse a medias.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>Dónde está cada cosa ahora</h2>
+  <p class="sub">Para quien edite PAM con ayuda de una IA. Lo que antes estaba dentro de <code>index.html</code>:</p>
+  <div class="card">
+    <table class="donde">
+      <tr><td>Los colores y estilos</td><td><code>css/pam.css</code></td></tr>
+      <tr><td>Datos del sistema, Tabla de Canjes y Compendio</td><td><code>js/paginas/pam/tabla-canjes.js</code></td></tr>
+      <tr><td>Revisor de Empleos y Mi Ficha</td><td><code>js/paginas/pam/revisor.js</code></td></tr>
+      <tr><td>Registro de Roles, Bóveda y Coloreador</td><td><code>js/paginas/pam/registro-roles.js</code></td></tr>
+      <tr><td>Portada y navegación</td><td><code>js/paginas/pam/portada.js</code></td></tr>
+      <tr><td>Temas</td><td><code>js/paginas/pam/temas.js</code></td></tr>
+      <tr><td>Empleos del foro y arcanos</td><td><code>data/empleos-foro.txt</code> y <code>data/arcanos.json</code></td></tr>
+      <tr><td>Configuración de cada foro (registro de canjes, grupos, desarrolladores…)</td><td><code>data/foros.json</code> (se edita a mano)</td></tr>
+      <tr><td>Frases que cierran un oficial</td><td><code>data/cierres-oficial.json</code> (se edita a mano)</td></tr>
+      <tr><td>El script que instalan los jugadores</td><td><code>agente/pam-agente.user.js</code></td></tr>
+    </table>
+    <div class="aviso">Si se cambia algo de PAM en la web de verdad (<b>main</b>) mientras dure el refactor, hay que avisar: ese cambio hay que pasarlo a mano a su archivo nuevo. Y a cualquier IA que vaya a tocar la rama, que lea primero <code>GUIA-AGENTES.md</code>.</div>
+  </div>
+</section>
+
+<section>
+  <h2>Próximos pasos</h2>
+  <p class="sub">En este orden. Lo que todavía falta corregir está en <code>PENDIENTES.md</code>.</p>
+  <ol class="pasos">
+    <li><div class="card"><h3>Pruebas en el foro de pruebas <span class="estado">ahora</span></h3><p>Con Chrome, el foro de pruebas y la ficha de Elena Whitlock: traer la ficha a PAM, hacer un canje, publicarlo, aprobarlo como Inspector, aplicarlo y terminar en PAM; la sesión con código en dos ventanas; y que PAM arranque bien.</p></div></li>
+    <li><div class="card"><h3>Registro de Roles y Coloreador</h3><p>Que el Registro guarde al momento y al cerrar la página (F14); poner al día la herramienta de «Importar desde Excel», que tiene fallos de seguridad conocidos (F09); que el Coloreador recuerde los colores y nombres de cada personaje (N08), sin cambiar lo que se ve.</p></div></li>
+    <li><div class="card"><h3>Revisor de Empleos y Mi Ficha</h3><p>Que usen los datos del sistema compartidos (R07).</p></div></li>
+    <li><div class="card"><h3>Tabla de Canjes y Compendio</h3><p>Que no vuelva a dibujar toda la tabla por cualquier cambio (F16): irá más fluida.</p></div></li>
+    <li><div class="card"><h3>Portada, temas y estilos</h3><p>Ordenar los estilos repetidos (F17).</p></div></li>
+    <li><div class="card"><h3>«Tus otras cuentas» en Mi PJ</h3><p>Que no enseñe cuentas desactivadas ni temas que ya terminaron (N03). Antes hay que ver en el foro cómo se marcan.</p></div></li>
+    <li><div class="card"><h3>Con permiso de Hana</h3><p>Revisar las reglas de la nube (Firestore) para que nadie pueda listar ni borrar sesiones ajenas (N01).</p></div></li>
+    <li><div class="card"><h3>Mejoras apuntadas</h3><p>Un icono animado mientras la Biblioteca de oficiales busca (N05); más listas editables a mano (N02); que la Biblioteca no lo lea todo de golpe (N06, por decidir).</p></div></li>
+    <li><div class="card"><h3>Publicar en la web de verdad</h3><p>Hana acepta la propuesta. El script nuevo ocupa el lugar de Mi PJ y Tampermonkey lo actualiza solo, sin perder datos. Los Inspectores desinstalan su script antiguo. Si algo fuera mal, se vuelve atrás con un botón y nadie pierde nada.</p></div></li>
+  </ol>
+</section>
+
+</main>
+
+<footer>✦ PAM · Plataforma Avadense · resumen del refactor, versión 0.5.3 (4 de noviembre de 2026) ✦</footer>
+</body>
+</html>

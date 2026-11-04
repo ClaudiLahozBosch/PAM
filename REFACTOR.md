@@ -3,6 +3,9 @@
 Esta rama es para preparar una versión reorganizada de PAM y de «Mi PJ» sin tocar la que está en uso.
 **Nada de lo que hay aquí se publica en tu web:** GitHub Pages sigue sirviendo solo `main`, y `main` no cambia.
 
+> **Resumen fácil de leer:** [`RESUMEN-REFACTOR.html`](https://claudilahozbosch.github.io/PAM/RESUMEN-REFACTOR.html) (qué cambió, qué se arregló y qué falta, sin tecnicismos).
+> **Para una IA que vaya a trabajar en la rama:** [`GUIA-AGENTES.md`](GUIA-AGENTES.md) (todo el detalle técnico).
+
 ## Las tres ramas
 
 | Rama | Qué es | ¿Se toca? |
