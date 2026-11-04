@@ -54,10 +54,10 @@ const esperarFin = async () => { for (let i = 0; i < 100 && !boton('Cerrar'); i+
 
 test('hola (con la ventana del foro), iframe sin marco y lectura del foro', async () => {
   const h = await agente.hola();
-  assert.deepEqual([h.agente, h.protocolo, h.foro, h.cuenta, h.ruta], ['0.3.9', 1, 'hp-avada-kedavra.foroactivo.com', { id: 7, nombre: 'TEST' }, '/t5-uno']);
+  assert.deepEqual([h.agente, h.protocolo, h.foro, h.cuenta, h.ruta], ['0.4.0', 1, 'hp-avada-kedavra.foroactivo.com', { id: 7, nombre: 'TEST' }, '/t5-uno']);
   assert.ok(h.ventana.ancho > 0 && h.ventana.alto > 0);
   const f = sombra().querySelector('iframe');
-  assert.equal(f.getAttribute('src'), PAM + '/PAM/panel.html?foro=' + encodeURIComponent(FORO) + '&v=0.3.9', 'con la versión: el navegador no mezcla archivos');
+  assert.equal(f.getAttribute('src'), PAM + '/PAM/panel.html?foro=' + encodeURIComponent(FORO) + '&v=0.4.0', 'con la versión: el navegador no mezcla archivos');
   assert.equal(f.className, 'marco');
   assert.equal(sombra().querySelector('.pastilla'), null, 'la pastilla es la de Mi PJ, dentro del panel');
   assert.equal((await agente.leer('/')).title, 'Foro');
@@ -294,6 +294,40 @@ test('«Terminar en PAM»: PAM avisa de que cerró el canje y después se le man
   W.open = () => ({ closed: true, postMessage() {} }); // (jsdom no marca «closed» al cerrar)
   await agente.abrirPam({ hash: '#foro' });
   assert.deepEqual(await agente.enviarPam({ mensaje: {}, respuesta: 'x' }), { abierta: false }, 'si se cerró la pestaña de PAM');
+});
+
+test('Inspector: pinta lo de PAM debajo del pedido (limpio), devuelve los clics, pega la respuesta sin enviar y se quita', async () => {
+  W.document.body.insertAdjacentHTML('beforeend', '<div class="post" id="p4321"><div class="content">Petición de canje</div></div>');
+  const clics = [];
+  agente.atender('inspector.accion', d => { clics.push(d); return {}; });
+  await agente.pedir('inspector.pintar', {
+    css: '.icj{color:red}',
+    barras: { 4321: '<div class="icj icj-barra"><button data-icj="revisar" data-p="4321" onclick="alert(1)">✦ Revisar canje</button><script>window.malo=1</script><a href="javascript:alert(1)">x</a></div>' },
+    cajas: { 4321: '<div class="icj icj-caja"><input type="checkbox" data-icj="prob" data-p="4321" data-i="0" data-k="1"></div>' },
+    panel: '<div class="icj flot"><textarea>Irvin, tus canjes son correctos.</textarea><button data-icj="pegar">Pegar en la respuesta rápida</button><div class="msg"></div></div>'
+  });
+  const host = W.document.querySelector('#p4321 .content').nextSibling;
+  assert.equal(host.className, 'pam-agente-icj', 'justo debajo del pedido');
+  const s = host.shadowRoot;
+  const b = s.querySelector('button');
+  assert.equal(b.getAttribute('onclick'), null);
+  assert.equal(s.querySelector('script'), null);
+  assert.equal(s.querySelector('a').getAttribute('href'), null);
+  assert.equal(W.malo, undefined);
+  b.click();
+  const cb = s.querySelector('input'); cb.checked = true; cb.dispatchEvent(new W.Event('change', { bubbles: true }));
+  await espera(30);
+  assert.deepEqual(clics.map(c => [c.accion, c.p, c.i, c.k, c.checked]), [['revisar', '4321', undefined, undefined, undefined], ['prob', '4321', '0', '1', true]]);
+  // «Pegar en la respuesta rápida»: en el editor del foro, sin enviar
+  const panel = [...W.document.querySelectorAll('.pam-agente-icj')].find(h => h.shadowRoot.querySelector('.flot')).shadowRoot;
+  W.document.querySelector('#editor textarea').value = '';
+  panel.querySelector('[data-icj="pegar"]').click();
+  assert.equal(W.document.querySelector('#editor textarea').value, 'Irvin, tus canjes son correctos.');
+  assert.equal(panel.querySelector('.msg').textContent, 'Listo: quedó en la respuesta rápida, sin enviar.');
+  assert.equal(clics.length, 2, 'pegar no va a PAM');
+  await agente.pedir('inspector.quitar', {});
+  assert.equal(W.document.querySelectorAll('.pam-agente-icj').length, 0);
+  W.document.querySelector('#editor textarea').value = '';
 });
 
 test('foro.ir: solo rutas del propio foro', async () => {

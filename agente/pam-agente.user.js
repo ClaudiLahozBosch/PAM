@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PAM · Agente (staging)
 // @namespace    https://claudilahozbosch.github.io/PAM/staging
-// @version      0.3.9
+// @version      0.4.0
 // @description  El script mínimo de PAM: lee el foro con tu sesión, publica y edita SOLO tras tu «Aceptar» y muestra el panel «Mi PJ» de PAM. Toda la lógica está en PAM.
 // @updateURL    https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
 // @downloadURL  https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
@@ -29,7 +29,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.3.9';
+  var VERSION = '0.4.0';
   var PROTOCOLO = 1;
   // Staging: el fork de pruebas (otro dominio que PAM real, así no ve los datos de los jugadores).
   var PAM = { origen: 'https://claudilahozbosch.github.io', ruta: '/PAM/' };
@@ -663,7 +663,7 @@
   // ---------------------------------------------------------------
   // Panel «Mi PJ» (página de PAM en un iframe que ocupa justo lo que ocupa el panel)
   // ---------------------------------------------------------------
-  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=0.3.9' });
+  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=0.4.0' });
   raiz.appendChild(iframe);
   // Si el panel no arranca (no pide tamaño), se enseña al menos su pastilla, para que nunca quede invisible.
   var panelVivo = false;
@@ -701,6 +701,8 @@
     },
     'panel.tema': function (d) { return aplicarTema(d.tema); },
     'foro.oficial': function (d) { return pintarOficial(d); },
+    'inspector.pintar': function (d) { return pintarInspector(d); },
+    'inspector.quitar': function () { return quitarInspector(); },
     // Solo a rutas del propio foro (p. ej. el mensaje que se acaba de publicar).
     'foro.ir': function (d) { var u = rutaSegura(d.ruta); setTimeout(function () { location.href = u.href; }, 0); return { ido: true }; },
     'pam.abrir': function (d) { return abrirPam(d); },
@@ -747,6 +749,100 @@
         try { w.postMessage(d.mensaje, PAM.origen); } catch (e) { /* todavía cargando */ }
       }, 500);
     });
+  }
+
+  // ---------------------------------------------------------------
+  // Inspector de Canjes (Registro de Canjes): PAM revisa y arma lo que se ve; aquí solo se pinta, con el tema de
+  // Mi PJ, debajo de cada pedido (barra y caja) y abajo a la izquierda (el panel). Los clics vuelven a PAM.
+  // Lo que llega se limpia antes de pintarlo (sin scripts, sin on…, sin enlaces javascript:).
+  // ---------------------------------------------------------------
+  function limpiarHtml(html) {
+    var t = document.createElement('template');
+    t.innerHTML = String(html || '');
+    Array.prototype.forEach.call(t.content.querySelectorAll('script,style,iframe,object,embed,link,meta,base,form'), function (x) { x.remove(); });
+    Array.prototype.forEach.call(t.content.querySelectorAll('*'), function (x) {
+      Array.prototype.slice.call(x.attributes).forEach(function (a) {
+        var n = a.name.toLowerCase();
+        if (n.indexOf('on') === 0 || ((n === 'href' || n === 'src' || n === 'action' || n === 'formaction') && /^\s*(javascript|data|vbscript):/i.test(a.value))) { x.removeAttribute(a.name); }
+      });
+    });
+    return t.content;
+  }
+  var icj = { hosts: {}, panel: null };
+  function cajaIcj(css) {
+    var h = document.createElement('div'); h.className = 'pam-agente-icj';
+    var s = h.attachShadow({ mode: 'open' });
+    var e1 = document.createElement('style'); e1.textContent = css; s.appendChild(e1);
+    var e2 = document.createElement('style'); e2.textContent = temaActual.css; s.appendChild(e2);
+    h.setAttribute('data-skin', temaActual.skin);
+    estilosTema.push({ estilo: e2, host: h });
+    var cuerpo = document.createElement('div'); s.appendChild(cuerpo);
+    s.addEventListener('click', alClicIcj);
+    s.addEventListener('change', alCambioIcj);
+    return { host: h, cuerpo: cuerpo, sombra: s };
+  }
+  function alClicIcj(e) {
+    var b = e.target.closest && e.target.closest('[data-icj]');
+    if (!b || b.matches('input')) { return; }
+    var a = b.getAttribute('data-icj'), p = b.getAttribute('data-p');
+    if (a === 'ir') { e.preventDefault(); var post = document.getElementById('p' + p); if (post) { post.scrollIntoView({ behavior: 'smooth', block: 'start' }); } return; }
+    if (a === 'copiar' || a === 'pegar') { respuestaIcj(a); return; }
+    if (b.disabled) { return; }
+    canal.pedir('inspector.accion', { accion: a, p: p, v: b.getAttribute('data-v') }, 10 * 60000).catch(function () {});
+  }
+  function alCambioIcj(e) {
+    var c = e.target; if (!c || !c.matches || !c.matches('input[data-icj="prob"]')) { return; }
+    canal.pedir('inspector.accion', { accion: 'prob', p: c.getAttribute('data-p'), i: c.getAttribute('data-i'), k: c.getAttribute('data-k'), checked: c.checked }).catch(function () {});
+  }
+  /* «Copiar» y «Pegar en la respuesta rápida» (en el editor del foro, sin enviar), como el Inspector antiguo. */
+  function respuestaIcj(a) {
+    if (!icj.panel) { return; }
+    var ta = icj.panel.cuerpo.querySelector('textarea'), msg = icj.panel.cuerpo.querySelector('.msg');
+    if (!ta || !msg) { return; }
+    if (a === 'copiar') {
+      (navigator.clipboard ? navigator.clipboard.writeText(ta.value) : Promise.reject()).then(function () { msg.textContent = 'Copiado.'; }, function () { ta.select(); msg.textContent = 'Seleccionado: copialo con Ctrl+C.'; });
+      return;
+    }
+    msg.textContent = pegarEnRespuesta(ta.value) ? 'Listo: quedó en la respuesta rápida, sin enviar.' : 'No encontré la respuesta rápida: usá «Copiar».';
+  }
+  function pegarEnRespuesta(texto) {
+    var ta = document.getElementById('text_editor_textarea') || document.querySelector('form textarea[name="message"]');
+    if (!ta) { return false; }
+    try {
+      var $ = W.jQuery;
+      var inst = $ && $.fn && $.fn.sceditor ? $(ta).sceditor('instance') : null;
+      if (inst && inst.val) {
+        var previo = inst.val();
+        inst.val((previo && previo.trim() ? previo.replace(/\s+$/, '') + '\n\n' : '') + texto);
+        if (inst.focus) { inst.focus(); }
+        return true;
+      }
+    } catch (e) { /* sin editor: va directo al textarea */ }
+    ta.value = (ta.value && ta.value.trim() ? ta.value.replace(/\s+$/, '') + '\n\n' : '') + texto;
+    ta.focus();
+    return true;
+  }
+  function pintarInspector(d) {
+    var css = String(d.css || '');
+    Object.keys(d.barras || {}).forEach(function (id) {
+      var post = document.getElementById('p' + parseInt(id, 10));
+      var cont = post && post.querySelector('.content');
+      if (!cont) { return; }
+      var c = icj.hosts[id];
+      if (!c || !c.host.isConnected) { c = icj.hosts[id] = cajaIcj(css); cont.parentNode.insertBefore(c.host, cont.nextSibling); }
+      c.cuerpo.replaceChildren(limpiarHtml(String(d.barras[id] || '') + String((d.cajas || {})[id] || '')));
+    });
+    if (d.panel != null) {
+      if (!icj.panel || !icj.panel.host.isConnected) { icj.panel = cajaIcj(css); document.body.appendChild(icj.panel.host); }
+      icj.panel.cuerpo.replaceChildren(limpiarHtml(d.panel));
+    }
+    return { pintado: true };
+  }
+  function quitarInspector() {
+    Object.keys(icj.hosts).forEach(function (id) { icj.hosts[id].host.remove(); });
+    if (icj.panel) { icj.panel.host.remove(); }
+    icj = { hosts: {}, panel: null };
+    return { quitado: true };
   }
 
   // ---------------------------------------------------------------

@@ -114,6 +114,17 @@ Aplicar el canje y cerrarlo en PAM (fase 6b·3), también como Mi PJ:
 - «Aplicar el canje» abre la puerta del agente con cuatro pasos: el primer mensaje de la bóveda (grageas actuales y totales), el movimiento (el código que preparó PAM, con los enlaces de la petición y la aprobación), la ficha (el código «Personalizada» de PAM, un solo mensaje: N07) y el aviso en la ficha. Lo que no se puede hacer sale «No se hará»; lo que ya está hecho, «Ya está igual» (un reintento no repite nada).
 - Al terminar, la misma puerta ofrece «Terminar en PAM»: se deja `pam.aprobacion` y el agente abre PAM. PAM cierra el canje (su pastilla, como en la 6b·1), marca la petición como cerrada y avisa a la pestaña del foro (`escribaCierre`); el agente se lo pasa al panel (`pam.cierre`) y el panel le manda a esa misma pestaña los datos ya releídos (`pam.enviar`). Es el canal oficial en los dos foros (Mi PJ, en el de pruebas, iba por su almacén).
 
+## El Inspector de Canjes (fase 6c)
+
+El script aparte «PAM · Inspector de Canjes» pasa a PAM y al mismo agente que Mi PJ. Se ve igual (la barra «Inspector» debajo de cada pedido, la caja de la revisión, la pastilla y el panel con la respuesta), y revisa igual:
+
+- `js/inspector/Revision.js`: la revisión del Inspector antiguo copiada por un script (leer el pedido, reconocer cada canje y su precio, compararlo con la ficha y la bóveda, armar la respuesta). Cambios: lee el foro con el agente, F05 (partes de la ficha), F06 (Puntos de Destino de dos cifras) y el `leerSaldos` de Mi PJ (F17).
+- `js/inspector/Tabla.js`: la Tabla de Canjes sale de `data/*.json`, con la misma forma que cuando se ejecutaba un trozo de `index.html` (F12).
+- `js/inspector/Inspector.js` e `InspectorUI.js`: PAM lee la página del registro, revisa y arma el HTML; el agente lo pinta (en una caja propia, con el tema de Mi PJ, y limpio de scripts), le devuelve los clics y hace «Copiar» y «Pegar en la respuesta rápida» (en el editor del foro, sin enviar).
+- **Quién lo ve:** en el panel Mi PJ aparece la tarjeta «🔍 Inspector de Canjes» (activar o desactivar el modo Inspector) solo para las cuentas del grupo de Inspectores de Canjes y las de `desarrolladores` en `data/foros.json` (Hana Park, Mortimer Gaunt, Robert Stevenson); en el foro de pruebas, para todas. Con el modo activo, en el Registro de Canjes cada pedido tiene su barra.
+- Cambio visual: la pastilla «✦ Inspector» va abajo a la **izquierda** (abajo a la derecha está la de Mi PJ y se tapaban).
+- Al publicar esta versión, los Inspectores tienen que desinstalar el script antiguo del Inspector (si no, verían dos barras).
+
 «Enviar a PAM» usa la ventana «Datos del foro → PAM» que ya tiene `index.html`: el agente abre PAM desde el foro y le pasa los datos, porque esa ventana solo acepta datos que vengan del foro. En la rama `refactor` acepta también el foro de pruebas (`FOROS_PRUEBA`), siempre con Aceptar / Denegar.
 
 ## Dónde guarda PAM los datos (y la sesión con código)

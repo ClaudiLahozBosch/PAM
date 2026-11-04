@@ -7,10 +7,10 @@
 //   · los enlaces abren la página del foro (<base target="_top"> en panel.html).
 // Las tarjetas que aún no están en PAM (canjes) lo dicen en vez de «Tocá Actualizar».
 // Arreglos: R09 (los oficiales cerrados ya no salen en curso) y R10 (✕ para ocultar un oficial hasta volver a escribir en él).
-import { aFecha } from '../../lectores/FechaForo.js?v=0.3.9';
-import { estadoSueldo } from '../../reglas/Sueldo.js?v=0.3.9';
-import { grageasOf } from '../../reglas/Oficiales.js?v=0.3.9';
-import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=0.3.9';
+import { aFecha } from '../../lectores/FechaForo.js?v=0.4.0';
+import { estadoSueldo } from '../../reglas/Sueldo.js?v=0.4.0';
+import { grageasOf } from '../../reglas/Oficiales.js?v=0.4.0';
+import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=0.4.0';
 
 const TEMA_AVADENSE = { skin: 'avadense', ink: '#171a2b', panel: '#1e2236', 'panel-2': '#262a42', parchment: '#F1EADF', 'parchment-dim': '#a7a1b6', gold: '#B49768',
   'gold-bright': '#d6bd8f', 'arcane-bright': '#cf94a3', good: '#93b8a0', bad: '#d98377', 'line-strong': 'rgba(241,234,223,.16)', 'accent-ink': '#1b1e30',
@@ -74,7 +74,7 @@ function bgsDe(R) {
  *   ventana: { ancho: number, alto: number }, pamUrl: string, cuenta?: { id: number, nombre: string } | null, ahora?: () => number,
  *   biblioteca?: { escanear: (op: any, log: (m: string) => void) => Promise<any>, origen: string, guardarEnAgente?: (k: string, v: any) => Promise<any> } | null }} dep
  */
-export function crearPanelMiPj({ root, documento, guardado = null, cargar, agente = null, ventana, pamUrl, cuenta = null, biblioteca = null, foroHost = '', canjes = null }) {
+export function crearPanelMiPj({ root, documento, guardado = null, cargar, agente = null, ventana, pamUrl, cuenta = null, biblioteca = null, foroHost = '', canjes = null, inspector = null }) {
   const gv = (k, d) => { try { const v = guardado?.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
   const sv = (k, v) => { try { guardado?.setItem(k, JSON.stringify(v)); } catch (e) { /* sin espacio */ } };
   const YO = (cuenta && cuenta.nombre) || '', UID = (cuenta && cuenta.id) || 0;
@@ -168,6 +168,12 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
         <div class="row" style="margin-top:6px"><button class="b" data-a="oficiales">Abrir la biblioteca</button></div></div>`;
       h += canjes ? '<div class="card" id="mipj-canjes"></div>' /* la tarjeta la pinta CanjesPanel */
         : `<div class="card" id="mipj-canjes"><div class="ct">⚖ Canjes</div><div class="dim">Para pedir un canje: en PAM armá el carrito y tocá «Preparar el canje» en la pastilla Mi PJ.</div></div>`;
+      // el modo Inspector (antes, un script aparte): solo para los Inspectores de Canjes y los desarrolladores
+      if (inspector && inspector.disponible()) {
+        const on = inspector.activo();
+        h += `<div class="card"><div class="ct">🔍 Inspector de Canjes</div><div class="dim">${on ? 'Activo: en el Registro de Canjes, cada pedido tiene su barra «Revisar canje».' : 'Revisa los pedidos del Registro de Canjes con la Tabla de PAM, la ficha y la bóveda. Solo lee: no publica nada.'}</div>
+        <div class="row" style="margin-top:6px"><button class="b${on ? '' : ' pri'}" data-a="inspector">${on ? 'Desactivar el modo Inspector' : 'Activar el modo Inspector'}</button></div></div>`;
+      }
     }
     if (error) h += `<div class="err">${esc(error)}</div>`;
     h += `</div><div class="ft"><span class="sp">${datos ? 'Leído<br>' + esc(leidoTxt(datos.leido)) : ''}</span>
@@ -378,6 +384,7 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
     else if (k === 'pam-abrir') { documento.defaultView?.open(pamUrl + '#ficha', 'pam'); }
     else if (k === 'rapido') { ui.rapido = !ui.rapido; ui.rapidoQ = ''; sv(K.ui, ui); pintar(); const bd = root.querySelector('.bd'); if (bd) bd.scrollTop = 0; }
     else if (k === 'sueldo-ocultar' || k === 'sueldo-ver') { e.preventDefault(); ui.sinSueldo = k === 'sueldo-ocultar'; sv(K.ui, ui); pintar(); }
+    else if (k === 'inspector' && inspector) { inspector.cambiar(); pintar(); }
   });
   /* acceso rápido: buscar y copiar */
   root.addEventListener('input', e => { const t = /** @type {HTMLInputElement} */ (e.target); if (!t.matches('.rq')) return; ui.rapidoQ = t.value; filtrarRapido(ui.rapidoQ); sincronizarTamano(); });

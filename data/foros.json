@@ -8,6 +8,7 @@
    "campoFicha": "profile_field_3_-10",
    "campoBoveda": "profile_field_3_24",
    "registroCanjes": "/t34430-registro-de-canjes",
+   "desarrolladores": { "como_se_edita": "Cuentas que siempre pueden activar el modo Inspector (además de las del grupo de Inspectores de Canjes). Un nombre por línea, entre comillas y separados por comas, tal como sale en el foro.", "cuentas": ["Hana Park", "Mortimer Gaunt", "Robert Stevenson"] },
    "forosFicha": [21, 29, 30, 31, 32, 263, 296, 33, 297, 298, 299, 300, 301, 34],
    "foroBovedas": 175,
    "grupos": { "canjes": "/g121-inspectores-de-canjes", "gringotts": "/g28-personal-de-gringotts", "aventuras": "/g81-inspectores-de-aventuras" },

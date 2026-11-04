@@ -8,9 +8,9 @@
 //   «pam.cuentas.<foro>.<id de cuenta>»   { peticiones } de esa cuenta (Mi PJ lo guardaba en «cuentas.<foro>.<id>»).
 // Los Inspectores de cada grupo se guardan un día en la memoria del panel («grupos.<foro>»).
 import { numero, formato, esNumero, mismoTexto, enlacePost, temaNumero, peticionCapturada, textoPeticion, avisosPeticion, clasificarRespuesta, normNombre,
-  claveCuenta, paqueteCierre, cambiarNumeroTras, descuadres, codigoConEnlaces } from '../reglas/Canjes.js?v=0.3.9';
-import { leerSaldos } from '../lectores/LectorBoveda.js?v=0.3.9';
-import { revisar } from '../reglas/RevisorBoveda.js?v=0.3.9';
+  claveCuenta, paqueteCierre, cambiarNumeroTras, descuadres, codigoConEnlaces } from '../reglas/Canjes.js?v=0.4.0';
+import { leerSaldos } from '../lectores/LectorBoveda.js?v=0.4.0';
+import { revisar } from '../reglas/RevisorBoveda.js?v=0.4.0';
 
 export const CLAVE_APROBACION = 'pam.aprobacion';
 const aNum = v => (typeof v === 'number' ? v : NaN);

@@ -1,18 +1,22 @@
 // @ts-check
 // Arranque del panel «Mi PJ» dentro del foro (el agente lo muestra en un iframe sin marco).
-import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=0.3.9';
-import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=0.3.9';
-import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial } from '../../datos/cargar.js?v=0.3.9';
-import { LectorFicha } from '../../lectores/LectorFicha.js?v=0.3.9';
-import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=0.3.9';
-import { crearPanelMiPj } from './MiPjPanel.js?v=0.3.9';
-import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=0.3.9';
-import { crearActividad } from '../../servicios/ActividadDelForo.js?v=0.3.9';
-import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=0.3.9';
-import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=0.3.9';
-import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=0.3.9';
-import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=0.3.9';
-import { crearTarjetaCanjes } from './CanjesPanel.js?v=0.3.9';
+import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=0.4.0';
+import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=0.4.0';
+import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=0.4.0';
+import { LectorFicha } from '../../lectores/LectorFicha.js?v=0.4.0';
+import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=0.4.0';
+import { crearPanelMiPj } from './MiPjPanel.js?v=0.4.0';
+import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=0.4.0';
+import { crearActividad } from '../../servicios/ActividadDelForo.js?v=0.4.0';
+import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=0.4.0';
+import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=0.4.0';
+import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=0.4.0';
+import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=0.4.0';
+import { crearTarjetaCanjes } from './CanjesPanel.js?v=0.4.0';
+import { crearRevision } from '../../inspector/Revision.js?v=0.4.0';
+import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=0.4.0';
+import { crearInspector } from '../../inspector/Inspector.js?v=0.4.0';
+import { normNombre } from '../../core/texto.js?v=0.4.0';
 
 const CACHE_MIN = 30; // como Mi PJ: si lo leído tiene más de media hora, se vuelve a leer al abrir
 const root = /** @type {HTMLElement} */ (document.getElementById('mipj'));
@@ -56,8 +60,10 @@ async function arrancar() {
     actualizar: () => panel.actualizar(), abrirPanel: () => panel.abrir(), irA: ruta => agente.ir(ruta),
     puerta: accion => agente.puerta(accion), enviarAPam: op => panel.enviarAPam(op)
   }) : null;
+  // el modo Inspector: en el Registro de Canjes, para los Inspectores de Canjes y los desarrolladores (en el foro de pruebas, todos)
+  const inspector = modoInspector(agente, { hola, cfg, servicioCanjes, memoria, repintar: () => panel && panel.pintar() });
   panel = crearPanelMiPj({
-    root, documento: document, guardado, agente, ventana: hola.ventana, cuenta: hola.cuenta, foroHost: hola.foro || '', canjes,
+    root, documento: document, guardado, agente, ventana: hola.ventana, cuenta: hola.cuenta, foroHost: hola.foro || '', canjes, inspector,
     pamUrl: new URL('index.html', location.href).href,
     biblioteca: cfg?.actividad?.biblioteca ? (() => {
       const origen = 'https://' + hola.foro;
@@ -72,6 +78,7 @@ async function arrancar() {
     }
   });
   if (canjes) canjes.recargar();
+  inspector.comprobar();
   agente.atender('ventana.cambio', v => { panel.ventana(v); return {}; });
   // «Terminar en PAM»: la pestaña de PAM terminó de cerrar el canje; ahora se le mandan los datos nuevos del foro
   agente.atender('pam.cierre', () => { panel.alCierrePam(); return {}; });
@@ -82,6 +89,50 @@ async function arrancar() {
   // llegada desde PAM con «Ir al foro a publicar la petición»: se abre sola la puerta
   if (canjes && hola.hash === '#escriba-publicar') canjes.alCargarForo(hola.cuenta.nombre);
   else if (viejo || enMiBoveda) panel.actualizar();
+}
+
+/**
+ * El modo Inspector (antes, el script «PAM · Inspector de Canjes»). Se puede activar si la cuenta está en el grupo de
+ * Inspectores de Canjes o en «desarrolladores» (data/foros.json); en el foro de pruebas, siempre. Activo y en una
+ * página del Registro de Canjes, cada pedido tiene su barra «Revisar canje».
+ */
+function modoInspector(agente, { hola, cfg, servicioCanjes, memoria, repintar }) {
+  const CLAVE = 'mipj.inspector';
+  const tema = String(cfg?.registroCanjes || '').match(/\/t(\d+)/)?.[1];
+  const enRegistro = !!(tema && new RegExp('^/t' + tema + '(p\\d+)?-').test(hola.ruta || ''));
+  let disponible = false, insp = null;
+  const activo = () => !!memoria.gv(CLAVE, false);
+  agente.atender('inspector.accion', d => (insp ? insp.accion(d) : {}));
+  async function arrancar() {
+    if (!enRegistro || insp) return;
+    const R = crearRevision({ leer: r => agente.leer(r) });
+    insp = crearInspector({ agente, R, ui: crearInspectorUI(document.implementation.createHTMLDocument(''), R), cargarDatos: f => cargarDatosTabla(f), ruta: hola.ruta });
+    try { await insp.iniciar(); } catch (e) { console.warn('[Mi PJ] Inspector', e); }
+  }
+  return {
+    disponible: () => disponible,
+    activo,
+    cambiar() {
+      const on = !activo();
+      memoria.sv(CLAVE, on);
+      if (on) arrancar();
+      else if (insp) { insp.quitar(); insp = null; }
+    },
+    /** ¿Puede esta cuenta usar el modo Inspector? (el grupo se lee una vez al día) */
+    async comprobar() {
+      if (!cfg || !servicioCanjes) return;
+      const yo = normNombre(hola.cuenta.nombre);
+      const desarrollador = (cfg.desarrolladores?.cuentas || []).some(n => normNombre(n) === yo);
+      let delGrupo = false;
+      if (!cfg.pruebas && !desarrollador) {
+        try { const g = await servicioCanjes.leerGruposRevisores(false); delGrupo = (g?.grupos?.canjes || []).some(m => m.id === hola.cuenta.id); } catch { /* sin grupo */ }
+      }
+      disponible = !!(cfg.pruebas || desarrollador || delGrupo);
+      if (!disponible) return;
+      repintar();
+      if (activo()) arrancar();
+    }
+  };
 }
 
 /** Las peticiones de canje que guardaba el «Mi PJ» antiguo («cuentas.<foro>.<id>»), la primera vez. */
