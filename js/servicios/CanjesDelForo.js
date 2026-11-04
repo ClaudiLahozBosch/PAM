@@ -8,12 +8,12 @@
 //   «pam.cuentas.<foro>.<id de cuenta>»   { peticiones } de esa cuenta (Mi PJ lo guardaba en «cuentas.<foro>.<id>»).
 // Los Inspectores de cada grupo se guardan un día en la memoria del panel («grupos.<foro>»).
 import { numero, formato, esNumero, mismoTexto, enlacePost, temaNumero, peticionCapturada, textoPeticion, avisosPeticion, clasificarRespuesta, normNombre,
-  claveCuenta, paqueteCierre, cambiarNumeroTras, descuadres, codigoConEnlaces } from '../reglas/Canjes.js?v=0.5.2';
-import { leerSaldos } from '../lectores/LectorBoveda.js?v=0.5.2';
-import { revisar } from '../reglas/RevisorBoveda.js?v=0.5.2';
-import { leerFichaDelForo } from './FichaDelForo.js?v=0.5.2';
-import { EditorFicha } from '../bbcode/EditorFicha.js?v=0.5.2';
-import { aplicarCanje } from '../reglas/CambiosFicha.js?v=0.5.2';
+  claveCuenta, paqueteCierre, cambiarNumeroTras, descuadres, codigoConEnlaces } from '../reglas/Canjes.js?v=0.5.3';
+import { leerSaldos } from '../lectores/LectorBoveda.js?v=0.5.3';
+import { revisar } from '../reglas/RevisorBoveda.js?v=0.5.3';
+import { leerFichaDelForo } from './FichaDelForo.js?v=0.5.3';
+import { EditorFicha } from '../bbcode/EditorFicha.js?v=0.5.3';
+import { aplicarCanje, yaAvisado } from '../reglas/CambiosFicha.js?v=0.5.3';
 
 export const CLAVE_APROBACION = 'pam.aprobacion';
 const aNum = v => (typeof v === 'number' ? v : NaN);
@@ -366,8 +366,7 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
     // nunca «hecho» sin verlo: la ficha tal como quedaría, leída otra vez
     const final = lector.leer(ed.partes.map(p => ({ post: p.post, bbcode: p.despues })), { tema: r.tema }).ficha;
     const aMano = [...manual, ...ed.manual];
-    const sinTipo = q => normNombre(q.replace(/^(Atributo|Habilidad|Ventaja|Especialización|Arte\/Artesanía|Arcano|Trasfondo|Idioma|Talento|Título)\s+/, '').replace(/[«»]/g, ''));
-    for (const q of comprobar(final)) if (!aMano.some(m => normNombre(m).includes(sinTipo(q)))) aMano.push(q + ': no quedó en la ficha; hacelo a mano');
+    for (const q of comprobar(final)) if (!yaAvisado(aMano, q)) aMano.push(q + ': no quedó en la ficha; hacelo a mano');
     if (aMano.length) avisos.push('Esto de la ficha no se pudo cambiar solo; hacelo a mano («Modificar» en el paso de la ficha, o editándola después): ' + aMano.join(' · ') + '.');
     const n = r.ficha.partes.length, hechos = ed.hechos.join(' · ');
     const cambian = ed.partes.filter(p => p.antes !== p.despues);

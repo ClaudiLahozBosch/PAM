@@ -83,6 +83,8 @@ test('arrancar desde los archivos deja el mismo PAM que cuando todo estaba en in
     assert.deepEqual(a.errores, b.errores);
     // y se puede navegar igual
     for (const s of ['canjes', 'compendio', 'ficha', 'boveda', 'coloreador']) { a.w.showSection(s); b.w.showSection(s); igual(pagina(a.w), pagina(b.w), s); }
+    // N07 (0.5.3): y el editor nuevo del «Código para el foro», listo para la página de Mi Ficha
+    assert.equal(typeof a.w.PAM_EDITOR?.actualizar, 'function');
   } finally { a.w.close(); b.w.close(); }
 });
 

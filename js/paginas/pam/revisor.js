@@ -1,5 +1,6 @@
 /* PAM · Revisor de Empleos: Empleos, Mi ficha, Controlador de stats y Editor de empleos.
-   Fase 8a: el mismo código que estaba dentro de index.html, sin cambios. Lo carga js/pam/arranque.js. */
+   Fase 8a: el mismo código que estaba dentro de index.html. Lo carga js/pam/arranque.js.
+   Cambios desde entonces (buscar «N07»): «Código para el foro» (Personalizada) con el editor nuevo, si está (window.PAM_EDITOR). */
 (function(){
 
 /* ============ Datos del sistema ============ */
@@ -1576,7 +1577,12 @@ const CAMPOS = [
 const CAMPOS_LARGOS = [['desc.fisica', 'Descripción Física'], ['desc.psico', 'Descripción Psicológica'], ['desc.historia', 'Historia'], ['desc.familia', 'Familia']];
 const getPath = (f, p) => p === 'nombre' ? f.nombre : p.split('.').reduce((o, k) => o ? o[k] : '', f);
 
+/* N07: con el editor nuevo (js/pam/EditorPam.js, lo deja js/pam/arranque.js); si no está o falla, el de antes */
 function actualizarCodigo(codigo, base, cur) {
+  if (window.PAM_EDITOR) { try { return window.PAM_EDITOR.actualizar(codigo, base, cur); } catch (e) { console.warn('[PAM] editor nuevo del código, uso el de antes:', e); } }
+  return actualizarCodigoAntiguo(codigo, base, cur);
+}
+function actualizarCodigoAntiguo(codigo, base, cur) {
   let code = String(codigo);
   const hechos = [], manual = [];
   const rep = (re, fn, what) => { let n = 0; code = code.replace(re, (...m) => { n++; return fn(...m); }); if (n) hechos.push(what); return n; };

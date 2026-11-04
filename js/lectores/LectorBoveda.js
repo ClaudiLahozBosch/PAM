@@ -3,8 +3,8 @@
 // `leerSaldos` es la de Mi PJ tal cual (entiende formularios «{…»», tablas «GRAGEAS Iniciales…» y el estilo
 // «Grageas actuales: X / +N por… / Grageas restantes: Y / Grageas totales: Z»). `analizarBoveda` es su
 // `leerBoveda`, pero sobre los mensajes ya leídos (LectorTema), así se puede probar sin el foro.
-import { norm } from '../core/texto.js?v=0.5.2';
-import { mismoAutor } from './LectorTema.js?v=0.5.2';
+import { norm } from '../core/texto.js?v=0.5.3';
+import { mismoAutor } from './LectorTema.js?v=0.5.3';
 
 /**
  * Saldos de un mensaje, por sección (gr = grageas, pl = puntos legendarios):

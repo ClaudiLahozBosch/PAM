@@ -5,8 +5,14 @@
 //      (no módulos): comparten sus variables como antes;
 //   3. y después lo nuevo: la sesión con código (js/nube/) y lo que llega del foro (js/pam/), como antes, al final.
 // Si algo no se puede traer, PAM avisa arriba en vez de quedarse a medias sin decir nada.
+// N07 (0.5.3): antes de las páginas deja en window.PAM_EDITOR el editor nuevo del «Código para el foro» (js/pam/EditorPam.js),
+// con data/sistema.json y los arcanos. Si eso falla, PAM sigue con el «Personalizada» antiguo.
+import { Sistema } from '../datos/Sistema.js?v=0.5.3';
+import { Compendio } from '../datos/Compendio.js?v=0.5.3';
+import { LectorFicha } from '../lectores/LectorFicha.js?v=0.5.3';
+import { crearEditorPam } from './EditorPam.js?v=0.5.3';
 
-const V = '?v=0.5.2'; // lo pone scripts/versionar.mjs
+const V = '?v=0.5.3'; // lo pone scripts/versionar.mjs
 
 /** Los datos que las páginas antiguas leen de la página, en orden. */
 export const DATOS = [
@@ -24,8 +30,10 @@ export const urlPagina = p => `js/paginas/pam/${p}.js${V}`;
  */
 export async function arrancar({ doc = document, fetch: traer = (...a) => fetch(...a), importar = r => import(r) } = {}) {
   const errores = [];
+  const sistemaJson = traer('data/sistema.json' + V).then(r => (r.ok ? r.text() : null)).then(t => (t ? JSON.parse(t) : null)).catch(() => null);
+  let textos;
   try {
-    const textos = await Promise.all(DATOS.map(async d => {
+    textos = await Promise.all(DATOS.map(async d => {
       const r = await traer(d.src + V);
       if (!r.ok) throw new Error(`${d.src} (HTTP ${r.status})`);
       return r.text();
@@ -38,6 +46,13 @@ export async function arrancar({ doc = document, fetch: traer = (...a) => fetch(
   } catch (e) {
     return fallo(doc, e);
   }
+  try {
+    const sj = await sistemaJson;
+    if (sj) {
+      const sistema = new Sistema(sj), compendio = new Compendio(JSON.parse(textos[DATOS.findIndex(d => d.id === 'arcanos-data')]));
+      /** @type {any} */ (doc.defaultView).PAM_EDITOR = crearEditorPam({ sistema, compendio, lector: new LectorFicha(sistema, compendio) });
+    }
+  } catch (e) { console.warn('[PAM] sin el editor nuevo del «Código para el foro»:', e); }
   // Todas a la vez (se descargan en paralelo) y async=false: se ejecutan en este orden, como dentro de index.html.
   // Si una falla al ejecutarse, las demás siguen, también como antes.
   await Promise.all(PAGINAS.map(p => new Promise(listo => {
