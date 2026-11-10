@@ -11,7 +11,7 @@ const fixture = f => new JSDOM(readFileSync(new URL('../fixtures/foro/' + f, imp
 
 /** La función `postsDe` de Mi PJ, sacada del script y ejecutada en la misma ventana. */
 function postsDeMiPj(w) {
-  const src = readFileSync(new URL('../../pam-mi-pj.user.js', import.meta.url), 'utf8');
+  const src = readFileSync(new URL('../legado/pam-mi-pj.user.js', import.meta.url), 'utf8');
   const i = src.indexOf('function postsDe(doc) {');
   let j = src.indexOf('{', i), n = 0;
   for (; j < src.length; j++) { if (src[j] === '{') n++; else if (src[j] === '}' && --n === 0) break; }

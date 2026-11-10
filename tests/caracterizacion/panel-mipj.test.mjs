@@ -17,7 +17,7 @@ const sistema = new Sistema(json('sistema.json')), compendio = new Compendio(jso
 const deps = { sistema, compendio, lector: new LectorFicha(sistema, compendio), foros: json('foros.json').foros };
 const fx = f => readFileSync(new URL('../fixtures/' + f, import.meta.url), 'utf8');
 const PARTES = JSON.parse(fx('fichas/varias-partes.json')).partes;
-const VIEJO = readFileSync(new URL('../../pam-mi-pj.user.js', import.meta.url), 'utf8');
+const VIEJO = readFileSync(new URL('../legado/pam-mi-pj.user.js', import.meta.url), 'utf8');
 const CUENTA = { id: 5203, nombre: 'Irvin Giles' };
 
 /** Los datos de Irvin leídos con el agente de prueba (perfil, ficha en cinco partes y bóveda de dos páginas). */

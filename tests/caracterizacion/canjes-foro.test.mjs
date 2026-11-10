@@ -12,7 +12,7 @@ import { crearTarjetaCanjes } from '../../js/paginas/panel/CanjesPanel.js';
 import { paginaDe } from '../fixtures/actividad/foro.mjs';
 import { registroDePrueba, peticionesGuardadas, PETICION_PAM, BB_PUBLICADA } from '../fixtures/canjes/registro.mjs';
 
-const VIEJO = readFileSync(new URL('../../pam-mi-pj.user.js', import.meta.url), 'utf8');
+const VIEJO = readFileSync(new URL('../legado/pam-mi-pj.user.js', import.meta.url), 'utf8');
 const foros = JSON.parse(readFileSync(new URL('../../data/foros.json', import.meta.url), 'utf8')).foros;
 const HOST = 'hp-avada-kedavra.foroactivo.com', FORO = 'https://' + HOST;
 const CUENTA = { id: 5203, nombre: 'Irvin Giles' };

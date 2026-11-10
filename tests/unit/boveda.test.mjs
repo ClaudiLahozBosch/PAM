@@ -9,7 +9,7 @@ import { ultimaPagina } from '../../js/servicios/BovedaDelForo.js';
 
 /** La función `leerSaldos` de pam-mi-pj.user.js, sacada del script. */
 function leerSaldosMiPj() {
-  const src = readFileSync(new URL('../../pam-mi-pj.user.js', import.meta.url), 'utf8');
+  const src = readFileSync(new URL('../legado/pam-mi-pj.user.js', import.meta.url), 'utf8');
   // hasta la función siguiente (contar llaves no sirve: sus expresiones regulares llevan «{»)
   const i = src.indexOf('function leerSaldos(texto) {'), j = src.indexOf('\nfunction crearCanjes', i);
   return new Function(src.slice(i, j) + '\nreturn leerSaldos;')();

@@ -22,7 +22,7 @@ async function barraAntigua(marcas) {
   w.GM_getValue = (k, d) => (k in gm ? gm[k] : d); w.GM_setValue = (k, v) => { gm[k] = v; }; w.GM_listValues = () => Object.keys(gm);
   w._userdata = { session_logged_in: 1, username: CUENTA.nombre, user_id: CUENTA.id }; w.unsafeWindow = w; w.fetch = fetchFalso;
   const warn = console.warn; console.warn = () => {};
-  w.eval(readFileSync(new URL('../../pam-mi-pj.user.js', import.meta.url), 'utf8'));
+  w.eval(readFileSync(new URL('../legado/pam-mi-pj.user.js', import.meta.url), 'utf8'));
   for (let i = 0; i < 200 && !/posts<\/small>/.test(w.document.querySelector('.mipj-of')?.innerHTML ?? ''); i++) await espera(20);
   console.warn = warn;
   const el = w.document.querySelector('.mipj-of');

@@ -12,7 +12,7 @@ import { crearLectorBiblioteca } from '../../js/servicios/BibliotecaDelForo.js';
 import { crearBibliotecaOficiales, CLAVES_BIBLIOTECA } from '../../js/paginas/panel/BibliotecaPanel.js';
 import { crearPanelMiPj } from '../../js/paginas/panel/MiPjPanel.js';
 
-const VIEJO = readFileSync(new URL('../../pam-mi-pj.user.js', import.meta.url), 'utf8');
+const VIEJO = readFileSync(new URL('../legado/pam-mi-pj.user.js', import.meta.url), 'utf8');
 const FORO = 'https://hp-avada-kedavra.foroactivo.com';
 const CUENTA = { id: 5203, nombre: 'Irvin Giles' };
 const PAGINAS = { ...foroDePrueba(new Date()), ...profetaDePrueba() };

@@ -11,7 +11,7 @@ import { pamEntero } from '../legado/montarPam.mjs';
 import { JSDOM, VirtualConsole } from 'jsdom';
 
 const RAIZ = new URL('../../', import.meta.url);
-const VIEJO = readFileSync(new URL('pam-mi-pj.user.js', RAIZ), 'utf8');
+const VIEJO = readFileSync(new URL('tests/legado/pam-mi-pj.user.js', RAIZ), 'utf8');
 const MORTIMER = readFileSync(new URL('tests/fixtures/fichas/mortimer-compacta.bbcode', RAIZ), 'utf8');
 const FOROS = JSON.parse(readFileSync(new URL('data/foros.json', RAIZ), 'utf8')).foros;
 const FORO = 'hp-avada-kedavra.foroactivo.com';

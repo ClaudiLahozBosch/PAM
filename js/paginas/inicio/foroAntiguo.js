@@ -7,7 +7,8 @@ export async function montar(w) {
 const window = w, document = w.document, location = w.location, history = w.history, Math = w.Math, Date = w.Date, Event = w.Event,
   alert = (...a) => w.alert(...a), getComputedStyle = (...a) => w.getComputedStyle(...a), setTimeout = (...a) => w.setTimeout(...a);
 const FORO = "https://hp-avada-kedavra.foroactivo.com";
-const FOROS_PRUEBA = ["https://test-forito.foroactivo.com"];   /* el foro de pruebas también puede mandar datos (siempre con Aceptar / Denegar) */
+/* el foro de pruebas también puede mandar datos (siempre con Aceptar / Denegar), pero no al PAM de verdad (2.0.0: solo en el de pruebas) */
+const FOROS_PRUEBA = location.hostname === "jesleytherabbit-prog.github.io" ? [] : ["https://test-forito.foroactivo.com"];
 const esc = t=>String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fmtN = n => (n===null||n===undefined||n==="") ? "—" : Number(n).toLocaleString("es-ES");
 let actual = null;

@@ -18,7 +18,7 @@ import { foroDePrueba, rutaDe } from '../fixtures/actividad/foro.mjs';
 const json = f => JSON.parse(readFileSync(new URL('../../data/' + f, import.meta.url), 'utf8'));
 const sistema = new Sistema(json('sistema.json')), compendio = new Compendio(json('arcanos.json'));
 const deps = { sistema, compendio, lector: new LectorFicha(sistema, compendio), foros: json('foros.json').foros, cierres: json('cierres-oficial.json').avisos };
-const VIEJO = readFileSync(new URL('../../pam-mi-pj.user.js', import.meta.url), 'utf8');
+const VIEJO = readFileSync(new URL('../legado/pam-mi-pj.user.js', import.meta.url), 'utf8');
 const CUENTA = { id: 5203, nombre: 'Irvin Giles' };
 const FORO = 'https://hp-avada-kedavra.foroactivo.com';
 const PAGINAS = foroDePrueba(new Date());

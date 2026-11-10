@@ -57,14 +57,17 @@ test('8e: «Datos del foro → PAM» abre la misma ventana con lo que manda el f
     const respuestas = [];
     for (const w of [a.w, b.w]) {
       const fuente = { postMessage: (m, o) => respuestas.push([JSON.stringify(m), o]) };
-      w.dispatchEvent(new w.MessageEvent('message', { data: { pamForo: 1, data: datos }, origin: 'https://test-forito.foroactivo.com', source: fuente }));
+      w.dispatchEvent(new w.MessageEvent('message', { data: { pamForo: 1, data: datos }, origin: 'https://hp-avada-kedavra.foroactivo.com', source: fuente }));
     }
     assert.equal(respuestas.length, 2);
     assert.equal(respuestas[0][0], respuestas[1][0], 'contesta lo mismo (pamForoOk y el tema)');
     const dlg = w => d(w).getElementById('foroDlg');
     assert.ok(dlg(a.w), 'abre la ventana');
     igual(dlg(a.w).outerHTML, dlg(b.w).outerHTML, 'la ventana');
-    // de otro sitio no acepta nada
+    // de otro sitio no acepta nada, y el PAM de verdad (2.0.0) tampoco del foro de pruebas
+    const ignorado = [];
+    a.w.dispatchEvent(new a.w.MessageEvent('message', { data: { pamForo: 1, data: { ...datos, leido: 'prueba' } }, origin: 'https://test-forito.foroactivo.com', source: { postMessage: m => ignorado.push(m) } }));
+    assert.deepEqual(ignorado, [], 'el PAM de verdad no contesta al foro de pruebas');
     a.w.dispatchEvent(new a.w.MessageEvent('message', { data: { pamForo: 1, data: { ...datos, leido: 'otro' } }, origin: 'https://otro.ejemplo', source: null }));
     assert.equal(d(a.w).querySelectorAll('#foroDlg').length, 1);
   } finally { cerrar(a, b); }

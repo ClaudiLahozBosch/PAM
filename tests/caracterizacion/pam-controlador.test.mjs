@@ -7,7 +7,7 @@ import { JSDOM } from 'jsdom';
 import { crearControladorForo } from '../../js/pam/ControladorForo.js';
 import { crearPamActual } from '../../js/pam/PamActual.js';
 
-const VIEJO = readFileSync(new URL('../../pam-mi-pj.user.js', import.meta.url), 'utf8');
+const VIEJO = readFileSync(new URL('../legado/pam-mi-pj.user.js', import.meta.url), 'utf8');
 const PAM = 'https://jesleytherabbit-prog.github.io/PAM/';
 const espera = ms => new Promise(r => setTimeout(r, ms));
 const PAQUETE = { v: 1, creado: '2026-11-03T10:00:00.000Z', modo: 'favoritos', usado: null,
@@ -95,11 +95,11 @@ test('sin paquete, sin la Bóveda de PAM o con un paquete raro: no hace nada', a
   }
 });
 
-test('PAM carga js/pam/main.js con la versión, al final, y acepta el foro de pruebas', () => {
+test('PAM carga js/pam/main.js con la versión, al final, y acepta el foro de pruebas (menos en el PAM de verdad)', () => {
   const html = readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
   assert.match(html, /<script type="module" src="js\/pam\/arranque\.js\?v=[\d.]+"><\/script>\s*<\/body>/);
   const arranque = readFileSync(new URL('../../js/pam/arranque.js', import.meta.url), 'utf8');
   assert.match(arranque, /const V = '\?v=[\d.]+';/);
   assert.match(arranque, /await importar\('\.\.\/nube\/main\.js' \+ V\);\n  await importar\('\.\/main\.js' \+ V\);\n  return true;/);
-  assert.match(readFileSync(new URL('../../js/paginas/inicio/foroAntiguo.js', import.meta.url), 'utf8'), /FOROS_PRUEBA = \["https:\/\/test-forito\.foroactivo\.com"\]/);
+  assert.match(readFileSync(new URL('../../js/paginas/inicio/foroAntiguo.js', import.meta.url), 'utf8'), /FOROS_PRUEBA = location\.hostname === "jesleytherabbit-prog\.github\.io" \? \[\] : \["https:\/\/test-forito\.foroactivo\.com"\]/);
 });

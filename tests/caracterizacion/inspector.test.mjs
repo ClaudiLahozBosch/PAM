@@ -13,7 +13,7 @@ import { paginaDe } from '../fixtures/actividad/foro.mjs';
 import { pamEntero } from '../legado/montarPam.mjs';
 import { registroInspector } from '../fixtures/inspector/registro.mjs';
 
-const VIEJO = readFileSync(new URL('../../pam-inspector-canjes.user.js', import.meta.url), 'utf8');
+const VIEJO = readFileSync(new URL('../legado/pam-inspector-canjes.user.js', import.meta.url), 'utf8');
 const INDEX = pamEntero(); // el Inspector antiguo descarga index.html y saca la Tabla de dentro
 const json = f => JSON.parse(readFileSync(new URL('../../data/' + f, import.meta.url), 'utf8'));
 const FORO = 'https://hp-avada-kedavra.foroactivo.com';

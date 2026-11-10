@@ -5,7 +5,7 @@
 //   · vive en el panel (iframe): al abrirla, el panel le pide al agente toda la ventana del foro, y al cerrarla vuelve;
 //   · los enlaces llevan el dominio del foro (dentro del iframe, uno relativo iría a PAM);
 //   · «Pasar a PAM» deja los oficiales en el almacén del agente (antes, en el de Mi PJ); en PAM los recoge js/pam/.
-import { clave, normBib as norm } from '../../servicios/BibliotecaDelForo.js?v=0.7.0';
+import { clave, normBib as norm } from '../../servicios/BibliotecaDelForo.js?v=2.0.0';
 
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const MESES = { enero: 1, febrero: 2, marzo: 3, abril: 4, mayo: 5, junio: 6, julio: 7, agosto: 8, septiembre: 9, setiembre: 9, octubre: 10, noviembre: 11, diciembre: 12 };

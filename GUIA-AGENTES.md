@@ -8,7 +8,7 @@ Documentos relacionados (en este orden de importancia):
 | Documento | Para qué |
 |---|---|
 | `GUIA-AGENTES.md` (este) | Visión completa y técnica. |
-| `PENDIENTES.md` | **Fuente única** de errores (F01–F17, R01–R11, N01–N12): estado, fase y prueba de cada uno. Si arreglas algo, se marca ahí. Arriba del todo, **la lista de lo que falta antes de publicar en `main`**. |
+| `PENDIENTES.md` | **Fuente única** de errores (F01–F17, R01–R11, N01–N16): estado, fase y prueba de cada uno. Si arreglas algo, se marca ahí. Arriba del todo, **la lista de lo que falta antes de publicar en `main`**. |
 | `REFACTOR.md` | El plan y las decisiones, escrito para Hana Park (la dueña de PAM). |
 | `RESUMEN-REFACTOR.html` | Resumen visual para quien no programa. |
 | `tests/README.md` | Cómo pasar las pruebas y qué fichas se pueden subir. |
@@ -256,7 +256,7 @@ Claves de paso en el almacén del agente: `pam.oficiales` (Biblioteca → PAM), 
 
 | R11 | (Encontrado en las pruebas en Chrome, 0.6.9) El editor no encontraba un valor escrito dentro de su propio color (`→ Atletismo:[/color] [color=#316996]Novato (+1)[/color]`); en un atributo, el número nuevo quedaba delante del viejo. Venía del «Personalizada» antiguo. | Admite etiquetas de apertura entre la etiqueta y el valor (atributos, habilidades, artes); el atributo se escribe sin «+» si la ficha lo escribía así. | `js/bbcode/EditorFicha.js` (`OPEN`) | `editor` |
 
-**Sin corregir:** N01, N03, N10, N11, N12 y las mejoras N02, N05, N06 (ver §11 y `PENDIENTES.md`).
+**Sin corregir:** N01, N03, N10, N11 y las mejoras N02, N05, N06, N13–N16 (N12, descartado) (ver §11 y `PENDIENTES.md`).
 
 ## 8. Cambios dentro del código antiguo de Hana
 
@@ -302,10 +302,11 @@ PAM_FICHA_IRVIN="C:\ruta\Irvin Giles.htm" npm test   # con la ficha real (no est
 
 1. Subir `@version` y `VERSION` en `agente/pam-agente.user.js`.
 2. `node scripts/versionar.mjs`: pone esa versión en imports, CSS, datos, páginas de `arranque.js` (`const V`), `index.html`, `panel.html` y la URL del iframe. **Sin esto, GitHub Pages (caché de 10 min) mezcla módulos de dos versiones y el panel no arranca.**
-3. `sed -i s/<vieja>/<nueva>/g tests/agente/agente.test.mjs`.
-4. `cd tests && npm test`.
-5. Actualizar `PENDIENTES.md` (y `REFACTOR.md` si cambia el plan), commit en castellano, push a los dos remotos.
-6. Actualizar la guía de pruebas del usuario en `poc-agente/PROVES-*.md` si cambia lo que tiene que probar.
+3. `node scripts/publicar-agente.mjs`: rehace `pam-mi-pj.user.js`, el script para los jugadores, a partir del agente (2.0.0): mismo `@name`/`@namespace` que el Mi PJ de Hana, el PAM de verdad y solo el foro de verdad. **Nunca se edita a mano**: `tests/agente/produccion.test.mjs` falla si no está al día.
+4. `sed -i s/<vieja>/<nueva>/g tests/agente/agente.test.mjs`.
+5. `cd tests && npm test`.
+6. Actualizar `PENDIENTES.md` (y `REFACTOR.md` si cambia el plan), commit en castellano, push a los dos remotos.
+7. Actualizar la guía de pruebas del usuario en `poc-agente/PROVES-*.md` si cambia lo que tiene que probar.
 
 ## 11. Próximos pasos (en orden)
 
@@ -324,12 +325,13 @@ PAM_FICHA_IRVIN="C:\ruta\Irvin Giles.htm" npm test   # con la ficha real (no est
 La lista completa, en orden y con quién lo hace, está arriba del todo en `PENDIENTES.md` («Antes de publicar en `main`»). En resumen:
 
 
-- Pull request de `refactor` a `main`, que acepta Hana. Antes, llevar a la rama lo que Hana haya cambiado en `main`.
-- El agente pasa a `pam-mi-pj.user.js` con el **mismo `@name` y `@namespace` que Mi PJ** y un `@version` mayor: Tampermonkey lo actualiza solo y conserva los datos (el panel los migra con `almacen.legado`). Cambiar `PAM.origen` del staging a la web de Hana y quitar el `@match` del staging.
-- **Por hacer (N12):** que PAM avise «actualizá el script» si el agente es de otra versión (hoy, si el protocolo no coincide, simplemente no hace nada).
-- **Antes:** la prueba 5c en el foro real, solo leyendo (`poc-agente/PROVES-5c.md`).
-- Los Inspectores tienen que **desinstalar el script antiguo del Inspector** (si no, verán dos barras).
-- Marcha atrás: «Revert» del pull request; la migración no borra datos antiguos.
+**Preparado en la 2.0.0 (10/11/2026):**
+- `pam-mi-pj.user.js` (raíz) es el agente para los jugadores, generado por `scripts/publicar-agente.mjs`: **mismo `@name` y `@namespace` que Mi PJ** y versión 2.0.0, así Tampermonkey lo toma como actualización y conserva lo guardado (el panel lo pasa al formato nuevo con `almacen.legado` y `traerPeticionesAntiguas`). Habla con la web de Hana y solo funciona en el foro de verdad.
+- `pam-inspector-canjes.user.js` (raíz) es la **última versión del Inspector de antes** (2.0.0): solo enseña «El Inspector ahora está dentro de Mi PJ… podés desinstalar este script» hasta «Entendido». Hacía falta: el de antes leía la Tabla de Canjes de dentro de `index.html` y con PAM 2.0 se rompería.
+- Los scripts de antes están en `tests/legado/` (las pruebas los ejecutan para comparar).
+- El PAM de verdad ya no acepta «Datos del foro → PAM» del foro de pruebas (`FOROS_PRUEBA` vacío en `jesleytherabbit-prog.github.io`).
+- Falta: el pull request de `refactor` a `main` (conflicto previsto solo en `index.html`, el pie de Hana: quedarse con el de la rama, que ya lo tiene). Sin aviso de «actualizá el script» (N12) ni prueba aparte de la actualización: decisión del usuario el 10/11, hay pocos jugadores activos.
+- Marcha atrás: «Revert» del pull request : ojo, Tampermonkey no baja de versión, así que para que los jugadores vuelvan al Mi PJ y al Inspector de antes hay que publicarlos con una versión mayor que 2.0.0 (p. ej. copiar los de `tests/legado/` con `@version 2.0.1`). La migración no borra datos antiguos.
 
 ## 12. Trampas conocidas
 

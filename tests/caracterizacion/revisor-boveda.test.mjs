@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { revisar, tieneFormulario, revisarEditor, temaDeRuta, aviso } from '../../js/reglas/RevisorBoveda.js';
 
-const VIEJO = readFileSync(new URL('../../pam-mi-pj.user.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+const VIEJO = readFileSync(new URL('../legado/pam-mi-pj.user.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 const trozo = (desde, hasta) => { const i = VIEJO.indexOf(desde); const j = VIEJO.indexOf(hasta, i + desde.length); assert.ok(i > 0 && j > i, desde); return VIEJO.slice(i, j); };
 const antiguo = new Function(
   trozo('  const num = t => {', '\n  const fmt') + trozo('\n  const fmt = n =>', '\n', ) + '\n' +

@@ -4,7 +4,7 @@
 #   · @media (max-width:520px) → #mipj.estrecho (la misma regla, pero según el ancho del foro).
 # Uso: python -I scripts/extraer-css-mipj.py
 import io, re, sys
-src = io.open('pam-mi-pj.user.js', encoding='utf-8').read()
+src = io.open('tests/legado/pam-mi-pj.user.js', encoding='utf-8').read()
 i = src.index('  const CSS = `\n') + len('  const CSS = `\n')
 j = src.index('`;', i)
 css = src[i:j]
