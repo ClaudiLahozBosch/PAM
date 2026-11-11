@@ -9,7 +9,13 @@ Todo lo marcado como «comprobado» se ha verificado contra el código de `main`
 - **Refactor (fase N)**: se arregla dentro de la reorganización; arreglarlo antes sería trabajo doble.
 - **Después**: menor; se apunta para más adelante.
 
-## Antes de publicar en `main` (para quien despliegue)
+## Publicado en `main`
+
+**2.0.0 publicada (pull request #2, aceptado por Hana).**
+
+**2.0.1 (11/11/2026), por publicar con otro pull request de `refactor` a `main`:** Mi Ficha lee la ficha del foro («Datos del foro → PAM», «Importar ficha del foro» y el código guardado) con el lector de Mi PJ en lugar del antiguo, que tiraba los trasfondos «Biblioteca V: Arcanismo.» (F02). Visto con la ficha de Robert Stevenson: 29 trasfondos en el panel de Mi PJ y 0 en PAM. Con la ficha de Mortimer todo queda igual que antes, salvo un arcano que ahora sí se reconoce. Prueba: `tests/caracterizacion/importar-ficha.test.mjs`. Quien ya importó su ficha y no tiene trasfondos: volver a «Enviar a PAM» después de publicar.
+
+## Lo que se preparó para publicar la 2.0.0 (para quien despliegue)
 
 **Estado (10/11/2026, versión 2.0.0):** Hana dio el visto bueno para publicar. El refactor está terminado y probado en Chrome: con el foro de pruebas (el canje entero con la ficha de Elena Whitlock, el Inspector, la sesión con código en dos ventanas, «Enviar a PAM» y todas las páginas) y en el foro de verdad (un canje de verdad de principio a fin, y «Te toca responder», misiones, sueldo y oficiales). Ya está preparado para publicar:
 
@@ -20,14 +26,14 @@ Todo lo marcado como «comprobado» se ha verificado contra el código de `main`
 
 | # | Qué | Quién | ¿Bloquea? |
 |---|---|---|---|
-| 1 | **Pull request de `refactor` a `main`**. Único conflicto: el pie de `index.html` («Hana Park y Mark Jordan»), que la rama ya tiene: quedarse con el de la rama. Lo acepta Hana. | quien despliega + Hana | sí |
+| 1 | ~~Pull request de `refactor` a `main`~~ **Hecho** (#2). La 2.0.1 necesita otro. | quien despliega + Hana | — |
 | 2 | **Avisar a los jugadores** (si se quiere; hay pocos activos): Mi PJ se actualiza solo (o «Buscar actualizaciones» en Tampermonkey); los **Inspectores** pueden desinstalar el script del Inspector (verán un aviso). | Hana | no |
 | 3 | Después de publicar, mirar en el foro de verdad que el panel sale, «Enviar a PAM» y el aviso del Inspector. | quien despliega | — |
 | 4 | **Dos reglas de los puntos por decidir** (N10 Herbivicus, N11 Altar del ritualista): PAM calcula igual que antes, pero no coincide del todo con el texto oficial. | Hana | no |
 | 5 | **Reglas de la nube** (N01), solo con permiso de Hana. | Hana | no |
 | 6 | Mejoras pedidas: N13 (casilla «Llevar a la calculadora»), N14 (requisitos de empleos automáticos), N15 («Vaciar carrito»), N16 (petición cambiada a mano). Y N03 (mirar antes el foro real), N02, N05, N06, la prueba que a veces falla y el límite del editor (más abajo). | cualquiera | no |
 
-**Marcha atrás:** «Revert» del pull request. **Ojo:** Tampermonkey no baja de versión. Para que los jugadores vuelvan al Mi PJ y al Inspector de antes, hay que publicarlos con una versión mayor que 2.0.0 (por ejemplo, los de `tests/legado/` con `@version 2.0.1`). La migración no borra los datos de antes.
+**Marcha atrás:** «Revert» del pull request. **Ojo:** Tampermonkey no baja de versión. Para que los jugadores vuelvan al Mi PJ y al Inspector de antes, hay que publicarlos con una versión mayor que la publicada (con la 2.0.1, por ejemplo, los de `tests/legado/` con `@version 2.0.2`). La migración no borra los datos de antes.
 
 ## Arreglos rápidos (antes del refactor)
 
@@ -41,7 +47,7 @@ Todo lo marcado como «comprobado» se ha verificado contra el código de `main`
 | ID | Problema | Estado | Fase |
 |---|---|---|---|
 | F01 | Mi PJ lee solo el **primer mensaje** de la ficha; en fichas de varias partes se pierden atributos, magia y trasfondos (dos funciones, `leerFicha` en las dos mitades del script). | comprobado | ✔ fase 3 · `partesVigentes()` + `LectorFicha` por partes; Mi PJ lo usará en la fase 5 |
-| F02 | El lector de trasfondos de PAM no reconoce el orden «Tipo NIVEL: categoría» (`Biblioteca V: Arcanismo.`, `Informantes III: Contrabandistas (Zacharias Hayes).`) y los descarta sin avisar. Los formatos «Biblioteca — Medicina — Heridas mágicas III» sí funcionan. | comprobado con el código real | ✔ fase 3 · `LectorTrasfondo`: los cinco ejemplos y los formatos antiguos, con prueba contra el lector antiguo |
+| F02 | El lector de trasfondos de PAM no reconoce el orden «Tipo NIVEL: categoría» (`Biblioteca V: Arcanismo.`, `Informantes III: Contrabandistas (Zacharias Hayes).`) y los descarta sin avisar. Los formatos «Biblioteca — Medicina — Heridas mágicas III» sí funcionan. | comprobado con el código real | ✔ fase 3 · `LectorTrasfondo`: los cinco ejemplos y los formatos antiguos, con prueba contra el lector antiguo. **2.0.1:** hasta entonces solo lo usaba Mi PJ; Mi Ficha seguía importando con el antiguo (`parseFichaForo`) y a Robert Stevenson le dejó la ficha sin trasfondos. Ahora Mi Ficha también usa el nuevo (`EditorPam.leerFicha`; el antiguo solo si el nuevo falla) |
 | F03 | El personaje se identifica por el **nombre**: «Irvin Giles.» y «Irvin Giles» no coinciden y se crea otro; el parecido «Hana» ↔ «Hana Park» puede confundir personajes. | comprobado | ✔ fases 2–3 · `Personaje` (foro + tema) y `asociarPersonaje()`: por tema; por nombre solo como sugerencia. Fase 6b·2: al publicar la petición de canje ya no avisa de «otro personaje» por el punto final del nombre de la ficha |
 | F04/F07 | Al aplicar un canje se edita siempre el **primer mensaje**, aunque el dato esté en otro (en Irvin los trasfondos están en el 339216). La actualización de niveles busca «nombre + número» y no encaja con «número + nombre». | comprobado | ✔ fases 3–4 · cada dato sabe su mensaje y `EditorFicha` edita solo ese (prueba con cinco partes) |
 | F05 | El Inspector toma como partes de la ficha los mensajes del dueño de más de 800 caracteres: mezcla la ficha vigente con canjes antiguos. | comprobado | ✔ fase 3 · el mismo lector para todos: la ficha son los mensajes seguidos del dueño al principio del tema; lo demás es historial. ✔ fase 6c · el Inspector usa esa regla (prueba: un aviso largo «Ficha actualizada…» ya no cuenta como ficha) |

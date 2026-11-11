@@ -8,12 +8,12 @@
 // Si algo no se puede traer o una página no arranca, PAM avisa arriba en vez de quedarse a medias sin decir nada.
 // N07 (0.5.3): antes de las páginas deja en window.PAM_EDITOR el editor nuevo del «Código para el foro» (js/pam/EditorPam.js),
 // con data/sistema.json y los arcanos. Si eso falla, Mi Ficha sigue con el «Personalizada» antiguo.
-import { Sistema } from '../datos/Sistema.js?v=2.0.0';
-import { Compendio } from '../datos/Compendio.js?v=2.0.0';
-import { LectorFicha } from '../lectores/LectorFicha.js?v=2.0.0';
-import { crearEditorPam } from './EditorPam.js?v=2.0.0';
+import { Sistema } from '../datos/Sistema.js?v=2.0.1';
+import { Compendio } from '../datos/Compendio.js?v=2.0.1';
+import { LectorFicha } from '../lectores/LectorFicha.js?v=2.0.1';
+import { crearEditorPam } from './EditorPam.js?v=2.0.1';
 
-const V = '?v=2.0.0'; // lo pone scripts/versionar.mjs
+const V = '?v=2.0.1'; // lo pone scripts/versionar.mjs
 
 /** Los datos que las páginas leen de la página, en orden. */
 export const DATOS = [

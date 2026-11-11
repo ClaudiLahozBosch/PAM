@@ -26,7 +26,15 @@ const fuera = v => (v === undefined ? undefined : JSON.parse(JSON.stringify(v)))
 const esperar = ms => new Promise(r => setTimeout(r, ms));
 const PESTANAS = ['empleos', 'ficha', 'control', 'editor'];
 const FICHA = ['datos', 'caract', 'magia', 'otros', 'desc', 'codigo'];
-async function par() { return [await abrir('archivos', { antes }), await abrir('junto', { antes })]; }
+// 2.0.1: el nuevo lee la ficha con el lector de Mi PJ (importar-ficha.test.mjs). Con Mortimer la única diferencia es un
+// arcano que el antiguo no reconocía (errata de la ficha); aquí se le devuelve el nombre de antes para comparar todo lo demás.
+const ARCANO_ANTES = { 'Transfiguración humana absoluta (Alter Humanus)': { name: 'Transfiguración humana absolutas | Alter Humanus', nota: 'Requiere Transfiguratio Mayoris.' } };
+async function par() {
+  const a = await abrir('archivos', { antes });
+  const leer = a.w.PAM_EDITOR.leerFicha;
+  a.w.PAM_EDITOR.leerFicha = t => { const r = leer(t); r.ficha.arcanos.forEach(x => Object.assign(x, ARCANO_ANTES[x.name])); return r; };
+  return [a, await abrir('junto', { antes })];
+}
 const cerrar = (...xs) => xs.forEach(x => x.w.close());
 function recorrer(a, b, que) {
   for (const t of PESTANAS) {

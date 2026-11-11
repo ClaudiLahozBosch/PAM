@@ -9,10 +9,10 @@
 // Recibe la ventana: así las pruebas lo montan en una página de prueba junto al antiguo y comparan.
 // 0.7.0: sin el «Personalizada» antiguo (el «Código para el foro» usa solo el editor nuevo) y con los cálculos de
 // combate y puntos de js/reglas/Combate.js (buscar «0.7.0»).
-import { RANKS, RANK_SHORT, SKILL_LV, SKILL_NAME, ATTRS, ART, SKILLS, ALL_SKILLS, BG_TYPES, ADVS, cats, SUELDOS, SK_MAP } from './datos.js?v=2.0.0';
-import { ETAPAS, ESP_RAMAS, IDIOMA_NIV, VINC, emptyFicha, normFicha, exampleFicha } from './modelo.js?v=2.0.0';
-import { A, S, sanador, parseEmpleosDSL } from './empleos.js?v=2.0.0';
-import { combate as combateReglas, puntos as puntosReglas } from '../../reglas/Combate.js?v=2.0.0';
+import { RANKS, RANK_SHORT, SKILL_LV, SKILL_NAME, ATTRS, ART, SKILLS, ALL_SKILLS, BG_TYPES, ADVS, cats, SUELDOS, SK_MAP } from './datos.js?v=2.0.1';
+import { ETAPAS, ESP_RAMAS, IDIOMA_NIV, VINC, emptyFicha, normFicha, exampleFicha } from './modelo.js?v=2.0.1';
+import { A, S, sanador, parseEmpleosDSL } from './empleos.js?v=2.0.1';
+import { combate as combateReglas, puntos as puntosReglas } from '../../reglas/Combate.js?v=2.0.1';
 
 /**
  * @param {Window} w la ventana de PAM
@@ -647,7 +647,7 @@ $('#f-import').onclick=()=>openDlg('Importar código','Pega el código de una fi
 $('#f-parse').onclick=()=>openDlg('Importar ficha del foro','Abrí tu ficha en el foro, entrá a «Editar», copiá TODO el contenido del mensaje (Ctrl+A, Ctrl+C) y pegalo acá. También sirve el texto copiado de la ficha publicada. Se reemplaza la ficha que tengas cargada.','',txt=>{
   if(!txt.trim()) throw new Error('vacío');
   if(esCodigoLector(txt)){ importarCodigoLector(txt); return; }
-  const p=parseFichaForo(txt); const js=ficha.jobState;
+  const p=leerFichaForo(txt); const js=ficha.jobState;
   ficha=normFicha(p.ficha); ficha.jobState=js||{};
   if(esCodigoForo(txt)) guardarPlantilla(txt, ficha);
   persist(); fichaTab='datos'; renderFicha();
@@ -972,6 +972,14 @@ function leerTrasfondo(l){
   let e = parts.slice(1).join(' > ');
   if(e && C[c0]){ const e0 = C[c0].find(s=>igual(s,e)); if(e0) e = e0; }
   return {t, c:c0, e, v, nota: nota.replace(/^[—–\-\s]+/,'').trim()};
+}
+/* 2.0.1: la ficha del foro se lee con el lector de Mi PJ (window.PAM_EDITOR.leerFicha, js/lectores/LectorFicha.js), que
+   entiende los trasfondos «Biblioteca V: Arcanismo.» (F02). Si no está o falla, con el antiguo (parseFichaForo). */
+function leerFichaForo(raw){
+  if(window.PAM_EDITOR && window.PAM_EDITOR.leerFicha){
+    try{ return window.PAM_EDITOR.leerFicha(raw); }catch(e){ console.warn('[PAM] lector de fichas:', e); }
+  }
+  return parseFichaForo(raw);
 }
 function parseFichaForo(raw){
   const f = emptyFicha(), T = cleanForo(raw), lines = T.split('\n');
@@ -1375,7 +1383,7 @@ function bindCodigo(body) {
   body.querySelectorAll('[data-fc-copy]').forEach(b => b.onclick = () => copy(body.querySelector(`[data-fc-out="${b.dataset.fcCopy}"]`).value));
   const save = load => {
     const raw = body.querySelector('#fc-in').value; if (!raw.trim()) { toast('Pegá primero tu código'); return; }
-    let parsed = null; try { parsed = normFicha(parseFichaForo(raw).ficha); } catch (e) { }
+    let parsed = null; try { parsed = normFicha(leerFichaForo(raw).ficha); } catch (e) { }
     if (load && parsed) { const js = ficha.jobState, pl = ficha.plantilla; ficha = normFicha(parsed); ficha.jobState = js || {}; ficha.plantilla = pl; }
     guardarPlantilla(raw, parsed && !load ? mezclaBase(parsed) : ficha);
     persist(); renderFicha(); toast('Código guardado para este personaje');
@@ -1614,7 +1622,7 @@ window.pamFicha = {
     if(id!==pjs.activa){ flushSave(); pjs.activa=id; ficha=pjActivo().ficha; flushSave(); refreshAll(); }
     return id; },
   importar: (txt, nombre) => { const id=window.pamFicha.asegurar(nombre);
-    const p=parseFichaForo(txt); const js=ficha.jobState; const plant=ficha.plantilla;
+    const p=leerFichaForo(txt); const js=ficha.jobState; const plant=ficha.plantilla;
     ficha=normFicha(p.ficha); ficha.jobState=js||{}; if(!ficha.nombre) ficha.nombre=nombre;
     if(esCodigoForo(txt)) guardarPlantilla(txt, ficha); else if(plant) ficha.plantilla=plant;
     persist(); flushSave(); refreshAll(); return {id, resumen:p.resumen}; },

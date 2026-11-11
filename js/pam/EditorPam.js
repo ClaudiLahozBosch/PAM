@@ -6,8 +6,8 @@
 //   · las líneas nuevas van dentro de su desplegable (R01), al quitar no se lleva los cierres (R02) y quedan en orden (R03);
 //   · también idiomas, trasfondos, ventajas, especializaciones, talentos y títulos (R06);
 //   · cada cambio se comprueba volviendo a leer el código; lo que no queda, a «Revisá a mano».
-import { EditorFicha } from '../bbcode/EditorFicha.js?v=2.0.0';
-import { aplicarEdicion, yaAvisado } from '../reglas/CambiosFicha.js?v=2.0.0';
+import { EditorFicha } from '../bbcode/EditorFicha.js?v=2.0.1';
+import { aplicarEdicion, yaAvisado } from '../reglas/CambiosFicha.js?v=2.0.1';
 
 /**
  * @param {{ sistema: import('../datos/Sistema.js').Sistema, compendio: import('../datos/Compendio.js').Compendio,
@@ -17,6 +17,23 @@ export function crearEditorPam({ sistema, compendio, lector }) {
   const editor = new EditorFicha(sistema, compendio, lector);
   const copia = x => JSON.parse(JSON.stringify(x == null ? {} : x)); // la ficha llega de la página de PAM
   return {
+    /**
+     * 2.0.1: la ficha del foro en el formato de Mi Ficha, con el lector de Mi PJ (js/lectores/LectorFicha.js) en lugar
+     * del antiguo (parseFichaForo), que tiraba los trasfondos «Biblioteca V: Arcanismo.» (F02). Los arcanos, como antes:
+     * el nombre de la calculadora (así los encuentran la Tabla y los cálculos) y, si no están en el Compendio, la
+     * primera frase de lo que dice la ficha.
+     * @param {string} txt el código (o el texto publicado) de la ficha
+     * @returns {{ ficha: any, resumen: string }}
+     */
+    leerFicha(txt) {
+      const { ficha, resumen } = lector.leer(String(txt));
+      const f = ficha.aLegado(sistema);
+      f.arcanos = ficha.arcanos.map(a => {
+        const c = a.ref ? compendio.porId(a.ref) : null;
+        return { type: a.tipo, tier: a.nivel, name: c ? c.nombreCalc : a.nombre, nota: c ? '' : a.descripcion.split(/(?<=\.)\s/)[0].slice(0, 160) };
+      });
+      return { ficha: f, resumen };
+    },
     /**
      * Tu código del foro con lo que cambiaste en PAM desde que lo guardaste (como actualizarCodigo).
      * @param {string} codigo el código guardado @param {any} base la ficha de PAM de entonces @param {any} actual la de ahora
