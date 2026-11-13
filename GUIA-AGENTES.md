@@ -331,7 +331,7 @@ La lista completa, en orden y con quién lo hace, está arriba del todo en `PEND
 - Los scripts de antes están en `tests/legado/` (las pruebas los ejecutan para comparar).
 - El PAM de verdad ya no acepta «Datos del foro → PAM» del foro de pruebas (`FOROS_PRUEBA` vacío en `jesleytherabbit-prog.github.io`).
 - Falta: el pull request de `refactor` a `main` (conflicto previsto solo en `index.html`, el pie de Hana: quedarse con el de la rama, que ya lo tiene). Sin aviso de «actualizá el script» (N12) ni prueba aparte de la actualización: decisión del usuario el 10/11, hay pocos jugadores activos.
-- Marcha atrás: «Revert» del pull request : ojo, Tampermonkey no baja de versión, así que para que los jugadores vuelvan al Mi PJ y al Inspector de antes hay que publicarlos con una versión mayor que la publicada (con la 2.0.1, p. ej. copiar los de `tests/legado/` con `@version 2.0.2`). La migración no borra datos antiguos.
+- Marcha atrás: «Revert» del pull request : ojo, Tampermonkey no baja de versión, así que para que los jugadores vuelvan al Mi PJ y al Inspector de antes hay que publicarlos con una versión mayor que la publicada (con la 2.0.2, p. ej. copiar los de `tests/legado/` con `@version 2.0.3`). La migración no borra datos antiguos.
 
 ## 12. Trampas conocidas
 

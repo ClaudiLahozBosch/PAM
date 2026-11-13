@@ -13,7 +13,18 @@ Todo lo marcado como «comprobado» se ha verificado contra el código de `main`
 
 **2.0.0 publicada (pull request #2, aceptado por Hana).**
 
-**2.0.1 (11/11/2026), por publicar con otro pull request de `refactor` a `main`:** Mi Ficha lee la ficha del foro («Datos del foro → PAM», «Importar ficha del foro» y el código guardado) con el lector de Mi PJ en lugar del antiguo, que tiraba los trasfondos «Biblioteca V: Arcanismo.» (F02). Visto con la ficha de Robert Stevenson: 29 trasfondos en el panel de Mi PJ y 0 en PAM. Con la ficha de Mortimer todo queda igual que antes, salvo un arcano que ahora sí se reconoce. Prueba: `tests/caracterizacion/importar-ficha.test.mjs`. Quien ya importó su ficha y no tiene trasfondos: volver a «Enviar a PAM» después de publicar.
+**2.0.1 (11/11/2026), publicada (pull request #3):** Mi Ficha lee la ficha del foro («Datos del foro → PAM», «Importar ficha del foro» y el código guardado) con el lector de Mi PJ en lugar del antiguo, que tiraba los trasfondos «Biblioteca V: Arcanismo.» (F02). Visto con la ficha de Robert Stevenson: 29 trasfondos en el panel de Mi PJ y 0 en PAM. Con la ficha de Mortimer todo queda igual que antes, salvo un arcano que ahora sí se reconoce. Prueba: `tests/caracterizacion/importar-ficha.test.mjs`. Quien ya importó su ficha y no tiene trasfondos: volver a «Enviar a PAM» después de publicar.
+
+**2.0.2 (13/11/2026), por publicar con otro pull request de `refactor` a `main`:** el Inspector de Canjes reconoce más formatos de petición (aviso de Claire Pusset-Strauss: posts de Himmel, Hana y otros sin barra). Se pasó por el detector todo el Registro de Canjes (14 páginas, 197 mensajes): de 34 peticiones sin barra quedan 5, y los canjes que reconoce pasan de 657 a 928. Ninguna respuesta de revisor cambia. Formatos nuevos (`leerPedido`, js/inspector/Revision.js):
+- «Morsequor: 300», «Poder 1 = 250», «Inteligencia - 1000» sin encabezado, «Política: 2 > 3 (250)» y «Talentoso Inteligencia 1.000»: solo si el post tiene «Total» (así una respuesta o un comentario con un número no se toma por petición).
+- El precio solo en la línea de abajo («Cinturón del Herbalista» / «600 grageas»), también con una descripción en medio: el canje es la línea de antes que sea un nombre.
+- El precio delante («100g Avensegium», «● 1000 grageas --- Punto de Destino», «● 300 grageas y 3 PL --- Proeza: Estilo.»): antes quedaba con el nombre «●».
+- Ya no cuentan como canjes «Subtotal», «Grageas disponibles/restantes», los resúmenes «Habilidades: 1.350 · Arcanos: 200 · …» ni los encabezados con la suma de su apartado («Maniobras de combate — 650 grageas:»); por eso muchos pedidos salían con el total descuadrado.
+- Se quitan del final de la línea las etiquetas de BBCode sueltas («[/list]») y los PL («+ 7 PL», «y 7 PL»), y se acepta la errata «grageaa».
+
+Siguen sin barra (no ponen precio a cada canje): «Carisma 2 / Coordinación a Experto / Total: 550», proezas con su descripción y un solo «Total», una devolución escrita como frase, el post de Hana con un «TOTAL» por canje, y «Nombre: 250» sin «Total» (a propósito). Prueba: `tests/unit/inspector-formatos.test.mjs`.
+
+También en la 2.0.2: la prueba F10 (`sesion-nube.test.mjs`) cargaba `Nube.js` sin el `?v=` de `Sesion.js`; para node eran dos módulos y el conflicto no se reconocía. Era solo de la prueba: en PAM los dos lo cargan igual.
 
 ## Lo que se preparó para publicar la 2.0.0 (para quien despliegue)
 
@@ -26,14 +37,14 @@ Todo lo marcado como «comprobado» se ha verificado contra el código de `main`
 
 | # | Qué | Quién | ¿Bloquea? |
 |---|---|---|---|
-| 1 | ~~Pull request de `refactor` a `main`~~ **Hecho** (#2). La 2.0.1 necesita otro. | quien despliega + Hana | — |
+| 1 | ~~Pull request de `refactor` a `main`~~ **Hecho** (#2; la 2.0.1 con el #3). La 2.0.2 necesita otro. | quien despliega + Hana | — |
 | 2 | **Avisar a los jugadores** (si se quiere; hay pocos activos): Mi PJ se actualiza solo (o «Buscar actualizaciones» en Tampermonkey); los **Inspectores** pueden desinstalar el script del Inspector (verán un aviso). | Hana | no |
 | 3 | Después de publicar, mirar en el foro de verdad que el panel sale, «Enviar a PAM» y el aviso del Inspector. | quien despliega | — |
 | 4 | **Dos reglas de los puntos por decidir** (N10 Herbivicus, N11 Altar del ritualista): PAM calcula igual que antes, pero no coincide del todo con el texto oficial. | Hana | no |
 | 5 | **Reglas de la nube** (N01), solo con permiso de Hana. | Hana | no |
 | 6 | Mejoras pedidas: N13 (casilla «Llevar a la calculadora»), N14 (requisitos de empleos automáticos), N15 («Vaciar carrito»), N16 (petición cambiada a mano). Y N03 (mirar antes el foro real), N02, N05, N06, la prueba que a veces falla y el límite del editor (más abajo). | cualquiera | no |
 
-**Marcha atrás:** «Revert» del pull request. **Ojo:** Tampermonkey no baja de versión. Para que los jugadores vuelvan al Mi PJ y al Inspector de antes, hay que publicarlos con una versión mayor que la publicada (con la 2.0.1, por ejemplo, los de `tests/legado/` con `@version 2.0.2`). La migración no borra los datos de antes.
+**Marcha atrás:** «Revert» del pull request. **Ojo:** Tampermonkey no baja de versión. Para que los jugadores vuelvan al Mi PJ y al Inspector de antes, hay que publicarlos con una versión mayor que la publicada (con la 2.0.2, por ejemplo, los de `tests/legado/` con `@version 2.0.3`). La migración no borra los datos de antes.
 
 ## Arreglos rápidos (antes del refactor)
 

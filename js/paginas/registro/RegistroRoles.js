@@ -8,10 +8,10 @@
 //   · las fechas de ejemplo, con el día de aquí y no el de Greenwich (F15);
 //   · sin el modo «Guardado en tu cuenta», que solo funcionaba dentro de otra aplicación (nunca en PAM).
 // Recibe la ventana: así las pruebas lo montan en una página de prueba junto al antiguo y comparan.
-import { TIPOS, ESTADOS, CASA_HEX, TURNOS, TONOS, OF_EST, GEST, KEY, SKINS, FLOR, DIV, BOV_LINKS, PRIO, WCATS, TRATO } from './datos.js?v=2.0.1';
-import { loadXLSX, norm, compact, pad, parseWorkbook } from './importarExcel.js?v=2.0.1';
-import { fechaISO as fechaLocalISO } from '../../core/fechas.js?v=2.0.1';
-import { montarColoreador } from './Coloreador.js?v=2.0.1';
+import { TIPOS, ESTADOS, CASA_HEX, TURNOS, TONOS, OF_EST, GEST, KEY, SKINS, FLOR, DIV, BOV_LINKS, PRIO, WCATS, TRATO } from './datos.js?v=2.0.2';
+import { loadXLSX, norm, compact, pad, parseWorkbook } from './importarExcel.js?v=2.0.2';
+import { fechaISO as fechaLocalISO } from '../../core/fechas.js?v=2.0.2';
+import { montarColoreador } from './Coloreador.js?v=2.0.2';
 
 /**
  * @param {Window} w la ventana de PAM

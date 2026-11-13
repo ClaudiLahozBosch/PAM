@@ -7,10 +7,10 @@
 //   · los enlaces abren la página del foro (<base target="_top"> en panel.html).
 // Las tarjetas que aún no están en PAM (canjes) lo dicen en vez de «Tocá Actualizar».
 // Arreglos: R09 (los oficiales cerrados ya no salen en curso) y R10 (✕ para ocultar un oficial hasta volver a escribir en él).
-import { aFecha } from '../../lectores/FechaForo.js?v=2.0.1';
-import { estadoSueldo } from '../../reglas/Sueldo.js?v=2.0.1';
-import { grageasOf } from '../../reglas/Oficiales.js?v=2.0.1';
-import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=2.0.1';
+import { aFecha } from '../../lectores/FechaForo.js?v=2.0.2';
+import { estadoSueldo } from '../../reglas/Sueldo.js?v=2.0.2';
+import { grageasOf } from '../../reglas/Oficiales.js?v=2.0.2';
+import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=2.0.2';
 
 const TEMA_AVADENSE = { skin: 'avadense', ink: '#171a2b', panel: '#1e2236', 'panel-2': '#262a42', parchment: '#F1EADF', 'parchment-dim': '#a7a1b6', gold: '#B49768',
   'gold-bright': '#d6bd8f', 'arcane-bright': '#cf94a3', good: '#93b8a0', bad: '#d98377', 'line-strong': 'rgba(241,234,223,.16)', 'accent-ink': '#1b1e30',

@@ -4,7 +4,7 @@
 // Lo que cambia: lo guardado está en el almacén del agente (se lee al abrir el panel y después de cada cambio) y,
 // al publicar, es el agente quien lleva la página del foro al mensaje nuevo (el panel está en un iframe).
 // «Terminar en PAM» abre PAM por el canal oficial en los dos foros (Mi PJ, en el de pruebas, iba por su almacén).
-import { formato, numero, describirAprobacion } from '../../reglas/Canjes.js?v=2.0.1';
+import { formato, numero, describirAprobacion } from '../../reglas/Canjes.js?v=2.0.2';
 
 /**
  * @param {{ documento: Document, servicio: ReturnType<typeof import('../../servicios/CanjesDelForo.js').crearCanjesDelForo> | null,

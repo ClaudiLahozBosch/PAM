@@ -8,8 +8,11 @@ import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { JSDOM, VirtualConsole } from 'jsdom';
-import { crearNube } from '../../js/nube/Nube.js';
 import { iniciarSesion } from '../../js/nube/Sesion.js';
+// Nube.js con el mismo «?v=» que usa Sesion.js: si no, para node son dos módulos y el Conflicto de uno no es
+// `instanceof` el del otro (en PAM los dos lo cargan igual, js/nube/main.js)
+const V = readFileSync(new URL('../../js/nube/Sesion.js', import.meta.url), 'utf8').match(/from '\.\/Nube\.js(\?v=[^']*)?'/)[1] || '';
+const { crearNube } = await import('../../js/nube/Nube.js' + V);
 import { RESTAURAR_ANTIGUO, SESION_ANTIGUA } from '../legado/sesion-antigua.mjs';
 
 const PENDIENTE = readFileSync(new URL('../../js/nube/pendiente.js', import.meta.url), 'utf8');

@@ -2,7 +2,7 @@
 // Portada y navegación principal (fase 8e): el mismo código que estaba en index.html (copia congelada en tests/legado/paginas/), como módulo.
 // Lo que cambia, marcado con «8e»: guarda tu nombre con el almacén (misma clave).
 // Recibe la ventana: así las pruebas lo montan en una página de prueba junto al antiguo y comparan.
-import { Almacen } from '../../core/Almacen.js?v=2.0.1';
+import { Almacen } from '../../core/Almacen.js?v=2.0.2';
 /** @param {Window} w la ventana de PAM */
 export async function montar(w) {
 const almacen = Almacen.de(w);

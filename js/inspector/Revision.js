@@ -8,8 +8,8 @@
 //   · F05: las partes de la ficha con la regla del lector compartido (js/lectores/PartesFicha.js);
 //   · F06: «Puntos de Destino: 13» se lee 13 (antes, 1);
 //   · leerSaldos es el de Mi PJ (js/lectores/LectorBoveda.js), que era una copia (F17).
-import { leerSaldos } from '../lectores/LectorBoveda.js?v=2.0.1';
-import { partesVigentes } from '../lectores/PartesFicha.js?v=2.0.1';
+import { leerSaldos } from '../lectores/LectorBoveda.js?v=2.0.2';
+import { partesVigentes } from '../lectores/PartesFicha.js?v=2.0.2';
 
 /**
  * @param {{ leer: (ruta: string) => Promise<Document> }} dep
@@ -161,7 +161,7 @@ export function crearRevision({ leer }) {
     [/^((caracteristicas )?legendarias?)$/, 'leg'], [/^raza$/, 'raza'], [/^armas?$/, 'arma'], [/^(maniobras?( de quidditch)?|quidditch|juego sucio|equipamiento( de quidditch)?|escobas?|protecciones|guantes|bates)$/, 'man'],
     [/^devolucion(es)?$/, 'dev']
   ];
-  var PRECIO = /(\d{1,3}(?:[.,]\d{3})+|\d+)\s*(?:g|gr|grs|grag|grageas?|grajeas?)\b\.?/gi;
+  var PRECIO = /(\d{1,3}(?:[.,]\d{3})+|\d+)\s*(?:g|gr|grs|grag|gragea[sa]?|grajeas?)\b\.?/gi;
 
   function categoriaDe(linea) {
     var n = norm(linea).replace(/[^a-z0-9ñ\/ ]+/g, ' ').replace(/\s+/g, ' ').trim();
@@ -175,30 +175,65 @@ export function crearRevision({ leer }) {
   function leerPedido(contenido) {
     var lineas = lineasDe(contenido);
     var r = { items: [], devoluciones: [], total: NaN, actualesDeclaradas: NaN, lineas: lineas };
-    var cat = null;
-    lineas.forEach(function (l) {
+    var cat = null, previas = [], sueltos = [], orden = [];
+    var NUM = '(\\d{1,3}(?:[.,]\\d{3})+|\\d+)';
+    var limpia = function (s) { return s.replace(/[\s—–\-=:→>·,(]+$/, '').replace(/^[\s•●✦✧\-–—*·→]+/, '').trim(); };
+    var meter = function (i, item) { if (cat === 'dev') { r.devoluciones.push(item); } else { r.items.push(item); orden.push(i); } };
+    lineas.forEach(function (l0, i) {
+      // lo que sobra al final: etiquetas de BBCode sin cerrar («[/list]») y los PL que acompañan al precio («+ 7 PL»)
+      var l = l0.replace(/(\s*\[\/?[a-z*]+[^\]]*\])+\s*$/i, '').replace(/\s*(?:\+|y)?\s*\d+\s*PL\.?\s*$/i, '').trim();
       var n = norm(l);
       var mt = n.match(/^\W*total\W*(?:[a-z ]*?)[:=]?\s*(\d{1,3}(?:[.,]\d{3})+|\d+)/);
       if (mt) { r.total = aNumero(mt[1]); return; }
       var ma = n.match(/grageas actuales\s*:?\s*(\d{1,3}(?:[.,]\d{3})+|\d+)/);
       if (ma) { r.actualesDeclaradas = aNumero(ma[1]); return; }
       if (/^\W*(peticion de canje|boveda\s*:|coste\s*:|costo\s*:)/.test(n)) { return; }
+      // cuentas, no canjes: «Subtotal: 1.350», «Grageas disponibles: 6.050», «Habilidades: 1.350 · Arcanos: 200 · …»
+      if (/^\W*(sub ?total|grageas (disponibles|restantes|totales|gastadas)|saldo|quedan|me quedan|restan)\b/.test(n)) { previas = []; return; }
+      if ((l.match(/·/g) || []).length >= 2 && (l.match(/\d+/g) || []).length >= 3) { return; }
       var c = categoriaDe(l);
-      if (c) { cat = c; return; }
+      if (c) { cat = c; previas = []; return; }
       var precios = [], m;
       PRECIO.lastIndex = 0;
       while ((m = PRECIO.exec(l))) { precios.push(m); }
-      if (!precios.length && cat) {
-        var suelto = l.match(/^(.*\S)\s*[—–\-=:→]\s*(\d{1,3}(?:[.,]\d{3})+|\d{2,5})\s*\.?$/);
-        if (suelto) { precios.push({ index: suelto[1].length, 1: suelto[2] }); }
+      // un encabezado que no conocemos, con la suma de su apartado: «Maniobras de combate — 650 grageas:»
+      if (precios.length && /[a-záéíóúñ]/i.test(l.slice(0, precios[0].index)) && /^\W*$/.test(l.slice(precios[precios.length - 1].index + precios[precios.length - 1][0].length)) && /:\s*$/.test(l)) { previas = []; return; }
+      var suelto = precios.length ? null : l.match(new RegExp('^(.*[a-záéíóúñ)].*?)\\s*(?:[—–\\-=:→]\\s*' + NUM + '|\\(\\s*' + NUM + '\\s*\\)|\\s' + NUM + ')\\s*\\.?$', 'i'));
+      if (suelto) {
+        var sp = suelto[2] || suelto[3] || suelto[4], ds = limpia(suelto[1]);
+        // con encabezado, «Nombre: 300» vale como siempre; sin él (o con el precio entre paréntesis o pegado), sólo si el post tiene «Total»
+        if (cat && suelto[2]) { precios.push({ index: suelto[1].length, 0: '', 1: sp }); }
+        else if (ds && aNumero(sp) >= 25) { sueltos.push({ i: i, item: { texto: l0, desc: ds, precio: aNumero(sp), cat: cat } }); }
       }
-      if (!precios.length) { return; }
+      if (!precios.length) { if (/[a-záéíóúñ]/i.test(l)) { previas.push(l); } return; }
       var ult = precios[precios.length - 1];
-      var desc = l.slice(0, ult.index).replace(/[\s—–\-=:→>·,(]+$/, '').replace(/^[\s•✦✧\-–—*·→]+/, '').trim();
+      var desc = limpia(l.slice(0, ult.index));
+      var resto = l.slice(ult.index + String(ult[0]).length);
+      // el precio delante: «100g Avensegium», «600g 6PL Objeto inventado», «100g - Filtro de Upsala»
+      if (!desc && /[a-záéíóúñ]{3}/i.test(resto) && !/^\s*(a|de|para)\s+devolver/i.test(resto)) {
+        // sin lo que lo acompaña («y 3 PL», «6PL») ni lo que se cuenta detrás («… Callejeo. Robert ha pasado…», «Reanimado de Combate: Puede ser…»)
+        var tras = limpia(resto.replace(/^[\s\-–—]*(?:y|\+)?\s*\d+\s*PL\b/i, '')).split(/\.\s/)[0].replace(/\.$/, '');
+        var dp = tras.indexOf(':');
+        desc = dp > 0 && tras.length - dp > 40 ? tras.slice(0, dp).trim() : tras;
+      }
+      // el precio solo en su línea: el canje es la línea de antes que sea un nombre (no la descripción de debajo)
+      else if (!desc && !/[a-z]/i.test(resto)) {
+        for (var k = previas.length - 1; k >= 0 && k >= previas.length - 2 && !desc; k--) {
+          var pv = previas[k], dos = pv.indexOf(':');
+          if (dos > 0 && dos <= 60) { desc = limpia(pv.slice(0, dos)); }
+          else if (pv.length <= 70 && !/\.\s+\S/.test(pv)) { desc = limpia(pv); }
+        }
+      }
+      previas = [];
       if (!desc) { return; }
-      var item = { texto: l, desc: desc, precio: aNumero(ult[1]), cat: cat };
-      if (cat === 'dev') { r.devoluciones.push(item); } else { r.items.push(item); }
+      meter(i, { texto: l0, desc: desc, precio: aNumero(ult[1]), cat: cat });
     });
+    if (sueltos.length && !isNaN(r.total)) {
+      var todos = r.items.map(function (it, k) { return { i: orden[k], item: it }; });
+      sueltos.forEach(function (s) { if (s.item.cat === 'dev') { r.devoluciones.push(s.item); } else { todos.push(s); } });
+      todos.sort(function (a, b) { return a.i - b.i; });
+      r.items = todos.map(function (s) { return s.item; });
+    }
     return r;
   }
 
