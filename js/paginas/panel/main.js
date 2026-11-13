@@ -1,22 +1,23 @@
 // @ts-check
 // Arranque del panel «Mi PJ» dentro del foro (el agente lo muestra en un iframe sin marco).
-import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=2.0.2';
-import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=2.0.2';
-import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=2.0.2';
-import { LectorFicha } from '../../lectores/LectorFicha.js?v=2.0.2';
-import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=2.0.2';
-import { crearPanelMiPj } from './MiPjPanel.js?v=2.0.2';
-import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=2.0.2';
-import { crearActividad } from '../../servicios/ActividadDelForo.js?v=2.0.2';
-import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=2.0.2';
-import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=2.0.2';
-import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=2.0.2';
-import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=2.0.2';
-import { crearTarjetaCanjes } from './CanjesPanel.js?v=2.0.2';
-import { crearRevision } from '../../inspector/Revision.js?v=2.0.2';
-import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=2.0.2';
-import { crearInspector } from '../../inspector/Inspector.js?v=2.0.2';
-import { normNombre } from '../../core/texto.js?v=2.0.2';
+import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=2.1.0';
+import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=2.1.0';
+import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=2.1.0';
+import { LectorFicha } from '../../lectores/LectorFicha.js?v=2.1.0';
+import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=2.1.0';
+import { crearPanelMiPj } from './MiPjPanel.js?v=2.1.0';
+import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=2.1.0';
+import { crearActividad } from '../../servicios/ActividadDelForo.js?v=2.1.0';
+import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=2.1.0';
+import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=2.1.0';
+import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=2.1.0';
+import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=2.1.0';
+import { crearTarjetaCanjes } from './CanjesPanel.js?v=2.1.0';
+import { crearRevision } from '../../inspector/Revision.js?v=2.1.0';
+import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=2.1.0';
+import { crearInspector } from '../../inspector/Inspector.js?v=2.1.0';
+import { normNombre } from '../../core/texto.js?v=2.1.0';
+import { crearColoreadorDelForo } from '../../servicios/ColoreadorDelForo.js?v=2.1.0';
 
 const CACHE_MIN = 30; // como Mi PJ: si lo leído tiene más de media hora, se vuelve a leer al abrir
 const root = /** @type {HTMLElement} */ (document.getElementById('mipj'));
@@ -27,8 +28,18 @@ async function arrancar() {
   // La revisión de la bóveda del editor del foro (la barra de debajo y «Antes de publicar»).
   // Funciona desde el principio: sin datos todavía, revisa las cuentas sin compararlas con la bóveda.
   /** @type {any} */ let panel = null;
-  agente.atender('editor.revisar', d => revisarEditor({ texto: String(d.texto ?? ''), ruta: String(d.ruta ?? '') }, panel?.datos?.boveda ?? null));
+  // 2.1.0: con la revisión va también lo del botón «Colorear diálogos» (cuántos diálogos hay; el agente lo enseña si hay alguno)
+  /** @type {string|null} */ let miNombre = null;
+  const coloreador = crearColoreadorDelForo(agente, { cuenta: () => miNombre });
+  agente.atender('editor.revisar', async d => {
+    const texto = String(d.texto ?? '');
+    const r = revisarEditor({ texto, ruta: String(d.ruta ?? '') }, panel?.datos?.boveda ?? null);
+    try { r.colorear = await coloreador.contar(texto); } catch { /* sin botón */ }
+    return r;
+  });
+  agente.atender('editor.colorear', d => coloreador.colorear(String(d.texto ?? '')));
   const hola = await agente.hola();
+  miNombre = hola.cuenta?.nombre ?? null;
   if (hola.protocolo !== PROTOCOLO) { root.textContent = 'Hay una versión nueva del script de PAM: actualizalo en Tampermonkey.'; await agente.tamano(420, 80).catch(() => {}); return; }
   if (!hola.cuenta) { await agente.tamano(1, 1); return; } // sin sesión, Mi PJ no se mostraba
 

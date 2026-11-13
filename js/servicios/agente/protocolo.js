@@ -22,6 +22,8 @@
 //   panel.tema     { tema }                el tema de Mi PJ para las puertas
 // agente → PAM:
 //   editor.revisar { texto, ruta }         → { avisos: string[], encabezado? }   («Antes de publicar»)
+//                                          2.1.0: y colorear { dialogos, coloreado, sinConfig, quien } (el botón)
+//   editor.colorear { texto }              → { texto, tramos, quien, sinConfig }   («Colorear diálogos», 2.1.0)
 //   ventana.cambio { ancho, alto }         cambió el tamaño de la ventana del foro
 //   pam.cierre     { hecho }               la pestaña de PAM terminó de cerrar el canje («Canje publicado → PAM»)
 

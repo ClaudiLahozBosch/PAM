@@ -4,6 +4,8 @@
 //   · guarda con el almacén (js/core/Almacen.js), con las mismas claves cd_…;
 //   · N08: recuerda la última configuración de cada personaje de Mi Ficha.
 
+import { GROUPS, FMTS, MARKERS, parseTag, fmtTags, ruleColor, colorize } from '../../bbcode/Dialogos.js?v=2.1.0';
+
 /**
  * @param {ShadowRoot} RR donde está el Coloreador (dentro del Registro de Roles)
  * @param {Window} w la ventana de PAM
@@ -18,125 +20,13 @@ const document = w.document, navigator = w.navigator, FileReader = w.FileReader,
     set(k,v){almacen.guardar(k,v)}
   };
 
-  // ---------- Etiquetas ----------
-  function parseTag(s){
-    s=(s||'').trim();
-    if(!s) return null;
-    if(/^#?[0-9a-f]{3,8}$/i.test(s)){const h=s[0]==='#'?s:'#'+s;return {open:`[color=${h}]`,close:'[/color]',color:h}}
-    if(/^[a-z]+$/i.test(s)) return {open:`[color=${s}]`,close:'[/color]',color:s};
-    const i=s.indexOf('[/');
-    let open,close;
-    if(i>0){open=s.slice(0,i).trim();close=s.slice(i).trim()}
-    else{
-      open=s;
-      const names=[...s.matchAll(/\[([a-z0-9]+)(?:=[^\]]*)?\]/gi)].map(m=>m[1]);
-      close=names.reverse().map(n=>`[/${n}]`).join('');
-    }
-    const m=open.match(/\[color=([^\]]+)\]/i);
-    return {open,close,color:m?m[1].trim():null};
-  }
-
-  // ---------- Detección de diálogo ----------
-  const SPACE=/\s/;
-  const PUNCT_AFTER=/[\s.,;:!?…)"»”'\]]/;
-  function isDash(line,i,o){
-    const c=line[i];
-    if(c==='—'||c==='–') return o.raya;
-    if(c==='-'&&o.guion){
-      if(line[i+1]==='-'||line[i-1]==='-') return false;
-      const prev=i===0?' ':line[i-1], next=i+1>=line.length?' ':line[i+1];
-      return SPACE.test(prev)||PUNCT_AFTER.test(next)||/[(«"“]/.test(prev);
-    }
-    return false;
-  }
-  function opening(line,i){return i===0||/[\s(«"“]/.test(line[i-1])}
-  function afterSentence(line,i){
-    let j=i-1; while(j>=0&&SPACE.test(line[j])) j--;
-    return j<0||/[.!?…:]/.test(line[j]);
-  }
-  const Q_OPEN={'"':'"','“':'”','«':'»'};
-
-  // devuelve array de {t, c} por carácter
-  function markLine(line,o){
-    const res=[]; let st='N', qClose=null;
-    for(let i=0;i<line.length;i++){
-      let ch=line[i];
-      const dash=isDash(line,i,o);
-      if(dash&&o.fix&&ch==='-') ch='—';
-      if(st==='Q'){res.push({t:ch,c:true}); if(ch===qClose) st='N'; continue}
-      if(dash){
-        if(st==='N'){ if(afterSentence(line,i)){st='D';res.push({t:ch,c:true})} else {st='A';res.push({t:ch,c:false})} }
-        else if(st==='A'){st='N';res.push({t:ch,c:false})}
-        else if(st==='D'){st='I';res.push({t:ch,c:false})}
-        else if(st==='I'){st='D';res.push({t:ch,c:opening(line,i)&&afterSentence(line,i)})}
-        continue;
-      }
-      if(st==='N'&&o.comillas&&Q_OPEN[ch]){st='Q';qClose=Q_OPEN[ch];res.push({t:ch,c:true});continue}
-      res.push({t:ch,c:st==='D'});
-    }
-    return res;
-  }
-
-  const GROUPS=[
-    ['Gryffindor','#A3000D'],['Hufflepuff','#DAA515'],['Ravenclaw','#316996'],['Slytherin','#005C1F'],['Otros menores','#b25228'],
-    ['Ex-Gryffindor','#803E3A'],['Ex-Hufflepuff','#d1cb9e'],['Ex-Ravenclaw','#769aaf'],['Ex-Slytherin','#4ca07d'],['Otros Adultos','#ae7952']];
-  const FMTS=[['b','B','Negrita','b'],['i','I','Cursiva','i'],['u','U','Subrayado','u'],['s','S','Tachado','strike']];
-  function fmtTags(f){f=f||{};const on=FMTS.filter(x=>f[x[0]]);return {open:on.map(x=>`[${x[3]}]`).join(''),close:on.reverse().map(x=>`[/${x[3]}]`).join('')}}
+  // 2.1.0: lo que colorea está en js/bbcode/Dialogos.js (también lo usa Mi PJ en el foro)
   function makeFmt(box,f,onChange){
     FMTS.forEach(([k,txt,title])=>{const b=document.createElement('button');b.type='button';b.className='tg '+k;b.textContent=txt;b.title=title;
       b.setAttribute('aria-label',title);b.setAttribute('aria-pressed',!!f[k]);
       b.onclick=()=>{f[k]=!f[k];b.setAttribute('aria-pressed',f[k]);onChange()};box.append(b)});
     return f;
   }
-  const reEsc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  function ruleColor(r){return r.g==='none'?null:r.g==='custom'?(r.c||'#ffffff'):(GROUPS[r.g]||GROUPS[0])[1]}
-  function wrapStyle(t,c,f){const ff=fmtTags(f);const inner=ff.open+t+ff.close;return c?`[color=${c}]${inner}[/color]`:inner}
-  const MARKERS=[['*','*'],['**','**'],['_','_'],['~','~'],['"','"'],['“','”'],['«','»'],['‘','’'],['(',')'],['<','>'],['|','|']];
-  function markRegex(rules){
-    const list=rules.map(r=>({r,m:MARKERS[r.m]})).filter(x=>x.m).sort((a,b)=>b.m[0].length-a.m[0].length);
-    if(!list.length) return null;
-    const re=new RegExp(list.map(x=>'(?<!'+reEsc(x.m[0][0])+')'+reEsc(x.m[0])+'([^\\n'+reEsc(x.m[1][0])+']+)'+reEsc(x.m[1])+'(?!'+reEsc(x.m[1].slice(-1))+')').join('|'),'g');
-    return {re,list};
-  }
-  function nameRegex(rules){
-    const list=rules.filter(r=>r.name.trim()).map(r=>({n:r.name.trim(),c:ruleColor(r),f:fmtTags(r.f)}))
-      .sort((a,b)=>b.n.length-a.n.length);
-    if(!list.length) return null;
-    const map=new Map(list.map(x=>[x.n.toLowerCase(),x]));
-    const re=new RegExp('(?<![\\p{L}\\p{N}_])('+list.map(x=>reEsc(x.n)).join('|')+')(?![\\p{L}\\p{N}_])','giu');
-    return {re,map};
-  }
-  function paintNames(t,nr,cnt){
-    if(!nr) return t;
-    return t.replace(nr.re,m=>{cnt.n++;const x=nr.map.get(m.toLowerCase());return x.c?`[color=${x.c}]${x.f.open}${m}${x.f.close}[/color]`:x.f.open+m+x.f.close});
-  }
-
-  function colorize(text,tg,o,rules,mrules){
-    let n=0; const nr=nameRegex(rules||[]); const cnt={n:0}; const mr=markRegex(mrules||[]); const slots=[];
-    const PH=0xE000;
-    if(mr) text=text.replace(mr.re,(...a)=>{
-      const g=a.slice(1,1+mr.list.length); const k=g.findIndex(v=>v!==undefined); const x=mr.list[k];
-      const body=x.r.strip?g[k]:x.m[0]+g[k]+x.m[1];
-      slots.push({body,c:ruleColor(x.r),f:x.r.f}); return String.fromCharCode(PH+slots.length-1);
-    });
-    const lines=text.replace(/\r\n?/g,'\n').split('\n').map(line=>{
-      const marks=markLine(line,o);
-      // agrupar en tramos
-      const runs=[];
-      for(const m of marks){const last=runs[runs.length-1]; if(last&&last.c===m.c) last.t+=m.t; else runs.push({t:m.t,c:m.c})}
-      return runs.map(r=>{
-        if(!r.c||!r.t.trim()) return paintNames(r.t,nr,cnt);
-        const lead=r.t.match(/^\s*/)[0], trail=r.t.match(/\s*$/)[0];
-        n++;
-        return lead+tg.open+paintNames(r.t.trim(),nr,cnt)+tg.close+trail;
-      }).join('');
-    });
-    let code=lines.join('\n');
-    if(slots.length) code=code.replace(/[\uE000-\uF8FF]/g,ch=>{const sl=slots[ch.charCodeAt(0)-PH];return sl?wrapStyle(paintNames(sl.body,nr,{n:0}),sl.c,sl.f):ch});
-    if(o.center&&code.trim()) code='[center]'+code+'[/center]';
-    return {code,count:n,names:cnt.n,marks:slots.length};
-  }
-
   // ---------- Vista previa BBCode ----------
   const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   function render(bb){
@@ -157,6 +47,7 @@ const document = w.document, navigator = w.navigator, FileReader = w.FileReader,
     const rules=readRules(); store.set('cd_names',rules);
     const mrules=readMarks(); store.set('cd_marks',mrules);
     guardarDelPj(rules,mrules); /* N08 */
+    try{document.dispatchEvent(new w.CustomEvent('pam:coloreador'))}catch(e){} /* 2.1.0: js/pam/main.js lo pasa a Mi PJ */
     store.set('cd_src',src.value); store.set('cd_tag',tag.value); store.set('cd_opts',opts());
     const r=tg?colorize(src.value,tg,opts(),rules,mrules):colorize(src.value,{open:'',close:''},{raya:false,guion:false,comillas:false,fix:false,center:$('optCenter').checked},rules,mrules);
     $('mcount').textContent=r.marks+(r.marks===1?' marca':' marcas');

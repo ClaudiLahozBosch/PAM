@@ -1,7 +1,7 @@
 // @ts-check
 // Misiones y acontecimientos: turno del master y plazo. De Mi PJ (pam-mi-pj.user.js 1.7.1) tal cual.
-import { normPalabras as norm } from '../core/texto.js?v=2.0.2';
-import { aFecha, offsetZona } from '../lectores/FechaForo.js?v=2.0.2';
+import { normPalabras as norm } from '../core/texto.js?v=2.1.0';
+import { aFecha, offsetZona } from '../lectores/FechaForo.js?v=2.1.0';
 
 export const ES_MISION = /\b(misi[oó]n|acontecimiento)\b/i;
 export const PLAZO_KW = /(pr[oó]ximo\s+turno|hora\s+l[ií]mite|l[ií]mite\s+de\s+poste[oa]|fecha\s+l[ií]mite|plazo|l[ií]mite\s+para\s+postear|deadline)/i;

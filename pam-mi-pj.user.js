@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PAM · Mi PJ (HP Avada Kedavra)
 // @namespace    https://jesleytherabbit-prog.github.io/PAM/
-// @version      2.0.2
+// @version      2.1.0
 // @description  El script mínimo de PAM: lee el foro con tu sesión, publica y edita SOLO tras tu «Aceptar» y muestra el panel «Mi PJ» de PAM. Toda la lógica está en PAM.
 // @author       Hana Park
 // @match        https://hp-avada-kedavra.foroactivo.com/*
@@ -22,14 +22,15 @@
       (la del Escriba: todos los pasos a la vista, con las diferencias de cada mensaje que se edita);
    3. guardar datos compartidos entre el foro y PAM (almacén de Tampermonkey, claves «pam.*»);
    4. mostrar el panel «Mi PJ», que es una página de PAM;
-   5. pasar a PAM el texto del editor del foro antes de enviarlo, para que lo revise;
+   5. pasar a PAM el texto del editor del foro antes de enviarlo, para que lo revise (y, si se pulsa «Colorear diálogos»,
+      poner en el editor el texto coloreado que devuelve PAM y previsualizar);
    6. abrir PAM y pasarle un mensaje desde el foro («Enviar a PAM»: PAM solo acepta datos que vengan del foro).
    No sabe nada de fichas ni de canjes. Habla con PAM con mensajes { pam, de, id, tipo, datos } (protocolo 1). */
 
 (function () {
   'use strict';
 
-  var VERSION = '2.0.2';
+  var VERSION = '2.1.0';
   var PROTOCOLO = 1;
   var PAM = { origen: 'https://jesleytherabbit-prog.github.io', ruta: '/PAM/' };
   var FOROS = ['hp-avada-kedavra.foroactivo.com'];
@@ -380,6 +381,17 @@
     '.mipj-check small{color:var(--m-parchment-dim);font-weight:500;margin-left:auto;font-size:11px}',
     ':host([data-skin="pixel"]) .mipj-check{border-radius:0}'
   ].join('\n');
+  // 2.1.0: el botón «Colorear diálogos», junto a los botones del foro del editor (solo si hay algún diálogo)
+  var CSS_COL = [
+    ':host{display:inline-block;vertical-align:middle;margin:0 4px}',
+    '.mipj-col{display:inline-flex;gap:6px;align-items:center;padding:4px 11px;border-radius:999px;cursor:pointer;font:600 12px var(--m-sans);',
+    '  background:var(--m-panel);color:var(--m-parchment);border:1px solid color-mix(in srgb,var(--m-gold) 55%,transparent)}',
+    '.mipj-col:hover{border-color:var(--m-gold-bright);color:var(--m-gold-bright)}',
+    '.mipj-col .ic{font-family:var(--m-serif);color:var(--m-gold-bright);font-size:14px;line-height:1}',
+    '.mipj-col small{color:var(--m-parchment-dim);font-weight:500;font-size:10.5px}',
+    '.mipj-col[disabled]{opacity:.6;cursor:wait}',
+    ':host([data-skin="pixel"]) .mipj-col{border-radius:0}'
+  ].join('\n');
   // La barra de arriba de los mensajes de un tema de oficial («🎓 Este oficial»), la de Mi PJ
   var CSS_OF = [
     ':host{display:block}',
@@ -662,7 +674,7 @@
   // ---------------------------------------------------------------
   // Panel «Mi PJ» (página de PAM en un iframe que ocupa justo lo que ocupa el panel)
   // ---------------------------------------------------------------
-  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=2.0.2' });
+  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=2.1.0' });
   raiz.appendChild(iframe);
   // Si el panel no arranca (no pide tamaño), se enseña al menos su pastilla, para que nunca quede invisible.
   var panelVivo = false;
@@ -903,6 +915,11 @@
     return ta.value;
   }
 
+  function ponerTexto(ta, texto) {
+    try { var $ = W.jQuery || W.$; var inst = $ && $(ta).sceditor && $(ta).sceditor('instance'); if (inst && inst.val) { inst.val(texto); try { inst.updateOriginal(); } catch (e) {} } } catch (e) {}
+    ta.value = texto;
+  }
+
   function revisarTexto(texto) {
     return canal.pedir('editor.revisar', { texto: texto, ruta: location.pathname + location.search }, 3000);
   }
@@ -921,6 +938,50 @@
     var bar = el('div', { clase: 'mipj-check' }); sombra.appendChild(bar);
     (form.querySelector('.sceditor-container') || ta).insertAdjacentElement('afterend', caja);
 
+    // 2.1.0: «Colorear diálogos». Va junto al «Previsualizar» del foro; si no lo hay, debajo del editor.
+    var prev = form.querySelector('input[name="preview"], button[name="preview"]');
+    var colHost = document.createElement('span'); colHost.className = 'pam-agente-colorear'; colHost.style.display = 'none';
+    var colSombra = colHost.attachShadow({ mode: 'open' });
+    var colEst = document.createElement('style'); colEst.textContent = CSS_COL; colSombra.appendChild(colEst);
+    var colTema = document.createElement('style'); colTema.textContent = temaActual.css; colSombra.appendChild(colTema);
+    colHost.setAttribute('data-skin', temaActual.skin);
+    estilosTema.push({ estilo: colTema, host: colHost });
+    var colBtn = el('button', { clase: 'mipj-col', type: 'button' }); colSombra.appendChild(colBtn);
+    if (prev) { prev.insertAdjacentElement('beforebegin', colHost); } else { caja.insertAdjacentElement('afterend', colHost); }
+    var CLAVE_DESHACER = 'pam.colorear.deshacer';
+    function deshacerGuardado() { try { var d = JSON.parse(sessionStorage.getItem(CLAVE_DESHACER) || 'null'); return d && d.ruta === location.pathname ? d : null; } catch (e) { return null; } }
+    function pintarColor(r) {
+      var c = r && r.colorear, d = deshacerGuardado(), t = textoEditor(ta);
+      if (d && d.despues === t) {
+        colBtn.replaceChildren(el('span', { clase: 'ic', texto: '↶' }), document.createTextNode('Quitar colores'));
+        colBtn.title = 'Volver al texto de antes de colorear'; colBtn.setAttribute('data-accion', 'deshacer'); colHost.style.display = ''; return;
+      }
+      if (!c || !c.dialogos || c.coloreado) { colHost.style.display = 'none'; return; }
+      colBtn.replaceChildren.apply(colBtn, [el('span', { clase: 'ic', texto: '✦' }), document.createTextNode('Colorear diálogos')].concat(c.quien ? [el('small', { texto: c.quien })] : []));
+      colBtn.title = c.sinConfig ? 'Primero abrí PAM con el script instalado: así Mi PJ conoce tu Coloreador'
+        : 'Colorea ' + (c.dialogos === 1 ? 'el diálogo' : 'los ' + c.dialogos + ' diálogos') + ' con tu Coloreador de PAM' + (c.quien ? ' (' + c.quien + ')' : ' (la configuración general)') + ' y previsualiza';
+      colBtn.setAttribute('data-accion', 'colorear'); colHost.style.display = '';
+    }
+    colBtn.addEventListener('click', function () {
+      var t = textoEditor(ta);
+      if (colBtn.getAttribute('data-accion') === 'deshacer') {
+        var d = deshacerGuardado(); if (d) { ponerTexto(ta, d.antes); }
+        try { sessionStorage.removeItem(CLAVE_DESHACER); } catch (e) {}
+        chequear(true).catch(function () {}); return;
+      }
+      colBtn.disabled = true;
+      canal.pedir('editor.colorear', { texto: t }, 8000).then(function (r) {
+        colBtn.disabled = false;
+        if (!r || r.sinConfig) { colBtn.replaceChildren(el('span', { clase: 'ic', texto: '!' }), document.createTextNode('Abrí PAM una vez con el script para usar tu Coloreador')); return; }
+        if (r.texto === t) { return; }
+        try { sessionStorage.setItem(CLAVE_DESHACER, JSON.stringify({ ruta: location.pathname, antes: t, despues: r.texto })); } catch (e) {}
+        ponerTexto(ta, r.texto);
+        if (prev) { try { form.requestSubmit(prev); } catch (e) { prev.click(); } } else { chequear(true).catch(function () {}); }
+      }, function (err) {
+        colBtn.disabled = false; console.warn('[PAM agente] colorear:', err.message);
+      });
+    });
+
     var ult = null, res = null, enCurso = false; // res: lo que PAM contestó para el texto «ult»
     function pintarBarra(r) {
       if (!r || !r.formulario) { caja.style.display = 'none'; return; }
@@ -938,9 +999,9 @@
       if (!forzar && (t === ult || enCurso)) { return Promise.resolve(res); }
       enCurso = true;
       return revisarTexto(t).then(function (r) {
-        enCurso = false; ult = t; res = r; pintarBarra(r); return r;
+        enCurso = false; ult = t; res = r; pintarBarra(r); pintarColor(r); return r;
       }, function (err) {
-        enCurso = false; ult = null; res = null; pintarBarra(null); throw err; // PAM no contesta: sin barra
+        enCurso = false; ult = null; res = null; pintarBarra(null); pintarColor(null); throw err; // PAM no contesta: sin barra
       });
     }
     bar.addEventListener('click', function () {

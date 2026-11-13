@@ -10,6 +10,7 @@ import path from 'node:path';
 import { abrir, igual, RAIZ } from '../legado/abrirPam.mjs';
 import { XLSX_URL, parseWorkbook } from '../../js/paginas/registro/importarExcel.js';
 import { crearDatosDeseos, claveDeseo } from '../../js/paginas/registro/deseos.js';
+import { configuracionColoreador } from '../../js/pam/ColoreadorAlForo.js';
 
 const MEDIODIA = Date.UTC(2026, 0, 15, 12); // a mediodía: el día es el mismo en UTC y aquí (F15 no cambia nada)
 function horaFija(w) {
@@ -44,10 +45,13 @@ const $ = (w, sel) => raiz(w).querySelector(sel);
 /** Lo que se ve (sin los <style>, que se comparan aparte) y lo escrito en los campos (que no sale en el HTML). */
 // 8c: el formulario de «Canjes futuros» (lista de deseos) usa los datos oficiales y cambia a propósito: de esa pestaña
 // se compara lo demás (los deseos apuntados, los totales), y el formulario tiene su prueba abajo.
+// 2.1.0: el Coloreador ya no pinta la puntuación que sigue al cierre de un inciso («—repitió—. Eran…»); para comparar
+// con el antiguo se saca esa puntuación del color en los dos (las mejoras tienen su prueba en tests/unit/dialogos.test.mjs).
+const sinPuntoDelInciso = t => t.replace(/\[color=([^\]]+)\]([.,;:]+\s*)/g, '$2[color=$1]').replace(/(<span style="color:[^"]+">)([.,;:]+\s*)/g, '$2$1');
 const vista = w => {
   const sinForm = e => { const c = e.cloneNode(true); c.querySelectorAll('.w-add').forEach(f => f.remove()); return c.outerHTML; };
-  return [...raiz(w).children].filter(e => e.tagName !== 'STYLE').map(sinForm).join('')
-    + '\n' + [...raiz(w).querySelectorAll('input,textarea,select')].filter(e => !e.closest('.w-add')).map(e => (e.type === 'checkbox' ? e.checked : e.value)).join('|');
+  return sinPuntoDelInciso([...raiz(w).children].filter(e => e.tagName !== 'STYLE').map(sinForm).join('')
+    + '\n' + [...raiz(w).querySelectorAll('input,textarea,select')].filter(e => !e.closest('.w-add')).map(e => (e.type === 'checkbox' ? e.checked : e.value)).join('|'));
 };
 const estilos = w => [...raiz(w).querySelectorAll('style')].map(s => s.textContent).join('');
 const TABS = ['inicio', 'personajes', 'turnos', 'oficiales', 'ganancias', 'boveda', 'canjes', 'copia', 'coloreador'];
@@ -154,6 +158,23 @@ test('N08: el Coloreador recuerda lo de cada personaje de Mi Ficha', async () =>
     assert.equal($(w, '#cd-tag').value, '[color=#222222] [/color]');
     assert.equal($(w, '#cd-names input[type="text"]').value, 'Robert');
     assert.equal(JSON.parse(w.localStorage.getItem('cd_pj.' + uno)).tag, '[color=#111111] [/color]');
+  } finally { a.w.close(); }
+});
+
+test('2.1.0: lo que PAM pasa a Mi PJ para «Colorear diálogos»: la configuración general y la de cada personaje, por su nombre', async () => {
+  const a = await abrir('archivos', conDatos);
+  try {
+    const w = a.w, P = w.pamPjs, [uno, dos] = P.lista();
+    let avisos = 0; w.document.addEventListener('pam:coloreador', () => avisos++);
+    const usar = tag => { const t = $(w, '#cd-tag'); t.value = tag; t.dispatchEvent(new w.Event('input')); };
+    w.rrGo('coloreador');
+    P.cambiar(uno.id); usar('[color=#111111] [/color]');
+    assert.ok(avisos > 0, 'avisa al cambiar algo (js/pam/main.js lo copia al almacén del agente)');
+    const c = configuracionColoreador(w);
+    assert.equal(c.v, 1);
+    assert.equal(c.general.tag, '[color=#111111] [/color]');
+    assert.deepEqual(c.pjs.map(p => [p.nombre, p.config.tag]), [[uno.nombre, '[color=#111111] [/color]']], 'solo los personajes que ya usaron el Coloreador');
+    assert.ok(!c.pjs.some(p => p.nombre === dos.nombre));
   } finally { a.w.close(); }
 });
 

@@ -2,9 +2,9 @@
 // Arranque de Mi Ficha, el Controlador de stats y el Revisor de Empleos (fase 8c). Lo importa js/pam/arranque.js en el
 // mismo sitio en que estaba dentro de index.html (después de la Tabla de Canjes, antes del Registro de Roles).
 // Su HTML sigue en index.html (<template id="re-template">) y sus estilos en css/pam.css, como antes.
-import { Almacen } from '../../core/Almacen.js?v=2.0.2';
-import { iniciarDatos } from './datos.js?v=2.0.2';
-import { montarRevisor } from './Revisor.js?v=2.0.2';
+import { Almacen } from '../../core/Almacen.js?v=2.1.0';
+import { iniciarDatos } from './datos.js?v=2.1.0';
+import { montarRevisor } from './Revisor.js?v=2.1.0';
 
 /** La versión de este archivo (?v=…): los datos se piden con la misma. */
 const V = new URL(import.meta.url).search;

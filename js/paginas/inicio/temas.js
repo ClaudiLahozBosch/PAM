@@ -2,7 +2,7 @@
 // Kit de temas (fase 8e): el mismo código que estaba en index.html (copia congelada en tests/legado/paginas/), como módulo.
 // Lo que cambia, marcado con «8e»: guarda el tema y las calabazas con el almacén (mismas claves y formato).
 // Recibe la ventana: así las pruebas lo montan en una página de prueba junto al antiguo y comparan.
-import { Almacen } from '../../core/Almacen.js?v=2.0.2';
+import { Almacen } from '../../core/Almacen.js?v=2.1.0';
 /** @param {Window} w la ventana de PAM */
 export async function montar(w) {
 const almacen = Almacen.de(w);
