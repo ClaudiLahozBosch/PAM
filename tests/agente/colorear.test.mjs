@@ -1,4 +1,5 @@
-// 2.1.0: el botón «Colorear diálogos» del agente, junto al «Previsualizar» del editor del foro. PAM (el panel) usa la
+// 2.1.0: el botón «Colorear diálogos» del agente, junto al «Previsualizar» del editor del foro (desde la 2.1.2 no
+// previsualiza solo). PAM (el panel) usa la
 // configuración que PAM dejó en el almacén del agente (`pam.coloreador`); aquí, con el servicio de verdad.
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -50,14 +51,15 @@ test('el botón va junto a «Previsualizar» y solo se ve si hay algún diálogo
   await escribir('Entró en la sala.\n—Buenas noches —dijo.');
   assert.equal(host().style.display, '');
   assert.equal(btn().textContent, '✦Colorear diálogosHimmel Reich Bils');
-  assert.match(btn().title, /Colorea el diálogo con tu Coloreador de PAM \(Himmel Reich Bils\) y previsualiza/);
+  assert.equal(btn().title, 'Colorea el diálogo con tu Coloreador de PAM (Himmel Reich Bils)');
+  assert.equal(host().style.margin, '0px 10px 0px 4px', 'separado de «Previsualizar»');
 });
 
-test('al pulsarlo pone el texto coloreado (la configuración de su personaje) y previsualiza; «Quitar colores» lo deja como estaba', async () => {
+test('al pulsarlo pone el texto coloreado (la configuración de su personaje), sin previsualizar; «Quitar colores» lo deja como estaba', async () => {
   const antes = ta.value;
   btn().click(); await espera(60);
   assert.equal(ta.value, 'Entró en la sala.\n[color=#A3000D]—Buenas noches[/color] —dijo.');
-  assert.deepEqual(enviados, ['preview'], 'solo previsualiza: no publica');
+  assert.deepEqual(enviados, [], 'no envía nada: el «Previsualizar» lo pulsa el usuario si quiere');
   await espera(1700);
   assert.equal(btn().textContent, '↶Quitar colores');
   btn().click(); await espera(60);
@@ -78,5 +80,5 @@ test('ya coloreado (sin poder deshacer): no sale; sin nada de PAM, avisa en luga
   btn().click(); await espera(60);
   assert.equal(ta.value, '—Hola otra vez.');
   assert.match(btn().textContent, /Abrí PAM una vez/);
-  assert.deepEqual(enviados, ['preview']);
+  assert.deepEqual(enviados, []);
 });

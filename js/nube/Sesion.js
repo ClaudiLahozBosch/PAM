@@ -6,7 +6,7 @@
 //   · F10: cada guardado lleva la versión de la nube que conoce; si otro dispositivo guardó por medio no se pisa nada
 //     y sale el aviso de siempre («Traer los de la nube» / «Guardar los de acá»);
 //   · F11: si los datos traídos de la nube no se pudieron poner, se avisa y no se guarda lo de este navegador encima.
-import { Conflicto, nuevoCodigo, normal, formato } from './Nube.js?v=2.1.1';
+import { Conflicto, nuevoCodigo, normal, formato } from './Nube.js?v=2.1.2';
 
 /**
  * @param {{ doc: Document, win: any, nube: ReturnType<typeof import('./Nube.js').crearNube>, claves: { esDePAM: (k: string) => boolean, errorAlTraer?: string|null } }} dep

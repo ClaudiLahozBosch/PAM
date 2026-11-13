@@ -54,10 +54,10 @@ const esperarFin = async () => { for (let i = 0; i < 100 && !boton('Cerrar'); i+
 
 test('hola (con la ventana del foro), iframe sin marco y lectura del foro', async () => {
   const h = await agente.hola();
-  assert.deepEqual([h.agente, h.protocolo, h.foro, h.cuenta, h.ruta], ['2.1.1', 1, 'hp-avada-kedavra.foroactivo.com', { id: 7, nombre: 'TEST' }, '/t5-uno']);
+  assert.deepEqual([h.agente, h.protocolo, h.foro, h.cuenta, h.ruta], ['2.1.2', 1, 'hp-avada-kedavra.foroactivo.com', { id: 7, nombre: 'TEST' }, '/t5-uno']);
   assert.ok(h.ventana.ancho > 0 && h.ventana.alto > 0);
   const f = sombra().querySelector('iframe');
-  assert.equal(f.getAttribute('src'), PAM + '/PAM/panel.html?foro=' + encodeURIComponent(FORO) + '&v=2.1.1', 'con la versión: el navegador no mezcla archivos');
+  assert.equal(f.getAttribute('src'), PAM + '/PAM/panel.html?foro=' + encodeURIComponent(FORO) + '&v=2.1.2', 'con la versión: el navegador no mezcla archivos');
   assert.equal(f.className, 'marco');
   assert.equal(sombra().querySelector('.pastilla'), null, 'la pastilla es la de Mi PJ, dentro del panel');
   assert.equal((await agente.leer('/')).title, 'Foro');

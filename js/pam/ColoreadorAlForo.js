@@ -5,7 +5,7 @@
 //   { v: 1, general: config, pjs: [{ nombre, config }] }
 // con config = { names, marks, dlgf, tag, opts } (lo de `cd_pj.<id>`; `general` es lo de ahora, cd_names, cd_tag…).
 // Se copia al abrir PAM y cada vez que se cambia algo en el Coloreador (evento `pam:coloreador`).
-import { Almacen } from '../core/Almacen.js?v=2.1.1';
+import { Almacen } from '../core/Almacen.js?v=2.1.2';
 
 /** La configuración actual del Coloreador y la de cada personaje de Mi Ficha, como la guarda PAM. @param {Window} w */
 export function configuracionColoreador(w) {

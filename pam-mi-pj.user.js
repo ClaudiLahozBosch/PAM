@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PAM · Mi PJ (HP Avada Kedavra)
 // @namespace    https://jesleytherabbit-prog.github.io/PAM/
-// @version      2.1.1
+// @version      2.1.2
 // @description  El script mínimo de PAM: lee el foro con tu sesión, publica y edita SOLO tras tu «Aceptar» y muestra el panel «Mi PJ» de PAM. Toda la lógica está en PAM.
 // @author       Hana Park
 // @match        https://hp-avada-kedavra.foroactivo.com/*
@@ -23,14 +23,14 @@
    3. guardar datos compartidos entre el foro y PAM (almacén de Tampermonkey, claves «pam.*»);
    4. mostrar el panel «Mi PJ», que es una página de PAM;
    5. pasar a PAM el texto del editor del foro antes de enviarlo, para que lo revise (y, si se pulsa «Colorear diálogos»,
-      poner en el editor el texto coloreado que devuelve PAM y previsualizar);
+      poner en el editor el texto coloreado que devuelve PAM);
    6. abrir PAM y pasarle un mensaje desde el foro («Enviar a PAM»: PAM solo acepta datos que vengan del foro).
    No sabe nada de fichas ni de canjes. Habla con PAM con mensajes { pam, de, id, tipo, datos } (protocolo 1). */
 
 (function () {
   'use strict';
 
-  var VERSION = '2.1.1';
+  var VERSION = '2.1.2';
   var PROTOCOLO = 1;
   var PAM = { origen: 'https://jesleytherabbit-prog.github.io', ruta: '/PAM/' };
   var FOROS = ['hp-avada-kedavra.foroactivo.com'];
@@ -383,7 +383,7 @@
   ].join('\n');
   // 2.1.0: el botón «Colorear diálogos», junto a los botones del foro del editor (solo si hay algún diálogo)
   var CSS_COL = [
-    ':host{display:inline-block;vertical-align:middle;margin:0 4px}',
+    ':host{display:inline-block;vertical-align:middle;margin:0 10px 0 4px}',
     '.mipj-col{display:inline-flex;gap:6px;align-items:center;padding:4px 11px;border-radius:999px;cursor:pointer;font:600 12px var(--m-sans);',
     '  background:var(--m-panel);color:var(--m-parchment);border:1px solid color-mix(in srgb,var(--m-gold) 55%,transparent)}',
     '.mipj-col:hover{border-color:var(--m-gold-bright);color:var(--m-gold-bright)}',
@@ -674,7 +674,7 @@
   // ---------------------------------------------------------------
   // Panel «Mi PJ» (página de PAM en un iframe que ocupa justo lo que ocupa el panel)
   // ---------------------------------------------------------------
-  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=2.1.1' });
+  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=2.1.2' });
   raiz.appendChild(iframe);
   // Si el panel no arranca (no pide tamaño), se enseña al menos su pastilla, para que nunca quede invisible.
   var panelVivo = false;
@@ -915,14 +915,6 @@
     return ta.value;
   }
 
-  // El foro avisa al salir con texto en el editor («¿Quieres salir del sitio web?»; script propio del foro, /99802.js)
-  // y lo apaga cuando se pulsan sus botones, añadiendo otro beforeunload que devuelve null. Al previsualizar desde
-  // «Colorear diálogos» se hace lo mismo (y, por si el foro lo hace con window.onbeforeunload, también eso).
-  function sinAvisoDeSalida() {
-    try { var $ = W.jQuery || W.$; if ($) { $(W).on('beforeunload', function () { return null; }); } } catch (e) {}
-    try { W.onbeforeunload = null; } catch (e) {}
-  }
-
   function ponerTexto(ta, texto) {
     try { var $ = W.jQuery || W.$; var inst = $ && $(ta).sceditor && $(ta).sceditor('instance'); if (inst && inst.val) { inst.val(texto); try { inst.updateOriginal(); } catch (e) {} } } catch (e) {}
     ta.value = texto;
@@ -955,6 +947,7 @@
     colHost.setAttribute('data-skin', temaActual.skin);
     estilosTema.push({ estilo: colTema, host: colHost });
     var colBtn = el('button', { clase: 'mipj-col', type: 'button' }); colSombra.appendChild(colBtn);
+    colHost.style.margin = '0 10px 0 4px'; // aunque el foro ponga márgenes a los span
     if (prev) { prev.insertAdjacentElement('beforebegin', colHost); } else { caja.insertAdjacentElement('afterend', colHost); }
     var CLAVE_DESHACER = 'pam.colorear.deshacer';
     function deshacerGuardado() { try { var d = JSON.parse(sessionStorage.getItem(CLAVE_DESHACER) || 'null'); return d && d.ruta === location.pathname ? d : null; } catch (e) { return null; } }
@@ -967,7 +960,7 @@
       if (!c || !c.dialogos || c.coloreado) { colHost.style.display = 'none'; return; }
       colBtn.replaceChildren.apply(colBtn, [el('span', { clase: 'ic', texto: '✦' }), document.createTextNode('Colorear diálogos')].concat(c.quien ? [el('small', { texto: c.quien })] : []));
       colBtn.title = c.sinConfig ? 'Primero abrí PAM con el script instalado: así Mi PJ conoce tu Coloreador'
-        : 'Colorea ' + (c.dialogos === 1 ? 'el diálogo' : 'los ' + c.dialogos + ' diálogos') + ' con tu Coloreador de PAM' + (c.quien ? ' (' + c.quien + ')' : ' (la configuración general)') + ' y previsualiza';
+        : 'Colorea ' + (c.dialogos === 1 ? 'el diálogo' : 'los ' + c.dialogos + ' diálogos') + ' con tu Coloreador de PAM' + (c.quien ? ' (' + c.quien + ')' : ' (la configuración general)');
       colBtn.setAttribute('data-accion', 'colorear'); colHost.style.display = '';
     }
     colBtn.addEventListener('click', function () {
@@ -984,7 +977,7 @@
         if (r.texto === t) { return; }
         try { sessionStorage.setItem(CLAVE_DESHACER, JSON.stringify({ ruta: location.pathname, antes: t, despues: r.texto })); } catch (e) {}
         ponerTexto(ta, r.texto);
-        if (prev) { sinAvisoDeSalida(); prev.click(); } else { chequear(true).catch(function () {}); }
+        chequear(true).catch(function () {}); // 2.1.2: sin previsualizar; el «Previsualizar» del foro está al lado
       }, function (err) {
         colBtn.disabled = false; console.warn('[PAM agente] colorear:', err.message);
       });
