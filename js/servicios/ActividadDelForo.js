@@ -2,12 +2,12 @@
 // Lo que Mi PJ leía del foro además de la ficha y la bóveda (pam-mi-pj.user.js 1.7.1), ahora a través del agente:
 // dónde te toca responder (con las misiones), el sueldo del mes y los oficiales en curso.
 // Mismas páginas, mismo orden y mismas reglas (js/reglas/Sueldo.js, Misiones.js, Oficiales.js).
-import { normPalabras as norm } from '../core/texto.js?v=2.1.0';
-import { FECHA, aFecha, partesDeFecha, aUTC } from '../lectores/FechaForo.js?v=2.1.0';
-import { postsDeMiPj } from '../lectores/LectorTema.js?v=2.1.0';
-import { temaDelMes, mesDelTema, pedidoYRespuesta, MESES } from '../reglas/Sueldo.js?v=2.1.0';
-import { ES_MISION, analizarMision, esBot } from '../reglas/Misiones.js?v=2.1.0';
-import { ES_OFICIAL, contarOficial, crearEsCierre } from '../reglas/Oficiales.js?v=2.1.0';
+import { normPalabras as norm } from '../core/texto.js?v=2.1.1';
+import { FECHA, aFecha, partesDeFecha, aUTC } from '../lectores/FechaForo.js?v=2.1.1';
+import { postsDeMiPj } from '../lectores/LectorTema.js?v=2.1.1';
+import { temaDelMes, mesDelTema, pedidoYRespuesta, MESES } from '../reglas/Sueldo.js?v=2.1.1';
+import { ES_MISION, analizarMision, esBot } from '../reglas/Misiones.js?v=2.1.1';
+import { ES_OFICIAL, contarOficial, crearEsCierre } from '../reglas/Oficiales.js?v=2.1.1';
 
 const tidDe = u => +((String(u || '').match(/\/t(\d+)/) || [0, 0])[1]);
 const aviso = (que, e) => console.warn('[Mi PJ] ' + que, e);

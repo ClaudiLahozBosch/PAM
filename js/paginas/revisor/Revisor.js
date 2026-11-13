@@ -9,10 +9,10 @@
 // Recibe la ventana: así las pruebas lo montan en una página de prueba junto al antiguo y comparan.
 // 0.7.0: sin el «Personalizada» antiguo (el «Código para el foro» usa solo el editor nuevo) y con los cálculos de
 // combate y puntos de js/reglas/Combate.js (buscar «0.7.0»).
-import { RANKS, RANK_SHORT, SKILL_LV, SKILL_NAME, ATTRS, ART, SKILLS, ALL_SKILLS, BG_TYPES, ADVS, cats, SUELDOS, SK_MAP } from './datos.js?v=2.1.0';
-import { ETAPAS, ESP_RAMAS, IDIOMA_NIV, VINC, emptyFicha, normFicha, exampleFicha } from './modelo.js?v=2.1.0';
-import { A, S, sanador, parseEmpleosDSL } from './empleos.js?v=2.1.0';
-import { combate as combateReglas, puntos as puntosReglas } from '../../reglas/Combate.js?v=2.1.0';
+import { RANKS, RANK_SHORT, SKILL_LV, SKILL_NAME, ATTRS, ART, SKILLS, ALL_SKILLS, BG_TYPES, ADVS, cats, SUELDOS, SK_MAP } from './datos.js?v=2.1.1';
+import { ETAPAS, ESP_RAMAS, IDIOMA_NIV, VINC, emptyFicha, normFicha, exampleFicha } from './modelo.js?v=2.1.1';
+import { A, S, sanador, parseEmpleosDSL } from './empleos.js?v=2.1.1';
+import { combate as combateReglas, puntos as puntosReglas } from '../../reglas/Combate.js?v=2.1.1';
 
 /**
  * @param {Window} w la ventana de PAM

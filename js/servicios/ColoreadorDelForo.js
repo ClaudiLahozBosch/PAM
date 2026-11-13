@@ -2,8 +2,8 @@
 // 2.1.0: el botón «Colorear diálogos» de Mi PJ en el editor del foro. Usa la configuración del Coloreador de PAM que
 // PAM deja en el almacén del agente (`pam.coloreador`, js/pam/ColoreadorAlForo.js): la del personaje que tiene el
 // nombre de la cuenta con la que se escribe y, si no tiene, la general.
-import { colorearConConfig, descolorear } from '../bbcode/Dialogos.js?v=2.1.0';
-import { normNombre } from '../core/texto.js?v=2.1.0';
+import { colorearConConfig, descolorear } from '../bbcode/Dialogos.js?v=2.1.1';
+import { normNombre } from '../core/texto.js?v=2.1.1';
 
 /** Solo para contar diálogos cuando PAM todavía no pasó ninguna configuración. */
 const POR_DEFECTO = { tag: '#ffffff', names: [], marks: [], dlgf: {}, opts: { raya: true, guion: true, comillas: true } };
