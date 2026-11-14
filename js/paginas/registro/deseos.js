@@ -7,7 +7,7 @@
 //   · data/arcanos.json (el Compendio): los inventados por los jugadores (con «✦», como antes) y los requisitos.
 // Lo que la lista antigua tenía y los oficiales no (el Quidditch, «Evolución de Trasfondos», algunos requisitos)
 // sigue saliendo: está en deseosExtra.js. Devuelve las mismas listas que usaba el código de la lista.
-import { ROM, QUIDDITCH, LEGENDARIAS, ARMA, REQUISITOS, REQUISITOS_ARCANOS } from './deseosExtra.js?v=2.1.2';
+import { ROM, QUIDDITCH, LEGENDARIAS, ARMA, REQUISITOS, REQUISITOS_ARCANOS } from './deseosExtra.js?v=2.1.3';
 
 /** Para comparar nombres: sin tildes ni mayúsculas y «Nombre | Latín» igual que «Nombre (Latín)». */
 export const claveDeseo = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()

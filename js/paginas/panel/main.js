@@ -1,23 +1,23 @@
 // @ts-check
 // Arranque del panel «Mi PJ» dentro del foro (el agente lo muestra en un iframe sin marco).
-import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=2.1.2';
-import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=2.1.2';
-import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=2.1.2';
-import { LectorFicha } from '../../lectores/LectorFicha.js?v=2.1.2';
-import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=2.1.2';
-import { crearPanelMiPj } from './MiPjPanel.js?v=2.1.2';
-import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=2.1.2';
-import { crearActividad } from '../../servicios/ActividadDelForo.js?v=2.1.2';
-import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=2.1.2';
-import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=2.1.2';
-import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=2.1.2';
-import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=2.1.2';
-import { crearTarjetaCanjes } from './CanjesPanel.js?v=2.1.2';
-import { crearRevision } from '../../inspector/Revision.js?v=2.1.2';
-import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=2.1.2';
-import { crearInspector } from '../../inspector/Inspector.js?v=2.1.2';
-import { normNombre } from '../../core/texto.js?v=2.1.2';
-import { crearColoreadorDelForo } from '../../servicios/ColoreadorDelForo.js?v=2.1.2';
+import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=2.1.3';
+import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=2.1.3';
+import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=2.1.3';
+import { LectorFicha } from '../../lectores/LectorFicha.js?v=2.1.3';
+import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=2.1.3';
+import { crearPanelMiPj } from './MiPjPanel.js?v=2.1.3';
+import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=2.1.3';
+import { crearActividad } from '../../servicios/ActividadDelForo.js?v=2.1.3';
+import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=2.1.3';
+import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=2.1.3';
+import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=2.1.3';
+import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=2.1.3';
+import { crearTarjetaCanjes } from './CanjesPanel.js?v=2.1.3';
+import { crearRevision } from '../../inspector/Revision.js?v=2.1.3';
+import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=2.1.3';
+import { crearInspector } from '../../inspector/Inspector.js?v=2.1.3';
+import { normNombre } from '../../core/texto.js?v=2.1.3';
+import { crearColoreadorDelForo } from '../../servicios/ColoreadorDelForo.js?v=2.1.3';
 
 const CACHE_MIN = 30; // como Mi PJ: si lo leído tiene más de media hora, se vuelve a leer al abrir
 const root = /** @type {HTMLElement} */ (document.getElementById('mipj'));
@@ -38,6 +38,7 @@ async function arrancar() {
     return r;
   });
   agente.atender('editor.colorear', d => coloreador.colorear(String(d.texto ?? '')));
+  agente.atender('editor.descolorear', d => coloreador.descolorear(String(d.texto ?? '')));
   const hola = await agente.hola();
   miNombre = hola.cuenta?.nombre ?? null;
   if (hola.protocolo !== PROTOCOLO) { root.textContent = 'Hay una versión nueva del script de PAM: actualizalo en Tampermonkey.'; await agente.tamano(420, 80).catch(() => {}); return; }

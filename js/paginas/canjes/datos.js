@@ -4,7 +4,7 @@
 // (data/arcanos.json, con los arcanos inventados). Devuelve lo mismo, con los mismos nombres, que las constantes que
 // tenía escritas la página antigua. Diferencias, las del Sistema reconciliado (sistema.json → reconciliado):
 // «Personal no-docente», los tipos de trasfondo en orden alfabético y «Arte/Artesanía» en las Proezas.
-import { tablaDeDatos, deshacer } from '../../inspector/Tabla.js?v=2.1.2';
+import { tablaDeDatos, deshacer } from '../../inspector/Tabla.js?v=2.1.3';
 
 const TYPE_OF = { Hechizos: 'hechizo', Pociones: 'pocion', Rituales: 'ritual', Objetos: 'objeto' };
 const TIER_OF = { 'Doméstico': 'dom', 'Básico': 'bas', 'Básica': 'bas', 'Intermedio': 'int', 'Intermedia': 'int', 'Avanzado': 'ava', 'Avanzada': 'ava', 'Legendario': 'leg' };

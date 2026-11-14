@@ -4,7 +4,7 @@
 //   · guarda con el almacén (js/core/Almacen.js), con las mismas claves cd_…;
 //   · N08: recuerda la última configuración de cada personaje de Mi Ficha.
 
-import { GROUPS, FMTS, MARKERS, parseTag, fmtTags, ruleColor, colorize } from '../../bbcode/Dialogos.js?v=2.1.2';
+import { GROUPS, FMTS, MARKERS, parseTag, fmtTags, ruleColor, colorize } from '../../bbcode/Dialogos.js?v=2.1.3';
 
 /**
  * @param {ShadowRoot} RR donde está el Coloreador (dentro del Registro de Roles)

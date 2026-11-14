@@ -1,7 +1,7 @@
 // @ts-nocheck
 // Revisor de Empleos: el empleo de ejemplo (Sanador/a) y el lector de los empleos del foro (data/empleos-foro.txt).
 // Copiado tal cual del código antiguo (fase 8c).
-import { SUELDOS } from './datos.js?v=2.1.2';
+import { SUELDOS } from './datos.js?v=2.1.3';
 export const A = (a,th)=>({k:'attr',a,th});
 export const S = (s,th)=>({k:'skill',s,th});
 export const B = (t,c,e,th)=>({k:'bg',t,c,e,th});

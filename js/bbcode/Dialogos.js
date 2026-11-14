@@ -194,7 +194,8 @@ export function descolorear(text, cfg) {
     const antes = t;
     for (const [a, c, m] of pares) {
       if (!a || !c) continue;
-      t = t.replace(new RegExp(reEsc(a) + '((?:(?!' + reEsc(a) + ')[^\\n])*?)' + reEsc(c), 'g'), (_, dentro) => (m ? m[0] + dentro + m[1] : dentro));
+      // 2.1.3: sin distinguir mayúsculas (al volver del foro puede ser #a3000d)
+      t = t.replace(new RegExp(reEsc(a) + '((?:(?!' + reEsc(a) + ')[^\\n])*?)' + reEsc(c), 'gi'), (_, dentro) => (m ? m[0] + dentro + m[1] : dentro));
     }
     if (t === antes) break;
   }

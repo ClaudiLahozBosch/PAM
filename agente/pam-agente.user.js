@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PAM · Agente (staging)
 // @namespace    https://claudilahozbosch.github.io/PAM/staging
-// @version      2.1.2
+// @version      2.1.3
 // @description  El script mínimo de PAM: lee el foro con tu sesión, publica y edita SOLO tras tu «Aceptar» y muestra el panel «Mi PJ» de PAM. Toda la lógica está en PAM.
 // @updateURL    https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
 // @downloadURL  https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
@@ -30,7 +30,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.1.2';
+  var VERSION = '2.1.3';
   var PROTOCOLO = 1;
   // Staging: el fork de pruebas (otro dominio que PAM real, así no ve los datos de los jugadores).
   var PAM = { origen: 'https://claudilahozbosch.github.io', ruta: '/PAM/' };
@@ -675,7 +675,7 @@
   // ---------------------------------------------------------------
   // Panel «Mi PJ» (página de PAM en un iframe que ocupa justo lo que ocupa el panel)
   // ---------------------------------------------------------------
-  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=2.1.2' });
+  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=2.1.3' });
   raiz.appendChild(iframe);
   // Si el panel no arranca (no pide tamaño), se enseña al menos su pastilla, para que nunca quede invisible.
   var panelVivo = false;
@@ -950,15 +950,19 @@
     var colBtn = el('button', { clase: 'mipj-col', type: 'button' }); colSombra.appendChild(colBtn);
     colHost.style.margin = '0 10px 0 4px'; // aunque el foro ponga márgenes a los span
     if (prev) { prev.insertAdjacentElement('beforebegin', colHost); } else { caja.insertAdjacentElement('afterend', colHost); }
+    // El texto de antes de colorear, para «Quitar colores». En sessionStorage y sin la ruta (2.1.3): sigue valiendo al
+    // previsualizar o al pasar de la respuesta rápida al editor completo. El foro puede devolver \r\n: se compara sin eso.
     var CLAVE_DESHACER = 'pam.colorear.deshacer';
-    function deshacerGuardado() { try { var d = JSON.parse(sessionStorage.getItem(CLAVE_DESHACER) || 'null'); return d && d.ruta === location.pathname ? d : null; } catch (e) { return null; } }
+    var igualTexto = function (a, b) { return String(a).replace(/\r\n?/g, '\n').trim() === String(b).replace(/\r\n?/g, '\n').trim(); };
+    function deshacerGuardado() { try { return JSON.parse(sessionStorage.getItem(CLAVE_DESHACER) || 'null'); } catch (e) { return null; } }
     function pintarColor(r) {
       var c = r && r.colorear, d = deshacerGuardado(), t = textoEditor(ta);
-      if (d && d.despues === t) {
+      var quitar = (d && igualTexto(d.despues, t)) || (c && c.coloreado && !c.cambiaria);
+      if (quitar) {
         colBtn.replaceChildren(el('span', { clase: 'ic', texto: '↶' }), document.createTextNode('Quitar colores'));
-        colBtn.title = 'Volver al texto de antes de colorear'; colBtn.setAttribute('data-accion', 'deshacer'); colHost.style.display = ''; return;
+        colBtn.title = 'Quitar los colores que puso «Colorear diálogos»'; colBtn.setAttribute('data-accion', 'deshacer'); colHost.style.display = ''; return;
       }
-      if (!c || !c.dialogos || c.coloreado) { colHost.style.display = 'none'; return; }
+      if (!c || !c.dialogos || !c.cambiaria) { colHost.style.display = 'none'; return; }
       colBtn.replaceChildren.apply(colBtn, [el('span', { clase: 'ic', texto: '✦' }), document.createTextNode('Colorear diálogos')].concat(c.quien ? [el('small', { texto: c.quien })] : []));
       colBtn.title = c.sinConfig ? 'Primero abrí PAM con el script instalado: así Mi PJ conoce tu Coloreador'
         : 'Colorea ' + (c.dialogos === 1 ? 'el diálogo' : 'los ' + c.dialogos + ' diálogos') + ' con tu Coloreador de PAM' + (c.quien ? ' (' + c.quien + ')' : ' (la configuración general)');
@@ -967,16 +971,29 @@
     colBtn.addEventListener('click', function () {
       var t = textoEditor(ta);
       if (colBtn.getAttribute('data-accion') === 'deshacer') {
-        var d = deshacerGuardado(); if (d) { ponerTexto(ta, d.antes); }
+        var d = deshacerGuardado();
         try { sessionStorage.removeItem(CLAVE_DESHACER); } catch (e) {}
-        chequear(true).catch(function () {}); return;
+        // el texto de antes si lo tenemos; si no (otra pestaña, o se cambió algo), PAM quita sus colores
+        if (d && igualTexto(d.despues, t)) { ponerTexto(ta, d.antes); chequear(true).catch(function () {}); return; }
+        colBtn.disabled = true;
+        canal.pedir('editor.descolorear', { texto: t }, 8000).then(function (r) {
+          colBtn.disabled = false;
+          if (r && typeof r.texto === 'string') { ponerTexto(ta, r.texto); }
+          chequear(true).catch(function () {});
+        }, function (err) { colBtn.disabled = false; console.warn('[PAM agente] quitar colores:', err.message); });
+        return;
       }
       colBtn.disabled = true;
       canal.pedir('editor.colorear', { texto: t }, 8000).then(function (r) {
         colBtn.disabled = false;
         if (!r || r.sinConfig) { colBtn.replaceChildren(el('span', { clase: 'ic', texto: '!' }), document.createTextNode('Abrí PAM una vez con el script para usar tu Coloreador')); return; }
         if (r.texto === t) { return; }
-        try { sessionStorage.setItem(CLAVE_DESHACER, JSON.stringify({ ruta: location.pathname, antes: t, despues: r.texto })); } catch (e) {}
+        // si el texto ya tenía colores (se añadió otro diálogo después de colorear), no se guarda un «antes» con colores:
+        // «Quitar colores» le pedirá a PAM que los quite todos
+        var yaTenia = res && ult === t && res.colorear && res.colorear.coloreado;
+        try {
+          if (yaTenia) { sessionStorage.removeItem(CLAVE_DESHACER); } else { sessionStorage.setItem(CLAVE_DESHACER, JSON.stringify({ antes: t, despues: r.texto })); }
+        } catch (e) {}
         ponerTexto(ta, r.texto);
         chequear(true).catch(function () {}); // 2.1.2: sin previsualizar; el «Previsualizar» del foro está al lado
       }, function (err) {

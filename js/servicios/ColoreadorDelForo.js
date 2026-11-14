@@ -2,8 +2,8 @@
 // 2.1.0: el botón «Colorear diálogos» de Mi PJ en el editor del foro. Usa la configuración del Coloreador de PAM que
 // PAM deja en el almacén del agente (`pam.coloreador`, js/pam/ColoreadorAlForo.js): la del personaje que tiene el
 // nombre de la cuenta con la que se escribe y, si no tiene, la general.
-import { colorearConConfig, descolorear } from '../bbcode/Dialogos.js?v=2.1.2';
-import { normNombre } from '../core/texto.js?v=2.1.2';
+import { colorearConConfig, descolorear } from '../bbcode/Dialogos.js?v=2.1.3';
+import { normNombre } from '../core/texto.js?v=2.1.3';
 
 /** Solo para contar diálogos cuando PAM todavía no pasó ninguna configuración. */
 const POR_DEFECTO = { tag: '#ffffff', names: [], marks: [], dlgf: {}, opts: { raya: true, guion: true, comillas: true } };
@@ -38,9 +38,22 @@ export function crearColoreadorDelForo(agente, { cuenta }) {
     async contar(texto) {
       const g = await guardado();
       const { config, quien } = g ? elegir(g) : { config: POR_DEFECTO, quien: null };
-      const limpio = descolorear(texto, config);
+      const t = String(texto).replace(/\r\n?/g, '\n'); // el foro lo devuelve con \r\n al previsualizar
+      const limpio = descolorear(t, config);
       const r = colorearConConfig(limpio, config);
-      return { dialogos: r.count, coloreado: limpio !== texto && r.code === texto, sinConfig: !g, quien };
+      // coloreado: tiene colores de esta configuración (sale «Quitar colores»); cambiaria: «Colorear» haría algo
+      // (2.1.3: si se añadió otro diálogo después de colorear, vuelve a salir «Colorear diálogos»)
+      return { dialogos: r.count, coloreado: limpio !== t, cambiaria: r.count > 0 && r.code.toLowerCase() !== t.toLowerCase(), sinConfig: !g, quien };
+    },
+    /**
+     * 2.1.3: el texto sin los colores de esta configuración («Quitar colores» cuando el agente ya no tiene el de antes,
+     * p. ej. después de previsualizar o de pasar de la respuesta rápida al editor completo).
+     * @param {string} texto
+     */
+    async descolorear(texto) {
+      const g = await guardado();
+      const { config } = g ? elegir(g) : { config: POR_DEFECTO };
+      return { texto: descolorear(String(texto).replace(/\r\n?/g, '\n'), config) };
     },
     /**
      * El texto coloreado (sin pintar dos veces lo que ya estaba coloreado con esta configuración).

@@ -35,6 +35,7 @@ const agente = new ClienteAgente({ destino: { postMessage: (d, o) => o === FORO 
 const C = crearColoreadorDelForo(agente, { cuenta: () => 'Himmel Reich Bils' });
 agente.atender('editor.revisar', async d => { const r = revisarEditor(d, null); r.colorear = await C.contar(String(d.texto)); return r; });
 agente.atender('editor.colorear', d => C.colorear(String(d.texto)));
+agente.atender('editor.descolorear', d => C.descolorear(String(d.texto)));
 
 const editor = W.document.getElementById('editor'), ta = editor.querySelector('textarea');
 const prev = editor.querySelector('input[name="preview"]');
@@ -68,10 +69,25 @@ test('al pulsarlo pone el texto coloreado (la configuración de su personaje), s
   assert.equal(btn().textContent, '✦Colorear diálogosHimmel Reich Bils');
 });
 
-test('ya coloreado (sin poder deshacer): no sale; sin nada de PAM, avisa en lugar de colorear', async () => {
+test('2.1.3: ya coloreado sin el texto de antes (tras previsualizar o en otra página): «Quitar colores» quita los colores', async () => {
   W.sessionStorage.clear();
-  await escribir('[color=#A3000D]—Hola.[/color]');
-  assert.equal(host().style.display, 'none');
+  await escribir('Narración.\r\n[color=#a3000d]—Hola.[/color]');
+  assert.equal(host().style.display, '');
+  assert.equal(btn().textContent, '↶Quitar colores');
+  btn().click(); await espera(80);
+  assert.equal(ta.value, 'Narración.\n—Hola.');
+  // coloreado y con un diálogo nuevo: «Colorear» de nuevo, y «Quitar colores» quita todos los colores
+  await escribir('Narración.');
+  await escribir('Narración.\n—Hola.'); btn().click(); await espera(80);
+  ta.value += '\n—Otro.'; await espera(1700);
+  assert.match(btn().textContent, /Colorear diálogos/);
+  btn().click(); await espera(80);
+  assert.equal(ta.value, 'Narración.\n[color=#A3000D]—Hola.[/color]\n[color=#A3000D]—Otro.[/color]');
+  await espera(1700); btn().click(); await espera(80);
+  assert.equal(ta.value, 'Narración.\n—Hola.\n—Otro.', 'sin ningún color');
+});
+
+test('sin nada de PAM, avisa en lugar de colorear', async () => {
   delete gm['pam.coloreador'];
   await espera(5100); // el panel vuelve a mirar el almacén cada 5 s
   await escribir('—Hola otra vez.');

@@ -68,8 +68,15 @@ test('Mi PJ en el foro: la configuración del personaje con el nombre de la cuen
   const C = crearColoreadorDelForo(agente, { cuenta: () => cuenta });
   let r = await C.colorear('—Hola.');
   assert.deepEqual([r.texto, r.quien, r.tramos, r.sinConfig], ['[color=#222222]—Hola.[/color]', 'Himmel Reich Bils', 1, false]);
-  assert.deepEqual(await C.contar('—Hola.\n—Adiós.'), { dialogos: 2, coloreado: false, sinConfig: false, quien: 'Himmel Reich Bils' });
-  assert.equal((await C.contar(r.texto)).coloreado, true, 'ya coloreado: el botón no sale');
+  assert.deepEqual(await C.contar('—Hola.\n—Adiós.'), { dialogos: 2, coloreado: false, cambiaria: true, sinConfig: false, quien: 'Himmel Reich Bils' });
+  assert.deepEqual([(await C.contar(r.texto)).coloreado, (await C.contar(r.texto)).cambiaria], [true, false], 'ya coloreado: sale «Quitar colores»');
+  // 2.1.3: después de previsualizar (\r\n, colores en minúsculas) sigue viéndose coloreado y se pueden quitar
+  const vuelta = 'Narración.\r\n' + r.texto.toLowerCase();
+  assert.equal((await C.contar(vuelta)).coloreado, true);
+  assert.equal((await C.descolorear('[color=#AbCdEf]x[/color] ' + r.texto.toLowerCase())).texto, '[color=#AbCdEf]x[/color] —hola.');
+  // coloreado y con un diálogo nuevo debajo: vuelve a salir «Colorear»
+  const mas = r.texto + '\n—Otro.';
+  assert.deepEqual([(await C.contar(mas)).coloreado, (await C.contar(mas)).cambiaria], [true, true]);
   assert.equal((await C.contar('Solo narración.')).dialogos, 0);
   cuenta = 'Otra Cuenta';
   r = await C.colorear('—Hola.');
@@ -78,6 +85,6 @@ test('Mi PJ en el foro: la configuración del personaje con el nombre de la cuen
 
 test('Mi PJ en el foro: sin nada de PAM, cuenta los diálogos pero no colorea', async () => {
   const C = crearColoreadorDelForo({ leerDato: async () => undefined }, { cuenta: () => 'TEST' });
-  assert.deepEqual(await C.contar('—Hola.'), { dialogos: 1, coloreado: false, sinConfig: true, quien: null });
+  assert.deepEqual(await C.contar('—Hola.'), { dialogos: 1, coloreado: false, cambiaria: true, sinConfig: true, quien: null });
   assert.deepEqual(await C.colorear('—Hola.'), { sinConfig: true, texto: '—Hola.', tramos: 0, quien: null });
 });
