@@ -2,7 +2,7 @@
 // Lee una página de tema de Foroactivo (ya convertida en Document) y saca los mensajes.
 // Sustituye a las dos copias de Mi PJ (`postsDe`) y a la del Inspector (`mensajesDe`).
 // Funciona con y sin sesión: sin sesión el foro no enlaza el perfil del autor, y entonces solo hay nombre.
-import { limpiarForo } from './LectorFicha.js?v=2.1.3';
+import { limpiarForo } from './LectorFicha.js?v=2.1.4';
 
 /**
  * @typedef {{ id: number, autorId: number|null, autor: string, fecha: string, html: string, texto: string, imgs: number }} Mensaje

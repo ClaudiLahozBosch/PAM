@@ -40,51 +40,50 @@ agente.atender('editor.descolorear', d => C.descolorear(String(d.texto)));
 const editor = W.document.getElementById('editor'), ta = editor.querySelector('textarea');
 const prev = editor.querySelector('input[name="preview"]');
 const host = () => editor.querySelector('.pam-agente-colorear');
-const btn = () => host().shadowRoot.querySelector('.mipj-col');
+const btn = () => host().shadowRoot.querySelector('[data-accion="colorear"]');
+const quitar = () => host().shadowRoot.querySelector('[data-accion="quitar"]');
+const visibles = () => host().style.display === 'none' ? [] : [...host().shadowRoot.querySelectorAll('.mipj-col')].filter(b => b.style.display !== 'none').map(b => b.getAttribute('data-accion'));
 const enviados = []; editor.addEventListener('submit', e => { enviados.push(e.submitter?.name); e.preventDefault(); });
 const escribir = async t => { ta.value = t; await espera(1700); }; // el agente mira el editor cada 1,5 s
 
-test('el botón va junto a «Previsualizar» y solo se ve si hay algún diálogo', async () => {
+test('los botones van junto a «Previsualizar», separados, y solo se ven si hay algo que hacer', async () => {
   await agente.hola();
   assert.equal(host().nextElementSibling, prev);
-  await escribir('Solo narración, sin nadie que hable.');
-  assert.equal(host().style.display, 'none');
-  await escribir('Entró en la sala.\n—Buenas noches —dijo.');
-  assert.equal(host().style.display, '');
-  assert.equal(btn().textContent, '✦Colorear diálogosHimmel Reich Bils');
-  assert.equal(btn().title, 'Colorea el diálogo con tu Coloreador de PAM (Himmel Reich Bils)');
   assert.equal(host().style.margin, '0px 10px 0px 4px', 'separado de «Previsualizar»');
+  await escribir('Solo narración, sin nadie que hable.');
+  assert.deepEqual(visibles(), []);
+  await escribir('Entró en la sala.\n—Buenas noches —dijo.');
+  assert.deepEqual(visibles(), ['colorear']);
+  assert.equal(btn().textContent, '✦Colorear diálogosHimmel Reich Bils');
+  assert.equal(btn().title, 'Colorea el diálogo sin color con tu Coloreador de PAM (Himmel Reich Bils)');
 });
 
-test('al pulsarlo pone el texto coloreado (la configuración de su personaje), sin previsualizar; «Quitar colores» lo deja como estaba', async () => {
-  const antes = ta.value;
-  btn().click(); await espera(60);
+test('«Colorear» pone el texto coloreado (la configuración de su personaje), sin previsualizar; después sale «Quitar colores»', async () => {
+  btn().click(); await espera(80);
   assert.equal(ta.value, 'Entró en la sala.\n[color=#A3000D]—Buenas noches[/color] —dijo.');
   assert.deepEqual(enviados, [], 'no envía nada: el «Previsualizar» lo pulsa el usuario si quiere');
   await espera(1700);
-  assert.equal(btn().textContent, '↶Quitar colores');
-  btn().click(); await espera(60);
-  assert.equal(ta.value, antes);
+  assert.deepEqual(visibles(), ['quitar']);
+  quitar().click(); await espera(80);
+  assert.equal(ta.value, 'Entró en la sala.\n—Buenas noches —dijo.');
   await espera(1700);
-  assert.equal(btn().textContent, '✦Colorear diálogosHimmel Reich Bils');
+  assert.deepEqual(visibles(), ['colorear']);
 });
 
-test('2.1.3: ya coloreado sin el texto de antes (tras previsualizar o en otra página): «Quitar colores» quita los colores', async () => {
-  W.sessionStorage.clear();
+test('2.1.4: con colores puestos a mano salen los dos; «Colorear» los respeta y «Quitar colores» los quita todos', async () => {
+  await escribir('[color=#336699]—Soy otro personaje.[/color]\n—Y yo hablo sin color.');
+  assert.deepEqual(visibles(), ['colorear', 'quitar']);
+  btn().click(); await espera(80);
+  assert.equal(ta.value, '[color=#336699]—Soy otro personaje.[/color]\n[color=#A3000D]—Y yo hablo sin color.[/color]');
+  await espera(1700);
+  assert.deepEqual(visibles(), ['quitar'], 'ya no queda ningún diálogo sin color');
+  quitar().click(); await espera(80);
+  assert.equal(ta.value, '—Soy otro personaje.\n—Y yo hablo sin color.');
+  // después de previsualizar, el foro lo devuelve con \r\n y el color en minúsculas: «Quitar colores» igual
   await escribir('Narración.\r\n[color=#a3000d]—Hola.[/color]');
-  assert.equal(host().style.display, '');
-  assert.equal(btn().textContent, '↶Quitar colores');
-  btn().click(); await espera(80);
+  assert.deepEqual(visibles(), ['quitar']);
+  quitar().click(); await espera(80);
   assert.equal(ta.value, 'Narración.\n—Hola.');
-  // coloreado y con un diálogo nuevo: «Colorear» de nuevo, y «Quitar colores» quita todos los colores
-  await escribir('Narración.');
-  await escribir('Narración.\n—Hola.'); btn().click(); await espera(80);
-  ta.value += '\n—Otro.'; await espera(1700);
-  assert.match(btn().textContent, /Colorear diálogos/);
-  btn().click(); await espera(80);
-  assert.equal(ta.value, 'Narración.\n[color=#A3000D]—Hola.[/color]\n[color=#A3000D]—Otro.[/color]');
-  await espera(1700); btn().click(); await espera(80);
-  assert.equal(ta.value, 'Narración.\n—Hola.\n—Otro.', 'sin ningún color');
 });
 
 test('sin nada de PAM, avisa en lugar de colorear', async () => {

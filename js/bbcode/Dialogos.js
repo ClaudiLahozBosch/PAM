@@ -118,7 +118,7 @@ function protegerEtiquetas(text) {
     if (etq.length > ETQ1 - ETQ0) return m;
     etq.push(m); return String.fromCharCode(ETQ0 + etq.length - 1);
   });
-  return { t, volver: s => etq.length ? s.replace(/[-]/g, ch => etq[ch.charCodeAt(0) - ETQ0] ?? ch) : s };
+  return { t, etq, volver: s => etq.length ? s.replace(/[-]/g, ch => etq[ch.charCodeAt(0) - ETQ0] ?? ch) : s };
 }
 
 /**
@@ -135,13 +135,20 @@ export function colorize(text, tg, o, rules, mrules) {
     const body = x.r.strip ? g[k] : x.m[0] + g[k] + x.m[1];
     slots.push({ body, c: ruleColor(x.r), f: x.r.f }); return String.fromCharCode(PH + slots.length - 1);
   });
+  // 2.1.4: lo que ya tiene un color puesto a mano ([color=…]…[/color]) se respeta: ni diálogo ni nombres por encima
+  let enColor = 0;
   const lines = text.replace(/\r\n?/g, '\n').split('\n').map(line => {
     const marks = markLine(line, o);
     // agrupar en tramos (una etiqueta siempre corta el tramo)
     const runs = [];
     for (const m of marks) { const last = runs[runs.length - 1]; if (last && !m.e && !last.e && last.c === m.c) last.t += m.t; else runs.push({ t: m.t, c: m.c, e: m.e }); }
     return runs.map(r => {
-      if (r.e) return r.t;
+      if (r.e) {
+        const tagTxt = P.etq[r.t.charCodeAt(0) - ETQ0] || '';
+        if (/^\[color=/i.test(tagTxt)) enColor++; else if (/^\[\/color\]/i.test(tagTxt) && enColor > 0) enColor--;
+        return r.t;
+      }
+      if (enColor) return r.t;
       if (!r.c || !r.t.trim()) return paintNames(r.t, nr, cnt);
       // 2.1.0: la puntuación que sigue al cierre de un inciso («—dijo—. ¿Vamos?») es del narrador: queda sin color
       const lead = r.t.match(/^[\s.,;:]*/)[0], trail = r.t.match(/\s*$/)[0], dentro = r.t.slice(lead.length, r.t.length - trail.length);
@@ -200,4 +207,9 @@ export function descolorear(text, cfg) {
     if (t === antes) break;
   }
   return t;
+}
+
+/** 2.1.4: «Quitar colores»: lo que puso el Coloreador (con sus formatos) y además cualquier otro [color], sea de donde sea. */
+export function quitarColores(text, cfg) {
+  return descolorear(text, cfg).replace(/\[color=[^\]\n]*\]|\[\/color\]/gi, '');
 }

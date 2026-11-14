@@ -3,7 +3,7 @@
 // tests/caracterizacion/registro.test.mjs («8b: el Coloreador colorea igual»).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { colorearConConfig, descolorear } from '../../js/bbcode/Dialogos.js';
+import { colorearConConfig, descolorear, quitarColores } from '../../js/bbcode/Dialogos.js';
 import { crearColoreadorDelForo } from '../../js/servicios/ColoreadorDelForo.js';
 
 const OPTS = { raya: true, guion: true, comillas: true, fix: false, center: false };
@@ -61,6 +61,18 @@ test('colorear dos veces da lo mismo que una (se quita lo de antes)', () => {
   assert.equal(descolorear('[color=red]rojo[/color] y [color=#A3000D]—Hola[/color]', CFG), '[color=red]rojo[/color] y —Hola');
 });
 
+test('2.1.4: lo coloreado a mano se respeta; «Quitar colores» quita todos los colores', () => {
+  // un diálogo con su propio color (otro personaje): ni el diálogo ni los nombres se pintan por encima
+  assert.equal(col('[color=#336699]—Soy Mortimer.[/color]\n—Y yo no.'), '[color=#336699]—Soy Mortimer.[/color]\n[color=#A3000D]—Y yo no.[/color]');
+  assert.equal(col('[color=#336699]—Un diálogo\nen dos líneas.[/color]\n—Hola.'), '[color=#336699]—Un diálogo\nen dos líneas.[/color]\n[color=#A3000D]—Hola.[/color]');
+  // quitarColores: los del Coloreador (con su formato) y los de mano
+  const cfgI = { ...CFG, dlgf: { i: true } };
+  const t = col('—Hola, Mortimer.\n[color=red]rojo[/color]', cfgI);
+  assert.equal(t, '[color=#A3000D][i]—Hola, [color=#005C1F][b]Mortimer[/b][/color].[/i][/color]\n[color=red]rojo[/color]');
+  assert.equal(quitarColores(t, cfgI), '—Hola, Mortimer.\nrojo');
+  assert.equal(quitarColores('[COLOR=#fff]a[/COLOR] [b]b[/b]', CFG), 'a [b]b[/b]', 'los demás formatos, no');
+});
+
 test('Mi PJ en el foro: la configuración del personaje con el nombre de la cuenta; si no, la general', async () => {
   const guardado = { v: 1, general: { ...CFG, tag: '#111111' }, pjs: [{ nombre: 'Himmel Reich Bils.', config: { ...CFG, tag: '#222222' } }] };
   const agente = { leerDato: async () => guardado };
@@ -68,15 +80,16 @@ test('Mi PJ en el foro: la configuración del personaje con el nombre de la cuen
   const C = crearColoreadorDelForo(agente, { cuenta: () => cuenta });
   let r = await C.colorear('—Hola.');
   assert.deepEqual([r.texto, r.quien, r.tramos, r.sinConfig], ['[color=#222222]—Hola.[/color]', 'Himmel Reich Bils', 1, false]);
-  assert.deepEqual(await C.contar('—Hola.\n—Adiós.'), { dialogos: 2, coloreado: false, cambiaria: true, sinConfig: false, quien: 'Himmel Reich Bils' });
-  assert.deepEqual([(await C.contar(r.texto)).coloreado, (await C.contar(r.texto)).cambiaria], [true, false], 'ya coloreado: sale «Quitar colores»');
-  // 2.1.3: después de previsualizar (\r\n, colores en minúsculas) sigue viéndose coloreado y se pueden quitar
-  const vuelta = 'Narración.\r\n' + r.texto.toLowerCase();
-  assert.equal((await C.contar(vuelta)).coloreado, true);
-  assert.equal((await C.descolorear('[color=#AbCdEf]x[/color] ' + r.texto.toLowerCase())).texto, '[color=#AbCdEf]x[/color] —hola.');
-  // coloreado y con un diálogo nuevo debajo: vuelve a salir «Colorear»
-  const mas = r.texto + '\n—Otro.';
-  assert.deepEqual([(await C.contar(mas)).coloreado, (await C.contar(mas)).cambiaria], [true, true]);
+  assert.deepEqual(await C.contar('—Hola.\n—Adiós.'), { dialogos: 2, colores: false, cambiaria: true, sinConfig: false, quien: 'Himmel Reich Bils' });
+  const ya = await C.contar(r.texto);
+  assert.deepEqual([ya.colores, ya.cambiaria], [true, false], 'ya coloreado: solo «Quitar colores»');
+  // después de previsualizar (\r\n, colores en minúsculas) se ve igual
+  const vuelta = await C.contar('Narración.\r\n' + r.texto.toLowerCase());
+  assert.deepEqual([vuelta.colores, vuelta.cambiaria], [true, false]);
+  assert.equal((await C.descolorear('[color=#AbCdEf]x[/color] ' + r.texto.toLowerCase())).texto, 'x —hola.');
+  // coloreado y con un diálogo nuevo debajo: salen los dos
+  const mas = await C.contar(r.texto + '\n—Otro.');
+  assert.deepEqual([mas.colores, mas.cambiaria], [true, true]);
   assert.equal((await C.contar('Solo narración.')).dialogos, 0);
   cuenta = 'Otra Cuenta';
   r = await C.colorear('—Hola.');
@@ -85,6 +98,6 @@ test('Mi PJ en el foro: la configuración del personaje con el nombre de la cuen
 
 test('Mi PJ en el foro: sin nada de PAM, cuenta los diálogos pero no colorea', async () => {
   const C = crearColoreadorDelForo({ leerDato: async () => undefined }, { cuenta: () => 'TEST' });
-  assert.deepEqual(await C.contar('—Hola.'), { dialogos: 1, coloreado: false, cambiaria: true, sinConfig: true, quien: null });
+  assert.deepEqual(await C.contar('—Hola.'), { dialogos: 1, colores: false, cambiaria: true, sinConfig: true, quien: null });
   assert.deepEqual(await C.colorear('—Hola.'), { sinConfig: true, texto: '—Hola.', tramos: 0, quien: null });
 });

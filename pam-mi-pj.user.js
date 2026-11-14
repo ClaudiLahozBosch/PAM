@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PAM · Mi PJ (HP Avada Kedavra)
 // @namespace    https://jesleytherabbit-prog.github.io/PAM/
-// @version      2.1.3
+// @version      2.1.4
 // @description  El script mínimo de PAM: lee el foro con tu sesión, publica y edita SOLO tras tu «Aceptar» y muestra el panel «Mi PJ» de PAM. Toda la lógica está en PAM.
 // @author       Hana Park
 // @match        https://hp-avada-kedavra.foroactivo.com/*
@@ -30,7 +30,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.1.3';
+  var VERSION = '2.1.4';
   var PROTOCOLO = 1;
   var PAM = { origen: 'https://jesleytherabbit-prog.github.io', ruta: '/PAM/' };
   var FOROS = ['hp-avada-kedavra.foroactivo.com'];
@@ -390,6 +390,7 @@
     '.mipj-col .ic{font-family:var(--m-serif);color:var(--m-gold-bright);font-size:14px;line-height:1}',
     '.mipj-col small{color:var(--m-parchment-dim);font-weight:500;font-size:10.5px}',
     '.mipj-col[disabled]{opacity:.6;cursor:wait}',
+    '.mipj-cols{display:inline-flex;gap:6px;align-items:center}',
     ':host([data-skin="pixel"]) .mipj-col{border-radius:0}'
   ].join('\n');
   // La barra de arriba de los mensajes de un tema de oficial («🎓 Este oficial»), la de Mi PJ
@@ -674,7 +675,7 @@
   // ---------------------------------------------------------------
   // Panel «Mi PJ» (página de PAM en un iframe que ocupa justo lo que ocupa el panel)
   // ---------------------------------------------------------------
-  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=2.1.3' });
+  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=2.1.4' });
   raiz.appendChild(iframe);
   // Si el panel no arranca (no pide tamaño), se enseña al menos su pastilla, para que nunca quede invisible.
   var panelVivo = false;
@@ -939,6 +940,7 @@
     (form.querySelector('.sceditor-container') || ta).insertAdjacentElement('afterend', caja);
 
     // 2.1.0: «Colorear diálogos». Va junto al «Previsualizar» del foro; si no lo hay, debajo del editor.
+    // 2.1.4: con «Quitar colores» al lado cuando el texto tiene algún [color] (los quita todos, sean de donde sean).
     var prev = form.querySelector('input[name="preview"], button[name="preview"]');
     var colHost = document.createElement('span'); colHost.className = 'pam-agente-colorear'; colHost.style.display = 'none';
     var colSombra = colHost.attachShadow({ mode: 'open' });
@@ -946,59 +948,36 @@
     var colTema = document.createElement('style'); colTema.textContent = temaActual.css; colSombra.appendChild(colTema);
     colHost.setAttribute('data-skin', temaActual.skin);
     estilosTema.push({ estilo: colTema, host: colHost });
-    var colBtn = el('button', { clase: 'mipj-col', type: 'button' }); colSombra.appendChild(colBtn);
+    var colBtn = el('button', { clase: 'mipj-col', type: 'button', 'data-accion': 'colorear' });
+    var quitarBtn = el('button', { clase: 'mipj-col', type: 'button', 'data-accion': 'quitar', title: 'Quitar todos los colores del texto, los del Coloreador y los puestos a mano' },
+      [el('span', { clase: 'ic', texto: '↶' }), document.createTextNode('Quitar colores')]);
+    colSombra.appendChild(el('span', { clase: 'mipj-cols' }, [colBtn, quitarBtn]));
     colHost.style.margin = '0 10px 0 4px'; // aunque el foro ponga márgenes a los span
     if (prev) { prev.insertAdjacentElement('beforebegin', colHost); } else { caja.insertAdjacentElement('afterend', colHost); }
-    // El texto de antes de colorear, para «Quitar colores». En sessionStorage y sin la ruta (2.1.3): sigue valiendo al
-    // previsualizar o al pasar de la respuesta rápida al editor completo. El foro puede devolver \r\n: se compara sin eso.
-    var CLAVE_DESHACER = 'pam.colorear.deshacer';
-    var igualTexto = function (a, b) { return String(a).replace(/\r\n?/g, '\n').trim() === String(b).replace(/\r\n?/g, '\n').trim(); };
-    function deshacerGuardado() { try { return JSON.parse(sessionStorage.getItem(CLAVE_DESHACER) || 'null'); } catch (e) { return null; } }
     function pintarColor(r) {
-      var c = r && r.colorear, d = deshacerGuardado(), t = textoEditor(ta);
-      var quitar = (d && igualTexto(d.despues, t)) || (c && c.coloreado && !c.cambiaria);
-      if (quitar) {
-        colBtn.replaceChildren(el('span', { clase: 'ic', texto: '↶' }), document.createTextNode('Quitar colores'));
-        colBtn.title = 'Quitar los colores que puso «Colorear diálogos»'; colBtn.setAttribute('data-accion', 'deshacer'); colHost.style.display = ''; return;
-      }
-      if (!c || !c.dialogos || !c.cambiaria) { colHost.style.display = 'none'; return; }
+      var c = r && r.colorear;
+      var verColorear = !!(c && c.dialogos && c.cambiaria), verQuitar = !!(c && c.colores);
+      colBtn.style.display = verColorear ? '' : 'none'; quitarBtn.style.display = verQuitar ? '' : 'none';
+      colHost.style.display = verColorear || verQuitar ? '' : 'none';
+      if (!verColorear) { return; }
       colBtn.replaceChildren.apply(colBtn, [el('span', { clase: 'ic', texto: '✦' }), document.createTextNode('Colorear diálogos')].concat(c.quien ? [el('small', { texto: c.quien })] : []));
       colBtn.title = c.sinConfig ? 'Primero abrí PAM con el script instalado: así Mi PJ conoce tu Coloreador'
-        : 'Colorea ' + (c.dialogos === 1 ? 'el diálogo' : 'los ' + c.dialogos + ' diálogos') + ' con tu Coloreador de PAM' + (c.quien ? ' (' + c.quien + ')' : ' (la configuración general)');
-      colBtn.setAttribute('data-accion', 'colorear'); colHost.style.display = '';
+        : 'Colorea ' + (c.dialogos === 1 ? 'el diálogo' : 'los ' + c.dialogos + ' diálogos') + ' sin color con tu Coloreador de PAM' + (c.quien ? ' (' + c.quien + ')' : ' (la configuración general)');
     }
-    colBtn.addEventListener('click', function () {
+    function pedirTexto(boton, tipo) {
       var t = textoEditor(ta);
-      if (colBtn.getAttribute('data-accion') === 'deshacer') {
-        var d = deshacerGuardado();
-        try { sessionStorage.removeItem(CLAVE_DESHACER); } catch (e) {}
-        // el texto de antes si lo tenemos; si no (otra pestaña, o se cambió algo), PAM quita sus colores
-        if (d && igualTexto(d.despues, t)) { ponerTexto(ta, d.antes); chequear(true).catch(function () {}); return; }
-        colBtn.disabled = true;
-        canal.pedir('editor.descolorear', { texto: t }, 8000).then(function (r) {
-          colBtn.disabled = false;
-          if (r && typeof r.texto === 'string') { ponerTexto(ta, r.texto); }
-          chequear(true).catch(function () {});
-        }, function (err) { colBtn.disabled = false; console.warn('[PAM agente] quitar colores:', err.message); });
-        return;
-      }
-      colBtn.disabled = true;
-      canal.pedir('editor.colorear', { texto: t }, 8000).then(function (r) {
-        colBtn.disabled = false;
-        if (!r || r.sinConfig) { colBtn.replaceChildren(el('span', { clase: 'ic', texto: '!' }), document.createTextNode('Abrí PAM una vez con el script para usar tu Coloreador')); return; }
-        if (r.texto === t) { return; }
-        // si el texto ya tenía colores (se añadió otro diálogo después de colorear), no se guarda un «antes» con colores:
-        // «Quitar colores» le pedirá a PAM que los quite todos
-        var yaTenia = res && ult === t && res.colorear && res.colorear.coloreado;
-        try {
-          if (yaTenia) { sessionStorage.removeItem(CLAVE_DESHACER); } else { sessionStorage.setItem(CLAVE_DESHACER, JSON.stringify({ antes: t, despues: r.texto })); }
-        } catch (e) {}
-        ponerTexto(ta, r.texto);
-        chequear(true).catch(function () {}); // 2.1.2: sin previsualizar; el «Previsualizar» del foro está al lado
+      boton.disabled = true;
+      canal.pedir(tipo, { texto: t }, 8000).then(function (r) {
+        boton.disabled = false;
+        if (!r || r.sinConfig) { boton.replaceChildren(el('span', { clase: 'ic', texto: '!' }), document.createTextNode('Abrí PAM una vez con el script para usar tu Coloreador')); return; }
+        if (typeof r.texto === 'string' && r.texto !== t) { ponerTexto(ta, r.texto); }
+        chequear(true).catch(function () {}); // sin previsualizar (2.1.2): el «Previsualizar» del foro está al lado
       }, function (err) {
-        colBtn.disabled = false; console.warn('[PAM agente] colorear:', err.message);
+        boton.disabled = false; console.warn('[PAM agente] ' + tipo + ':', err.message);
       });
-    });
+    }
+    colBtn.addEventListener('click', function () { pedirTexto(colBtn, 'editor.colorear'); });
+    quitarBtn.addEventListener('click', function () { pedirTexto(quitarBtn, 'editor.descolorear'); });
 
     var ult = null, res = null, enCurso = false; // res: lo que PAM contestó para el texto «ult»
     function pintarBarra(r) {

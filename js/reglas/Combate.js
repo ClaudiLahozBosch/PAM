@@ -2,7 +2,7 @@
 // Stats de combate y puntos de pociones/rituales (Sistema Avadense + Calculadora de Stats de Combate).
 // Es `combate()` y `puntos()` del PAM antiguo sobre la Ficha nueva: mismos números y mismos textos
 // (el editor los escribe en la ficha del foro).
-import { norm, num } from '../core/texto.js?v=2.1.3';
+import { norm, num } from '../core/texto.js?v=2.1.4';
 
 const BONUS = [0, 1, 2, 4, 7, 9];
 const LV_IDX = v => Math.min(4, num(v)); // 1 Novato … 4 Maestro (Herbivicus, etc.)
