@@ -7,10 +7,10 @@
 //   · los enlaces abren la página del foro (<base target="_top"> en panel.html).
 // Las tarjetas que aún no están en PAM (canjes) lo dicen en vez de «Tocá Actualizar».
 // Arreglos: R09 (los oficiales cerrados ya no salen en curso) y R10 (✕ para ocultar un oficial hasta volver a escribir en él).
-import { aFecha } from '../../lectores/FechaForo.js?v=2.2.2';
-import { estadoSueldo } from '../../reglas/Sueldo.js?v=2.2.2';
-import { grageasOf } from '../../reglas/Oficiales.js?v=2.2.2';
-import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=2.2.2';
+import { aFecha } from '../../lectores/FechaForo.js?v=2.2.3';
+import { estadoSueldo } from '../../reglas/Sueldo.js?v=2.2.3';
+import { grageasOf } from '../../reglas/Oficiales.js?v=2.2.3';
+import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=2.2.3';
 
 const TEMA_AVADENSE = { skin: 'avadense', ink: '#171a2b', panel: '#1e2236', 'panel-2': '#262a42', parchment: '#F1EADF', 'parchment-dim': '#a7a1b6', gold: '#B49768',
   'gold-bright': '#d6bd8f', 'arcane-bright': '#cf94a3', good: '#93b8a0', bad: '#d98377', 'line-strong': 'rgba(241,234,223,.16)', 'accent-ink': '#1b1e30',
@@ -173,7 +173,7 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
       if (ver('panel', 'canjes')) h += canjes ? '<div class="card" id="mipj-canjes"></div>' /* la tarjeta la pinta CanjesPanel */
         : `<div class="card" id="mipj-canjes"><div class="ct">⚖ Canjes</div><div class="dim">Para pedir un canje: en PAM armá el carrito y tocá «Preparar el canje» en la pastilla Mi PJ.</div></div>`;
       // el modo Inspector (antes, un script aparte): solo para los Inspectores de Canjes y los desarrolladores
-      if (inspector && inspector.disponible()) {
+      if (inspector && inspector.disponible() && ver('foro', 'inspector')) { // 2.2.3: apagado en «Configurar Mi PJ», ni la tarjeta
         const on = inspector.activo();
         h += `<div class="card"><div class="ct">🔍 Inspector de Canjes</div><div class="dim">${on ? 'Activo: en el Registro de Canjes, cada pedido tiene su barra «Revisar canje».' : 'Revisa los pedidos del Registro de Canjes con la Tabla de PAM, la ficha y la bóveda. Solo lee: no publica nada.'}</div>
         <div class="row" style="margin-top:6px"><button class="b${on ? '' : ' pri'}" data-a="inspector">${on ? 'Desactivar el modo Inspector' : 'Activar el modo Inspector'}</button></div></div>`;

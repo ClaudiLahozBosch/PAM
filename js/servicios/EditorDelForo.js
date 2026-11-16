@@ -4,16 +4,18 @@
 // apagar en «Configurar Mi PJ» (`on(grupo, id)`, js/reglas/ConfigMiPj.js):
 //   · sin revisión de la bóveda: `formulario: false` y sin avisos (el agente no pinta la barra ni para el envío);
 //   · sin un botón: el agente no lo enseña (cambiaria / colores en false) y, si igual llega el pedido, el texto no cambia.
-import { revisarEditor } from '../reglas/RevisorBoveda.js?v=2.2.2';
+import { revisarEditor } from '../reglas/RevisorBoveda.js?v=2.2.3';
 
 /**
  * @param {{ atender: (tipo: string, fn: (d: any) => any) => any }} agente
  * @param {{ coloreador: { contar: (t: string) => Promise<any>, colorear: (t: string) => any, descolorear: (t: string) => any },
- *   boveda: () => any, on?: (g: 'foro', id: string) => boolean, alPedir?: () => void }} op
+ *   boveda: () => any, on?: (g: 'foro', id: string) => boolean, alPedir?: () => any }} op
  */
 export function atenderEditor(agente, { coloreador, boveda, on = () => true, alPedir = () => {} }) {
   agente.atender('editor.revisar', async d => {
-    alPedir();
+    // 2.2.3: espera a tener la configuración (como mucho 0,6 s; el agente espera 3 s): si no, al abrir el foro la
+    // primera respuesta podía salir con todo encendido, y un agente anterior a la 2.2.2 ya no volvía a preguntar
+    await Promise.race([Promise.resolve(alPedir()).catch(() => {}), new Promise(r => setTimeout(r, 600))]);
     const texto = String(d.texto ?? '');
     const r = revisarEditor({ texto, ruta: String(d.ruta ?? '') }, boveda());
     if (!on('foro', 'boveda')) { r.formulario = false; r.avisos = []; }
