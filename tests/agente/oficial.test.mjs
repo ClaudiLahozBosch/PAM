@@ -100,5 +100,15 @@ test('cerrar la barra se recuerda (avisa al panel)', async () => {
 test('si no se puede leer el tema, lo dice como Mi PJ', async () => {
   await agente.oficial({ estado: 'error', abierta: true, error: 'HTTP 500' });
   assert.equal(barra().querySelector('.of-bd').innerHTML, '<div class="dim">No pude leer el tema: HTTP 500</div>');
+});
+
+test('2.2.2: apagado en «Configurar Mi PJ», la barra se quita; al volver a encenderla, sale de nuevo', async () => {
+  assert.ok(caja());
+  assert.deepEqual(await agente.oficial({ estado: 'quitar', abierta: true }), { pintada: false });
+  assert.equal(caja(), null);
+  assert.deepEqual(await agente.oficial({ estado: 'quitar', abierta: true }), { pintada: false }, 'dos veces no rompe nada');
+  await agente.oficial({ estado: 'leyendo', abierta: true });
+  assert.ok(caja(), 'vuelve a salir');
+  assert.match(barra().innerHTML, /leyendo…/);
   W.close();
 });

@@ -68,6 +68,18 @@ test('apagar cada cosa en «Configurar Mi PJ»: el agente deja de enseñarla', a
   assert.deepEqual(await h['editor.descolorear']({ texto: '[color=#1]x[/color]' }), { texto: '[color=#1]x[/color]' });
 });
 
+test('2.2.2: sin escribir nada, lo que se apaga o se enciende en PAM se ve en el editor en unos segundos', async () => {
+  await poner({});
+  await escribir(TEXTO + '\n');
+  assert.deepEqual(botones(), ['colorear', 'quitar']);
+  await poner({ foro: { colorear: false } });
+  await espera(1700); // el agente vuelve a preguntar cada 1,5 s aunque el texto sea el mismo
+  assert.deepEqual(botones(), ['quitar']);
+  await poner({});
+  await espera(1700);
+  assert.deepEqual(botones(), ['colorear', 'quitar']);
+});
+
 test('«Desactivar todas las superposiciones»: nada en el editor y el envío no se para', async () => {
   await poner({ pausa: true });
   await escribir(TEXTO + '   ');
