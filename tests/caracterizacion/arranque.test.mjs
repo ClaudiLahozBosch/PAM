@@ -25,7 +25,7 @@ test('arrancar desde los archivos deja el mismo PAM que cuando todo estaba en in
   for (const w of [a.w, b.w]) { abrirTodas(w); w.pamTabla.renderAll(); abrirTodas(w); w.showSection('compendio'); w.showSection('home'); }
   try {
     assert.equal(a.ok, true);
-    assert.deepEqual(a.importados, ['../paginas/canjes/main.js', '../paginas/revisor/main.js', '../paginas/registro/main.js', '../paginas/inicio/portada.js', '../paginas/inicio/temas.js', '../paginas/inicio/foroAntiguo.js', '../nube/main.js', './main.js'], 'las páginas en su orden y después lo nuevo');
+    assert.deepEqual(a.importados, ['../paginas/canjes/main.js', '../paginas/revisor/main.js', '../paginas/registro/main.js', '../paginas/inicio/portada.js', '../paginas/inicio/temas.js', '../paginas/inicio/foroAntiguo.js', '../paginas/mipj/main.js', '../nube/main.js', './main.js'], 'las páginas en su orden (y las nuevas al final) y después lo nuevo');
     for (const g of GLOBALES) assert.equal(typeof a.w[g], typeof b.w[g], g);
     assert.notEqual(typeof a.w.pamFicha, 'undefined');
     igual(pagina(a.w), pagina(b.w));
@@ -64,7 +64,8 @@ test('si no se puede traer el Registro de Roles, PAM lo dice arriba', async () =
 });
 
 test('el orden y los datos son los de index.html antes de la fase 8a', () => {
-  assert.deepEqual(PAGINAS, ['tabla-canjes', 'revisor', 'registro', 'portada', 'temas', 'foro-antiguo']);
+  // y al final las páginas nuevas, que no estaban: «Configurar Mi PJ» (2.2.0)
+  assert.deepEqual(PAGINAS, ['tabla-canjes', 'revisor', 'registro', 'portada', 'temas', 'foro-antiguo', 'configurar-mipj']);
   assert.deepEqual(Object.keys(MODULOS), PAGINAS, 'desde la 8e todas son módulos');
   assert.deepEqual(DATOS.map(d => d.src), ['data/empleos-foro.txt', 'data/arcanos.json']);
   const idx = readFileSync(path.join(RAIZ, 'index.html'), 'utf8');
@@ -78,7 +79,8 @@ test('F17: los estilos de PAM, un archivo por página, son los de antes y en el 
   const archivos = [...idx.matchAll(/<link rel="stylesheet" href="(css\/[\w-]+\.css)\?v=[^"]*">/g)].map(m => m[1]);
   assert.deepEqual(archivos, JSON.parse(readFileSync(path.join(RAIZ, 'scripts/css-pam.json'), 'utf8')).map(f => 'css/' + f));
   const sinCabecera = f => readFileSync(path.join(RAIZ, f), 'utf8').replace(/^\/\* PAM · .*\*\/\n/, '');
-  const juntos = archivos.map(sinCabecera).join('');
+  // css/configurar.css es de una página nueva (2.2.0, «Configurar Mi PJ»): no estaba en el pam.css de antes
+  const juntos = archivos.filter(f => f !== 'css/configurar.css').map(sinCabecera).join('');
   const antes = readFileSync(path.join(RAIZ, 'tests/legado/pam.css'), 'utf8');
   // lo único que cambia de sitio: las dos reglas de .pk-bar pasan delante de los efectos (no se tocan entre sí)
   const pkBar = antes.split('\n').filter(l => l.startsWith('.pk-bar')).join('\n') + '\n';

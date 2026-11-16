@@ -18,6 +18,8 @@ export const LEGADO = {
   registro: 'tests/legado/paginas/registro-roles.js', portada: 'tests/legado/paginas/portada.js',
   temas: 'tests/legado/paginas/temas.js', 'foro-antiguo': 'tests/legado/paginas/foro-antiguo.js'
 };
+/** Las páginas nuevas, que el PAM antiguo no tenía (no hay nada con qué compararlas): «Configurar Mi PJ» (2.2.0). */
+export const NUEVAS = ['configurar-mipj'];
 const codigoPagina = p => { if (!LEGADO[p] || !MODULOS[p]) throw new Error('página sin copia antigua: ' + p); return leer(LEGADO[p]); };
 
 let cache = null;
@@ -33,7 +35,7 @@ export function pamEntero() {
   const v = arr[1] || '';
   html = html.replace(css[0], () => `<style>\n${leer('tests/legado/pam.css')}</style>\n`);
   const cuerpo = DATOS.map(d => `<script${d.tipo === 'text/plain' ? ' type="text/plain"' : ''} id="${d.id}"${d.tipo === 'text/plain' ? '' : ` type="${d.tipo}"`}>${leer(d.src)}</script>\n`).join('')
-    + PAGINAS.map(p => `<script>\n${codigoPagina(p)}</script>\n`).join('')
+    + PAGINAS.filter(p => !NUEVAS.includes(p)).map(p => `<script>\n${codigoPagina(p)}</script>\n`).join('')
     + `<script type="module" src="js/nube/main.js${v}"></script>\n<script type="module" src="js/pam/main.js${v}"></script>\n`;
   html = html.replace(arr[0], () => cuerpo);
   return (cache = html);

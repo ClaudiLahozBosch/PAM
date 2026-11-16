@@ -7,10 +7,10 @@
 //   · los enlaces abren la página del foro (<base target="_top"> en panel.html).
 // Las tarjetas que aún no están en PAM (canjes) lo dicen en vez de «Tocá Actualizar».
 // Arreglos: R09 (los oficiales cerrados ya no salen en curso) y R10 (✕ para ocultar un oficial hasta volver a escribir en él).
-import { aFecha } from '../../lectores/FechaForo.js?v=2.1.4';
-import { estadoSueldo } from '../../reglas/Sueldo.js?v=2.1.4';
-import { grageasOf } from '../../reglas/Oficiales.js?v=2.1.4';
-import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=2.1.4';
+import { aFecha } from '../../lectores/FechaForo.js?v=2.2.0';
+import { estadoSueldo } from '../../reglas/Sueldo.js?v=2.2.0';
+import { grageasOf } from '../../reglas/Oficiales.js?v=2.2.0';
+import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=2.2.0';
 
 const TEMA_AVADENSE = { skin: 'avadense', ink: '#171a2b', panel: '#1e2236', 'panel-2': '#262a42', parchment: '#F1EADF', 'parchment-dim': '#a7a1b6', gold: '#B49768',
   'gold-bright': '#d6bd8f', 'arcane-bright': '#cf94a3', good: '#93b8a0', bad: '#d98377', 'line-strong': 'rgba(241,234,223,.16)', 'accent-ink': '#1b1e30',
@@ -74,7 +74,9 @@ function bgsDe(R) {
  *   ventana: { ancho: number, alto: number }, pamUrl: string, cuenta?: { id: number, nombre: string } | null, ahora?: () => number,
  *   biblioteca?: { escanear: (op: any, log: (m: string) => void) => Promise<any>, origen: string, guardarEnAgente?: (k: string, v: any) => Promise<any> } | null }} dep
  */
-export function crearPanelMiPj({ root, documento, guardado = null, cargar, agente = null, ventana, pamUrl, cuenta = null, biblioteca = null, foroHost = '', canjes = null, inspector = null }) {
+export function crearPanelMiPj({ root, documento, guardado = null, cargar, agente = null, ventana, pamUrl, cuenta = null, biblioteca = null, foroHost = '', canjes = null, inspector = null, config = () => null }) {
+  // 2.2.0: «Configurar Mi PJ» en PAM: qué tarjetas y qué marcas de la pastilla se ven (sin configuración, todas)
+  const ver = (g, id) => { const c = config(); return !c || !c[g] || c[g][id] !== false; };
   const gv = (k, d) => { try { const v = guardado?.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
   const sv = (k, v) => { try { guardado?.setItem(k, JSON.stringify(v)); } catch (e) { /* sin espacio */ } };
   const YO = (cuenta && cuenta.nombre) || '', UID = (cuenta && cuenta.id) || 0;
@@ -125,7 +127,7 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
     const B = datos && datos.boveda, F = datos && datos.ficha, R = rolesVisibles();
     const pendF = F && F.estado === 'pendiente';
     if (!ui.abierto) {
-      root.innerHTML = `<div class="pill" data-a="abrir" title="Abrir Mi PJ"><span class="brand"><i>✦</i>Mi PJ</span>${B && B.act != null ? `<b>${fmt(B.act)}</b>` : ''}${R.length ? `<span class="n" title="Roles donde te toca responder">${R.length}</span>` : ''}${(() => { const u = R.filter(r => r.mision && r.mision.vence && r.mision.vence - Date.now() < 864e5).length + misionesOtras().filter(x => x.r.mision.vence && x.r.mision.vence - Date.now() < 864e5 && x.r.mision.vence > Date.now()).length; return u ? `<span class="ms" title="Turnos de misión que vencen en menos de 24 h">⚔${u}</span>` : ''; })()}${sueldoPendiente() ? `<span class="sd" title="${SUELDO_TXT[sueldoPendiente()]}">⚜</span>` : ''}${pendF ? '<span class="dot" title="Ficha pendiente de revisión"></span>' : ''}</div>`;
+      root.innerHTML = `<div class="pill" data-a="abrir" title="Abrir Mi PJ"><span class="brand"><i>✦</i>Mi PJ</span>${ver('pastilla', 'grageas') && B && B.act != null ? `<b>${fmt(B.act)}</b>` : ''}${ver('pastilla', 'roles') && R.length ? `<span class="n" title="Roles donde te toca responder">${R.length}</span>` : ''}${(() => { if (!ver('pastilla', 'misiones')) return ''; const u = R.filter(r => r.mision && r.mision.vence && r.mision.vence - Date.now() < 864e5).length + misionesOtras().filter(x => x.r.mision.vence && x.r.mision.vence - Date.now() < 864e5 && x.r.mision.vence > Date.now()).length; return u ? `<span class="ms" title="Turnos de misión que vencen en menos de 24 h">⚔${u}</span>` : ''; })()}${ver('pastilla', 'sueldo') && sueldoPendiente() ? `<span class="sd" title="${SUELDO_TXT[sueldoPendiente()]}">⚜</span>` : ''}${ver('pastilla', 'ficha') && pendF ? '<span class="dot" title="Ficha pendiente de revisión"></span>' : ''}</div>`;
       sincronizarTamano();
       return;
     }
@@ -137,36 +139,38 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
     else {
       if (B) h += `<div class="rule">☾</div><div class="big">${fmt(B.act)}<span>grageas</span></div>
         <div class="stats"><div class="stat"><b>${fmt(B.tot)}</b><small>Totales</small></div><div class="stat"><b>${fmt(B.ini)}</b><small>Iniciales</small></div><div class="stat"><b>${B.pla != null ? fmt(B.pla) + '<span class="dim"> / ' + fmt(B.plt) + '</span>' : '—'}</b><small>Legendarios</small></div></div>`;
+      if (ver('panel', 'responder')) {
       h += `<div class="card"><div class="ct">✒ Te toca responder${R.length ? `<span class="n">${R.length}</span>` : ''}</div>`;
       if (!datos.roles) h += `<div class="dim">${cargando ? 'Buscando…' : 'Tocá «Actualizar».'}</div>`;
       else if (!R.length) h += `<div class="dim">Estás al día con todos tus roles ✦</div>`;
       else h += R.slice(0, ui.todos ? 60 : 5).map(r => { if (r.mision) return filaMision(r); const d = aFecha(r.fecha), n = dias(d);
         return `<div class="rol"><div class="rt"><a href="${esc(r.ultUrl || r.url)}">${esc(r.titulo)}</a><div class="dim">Respondió ${esc(r.autor || 'alguien')}</div></div><span class="d ${n != null && n >= 7 ? 'old' : ''}">${esc(haceTxt(d))}</span><button class="x" data-a="ocultar" data-t="${r.tid}" data-l="${r.lpid}" title="No me toca o ya terminó (vuelve a aparecer si hay un mensaje nuevo)">✕</button></div>`; }).join('')
         + (R.length > 5 ? `<div class="row"><a href="#" data-a="todos">${ui.todos ? 'Ver menos' : `Ver los ${R.length}`}</a></div>` : '');
-      const O = misionesOtras();
+      const O = ver('panel', 'otrasCuentas') ? misionesOtras() : [];
       if (O.length) h += `<div class="otras"><div class="rgrp">Tus otras cuentas</div>${O.map(x => filaMision(x.r, x.cuenta)).join('')}<div class="dim" style="margin-top:4px">Según la última vez que entraste con cada cuenta.</div></div>`;
-      const V = rolesTodos().filter(esViejo);
+      const V = ver('panel', 'viejos') ? rolesTodos().filter(esViejo) : [];
       if (V.length) h += ui.viejos ? `<div class="row dim" style="margin-top:8px">Sin movimiento hace más de ${DIAS_ROL} días:</div>` + V.map(r => `<div class="rol"><div class="rt"><a href="${esc(r.ultUrl || r.url)}">${esc(r.titulo)}</a><div class="dim">Respondió ${esc(r.autor || 'alguien')}</div></div><span class="d">${esc(haceTxt(aFecha(r.fecha)))}</span><button class="x" data-a="ocultar" data-t="${r.tid}" data-l="${r.lpid}" title="Ya terminó">✕</button></div>`).join('') + `<div class="row"><a href="#" data-a="viejos">Ocultar los viejos</a></div>`
         : `<div class="row dim" style="margin-top:6px">y ${V.length} ${V.length === 1 ? 'rol viejo' : 'roles viejos'} (más de ${DIAS_ROL} días quietos) · <a href="#" data-a="viejos">ver</a></div>`;
       h += `</div>`;
-      h += tarjetaOficiales();
-      h += tarjetaSueldo();
-      h += `<div class="card"><div class="ct">❖ Ficha</div>${F ? `<a class="tl" href="${esc(F.url)}">${esc(F.titulo)}</a><br>
+      }
+      if (ver('panel', 'oficiales')) h += tarjetaOficiales();
+      if (ver('panel', 'sueldo')) h += tarjetaSueldo();
+      if (ver('panel', 'ficha')) h += `<div class="card"><div class="ct">❖ Ficha</div>${F ? `<a class="tl" href="${esc(F.url)}">${esc(F.titulo)}</a><br>
         <span class="badge ${pendF ? 'warn' : 'ok'}">${pendF ? '◷ Pendiente de revisión' : '✓ Revisada'}</span>
         <div class="row">${F.sello ? `Último sello: ${esc(F.sello.fecha)}${F.sello.autor ? ` <span class="dim">· ${esc(F.sello.autor)}</span>` : ''}` : 'Todavía sin sello'}</div>
         <div class="dim">Código leído · ${fmt(F.codigo ? F.codigo.length : 0)} caracteres</div>` : '<div class="dim">No encontré tu ficha.</div>'}</div>`;
-      h += `<div class="card"><div class="ct">⛁ Bóveda</div>${B ? `<a class="tl" href="${esc(B.url)}">${esc(B.titulo)}</a>
+      if (ver('panel', 'boveda')) h += `<div class="card"><div class="ct">⛁ Bóveda</div>${B ? `<a class="tl" href="${esc(B.url)}">${esc(B.titulo)}</a>
         ${(B.movs || []).map(m => `<div class="row"><span class="${m.d < 0 ? 'neg' : 'pos'}">${m.d == null ? '' : (m.d > 0 ? '+' : '') + fmt(m.d)}</span> → ${fmt(m.act)} <span class="dim">· ${esc(m.fecha)}</span></div>`).join('')}
         ${B.revision ? `<div class="row dim">Última revisión: ${esc(B.revision.autor)}, ${esc(B.revision.fecha)}</div>` : ''}
         ${B.nota ? `<div class="nota">Nota de ${esc(B.nota.autor)}: ${esc(B.nota.texto)}</div>` : ''}` : '<div class="dim">No encontré tu bóveda en el Panel de Bóvedas.</div>'}</div>`;
     }
     if (!(datos && ui.rapido)) {
       const rb = BIB ? BIB.resumen() : null;
-      h += `<div class="card"><div class="ct">📜 Biblioteca de oficiales<span class="sp"></span><a href="#" data-a="oficiales">abrir</a></div>${rb
+      if (ver('panel', 'biblioteca')) h += `<div class="card"><div class="ct">📜 Biblioteca de oficiales<span class="sp"></span><a href="#" data-a="oficiales">abrir</a></div>${rb
         ? `<div class="row">${rb.libres} libres · ${rb.abandonados} abandonados${rb.favs ? ` · ★ ${rb.favs}` : ''}</div><div class="dim">Último escaneo: ${esc(leidoTxt(rb.fecha))}</div>`
         : '<div class="dim">Biblioteca de sucesos de El Profeta: cuáles están libres, en curso o abandonados. Marcalos con ★ y pasalos a PAM.</div>'}
         <div class="row" style="margin-top:6px"><button class="b" data-a="oficiales">Abrir la biblioteca</button></div></div>`;
-      h += canjes ? '<div class="card" id="mipj-canjes"></div>' /* la tarjeta la pinta CanjesPanel */
+      if (ver('panel', 'canjes')) h += canjes ? '<div class="card" id="mipj-canjes"></div>' /* la tarjeta la pinta CanjesPanel */
         : `<div class="card" id="mipj-canjes"><div class="ct">⚖ Canjes</div><div class="dim">Para pedir un canje: en PAM armá el carrito y tocá «Preparar el canje» en la pastilla Mi PJ.</div></div>`;
       // el modo Inspector (antes, un script aparte): solo para los Inspectores de Canjes y los desarrolladores
       if (inspector && inspector.disponible()) {
@@ -180,7 +184,7 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
       <button class="b" data-a="act" ${cargando ? 'disabled' : ''}>${cargando ? 'Leyendo…' : 'Actualizar'}</button>
       <button class="b pri" data-a="pam" ${datos ? '' : 'disabled'} title="Abre PAM y te muestra qué se va a cambiar antes de aplicarlo">Enviar a PAM</button></div></div>`;
     root.innerHTML = h;
-    if (canjes) canjes.pintar(root.querySelector('#mipj-canjes'));
+    if (canjes && root.querySelector('#mipj-canjes')) canjes.pintar(root.querySelector('#mipj-canjes'));
     if (ui.rapido && ui.rapidoQ) filtrarRapido(ui.rapidoQ);
     aplicarTam();
   }

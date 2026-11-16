@@ -1,25 +1,27 @@
 // @ts-check
 // Arranque del panel «Mi PJ» dentro del foro (el agente lo muestra en un iframe sin marco).
-import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=2.1.4';
-import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=2.1.4';
-import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=2.1.4';
-import { LectorFicha } from '../../lectores/LectorFicha.js?v=2.1.4';
-import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=2.1.4';
-import { crearPanelMiPj } from './MiPjPanel.js?v=2.1.4';
-import { revisarEditor, temaDeRuta } from '../../reglas/RevisorBoveda.js?v=2.1.4';
-import { crearActividad } from '../../servicios/ActividadDelForo.js?v=2.1.4';
-import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=2.1.4';
-import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=2.1.4';
-import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=2.1.4';
-import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=2.1.4';
-import { crearTarjetaCanjes } from './CanjesPanel.js?v=2.1.4';
-import { crearRevision } from '../../inspector/Revision.js?v=2.1.4';
-import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=2.1.4';
-import { crearInspector } from '../../inspector/Inspector.js?v=2.1.4';
-import { normNombre } from '../../core/texto.js?v=2.1.4';
-import { crearColoreadorDelForo } from '../../servicios/ColoreadorDelForo.js?v=2.1.4';
+import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=2.2.0';
+import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=2.2.0';
+import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=2.2.0';
+import { LectorFicha } from '../../lectores/LectorFicha.js?v=2.2.0';
+import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=2.2.0';
+import { crearPanelMiPj } from './MiPjPanel.js?v=2.2.0';
+import { temaDeRuta } from '../../reglas/RevisorBoveda.js?v=2.2.0';
+import { crearActividad } from '../../servicios/ActividadDelForo.js?v=2.2.0';
+import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=2.2.0';
+import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=2.2.0';
+import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=2.2.0';
+import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=2.2.0';
+import { crearTarjetaCanjes } from './CanjesPanel.js?v=2.2.0';
+import { crearRevision } from '../../inspector/Revision.js?v=2.2.0';
+import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=2.2.0';
+import { crearInspector } from '../../inspector/Inspector.js?v=2.2.0';
+import { normNombre } from '../../core/texto.js?v=2.2.0';
+import { crearColoreadorDelForo } from '../../servicios/ColoreadorDelForo.js?v=2.2.0';
+import { crearConfigDelForo } from '../../servicios/ConfigMiPjDelForo.js?v=2.2.0';
+import { atenderEditor } from '../../servicios/EditorDelForo.js?v=2.2.0';
+import { activo as estaActivo } from '../../reglas/ConfigMiPj.js?v=2.2.0';
 
-const CACHE_MIN = 30; // como Mi PJ: si lo leído tiene más de media hora, se vuelve a leer al abrir
 const root = /** @type {HTMLElement} */ (document.getElementById('mipj'));
 
 async function arrancar() {
@@ -31,14 +33,11 @@ async function arrancar() {
   // 2.1.0: con la revisión va también lo del botón «Colorear diálogos» (cuántos diálogos hay; el agente lo enseña si hay alguno)
   /** @type {string|null} */ let miNombre = null;
   const coloreador = crearColoreadorDelForo(agente, { cuenta: () => miNombre });
-  agente.atender('editor.revisar', async d => {
-    const texto = String(d.texto ?? '');
-    const r = revisarEditor({ texto, ruta: String(d.ruta ?? '') }, panel?.datos?.boveda ?? null);
-    try { r.colorear = await coloreador.contar(texto); } catch { /* sin botón */ }
-    return r;
-  });
-  agente.atender('editor.colorear', d => coloreador.colorear(String(d.texto ?? '')));
-  agente.atender('editor.descolorear', d => coloreador.descolorear(String(d.texto ?? '')));
+  // 2.2.0: «Configurar Mi PJ» (lo que se puede apagar). Se relee sin esperar: un cambio en PAM llega en unos segundos.
+  const config = crearConfigDelForo(agente);
+  const on = (g, id) => estaActivo(config.actual(), g, id);
+  const releerConfig = () => { config.refrescar().then(cambio => { if (cambio && panel) panel.pintar(); }, () => {}); };
+  atenderEditor(agente, { coloreador, boveda: () => panel?.datos?.boveda ?? null, on, alPedir: releerConfig });
   const hola = await agente.hola();
   miNombre = hola.cuenta?.nombre ?? null;
   if (hola.protocolo !== PROTOCOLO) { root.textContent = 'Hay una versión nueva del script de PAM: actualizalo en Tampermonkey.'; await agente.tamano(420, 80).catch(() => {}); return; }
@@ -59,11 +58,11 @@ async function arrancar() {
     sv: (k, v) => { try { guardado?.setItem(k, JSON.stringify(v)); } catch { /* sin espacio */ } }
   };
 
-  const [sistema, compendio, foros, cierres] = await Promise.all([cargarSistema(), cargarCompendio(), cargarForos(), cargarCierresOficial()]);
+  const [sistema, compendio, foros, cierres] = await Promise.all([cargarSistema(), cargarCompendio(), cargarForos(), cargarCierresOficial(), config.refrescar(true).catch(() => false)]);
   const lector = new LectorFicha(sistema, compendio);
   const cfg = foros[hola.foro ?? ''];
   // en el tema de un oficial: la barra con las cuentas, arriba de los mensajes (como Mi PJ, antes de pintar el panel)
-  if (cfg?.actividad && ES_OFICIAL.test(hola.titulo || '') && /^\/t\d+/.test(hola.ruta || '')) barraOficial(agente, crearActividad(agente, { yo: hola.cuenta.nombre, uid: hola.cuenta.id, origen: 'https://' + hola.foro, cfg: cfg.actividad, memoria, cierres }), hola.ruta, memoria);
+  if (cfg?.actividad && on('foro', 'oficial') && ES_OFICIAL.test(hola.titulo || '') && /^\/t\d+/.test(hola.ruta || '')) barraOficial(agente, crearActividad(agente, { yo: hola.cuenta.nombre, uid: hola.cuenta.id, origen: 'https://' + hola.foro, cfg: cfg.actividad, memoria, cierres }), hola.ruta, memoria);
   // los canjes en el foro: la petición que preparó PAM, publicarla y la respuesta del Inspector (solo si el foro tiene registro)
   const servicioCanjes = cfg?.registroCanjes ? crearCanjesDelForo(agente, { foroHost: hola.foro || '', cuenta: hola.cuenta, cfg, memoria, ficha: { sistema, compendio, lector } }) : null;
   if (servicioCanjes) await traerPeticionesAntiguas(agente, servicioCanjes.clave, 'cuentas.' + hola.foro + '.' + hola.cuenta.id);
@@ -73,9 +72,10 @@ async function arrancar() {
     puerta: accion => agente.puerta(accion), enviarAPam: op => panel.enviarAPam(op)
   }) : null;
   // el modo Inspector: en el Registro de Canjes, para los Inspectores de Canjes y los desarrolladores (en el foro de pruebas, todos)
-  const inspector = modoInspector(agente, { hola, cfg, servicioCanjes, memoria, repintar: () => panel && panel.pintar() });
+  const inspector = modoInspector(agente, { hola, cfg, servicioCanjes, memoria, repintar: () => panel && panel.pintar(), permitido: () => on('foro', 'inspector') });
   panel = crearPanelMiPj({
     root, documento: document, guardado, agente, ventana: hola.ventana, cuenta: hola.cuenta, foroHost: hola.foro || '', canjes, inspector,
+    config: () => config.actual(),
     pamUrl: new URL('index.html', location.href).href,
     biblioteca: cfg?.actividad?.biblioteca ? (() => {
       const origen = 'https://' + hola.foro;
@@ -94,10 +94,12 @@ async function arrancar() {
   agente.atender('ventana.cambio', v => { panel.ventana(v); return {}; });
   // «Terminar en PAM»: la pestaña de PAM terminó de cerrar el canje; ahora se le mandan los datos nuevos del foro
   agente.atender('pam.cierre', () => { panel.alCierrePam(); return {}; });
-  const d = panel.datos;
-  const viejo = !d || d.v !== 2 || Date.now() - new Date(d.leido).getTime() > CACHE_MIN * 60000 || (d.pendientes || []).includes('roles'); // leído por la 0.3.2, sin roles
+  setInterval(releerConfig, 15000);
+  // como Mi PJ: si lo leído tiene más de media hora, se vuelve a leer al abrir (2.2.0: el rato se elige en «Configurar Mi PJ»; 0: solo con «Actualizar»)
+  const d = panel.datos, cadaMin = config.actual().lectura.cada;
+  const viejo = !d || d.v !== 2 || (cadaMin > 0 && Date.now() - new Date(d.leido).getTime() > cadaMin * 60000) || (d.pendientes || []).includes('roles'); // leído por la 0.3.2, sin roles
   // como Mi PJ: escribiendo en la propia bóveda, se relee si lo leído tiene más de 2 minutos (para comparar con lo último)
-  const enMiBoveda = !!(d?.boveda && hola.editor && (d.boveda.tema ?? d.boveda.tid) === temaDeRuta(hola.ruta) && Date.now() - new Date(d.leido).getTime() > 2 * 60000);
+  const enMiBoveda = !!(config.actual().lectura.boveda && d?.boveda && hola.editor && (d.boveda.tema ?? d.boveda.tid) === temaDeRuta(hola.ruta) && Date.now() - new Date(d.leido).getTime() > 2 * 60000);
   // llegada desde PAM con «Ir al foro a publicar la petición»: se abre sola la puerta
   if (canjes && hola.hash === '#escriba-publicar') canjes.alCargarForo(hola.cuenta.nombre);
   else if (viejo || enMiBoveda) panel.actualizar();
@@ -108,7 +110,7 @@ async function arrancar() {
  * Inspectores de Canjes o en «desarrolladores» (data/foros.json); en el foro de pruebas, siempre. Activo y en una
  * página del Registro de Canjes, cada pedido tiene su barra «Revisar canje».
  */
-function modoInspector(agente, { hola, cfg, servicioCanjes, memoria, repintar }) {
+function modoInspector(agente, { hola, cfg, servicioCanjes, memoria, repintar, permitido = () => true }) {
   const CLAVE = 'mipj.inspector';
   const tema = String(cfg?.registroCanjes || '').match(/\/t(\d+)/)?.[1];
   const enRegistro = !!(tema && new RegExp('^/t' + tema + '(p\\d+)?-').test(hola.ruta || ''));
@@ -116,7 +118,7 @@ function modoInspector(agente, { hola, cfg, servicioCanjes, memoria, repintar })
   const activo = () => !!memoria.gv(CLAVE, false);
   agente.atender('inspector.accion', d => (insp ? insp.accion(d) : {}));
   async function arrancar() {
-    if (!enRegistro || insp) return;
+    if (!enRegistro || insp || !permitido()) return; // 2.2.0: apagado en «Configurar Mi PJ»
     const R = crearRevision({ leer: r => agente.leer(r) });
     insp = crearInspector({ agente, R, ui: crearInspectorUI(document.implementation.createHTMLDocument(''), R), cargarDatos: f => cargarDatosTabla(f), ruta: hola.ruta });
     try { await insp.iniciar(); } catch (e) { console.warn('[Mi PJ] Inspector', e); }
