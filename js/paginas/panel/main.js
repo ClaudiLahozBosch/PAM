@@ -1,26 +1,26 @@
 // @ts-check
 // Arranque del panel «Mi PJ» dentro del foro (el agente lo muestra en un iframe sin marco).
-import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=2.2.0';
-import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=2.2.0';
-import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=2.2.0';
-import { LectorFicha } from '../../lectores/LectorFicha.js?v=2.2.0';
-import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=2.2.0';
-import { crearPanelMiPj } from './MiPjPanel.js?v=2.2.0';
-import { temaDeRuta } from '../../reglas/RevisorBoveda.js?v=2.2.0';
-import { crearActividad } from '../../servicios/ActividadDelForo.js?v=2.2.0';
-import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=2.2.0';
-import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=2.2.0';
-import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=2.2.0';
-import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=2.2.0';
-import { crearTarjetaCanjes } from './CanjesPanel.js?v=2.2.0';
-import { crearRevision } from '../../inspector/Revision.js?v=2.2.0';
-import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=2.2.0';
-import { crearInspector } from '../../inspector/Inspector.js?v=2.2.0';
-import { normNombre } from '../../core/texto.js?v=2.2.0';
-import { crearColoreadorDelForo } from '../../servicios/ColoreadorDelForo.js?v=2.2.0';
-import { crearConfigDelForo } from '../../servicios/ConfigMiPjDelForo.js?v=2.2.0';
-import { atenderEditor } from '../../servicios/EditorDelForo.js?v=2.2.0';
-import { activo as estaActivo } from '../../reglas/ConfigMiPj.js?v=2.2.0';
+import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=2.2.1';
+import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=2.2.1';
+import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=2.2.1';
+import { LectorFicha } from '../../lectores/LectorFicha.js?v=2.2.1';
+import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=2.2.1';
+import { crearPanelMiPj } from './MiPjPanel.js?v=2.2.1';
+import { temaDeRuta } from '../../reglas/RevisorBoveda.js?v=2.2.1';
+import { crearActividad } from '../../servicios/ActividadDelForo.js?v=2.2.1';
+import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=2.2.1';
+import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=2.2.1';
+import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=2.2.1';
+import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=2.2.1';
+import { crearTarjetaCanjes } from './CanjesPanel.js?v=2.2.1';
+import { crearRevision } from '../../inspector/Revision.js?v=2.2.1';
+import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=2.2.1';
+import { crearInspector } from '../../inspector/Inspector.js?v=2.2.1';
+import { normNombre } from '../../core/texto.js?v=2.2.1';
+import { crearColoreadorDelForo } from '../../servicios/ColoreadorDelForo.js?v=2.2.1';
+import { crearConfigDelForo } from '../../servicios/ConfigMiPjDelForo.js?v=2.2.1';
+import { atenderEditor } from '../../servicios/EditorDelForo.js?v=2.2.1';
+import { activo as estaActivo } from '../../reglas/ConfigMiPj.js?v=2.2.1';
 
 const root = /** @type {HTMLElement} */ (document.getElementById('mipj'));
 
@@ -34,7 +34,7 @@ async function arrancar() {
   /** @type {string|null} */ let miNombre = null;
   const coloreador = crearColoreadorDelForo(agente, { cuenta: () => miNombre });
   // 2.2.0: «Configurar Mi PJ» (lo que se puede apagar). Se relee sin esperar: un cambio en PAM llega en unos segundos.
-  const config = crearConfigDelForo(agente);
+  const config = crearConfigDelForo(agente, { cada: 1500 });
   const on = (g, id) => estaActivo(config.actual(), g, id);
   const releerConfig = () => { config.refrescar().then(cambio => { if (cambio && panel) panel.pintar(); }, () => {}); };
   atenderEditor(agente, { coloreador, boveda: () => panel?.datos?.boveda ?? null, on, alPedir: releerConfig });
@@ -94,7 +94,9 @@ async function arrancar() {
   agente.atender('ventana.cambio', v => { panel.ventana(v); return {}; });
   // «Terminar en PAM»: la pestaña de PAM terminó de cerrar el canje; ahora se le mandan los datos nuevos del foro
   agente.atender('pam.cierre', () => { panel.alCierrePam(); return {}; });
-  setInterval(releerConfig, 15000);
+  // 2.2.1: un cambio en PAM llega en 2 s, y enseguida al volver a la pestaña del foro (antes, hasta 15 s)
+  setInterval(releerConfig, 2000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) config.refrescar(true).then(cambio => { if (cambio) panel.pintar(); }, () => {}); });
   // como Mi PJ: si lo leído tiene más de media hora, se vuelve a leer al abrir (2.2.0: el rato se elige en «Configurar Mi PJ»; 0: solo con «Actualizar»)
   const d = panel.datos, cadaMin = config.actual().lectura.cada;
   const viejo = !d || d.v !== 2 || (cadaMin > 0 && Date.now() - new Date(d.leido).getTime() > cadaMin * 60000) || (d.pendientes || []).includes('roles'); // leído por la 0.3.2, sin roles

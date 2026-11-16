@@ -3,8 +3,8 @@
 // js/reglas/ConfigMiPj.js; esta página solo las enseña, guarda con el almacén (`grimorio.mipj.config`, viaja con la
 // Sesión con código) y avisa con el evento `pam:mipj` para que js/pam/ConfigMiPjAlForo.js pase la copia al agente.
 // Recibe la ventana, como las demás páginas: así las pruebas la montan en jsdom.
-import { Almacen } from '../../core/Almacen.js?v=2.2.0';
-import { OPCIONES, LECTURA, SIEMPRE, configPorDefecto, normalizarConfig } from '../../reglas/ConfigMiPj.js?v=2.2.0';
+import { Almacen } from '../../core/Almacen.js?v=2.2.1';
+import { OPCIONES, LECTURA, SIEMPRE, configPorDefecto, normalizarConfig } from '../../reglas/ConfigMiPj.js?v=2.2.1';
 
 const CLAVE = 'grimorio.mipj.config';
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -50,7 +50,10 @@ export async function montar(w) {
     if (!E) return '<span class="cm-chip cm-buscando"><i></i>Buscando Mi PJ en este navegador…</span>';
     if (E.estado === 'sin') return `<span class="cm-chip cm-sin"><i></i>No encuentro Mi PJ en este navegador</span><span class="cm-chip-txt">Igual se guarda: Mi PJ lo toma la próxima vez que abras PAM con el script instalado. <a href="pam-mi-pj.user.js">Instalar Mi PJ</a></span>`;
     if (E.estado === 'error') return `<span class="cm-chip cm-sin"><i></i>No pude pasarle la configuración a Mi PJ</span><span class="cm-chip-txt">${esc(E.detalle || '')} Probá recargar PAM.</span>`;
-    return `<span class="cm-chip cm-ok"><i></i>Mi PJ conectado${E.agente ? ' · ' + esc(E.agente) : ''}</span><span class="cm-chip-txt">Los cambios le llegan solos al foro.</span>`;
+    const hora = E.enviado ? new Date(E.enviado).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) : '';
+    return `<span class="cm-chip cm-ok"><i></i>Mi PJ conectado${E.agente ? ' · ' + esc(E.agente) : ''}</span>`
+      + `<span class="cm-chip-txt">${E.estado === 'guardando' ? 'Enviando…' : hora ? 'Enviado a Mi PJ a las ' + esc(hora) + '. En el foro se ve en unos segundos (al volver a su pestaña, enseguida).' : 'Los cambios le llegan solos al foro.'}</span>`
+      + `<button type="button" class="btn small" id="cmEnviar"${E.estado === 'guardando' ? ' disabled' : ''}>✦ Enviar a Mi PJ ahora</button>`;
   }
 
   function pintar() {
@@ -112,6 +115,7 @@ export async function montar(w) {
     if (!b) return;
     if (b.dataset.todo) { const g = b.dataset.todo, v = b.dataset.v === '1'; for (const o of OPCIONES[g]) cfg[g][o.id] = v; guardar(); }
     else if (b.id === 'cmRestablecer') { cfg = configPorDefecto(); guardar('✓ Todo como venía'); }
+    else if (b.id === 'cmEnviar') { almacen.guardar(CLAVE, cfg); doc.dispatchEvent(new w.CustomEvent('pam:mipj', { detail: { forzar: true } })); }
   });
 
   const repintarEstado = () => { const e = doc.getElementById('cmEstado'); if (e) e.innerHTML = estadoHtml(); };
