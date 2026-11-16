@@ -1,26 +1,26 @@
 // @ts-check
 // Arranque del panel «Mi PJ» dentro del foro (el agente lo muestra en un iframe sin marco).
-import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=2.2.2';
-import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=2.2.2';
-import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=2.2.2';
-import { LectorFicha } from '../../lectores/LectorFicha.js?v=2.2.2';
-import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=2.2.2';
-import { crearPanelMiPj } from './MiPjPanel.js?v=2.2.2';
-import { temaDeRuta } from '../../reglas/RevisorBoveda.js?v=2.2.2';
-import { crearActividad } from '../../servicios/ActividadDelForo.js?v=2.2.2';
-import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=2.2.2';
-import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=2.2.2';
-import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=2.2.2';
-import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=2.2.2';
-import { crearTarjetaCanjes } from './CanjesPanel.js?v=2.2.2';
-import { crearRevision } from '../../inspector/Revision.js?v=2.2.2';
-import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=2.2.2';
-import { crearInspector } from '../../inspector/Inspector.js?v=2.2.2';
-import { normNombre } from '../../core/texto.js?v=2.2.2';
-import { crearColoreadorDelForo } from '../../servicios/ColoreadorDelForo.js?v=2.2.2';
-import { crearConfigDelForo } from '../../servicios/ConfigMiPjDelForo.js?v=2.2.2';
-import { atenderEditor } from '../../servicios/EditorDelForo.js?v=2.2.2';
-import { activo as estaActivo } from '../../reglas/ConfigMiPj.js?v=2.2.2';
+import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=2.2.3';
+import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=2.2.3';
+import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=2.2.3';
+import { LectorFicha } from '../../lectores/LectorFicha.js?v=2.2.3';
+import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=2.2.3';
+import { crearPanelMiPj } from './MiPjPanel.js?v=2.2.3';
+import { temaDeRuta } from '../../reglas/RevisorBoveda.js?v=2.2.3';
+import { crearActividad } from '../../servicios/ActividadDelForo.js?v=2.2.3';
+import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=2.2.3';
+import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=2.2.3';
+import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=2.2.3';
+import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=2.2.3';
+import { crearTarjetaCanjes } from './CanjesPanel.js?v=2.2.3';
+import { crearRevision } from '../../inspector/Revision.js?v=2.2.3';
+import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=2.2.3';
+import { crearInspector } from '../../inspector/Inspector.js?v=2.2.3';
+import { normNombre } from '../../core/texto.js?v=2.2.3';
+import { crearColoreadorDelForo } from '../../servicios/ColoreadorDelForo.js?v=2.2.3';
+import { crearConfigDelForo } from '../../servicios/ConfigMiPjDelForo.js?v=2.2.3';
+import { atenderEditor } from '../../servicios/EditorDelForo.js?v=2.2.3';
+import { activo as estaActivo } from '../../reglas/ConfigMiPj.js?v=2.2.3';
 
 const root = /** @type {HTMLElement} */ (document.getElementById('mipj'));
 
@@ -38,7 +38,7 @@ async function arrancar() {
   const on = (g, id) => estaActivo(config.actual(), g, id);
   // 2.2.2: al cambiar, todo al momento (el panel, el cartel del oficial y el Inspector); lo pone `alCambiarConfig` más abajo
   let alCambiarConfig = () => { if (panel) panel.pintar(); };
-  const releerConfig = (forzar = false) => { config.refrescar(forzar).then(cambio => { if (cambio) alCambiarConfig(); }, () => {}); };
+  const releerConfig = (forzar = false) => config.refrescar(forzar).then(cambio => { if (cambio) alCambiarConfig(); }, () => {});
   atenderEditor(agente, { coloreador, boveda: () => panel?.datos?.boveda ?? null, on, alPedir: releerConfig });
   const hola = await agente.hola();
   miNombre = hola.cuenta?.nombre ?? null;

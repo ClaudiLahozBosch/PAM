@@ -98,3 +98,4 @@
   .cm-op .cm-sel{max-width:none;width:100%;}
   .cm-op:has(.cm-sel){flex-wrap:wrap;}
 }
+.cm-salto{flex-basis:100%;height:0;}

@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
 import { OPCIONES, configPorDefecto, normalizarConfig, activo } from '../../js/reglas/ConfigMiPj.js';
 import { montar } from '../../js/paginas/mipj/main.js';
-import { publicarConfigMiPj, CLAVE_PAM, CLAVE_AGENTE } from '../../js/pam/ConfigMiPjAlForo.js';
+import { publicarConfigMiPj, CLAVE_PAM, CLAVE_AGENTE, esAnterior } from '../../js/pam/ConfigMiPjAlForo.js';
 import { crearConfigDelForo } from '../../js/servicios/ConfigMiPjDelForo.js';
 import { crearPanelMiPj } from '../../js/paginas/panel/MiPjPanel.js';
 
@@ -134,4 +134,52 @@ test('el panel: las tarjetas y las marcas de la pastilla apagadas no se ven', ()
   const sola = panel(c, 400);
   assert.doesNotMatch(sola, /<b>|class="n"|class="dot"/);
   assert.match(sola, /Mi PJ/, 'la pastilla siempre está');
+});
+
+test('2.2.3: PAM avisa si el script de Tampermonkey es más viejo que PAM', async () => {
+  assert.equal(esAnterior('2.2.0', '2.2.3'), true);
+  assert.equal(esAnterior('2.2.3', '2.2.3'), false);
+  assert.equal(esAnterior('2.10.0', '2.9.9'), false);
+  assert.equal(esAnterior('raro', '2.2.3'), false);
+  for (const [agente, aviso] of [['2.2.0', true], ['2.2.3', false]]) {
+    const w = pam();
+    try {
+      await montar(w);
+      publicarConfigMiPj({ guardarDato: async () => {} }, w, { agente }, '2.2.3');
+      await espera(0);
+      const t = w.document.getElementById('cmEstado').textContent;
+      assert.equal(/Tu script Mi PJ es la 2\.2\.0; PAM ya va por la 2\.2\.3/.test(t), aviso, agente);
+      assert.match(t, /Mi PJ conectado/);
+    } finally { w.close(); }
+  }
+});
+
+test('2.2.3: con el Inspector apagado, el panel no enseña ni su tarjeta', () => {
+  const insp = { disponible: () => true, activo: () => false };
+  const conInsp = c => {
+    const { window: w } = new JSDOM('<!doctype html><head></head><body><div id="mipj"></div></body>', { pretendToBeVisual: true });
+    const mem = new Map([['mipj.5203', JSON.stringify(DATOS)]]);
+    const p = crearPanelMiPj({ root: w.document.getElementById('mipj'), documento: w.document, guardado: { getItem: k => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, v) }, cargar: async () => DATOS, ventana: { ancho: 1400, alto: 900 }, pamUrl: 'https://x/', cuenta: { id: 5203, nombre: 'Irvin Giles' }, inspector: insp, config: () => c });
+    p.pintar(); const h = w.document.getElementById('mipj').innerHTML; w.close(); return h;
+  };
+  assert.match(conInsp(null), /🔍 Inspector de Canjes/);
+  const c = configPorDefecto(); c.foro.inspector = false;
+  assert.doesNotMatch(conInsp(c), /Inspector de Canjes/);
+});
+
+test('2.2.3: el editor espera la configuración antes de contestar (la primera respuesta ya sale bien)', async () => {
+  const { atenderEditor } = await import('../../js/servicios/EditorDelForo.js');
+  let cfg = configPorDefecto();
+  const h = {};
+  const coloreador = { contar: async () => ({ dialogos: 1, colores: true, cambiaria: true }), colorear: t => ({ texto: t }), descolorear: t => ({ texto: t }) };
+  const leer = () => new Promise(r => setTimeout(() => { cfg = normalizarConfig({ foro: { boveda: false, colorear: false } }); r(true); }, 50));
+  atenderEditor({ atender: (t, fn) => { h[t] = fn; } }, { coloreador, boveda: () => null, on: (g, id) => activo(cfg, g, id), alPedir: leer });
+  const FORM = '[b]Grageas iniciales»[/b] 1.200\n{[b]Grageas actuales»[/b] 1.300';
+  const r = await h['editor.revisar']({ texto: FORM, ruta: '/t9-' });
+  assert.equal(r.formulario, false, 'sin barra de la bóveda desde la primera vez');
+  assert.equal(r.colorear.cambiaria, false);
+  // y si leer la configuración no contesta, no se queda esperando para siempre
+  atenderEditor({ atender: (t, fn) => { h[t] = fn; } }, { coloreador, boveda: () => null, on: () => true, alPedir: () => new Promise(() => {}) });
+  const t0 = Date.now(); await h['editor.revisar']({ texto: 'hola', ruta: '/' });
+  assert.ok(Date.now() - t0 < 1500);
 });
