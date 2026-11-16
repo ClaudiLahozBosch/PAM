@@ -82,10 +82,16 @@ export const comoOficial = html => html
   .replace(/Arte \/ Artesanía \(Voluntad\)/g, 'Arte/Artesanía (Voluntad)') // el valor de la Proeza: «habilidad (atributo)»
   .replace(/"Arte \/ Artesanía"/g, '"Arte/Artesanía"'); // en los datos (JSON)
 
-/** El HTML de la página sin los <script>. */
+/**
+ * El HTML de la página sin los <script>, y sin lo que el PAM antiguo no tenía: la sección «Configurar Mi PJ» (2.2.0) y
+ * sus botones en la portada y en la navegación (con su tarjeta, el grupo «Mi personaje» pasa de 2 a 3: «g2» → «g3»).
+ */
 export const pagina = w => {
   const c = w.document.body.cloneNode(true);
   c.querySelectorAll('script').forEach(s => s.remove());
+  c.querySelector('#sec-mipj')?.remove();
+  c.querySelectorAll('[data-go="mipj"]').forEach(b => b.remove());
+  c.querySelectorAll('.home-grid').forEach(g => { g.className = g.className.replace(/\bg\d+\b/, 'g' + g.children.length); });
   return c.innerHTML.replace(/\s+$/, ''); // sin los saltos de línea que dejan los <script> quitados
 };
 /** Igual, y si no, dónde empieza la diferencia (la página entera es muy larga para el mensaje). */

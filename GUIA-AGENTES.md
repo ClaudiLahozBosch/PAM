@@ -91,6 +91,8 @@ js/paginas/inicio/        Fase 8e: portada.js (portada y navegación, window.sho
                           (js/paginas/pam/, donde la 8a dejó las páginas antiguas, ya no existe.)
 js/paginas/canjes/        Fase 8d: Tabla de Canjes y Compendio. main.js, Tabla.js (mismo código; ofrece window.pamTabla
                           y window.pamCanjes; F16: pinta lo que se ve), datos.js (de data/*.json con tablaDeDatos()).
+js/paginas/mipj/          2.2.0: «Configurar Mi PJ» (main.js, montar). Las opciones, js/reglas/ConfigMiPj.js; la copia para
+                          el agente, js/pam/ConfigMiPjAlForo.js; lo que lee el panel, js/servicios/ConfigMiPjDelForo.js.
 js/paginas/revisor/       Fase 8c: Mi Ficha, Controlador de stats, Revisor y Editor de empleos como módulos. main.js,
                           Revisor.js (pantallas, mismo código; lo de la Tabla por window.pamTabla como «TC.…»),
                           datos.js (de data/sistema.json: iniciarDatos() al arrancar; los demás leen sus `export let`,

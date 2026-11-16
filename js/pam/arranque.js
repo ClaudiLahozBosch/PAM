@@ -8,20 +8,20 @@
 // Si algo no se puede traer o una página no arranca, PAM avisa arriba en vez de quedarse a medias sin decir nada.
 // N07 (0.5.3): antes de las páginas deja en window.PAM_EDITOR el editor nuevo del «Código para el foro» (js/pam/EditorPam.js),
 // con data/sistema.json y los arcanos. Si eso falla, Mi Ficha sigue con el «Personalizada» antiguo.
-import { Sistema } from '../datos/Sistema.js?v=2.1.4';
-import { Compendio } from '../datos/Compendio.js?v=2.1.4';
-import { LectorFicha } from '../lectores/LectorFicha.js?v=2.1.4';
-import { crearEditorPam } from './EditorPam.js?v=2.1.4';
+import { Sistema } from '../datos/Sistema.js?v=2.2.0';
+import { Compendio } from '../datos/Compendio.js?v=2.2.0';
+import { LectorFicha } from '../lectores/LectorFicha.js?v=2.2.0';
+import { crearEditorPam } from './EditorPam.js?v=2.2.0';
 
-const V = '?v=2.1.4'; // lo pone scripts/versionar.mjs
+const V = '?v=2.2.0'; // lo pone scripts/versionar.mjs
 
 /** Los datos que las páginas leen de la página, en orden. */
 export const DATOS = [
   { id: 'empleos-foro', tipo: 'text/plain', src: 'data/empleos-foro.txt' },
   { id: 'arcanos-data', tipo: 'application/json', src: 'data/arcanos.json' },
 ];
-/** Las páginas, en el orden en que estaban en index.html. */
-export const PAGINAS = ['tabla-canjes', 'revisor', 'registro', 'portada', 'temas', 'foro-antiguo'];
+/** Las páginas, en el orden en que estaban en index.html (y al final, las nuevas). */
+export const PAGINAS = ['tabla-canjes', 'revisor', 'registro', 'portada', 'temas', 'foro-antiguo', 'configurar-mipj'];
 /** Dónde está cada una (fases 8b–8e). */
 export const MODULOS = {
   'tabla-canjes': '../paginas/canjes/main.js',   // Tabla de Canjes y Compendio (8d)
@@ -29,7 +29,8 @@ export const MODULOS = {
   registro: '../paginas/registro/main.js',        // Registro de Roles, Bóveda y Coloreador (8b)
   portada: '../paginas/inicio/portada.js',        // portada y navegación (8e)
   temas: '../paginas/inicio/temas.js',            // kit de temas (8e)
-  'foro-antiguo': '../paginas/inicio/foroAntiguo.js' // «Datos del foro → PAM» (8e)
+  'foro-antiguo': '../paginas/inicio/foroAntiguo.js', // «Datos del foro → PAM» (8e)
+  'configurar-mipj': '../paginas/mipj/main.js'      // «Configurar Mi PJ»: qué hace Mi PJ en el foro (2.2.0)
 };
 
 /**

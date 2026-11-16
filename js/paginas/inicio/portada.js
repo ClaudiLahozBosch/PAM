@@ -2,14 +2,14 @@
 // Portada y navegación principal (fase 8e): el mismo código que estaba en index.html (copia congelada en tests/legado/paginas/), como módulo.
 // Lo que cambia, marcado con «8e»: guarda tu nombre con el almacén (misma clave).
 // Recibe la ventana: así las pruebas lo montan en una página de prueba junto al antiguo y comparan.
-import { Almacen } from '../../core/Almacen.js?v=2.1.4';
+import { Almacen } from '../../core/Almacen.js?v=2.2.0';
 /** @param {Window} w la ventana de PAM */
 export async function montar(w) {
 const almacen = Almacen.de(w);
 const window = w, document = w.document, location = w.location, history = w.history, Math = w.Math, showSection = (...a) => w.showSection(...a);
   const K_USER = "grimorioAvadense.usuario";
   const SECS = {home:"sec-home", ficha:"sec-revisor", control:"sec-revisor", canjes:"sec-canjes", compendio:"sec-compendio", empleos:"sec-revisor", editor:"sec-revisor",
-    ganancias:"sec-rr", boveda:"sec-rr", futuros:"sec-rr", roles:"sec-rr", misroles:"sec-rr", turnos:"sec-rr", oficiales:"sec-rr", coloreador:"sec-rr", respaldo:"sec-rr"};
+    ganancias:"sec-rr", boveda:"sec-rr", futuros:"sec-rr", roles:"sec-rr", misroles:"sec-rr", turnos:"sec-rr", oficiales:"sec-rr", coloreador:"sec-rr", respaldo:"sec-rr", mipj:"sec-mipj"};
   /* sección de PAM -> pestaña del Registro de Roles */
   const RR_TAB = {ganancias:"ganancias", boveda:"boveda", futuros:"canjes", roles:"inicio", misroles:"personajes", turnos:"turnos", oficiales:"oficiales", coloreador:"coloreador", respaldo:"copia"};
   const RR_INFO = {
@@ -26,7 +26,8 @@ const window = w, document = w.document, location = w.location, history = w.hist
   const GRUPOS = [
     {id:"pj", nombre:"Mi personaje", corto:"Personaje", glyph:"❖", items:[
       ["ficha","Mi Ficha","❖","Cargá atributos, habilidades, trasfondos y ventajas de tu personaje."],
-      ["control","Controlador de Stats","⚖","Chequeá que los stats de combate de tu ficha estén bien calculados."]]},
+      ["control","Controlador de Stats","⚖","Chequeá que los stats de combate de tu ficha estén bien calculados."],
+      ["mipj","Configurar Mi PJ","⚙","Elegí qué hace Mi PJ en el foro: carteles, revisiones, botones y tarjetas."]]},
     {id:"gr", nombre:"Grageas y canjes", corto:"Grageas", glyph:"✦", items:[
       ["ganancias","Ganancias","✧","Lo que cobra cada personaje en el mes."],
       ["boveda","Bóveda","⛁","Tus grageas al día y el código para actualizar la bóveda."],
