@@ -76,6 +76,12 @@ test('la página dice si Mi PJ está instalado y le pasa la copia al agente al a
     await espera(0);
     assert.equal(guardados.length, 2);
     assert.equal(guardados[1][1].pastilla.grageas, false);
+    // 2.2.1: «Enviar a Mi PJ ahora» la vuelve a mandar aunque no haya cambiado nada, y dice a qué hora
+    assert.match(w.document.getElementById('cmEstado').textContent, /Enviado a Mi PJ a las/);
+    w.document.getElementById('cmEnviar').click();
+    await espera(0);
+    assert.equal(guardados.length, 3);
+    assert.deepEqual(guardados[2][1], guardados[1][1]);
   } finally { w.close(); }
 });
 

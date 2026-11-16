@@ -2,8 +2,8 @@
 // «Configurar Mi PJ»: PAM guarda la configuración en `grimorio.mipj.config` y el panel de Mi PJ, dentro del foro, no
 // la ve (GUIA-AGENTES §5.2). Igual que el Coloreador (ColoreadorAlForo.js), PAM deja una copia en el almacén del
 // agente, `pam.mipj`, al abrir PAM y cada vez que se cambia algo en la página (evento `pam:mipj`).
-import { Almacen } from '../core/Almacen.js?v=2.2.0';
-import { normalizarConfig } from '../reglas/ConfigMiPj.js?v=2.2.0';
+import { Almacen } from '../core/Almacen.js?v=2.2.1';
+import { normalizarConfig } from '../reglas/ConfigMiPj.js?v=2.2.1';
 
 export const CLAVE_PAM = 'grimorio.mipj.config';
 export const CLAVE_AGENTE = 'pam.mipj';
@@ -18,18 +18,19 @@ export function leerConfigMiPj(w) { return normalizarConfig(Almacen.de(w).leer(C
 export function publicarConfigMiPj(agente, w, hola = {}) {
   let ultima = '';
   const ventana = /** @type {any} */ (w);
-  const avisar = (estado, detalle = '') => {
-    ventana.pamMiPjEstado = { estado, agente: hola.agente || '', detalle };
+  const avisar = (estado, detalle = '', enviado = ventana.pamMiPjEstado?.enviado || 0) => {
+    ventana.pamMiPjEstado = { estado, agente: hola.agente || '', detalle, enviado };
     w.document.dispatchEvent(new w.CustomEvent('pam:mipj-estado', { detail: ventana.pamMiPjEstado }));
   };
-  const copiar = () => {
+  // forzar (2.2.1, botón «Enviar a Mi PJ ahora»): aunque no haya cambiado nada desde la última copia
+  const copiar = (forzar = false) => {
     const c = leerConfigMiPj(w), txt = JSON.stringify(c);
-    if (txt === ultima) return Promise.resolve();
+    if (txt === ultima && !forzar) return Promise.resolve();
     ultima = txt;
     avisar('guardando');
-    return agente.guardarDato(CLAVE_AGENTE, c).then(() => avisar('ok'), e => { ultima = ''; avisar('error', String(e?.message || e)); });
+    return agente.guardarDato(CLAVE_AGENTE, c).then(() => avisar('ok', '', Date.now()), e => { ultima = ''; avisar('error', String(e?.message || e)); });
   };
-  w.document.addEventListener('pam:mipj', () => { copiar(); });
+  w.document.addEventListener('pam:mipj', e => { copiar(!!(/** @type {any} */ (e).detail?.forzar)); });
   avisar('ok');
   copiar();
   return { copiar };
