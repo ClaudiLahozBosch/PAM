@@ -1,6 +1,6 @@
 // @ts-check
-import { Ficha } from './Ficha.js?v=2.2.1';
-import { Boveda } from './Boveda.js?v=2.2.1';
+import { Ficha } from './Ficha.js?v=2.2.2';
+import { Boveda } from './Boveda.js?v=2.2.2';
 
 /**
  * Un personaje del jugador.

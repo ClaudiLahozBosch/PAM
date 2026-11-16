@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PAM · Agente (staging)
 // @namespace    https://claudilahozbosch.github.io/PAM/staging
-// @version      2.2.1
+// @version      2.2.2
 // @description  El script mínimo de PAM: lee el foro con tu sesión, publica y edita SOLO tras tu «Aceptar» y muestra el panel «Mi PJ» de PAM. Toda la lógica está en PAM.
 // @updateURL    https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
 // @downloadURL  https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
@@ -30,7 +30,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.2.1';
+  var VERSION = '2.2.2';
   var PROTOCOLO = 1;
   // Staging: el fork de pruebas (otro dominio que PAM real, así no ve los datos de los jugadores).
   var PAM = { origen: 'https://claudilahozbosch.github.io', ruta: '/PAM/' };
@@ -676,7 +676,7 @@
   // ---------------------------------------------------------------
   // Panel «Mi PJ» (página de PAM en un iframe que ocupa justo lo que ocupa el panel)
   // ---------------------------------------------------------------
-  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=2.2.1' });
+  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=2.2.2' });
   raiz.appendChild(iframe);
   // Si el panel no arranca (no pide tamaño), se enseña al menos su pastilla, para que nunca quede invisible.
   var panelVivo = false;
@@ -863,6 +863,8 @@
   // ---------------------------------------------------------------
   var barraOf = null;
   function pintarOficial(d) {
+    // 2.2.2: apagado en «Configurar Mi PJ» (si se vuelve a encender, PAM la pide otra vez desde el principio)
+    if (d && d.estado === 'quitar') { if (barraOf) { barraOf.caja.remove(); barraOf = null; } return { pintada: false }; }
     var p0 = document.querySelector('div.post');
     if (!p0) { return { pintada: false }; }
     if (!barraOf) {
@@ -1005,7 +1007,9 @@
     bar.addEventListener('click', function () {
       chequear(false).then(function (r) { if (r && r.avisos.length) { modalAntesDePublicar(r.avisos, r.encabezado, false); } }, function () {});
     });
-    setInterval(function () { chequear(false).catch(function () {}); }, 1500);
+    // 2.2.2: cada 1,5 s se vuelve a preguntar aunque el texto no cambie, así lo que se apaga o se enciende en
+    // «Configurar Mi PJ» se ve sin tener que escribir (antes, solo al cambiar el texto)
+    setInterval(function () { var forzar = !document.hidden; if (forzar && enCurso) { return; } chequear(forzar).catch(function () {}); }, 1500);
 
     var pasar = false;
     form.addEventListener('submit', function (e) {

@@ -1,26 +1,26 @@
 // @ts-check
 // Arranque del panel «Mi PJ» dentro del foro (el agente lo muestra en un iframe sin marco).
-import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=2.2.1';
-import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=2.2.1';
-import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=2.2.1';
-import { LectorFicha } from '../../lectores/LectorFicha.js?v=2.2.1';
-import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=2.2.1';
-import { crearPanelMiPj } from './MiPjPanel.js?v=2.2.1';
-import { temaDeRuta } from '../../reglas/RevisorBoveda.js?v=2.2.1';
-import { crearActividad } from '../../servicios/ActividadDelForo.js?v=2.2.1';
-import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=2.2.1';
-import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=2.2.1';
-import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=2.2.1';
-import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=2.2.1';
-import { crearTarjetaCanjes } from './CanjesPanel.js?v=2.2.1';
-import { crearRevision } from '../../inspector/Revision.js?v=2.2.1';
-import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=2.2.1';
-import { crearInspector } from '../../inspector/Inspector.js?v=2.2.1';
-import { normNombre } from '../../core/texto.js?v=2.2.1';
-import { crearColoreadorDelForo } from '../../servicios/ColoreadorDelForo.js?v=2.2.1';
-import { crearConfigDelForo } from '../../servicios/ConfigMiPjDelForo.js?v=2.2.1';
-import { atenderEditor } from '../../servicios/EditorDelForo.js?v=2.2.1';
-import { activo as estaActivo } from '../../reglas/ConfigMiPj.js?v=2.2.1';
+import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=2.2.2';
+import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=2.2.2';
+import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=2.2.2';
+import { LectorFicha } from '../../lectores/LectorFicha.js?v=2.2.2';
+import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=2.2.2';
+import { crearPanelMiPj } from './MiPjPanel.js?v=2.2.2';
+import { temaDeRuta } from '../../reglas/RevisorBoveda.js?v=2.2.2';
+import { crearActividad } from '../../servicios/ActividadDelForo.js?v=2.2.2';
+import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=2.2.2';
+import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=2.2.2';
+import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=2.2.2';
+import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=2.2.2';
+import { crearTarjetaCanjes } from './CanjesPanel.js?v=2.2.2';
+import { crearRevision } from '../../inspector/Revision.js?v=2.2.2';
+import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=2.2.2';
+import { crearInspector } from '../../inspector/Inspector.js?v=2.2.2';
+import { normNombre } from '../../core/texto.js?v=2.2.2';
+import { crearColoreadorDelForo } from '../../servicios/ColoreadorDelForo.js?v=2.2.2';
+import { crearConfigDelForo } from '../../servicios/ConfigMiPjDelForo.js?v=2.2.2';
+import { atenderEditor } from '../../servicios/EditorDelForo.js?v=2.2.2';
+import { activo as estaActivo } from '../../reglas/ConfigMiPj.js?v=2.2.2';
 
 const root = /** @type {HTMLElement} */ (document.getElementById('mipj'));
 
@@ -36,7 +36,9 @@ async function arrancar() {
   // 2.2.0: «Configurar Mi PJ» (lo que se puede apagar). Se relee sin esperar: un cambio en PAM llega en unos segundos.
   const config = crearConfigDelForo(agente, { cada: 1500 });
   const on = (g, id) => estaActivo(config.actual(), g, id);
-  const releerConfig = () => { config.refrescar().then(cambio => { if (cambio && panel) panel.pintar(); }, () => {}); };
+  // 2.2.2: al cambiar, todo al momento (el panel, el cartel del oficial y el Inspector); lo pone `alCambiarConfig` más abajo
+  let alCambiarConfig = () => { if (panel) panel.pintar(); };
+  const releerConfig = (forzar = false) => { config.refrescar(forzar).then(cambio => { if (cambio) alCambiarConfig(); }, () => {}); };
   atenderEditor(agente, { coloreador, boveda: () => panel?.datos?.boveda ?? null, on, alPedir: releerConfig });
   const hola = await agente.hola();
   miNombre = hola.cuenta?.nombre ?? null;
@@ -62,7 +64,20 @@ async function arrancar() {
   const lector = new LectorFicha(sistema, compendio);
   const cfg = foros[hola.foro ?? ''];
   // en el tema de un oficial: la barra con las cuentas, arriba de los mensajes (como Mi PJ, antes de pintar el panel)
-  if (cfg?.actividad && on('foro', 'oficial') && ES_OFICIAL.test(hola.titulo || '') && /^\/t\d+/.test(hola.ruta || '')) barraOficial(agente, crearActividad(agente, { yo: hola.cuenta.nombre, uid: hola.cuenta.id, origen: 'https://' + hola.foro, cfg: cfg.actividad, memoria, cierres }), hola.ruta, memoria);
+  // 2.2.2: si se apaga en «Configurar Mi PJ» se quita, y si se vuelve a encender se lee otra vez
+  const enTemaOficial = !!(cfg?.actividad && ES_OFICIAL.test(hola.titulo || '') && /^\/t\d+/.test(hola.ruta || ''));
+  let vueltaOficial = 0, oficialPuesto = false;
+  const ponerOficial = () => {
+    if (!enTemaOficial || !cfg?.actividad) return;
+    if (on('foro', 'oficial') && !oficialPuesto) {
+      oficialPuesto = true; const mia = ++vueltaOficial;
+      barraOficial(agente, crearActividad(agente, { yo: hola.cuenta.nombre, uid: hola.cuenta.id, origen: 'https://' + hola.foro, cfg: cfg.actividad, memoria, cierres }), hola.ruta, memoria, () => mia === vueltaOficial && oficialPuesto);
+    } else if (!on('foro', 'oficial') && oficialPuesto) {
+      oficialPuesto = false; vueltaOficial++;
+      agente.oficial({ estado: 'quitar', abierta: true }).catch(() => {});
+    }
+  };
+  ponerOficial();
   // los canjes en el foro: la petición que preparó PAM, publicarla y la respuesta del Inspector (solo si el foro tiene registro)
   const servicioCanjes = cfg?.registroCanjes ? crearCanjesDelForo(agente, { foroHost: hola.foro || '', cuenta: hola.cuenta, cfg, memoria, ficha: { sistema, compendio, lector } }) : null;
   if (servicioCanjes) await traerPeticionesAntiguas(agente, servicioCanjes.clave, 'cuentas.' + hola.foro + '.' + hola.cuenta.id);
@@ -95,8 +110,9 @@ async function arrancar() {
   // «Terminar en PAM»: la pestaña de PAM terminó de cerrar el canje; ahora se le mandan los datos nuevos del foro
   agente.atender('pam.cierre', () => { panel.alCierrePam(); return {}; });
   // 2.2.1: un cambio en PAM llega en 2 s, y enseguida al volver a la pestaña del foro (antes, hasta 15 s)
-  setInterval(releerConfig, 2000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) config.refrescar(true).then(cambio => { if (cambio) panel.pintar(); }, () => {}); });
+  alCambiarConfig = () => { panel.pintar(); ponerOficial(); inspector.revisar(); };
+  setInterval(() => releerConfig(), 2000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) releerConfig(true); });
   // como Mi PJ: si lo leído tiene más de media hora, se vuelve a leer al abrir (2.2.0: el rato se elige en «Configurar Mi PJ»; 0: solo con «Actualizar»)
   const d = panel.datos, cadaMin = config.actual().lectura.cada;
   const viejo = !d || d.v !== 2 || (cadaMin > 0 && Date.now() - new Date(d.leido).getTime() > cadaMin * 60000) || (d.pendientes || []).includes('roles'); // leído por la 0.3.2, sin roles
@@ -128,6 +144,11 @@ function modoInspector(agente, { hola, cfg, servicioCanjes, memoria, repintar, p
   return {
     disponible: () => disponible,
     activo,
+    /** 2.2.2: «Configurar Mi PJ» cambió: si ya no está permitido se quita; si vuelve a estarlo y estaba activo, se pone. */
+    revisar() {
+      if (!permitido() && insp) { insp.quitar(); insp = null; }
+      else if (permitido() && disponible && activo()) arrancar();
+    },
     cambiar() {
       const on = !activo();
       memoria.sv(CLAVE, on);
@@ -162,7 +183,7 @@ async function traerPeticionesAntiguas(agente, clave, claveAntigua) {
 }
 
 /** La barra del oficial: «leyendo…» al tener la primera página, y luego las cuentas; las marcas de «segundo oficial» se guardan aquí. */
-async function barraOficial(agente, act, ruta, memoria) {
+async function barraOficial(agente, act, ruta, memoria, vigente = () => true) {
   const abierta = () => memoria.gv('mipj.of.abierta', true);
   let O = null;
   const pintar = () => ({ estado: 'ok', abierta: abierta(), barra: barraDeOficial(O, memoria.gv('mipj.of.cuarto', {})) });
@@ -173,10 +194,10 @@ async function barraOficial(agente, act, ruta, memoria) {
     return pintar();
   });
   try {
-    O = await act.leerOficialDeRuta(ruta.split('?')[0].split('#')[0], () => { agente.oficial({ estado: 'leyendo', abierta: abierta() }).catch(() => {}); });
-    await agente.oficial(pintar());
+    O = await act.leerOficialDeRuta(ruta.split('?')[0].split('#')[0], () => { if (vigente()) agente.oficial({ estado: 'leyendo', abierta: abierta() }).catch(() => {}); });
+    if (vigente()) await agente.oficial(pintar()); // (si mientras tanto se apagó, no se pinta)
   } catch (e) {
-    agente.oficial({ estado: 'error', abierta: abierta(), error: e instanceof Error ? e.message : String(e) }).catch(() => {});
+    if (vigente()) agente.oficial({ estado: 'error', abierta: abierta(), error: e instanceof Error ? e.message : String(e) }).catch(() => {});
   }
 }
 
