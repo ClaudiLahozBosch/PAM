@@ -8,8 +8,8 @@
 //   · F05: las partes de la ficha con la regla del lector compartido (js/lectores/PartesFicha.js);
 //   · F06: «Puntos de Destino: 13» se lee 13 (antes, 1);
 //   · leerSaldos es el de Mi PJ (js/lectores/LectorBoveda.js), que era una copia (F17).
-import { leerSaldos } from '../lectores/LectorBoveda.js?v=2.3.0';
-import { partesVigentes } from '../lectores/PartesFicha.js?v=2.3.0';
+import { leerSaldos } from '../lectores/LectorBoveda.js?v=2.3.1';
+import { partesVigentes } from '../lectores/PartesFicha.js?v=2.3.1';
 
 /**
  * @param {{ leer: (ruta: string) => Promise<Document> }} dep
@@ -439,13 +439,13 @@ export function crearRevision({ leer }) {
     return pedirDoc('/t' + tema + '-').then(function (d) {
       var posts = mensajesDe(d);
       if (!posts.length) { throw new Error('No pude abrir la ficha.'); }
-      var autor = function (p) { var a = p.querySelector('.author a[href^="/u"]'); return a ? a.getAttribute('href') : null; };
+      var autor = function (p) { return autorDe(p).autor; }; // 2.3.1: por nombre si el foro no enlaza el perfil
       var duenyo = autor(posts[0]);
       // F05: la ficha son los mensajes seguidos del dueño al principio del tema que parecen ficha (la regla del
       // lector compartido); los avisos y los canjes antiguos son historial (antes: cualquiera de más de 800 letras)
       var partes = partesVigentes(posts.map(function (p) {
         var c = p.querySelector('.content'), a = autor(p);
-        return { el: c, autorId: a ? parseInt((a.match(/^\/u(\d+)/) || [])[1], 10) : null, autor: a || '', texto: lineasDe(c).join('\n'), html: c ? c.innerHTML : '' };
+        return { el: c, autorId: a && a.charAt(0) === '/' ? parseInt((a.match(/^\/u(\d+)/) || [])[1], 10) : null, autor: a || '', texto: lineasDe(c).join('\n'), html: c ? c.innerHTML : '' };
       })).partes.map(function (p) { return p.el; });
       var lineas = [], finas = [];
       partes.forEach(function (c) { lineas = lineas.concat(lineasDe(c)); finas = finas.concat(fichasDe(c)); });
@@ -578,17 +578,26 @@ export function crearRevision({ leer }) {
   /* ============================== bóveda ============================== */
   /* El lector de movimientos de bóveda es el de Mi PJ (js/lectores/LectorBoveda.js: leerSaldos, F17). */
 
+  /* 2.3.1 · El autor de un mensaje. El foro no enlaza el perfil (ni con sesión): entonces se usa el nombre de
+     «por <strong>…», con «@» delante para que dos mensajes del mismo autor se reconozcan igual. */
+  function autorDe(p) {
+    var a = p.querySelector('.author a[href^="/u"]');
+    if (a) { return { autor: a.getAttribute('href'), nombre: a.textContent.trim() }; }
+    var n = p.querySelector('p.author strong') || p.querySelector('p.author .usr_grp_clr');
+    var nombre = n ? n.textContent.trim() : '';
+    return { autor: nombre ? '@' + norm(nombre) : null, nombre: nombre };
+  }
   function postsDe(doc) {
     return mensajesDe(doc).map(function (p) {
-      var a = p.querySelector('.author a[href^="/u"]');
+      var A = autorDe(p);
       var au = p.querySelector('p.author');
       var ed = (p.textContent || '').match(/[ÚU]ltima edici[oó]n por .+? el (.+?), editado/);
       return {
         editado: ed ? leerFecha(ed[1]) : null,
         id: parseInt((p.id || '').replace(/\D/g, ''), 10) || 0,
-        autor: a ? a.getAttribute('href') : null,
-        autorNombre: a ? a.textContent.trim() : '',
-        fecha: au ? au.textContent.replace(/\s+/g, ' ').replace(/^.*?por\s*/i, '').replace(a ? a.textContent.trim() : '', '').trim() : '',
+        autor: A.autor,
+        autorNombre: A.nombre,
+        fecha: au ? au.textContent.replace(/\s+/g, ' ').replace(/^.*?por\s*/i, '').replace(A.nombre, '').trim() : '',
         contenido: p.querySelector('.content')
       };
     }).map(function (x) { x.cuando = leerFecha(x.fecha); return x; });
@@ -645,7 +654,7 @@ export function crearRevision({ leer }) {
   function enCache(clave, fn) { if (!cacheDocs[clave]) { cacheDocs[clave] = fn(); cacheDocs[clave].catch(function () { delete cacheDocs[clave]; }); } return cacheDocs[clave]; }
 
   function datosDelPost(postEl) {
-    var a = postEl.querySelector('.author a[href^="/u"]');
+    var A = autorDe(postEl);
     var perfil = {};
     Array.prototype.forEach.call(postEl.querySelectorAll('.profileField'), function (s) {
       var lab = s.querySelector('.label');
@@ -665,8 +674,8 @@ export function crearRevision({ leer }) {
     if (!boveda && otros.length) { boveda = otros.shift(); }
     return {
       id: parseInt((postEl.id || '').replace(/\D/g, ''), 10) || 0,
-      autor: a ? a.getAttribute('href') : null,
-      nombre: a ? a.textContent.trim() : '',
+      autor: A.autor,
+      nombre: A.nombre,
       etapa: perfil.etapa || '', raza: perfil.raza || '', edad: parseInt(perfil.edad, 10) || null, curso: perfil.curso || '',
       ficha: ficha, boveda: boveda
     };

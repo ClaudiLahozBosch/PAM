@@ -8,12 +8,12 @@
 //   «pam.cuentas.<foro>.<id de cuenta>»   { peticiones } de esa cuenta (Mi PJ lo guardaba en «cuentas.<foro>.<id>»).
 // Los Inspectores de cada grupo se guardan un día en la memoria del panel («grupos.<foro>»).
 import { numero, formato, esNumero, mismoTexto, enlacePost, temaNumero, peticionCapturada, textoPeticion, avisosPeticion, clasificarRespuesta, normNombre,
-  claveCuenta, paqueteCierre, cambiarNumeroTras, descuadres, codigoConEnlaces } from '../reglas/Canjes.js?v=2.3.0';
-import { leerSaldos } from '../lectores/LectorBoveda.js?v=2.3.0';
-import { revisar } from '../reglas/RevisorBoveda.js?v=2.3.0';
-import { leerFichaDelForo } from './FichaDelForo.js?v=2.3.0';
-import { EditorFicha } from '../bbcode/EditorFicha.js?v=2.3.0';
-import { aplicarCanje, yaAvisado } from '../reglas/CambiosFicha.js?v=2.3.0';
+  claveCuenta, paqueteCierre, cambiarNumeroTras, descuadres, codigoConEnlaces } from '../reglas/Canjes.js?v=2.3.1';
+import { leerSaldos } from '../lectores/LectorBoveda.js?v=2.3.1';
+import { revisar } from '../reglas/RevisorBoveda.js?v=2.3.1';
+import { leerFichaDelForo } from './FichaDelForo.js?v=2.3.1';
+import { EditorFicha } from '../bbcode/EditorFicha.js?v=2.3.1';
+import { aplicarCanje, yaAvisado } from '../reglas/CambiosFicha.js?v=2.3.1';
 
 export const CLAVE_APROBACION = 'pam.aprobacion';
 const aNum = v => (typeof v === 'number' ? v : NaN);
@@ -51,7 +51,8 @@ export function postsDe(doc) {
   return [...doc.querySelectorAll('.post')].map(p => {
     const a = p.querySelector('.author a[href^="/u"], .postprofile a[href^="/u"]');
     const autor = p.querySelector('p.author');
-    const nombre = a ? (a.textContent ?? '').trim() : '';
+    // 2.3.1: el foro no enlaza el perfil del autor de cada mensaje (ni con sesión): entonces el nombre sale de «por <strong>…»
+    const nombre = ((a ? a.textContent : null) || autor?.querySelector('strong')?.textContent || autor?.querySelector('.usr_grp_clr')?.textContent || '').trim();
     let fecha = autor ? (autor.textContent ?? '').replace(/\s+/g, ' ').replace(/^.*?por\s*/i, '') : '';
     if (nombre && fecha.indexOf(nombre) === 0) fecha = fecha.substring(nombre.length);
     return {
@@ -75,6 +76,8 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
   // (el agente solo acepta letras, números, «.», «_» y «-» en las claves: un foro con puerto, como el banco local, lleva «:»)
   const CLAVE_CUENTA = claveCuenta(foroHost, cuenta.id);
   const enlace = id => enlacePost(origen, id);
+  /** 2.3.1 · ¿Es tuyo el mensaje? Por id si el foro lo enlaza; si no, por el nombre (como LectorTema.mismoAutor). */
+  const esMio = p => (p.autorId != null && !isNaN(p.autorId) ? p.autorId === cuenta.id : !!p.autorNombre && normNombre(p.autorNombre) === normNombre(cuenta.nombre));
 
   /** La primera página y, si hay más, la última (y la anteúltima). */
   async function leerTema(urlTema) {
@@ -146,7 +149,7 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
   /** ¿Ya está publicada esta petición? Mira tus últimos mensajes del registro. */
   async function buscarPeticionPublicada(texto) {
     const t = await leerTema(cfg.registroCanjes);
-    const propios = t.posts.filter(p => p.autorId === cuenta.id).slice(-3).reverse();
+    const propios = t.posts.filter(esMio).slice(-3).reverse();
     for (const p of propios) { const bb = await leerBBCode(p.id); if (bb !== null && mismoTexto(bb, texto)) return p; }
     return null;
   }
@@ -249,10 +252,18 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
   }
 
   /** Busca la respuesta de un revisor a una petición. No decide nada: deja el candidato anotado. */
-  async function buscarAprobacion(revisores, pet) {
+  /**
+   * @param {any} revisores @param {any} pet
+   * @param {{ fueraDelGrupo?: boolean }} [op] 2.3.1 (barra del Registro): si ningún Inspector del grupo respondió, vale
+   *   también una respuesta de otra cuenta que te nombra y aprueba (queda sin confirmar: se ve en amarillo).
+   */
+  async function buscarAprobacion(revisores, pet, op = {}) {
     const g = revisores && revisores.grupos && revisores.grupos.canjes;
     const conGrupo = Array.isArray(g) && g.length > 0;
     const idsRev = conGrupo ? g.map(m => m.id) : [];
+    // 2.3.1: sin enlace al perfil, el Inspector se reconoce por el nombre
+    const nombresRev = conGrupo ? g.map(m => normNombre(m.nombre)) : [];
+    const esRevisor = p => (p.autorId ? idsRev.indexOf(p.autorId) !== -1 : nombresRev.indexOf(normNombre(p.autorNombre)) !== -1);
     const nombre = normNombre(pet.pj);
     const pila = nombre.split(' ')[0];
     const posts = await postsTrasPeticion(pet.post);
@@ -265,24 +276,29 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
     };
     // Candidato: un revisor que te nombra (o enlaza la petición) o, si no te nombra, la
     // primera respuesta de un revisor sin otras peticiones por medio (siempre se pregunta).
-    let cand = null, sinNombre = false, otrosPorMedio = false;
+    let cand = null, sinNombre = false, otrosPorMedio = false, fuera = null;
     for (let k = 0; k < posts.length && !cand; k++) {
       const p = posts[k];
-      if (!p.autorId || p.autorId === cuenta.id) continue;
-      if (conGrupo && idsRev.indexOf(p.autorId) === -1) { otrosPorMedio = true; continue; }
+      if ((!p.autorId && !p.autorNombre) || esMio(p)) continue;
+      if (conGrupo && !esRevisor(p)) {
+        if (op.fueraDelGrupo && !fuera && (pet.descartadas || []).indexOf(p.id) === -1 && teNombra(p) && ['aprobada', 'corregida'].includes(clasificarRespuesta(lineasDe(p.contenido).join(' ')).clase)) fuera = p;
+        otrosPorMedio = true; continue;
+      }
       if ((pet.descartadas || []).indexOf(p.id) !== -1) continue;
       if (teNombra(p)) cand = p;
       else if (!otrosPorMedio) { cand = p; sinNombre = true; }
     }
+    let delGrupo = conGrupo;
+    if (!cand && fuera) { cand = fuera; delGrupo = false; }
     if (!cand) return { ninguna: true };
     const texto = lineasDe(cand.contenido).join(' ');
     const c = clasificarRespuesta(texto);
     return {
       post: cand.id, enlace: enlace(cand.id), autor: cand.autorNombre, fecha: cand.fecha,
       clase: c.clase, importe: c.importe, extracto: texto.substring(0, 280),
-      revisorConfirmado: conGrupo, sinNombre,
+      revisorConfirmado: delGrupo, sinNombre,
       // Solo se da por buena sin preguntar si es de un Inspector de Canjes, te nombra y es clara.
-      confirmada: conGrupo && !sinNombre && (c.clase === 'aprobada' || c.clase === 'corregida')
+      confirmada: delGrupo && !sinNombre && (c.clase === 'aprobada' || c.clase === 'corregida')
     };
   }
 
@@ -316,7 +332,7 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
     const t = await leerTema(urlTema);
     const primero = t.posts[0];
     if (!primero) throw new Error('No pude abrir la bóveda.');
-    if (primero.autorId !== cuenta.id) throw new Error('El primer mensaje de la bóveda no es tuyo.');
+    if (!esMio(primero)) throw new Error('El primer mensaje de la bóveda no es tuyo.');
     const l = lineasDe(primero.contenido);
     // Saldo: el primer mensaje es solo el respaldo; manda el último movimiento (tuyo o de una revisión).
     const cab = leerSaldos(l.join('\n'));
@@ -326,8 +342,8 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
     };
     t.posts.slice(1).forEach(p => {
       let esRevision = false;
-      if (p.autorId !== cuenta.id && p.autorId) esRevision = /Revisi[oó]n\s+de\s+B[oó]veda/i.test(lineasDe(p.contenido).join(' '));
-      if (p.autorId === cuenta.id || esRevision) {
+      if (!esMio(p) && (p.autorId || p.autorNombre)) esRevision = /Revisi[oó]n\s+de\s+B[oó]veda/i.test(lineasDe(p.contenido).join(' '));
+      if (esMio(p) || esRevision) {
         const s2 = leerSaldos(lineasDe(p.contenido).join('\n'));
         if (s2.gr) { saldo.gr.act = s2.gr.fin; if (s2.gr.tot != null) saldo.gr.tot = s2.gr.tot; }
         if (s2.pl) { saldo.pl.act = s2.pl.fin; if (s2.pl.tot != null) saldo.pl.tot = s2.pl.tot; }
@@ -346,7 +362,7 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
     const t = await leerTema(urlTema);
     const primero = t.posts[0];
     if (!primero) throw new Error('No pude abrir la ficha.');
-    if (primero.autorId !== cuenta.id) throw new Error('El primer mensaje de la ficha no es tuyo.');
+    if (!esMio(primero)) throw new Error('El primer mensaje de la ficha no es tuyo.');
     return { post: primero.id, bbcode: await leerBBCode(primero.id) };
   }
 
@@ -385,7 +401,7 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
   /** Tu último mensaje de un tema (sin contar el primero) cuyo BBCode cumple `cond`, o null. */
   async function buscarMensajePropio(urlTema, cond) {
     const t = await leerTema(urlTema);
-    const propios = t.posts.slice(1).filter(p => p.autorId === cuenta.id).slice(-3).reverse();
+    const propios = t.posts.slice(1).filter(esMio).slice(-3).reverse();
     for (const p of propios) { const bb = await leerBBCode(p.id); if (bb !== null && cond(bb)) return p; }
     return null;
   }

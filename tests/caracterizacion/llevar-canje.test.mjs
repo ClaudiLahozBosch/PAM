@@ -205,3 +205,65 @@ test('foro: «Aplicar cambio a la ficha» edita la ficha por la puerta del agent
   await hasta(() => gm[claveLlevados(FORO, CUENTA.id)].posts['900'].ficha);
   await hasta(() => /Ficha editada/.test(ultimaBarra(agente)['900']));
 });
+
+/* ---------------- 2.3.1 · el foro de verdad no enlaza el perfil del autor ---------------- */
+// Así sale el autor en el Registro (con sesión y sin ella): «por <span class="usr_grp_clr"><strong>Nombre</strong></span> fecha»
+const real = (id, autor, html) => `<div id="p${id}" class="post row2 post--${id}"><div class="inner"><div class="postbody"><p class="author"><img class="sprite-icon_post_target" alt="Mensaje">&nbsp;por&nbsp;<span class="group-9 usr_grp_clr" style="color:#769aaf"><strong>${autor}</strong></span> Mar 10 Nov 2026 - 20:19</p><div class="content clearfix"><div>${html}</div></div></div><div class="postprofile" id="profile${id}"><dl><dt><img alt="${autor}"></dt></dl></div></div></div>`;
+function foroReal() {
+  const pag1 = `<html><body><h1 class="page-title">Registro de Canjes</h1><div class="pagination"><a href="/t34430p15-registro-de-canjes">2</a></div>${real(100, 'Alguien', 'Normas del registro')}</body></html>`;
+  const pag2 = `<html><body><h1 class="page-title">Registro de Canjes</h1><div class="pagination"><a href="/t34430-registro-de-canjes">1</a></div>
+    ${real(739660, 'Hana Park', PETICION)}${real(739690, 'Claire Pusset-Strauss', 'Hana tus canjes son correctos y puedes agregarlos a la ficha. Recuerda que debes descontar las grageas de la bóveda.')}
+    ${real(739702, 'Woojin Moon', 'HABILIDADES<br>Rituales: Sin nivel → Novato — 75 grageas<br>Total: 75 grageas.')}</body></html>`;
+  const grupo = `<html><body><div id="main-content"><table><tr><td><a href="/u5800">Claire Pusset-Strauss</a></td></tr><tr><td><a href="/u4775">Betjelli Bray</a></td></tr></table></div></body></html>`;
+  const paginas = { '/t34430-registro-de-canjes': pag1, '/t34430p15-registro-de-canjes': pag2, '/t34430p15-': pag2, '/g121-inspectores-de-canjes': grupo };
+  return async ruta => { const k = Object.keys(paginas).find(r => ruta.split('?')[0] === r || ruta.startsWith(r)); if (!k) throw new Error('sin página ' + ruta); return new JSDOM(paginas[k]).window.document; };
+}
+
+test('foro real (sin enlace al perfil): reconoce tu petición y la aprobación de la Inspectora por el nombre', async () => {
+  const { crearCanjesDelForo } = await import('../../js/servicios/CanjesDelForo.js');
+  const leerForo = foroReal();
+  const gm = {}, llamadas = [];
+  const HANA = { id: 5709, nombre: 'Hana Park' };
+  const agente = {
+    leer: leerForo, leerDato: async k => gm[k] ?? null, guardarDato: async (k, v) => { gm[k] = v; },
+    pedir: async (tipo, d) => { llamadas.push([tipo, d]); return {}; }, atender: () => {}, abrirPam: async () => ({ abierta: true }), puerta: async () => ({ resultado: 'aceptada' })
+  };
+  const cfg = { registroCanjes: '/t34430-registro-de-canjes', grupos: { canjes: '/g121-inspectores-de-canjes' } };
+  const mem = new Map(), memoria = { gv: (k, d) => (mem.has(k) ? mem.get(k) : d), sv: (k, v) => mem.set(k, v) };
+  const servicio = crearCanjesDelForo(agente, { foroHost: FORO, cuenta: HANA, cfg, memoria });
+  const R = crearCanjesEnRegistro({
+    agente, hola: { foro: FORO, cuenta: HANA, ruta: '/t34430p15-registro-de-canjes' }, cfg, servicio, datos: () => null, actualizar: async () => {}, memoria,
+    cargarDatos: async () => ({ sistema: j('sistema.json'), calculadora: j('arcanos-calculadora.json'), compendio: j('arcanos.json') }),
+    documento: new JSDOM('').window.document
+  });
+  await R.iniciar();
+  const p = llamadas.filter(l => l[0] === 'canje.pintar').pop();
+  assert.ok(p, 'pinta la barra');
+  assert.deepEqual(Object.keys(p[1].barras), ['739660'], 'solo bajo la petición de Hana (ni la de Woojin ni la respuesta)');
+  assert.match(p[1].barras['739660'], /chip ok[^>]*>✓ Aprobado por Claire Pusset-Strauss/, 'Claire, reconocida como Inspectora por su nombre');
+});
+
+test('Inspector: sin enlace al perfil, el autor sale del nombre', () => {
+  const doc = new JSDOM(real(5, 'Hana Park', 'hola')).window.document;
+  const D = crearRevision({ leer: async () => doc }).datosDelPost(doc.querySelector('.post'));
+  assert.equal(D.nombre, 'Hana Park');
+  assert.equal(D.autor, '@hana park');
+});
+
+test('si quien aprobó no figura en el grupo, la barra sale igual, marcada «sin confirmar»', async () => {
+  const { crearCanjesDelForo } = await import('../../js/servicios/CanjesDelForo.js');
+  const leerForo = foroReal();
+  const sinClaire = async ruta => { const d = await leerForo(ruta); if (/g121/.test(ruta)) d.querySelector('a[href="/u5800"]').remove(); return d; };
+  const llamadas = [], HANA = { id: 5709, nombre: 'Hana Park' };
+  const agente = { leer: sinClaire, leerDato: async () => null, guardarDato: async () => {}, pedir: async (t, d) => { llamadas.push([t, d]); return {}; }, atender: () => {} };
+  const cfg = { registroCanjes: '/t34430-registro-de-canjes', grupos: { canjes: '/g121-inspectores-de-canjes' } };
+  const mem = new Map(), memoria = { gv: (k, d) => (mem.has(k) ? mem.get(k) : d), sv: (k, v) => mem.set(k, v) };
+  const servicio = crearCanjesDelForo(agente, { foroHost: FORO, cuenta: HANA, cfg, memoria });
+  const R = crearCanjesEnRegistro({ agente, hola: { foro: FORO, cuenta: HANA, ruta: '/t34430p15-registro-de-canjes' }, cfg, servicio, datos: () => null, actualizar: async () => {}, memoria,
+    cargarDatos: async () => ({ sistema: j('sistema.json'), calculadora: j('arcanos-calculadora.json'), compendio: j('arcanos.json') }), documento: new JSDOM('').window.document });
+  await R.iniciar();
+  const p = llamadas.filter(l => l[0] === 'canje.pintar').pop();
+  assert.match(p[1].barras['739660'], /chip warn[^>]*>✓ Aprobado por Claire Pusset-Strauss/);
+  // la tarjeta del panel (sin la opción) sigue como siempre: solo Inspectores del grupo
+  assert.deepEqual(await servicio.buscarAprobacion(await servicio.leerGruposRevisores(true), { post: '739660', pj: 'Hana Park' }), { ninguna: true });
+});
