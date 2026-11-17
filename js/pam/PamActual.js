@@ -43,6 +43,14 @@ export function crearPamActual(w) {
     fichaEnMemoria: () => { try { const f = w.grimorioFicha && w.grimorioFicha(); return f ? JSON.parse(JSON.stringify(f)) : null; } catch (e) { return null; } },
     /** «Traer de la calculadora»: los canjes del carrito pasan a la ficha de PAM. */
     traerCalculadora: () => w.pamFicha.traerCalculadora(),
+    /** 2.3.0 · ¿Tiene este PAM «sumar un canje a la ficha»? (Mi Ficha, para «Llevar a PAM» desde el Registro de Canjes) */
+    hayLlevar: () => !!(w.pamFicha && w.pamFicha.aplicarCanje && w.pamFicha.buscar && w.pamPjs && w.pamPjs.cambiar && w.rrBoveda && w.rrBoveda.preparar && w.rrBoveda.cerrar),
+    /** 2.3.0 · Suma a la ficha activa lo de una petición aprobada (js/reglas/LlevarCanje.js): { hechos, manual }. */
+    aplicarCanjeFicha: cambios => w.pamFicha.aplicarCanje(cambios),
+    /** 2.3.0 · El personaje de «Mi Ficha» con ese nombre ({ id, nombre, activo }) o null, sin cambiar nada. */
+    buscarPj: nombre => { try { return w.pamFicha.buscar(nombre); } catch (e) { return null; } },
+    /** 2.3.0 · Pone activo en «Mi Ficha» el personaje con ese nombre: su id, o null si no está. */
+    activarPj: nombre => { const f = w.pamFicha.buscar(nombre); if (!f) return null; if (!f.activo) w.pamPjs.cambiar(f.id); return f.id; },
     /** «Llevar a la calculadora»: la ficha de PAM pasa a ser el nivel actual de la Tabla de Canjes. */
     llevarCalculadora: () => w.pamFicha.llevarCalculadora(),
     /** El código del foro de la ficha activa en modo «Personalizada»: { codigo, base, hechos, manual } o null. */

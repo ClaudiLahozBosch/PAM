@@ -3,8 +3,8 @@
 // js/reglas/ConfigMiPj.js; esta página solo las enseña, guarda con el almacén (`grimorio.mipj.config`, viaja con la
 // Sesión con código) y avisa con el evento `pam:mipj` para que js/pam/ConfigMiPjAlForo.js pase la copia al agente.
 // Recibe la ventana, como las demás páginas: así las pruebas la montan en jsdom.
-import { Almacen } from '../../core/Almacen.js?v=2.2.4';
-import { OPCIONES, LECTURA, SIEMPRE, configPorDefecto, normalizarConfig } from '../../reglas/ConfigMiPj.js?v=2.2.4';
+import { Almacen } from '../../core/Almacen.js?v=2.3.0';
+import { OPCIONES, LECTURA, SIEMPRE, configPorDefecto, normalizarConfig } from '../../reglas/ConfigMiPj.js?v=2.3.0';
 
 const CLAVE = 'grimorio.mipj.config';
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);

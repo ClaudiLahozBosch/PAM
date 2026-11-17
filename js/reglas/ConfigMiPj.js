@@ -14,6 +14,7 @@ export const OPCIONES = {
     { id: 'boveda', glifo: '⛁', titulo: 'Revisión de la bóveda', desc: 'La barra debajo del editor («Bóveda: las cuentas cuadran») y el aviso «Antes de publicar» si algo no cuadra.' },
     { id: 'colorear', glifo: '✦', titulo: 'Botón «Colorear diálogos»', desc: 'Junto a «Previsualizar», colorea los diálogos con tu Coloreador de PAM.' },
     { id: 'quitar', glifo: '↶', titulo: 'Botón «Quitar colores»', desc: 'Aparece cuando el texto tiene algún [color] y los quita todos.' },
+    { id: 'canjes', glifo: '⚖', titulo: 'Botones en el Registro de Canjes', desc: 'Debajo de tus peticiones aprobadas: «Llevar a PAM» (suma el canje a tu ficha y tu bóveda de PAM) y «Aplicar cambio a la ficha».' },
     { id: 'inspector', glifo: '🔍', titulo: 'Barras del Inspector de Canjes', desc: 'Solo para Inspectores: la barra «Revisar canje» en cada pedido. Además hay que activarlo en la tarjeta del panel.' }
   ],
   panel: [

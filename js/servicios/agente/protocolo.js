@@ -27,6 +27,9 @@
 //   editor.descolorear { texto }           → { texto }   («Quitar colores» sin el texto de antes, 2.1.3)
 //   ventana.cambio { ancho, alto }         cambió el tamaño de la ventana del foro
 //   pam.cierre     { hecho }               la pestaña de PAM terminó de cerrar el canje («Canje publicado → PAM»)
+//   canje.accion   { accion, p }           2.3.0: un clic en la barra del Registro de Canjes («llevar» | «ficha», p = mensaje)
+// PAM → agente (2.3.0):
+//   canje.pintar   { css, barras: { <post>: html } }  la barra de Mi PJ debajo de tus peticiones aprobadas; canje.quitar {}
 
 export const PROTOCOLO = 1;
 

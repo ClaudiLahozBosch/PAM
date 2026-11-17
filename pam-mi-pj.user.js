@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PAM · Mi PJ (HP Avada Kedavra)
 // @namespace    https://jesleytherabbit-prog.github.io/PAM/
-// @version      2.2.4
+// @version      2.3.0
 // @description  El script mínimo de PAM: lee el foro con tu sesión, publica y edita SOLO tras tu «Aceptar» y muestra el panel «Mi PJ» de PAM. Toda la lógica está en PAM.
 // @author       Hana Park
 // @match        https://hp-avada-kedavra.foroactivo.com/*
@@ -30,7 +30,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.2.4';
+  var VERSION = '2.3.0';
   var PROTOCOLO = 1;
   var PAM = { origen: 'https://jesleytherabbit-prog.github.io', ruta: '/PAM/' };
   var FOROS = ['hp-avada-kedavra.foroactivo.com'];
@@ -675,7 +675,7 @@
   // ---------------------------------------------------------------
   // Panel «Mi PJ» (página de PAM en un iframe que ocupa justo lo que ocupa el panel)
   // ---------------------------------------------------------------
-  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=2.2.4' });
+  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=2.3.0' });
   raiz.appendChild(iframe);
   // Si el panel no arranca (no pide tamaño), se enseña al menos su pastilla, para que nunca quede invisible.
   var panelVivo = false;
@@ -715,6 +715,8 @@
     'foro.oficial': function (d) { return pintarOficial(d); },
     'inspector.pintar': function (d) { return pintarInspector(d); },
     'inspector.quitar': function () { return quitarInspector(); },
+    'canje.pintar': function (d) { return pintarCanje(d); },
+    'canje.quitar': function () { return quitarCanje(); },
     // Solo a rutas del propio foro (p. ej. el mensaje que se acaba de publicar).
     'foro.ir': function (d) { var u = rutaSegura(d.ruta); setTimeout(function () { location.href = u.href; }, 0); return { ido: true }; },
     'pam.abrir': function (d) { return abrirPam(d); },
@@ -781,7 +783,7 @@
     return t.content;
   }
   var icj = { hosts: {}, panel: null };
-  function cajaIcj(css) {
+  function cajaIcj(css, alClic, alCambio) {
     var h = document.createElement('div'); h.className = 'pam-agente-icj';
     var s = h.attachShadow({ mode: 'open' });
     var e1 = document.createElement('style'); e1.textContent = css; s.appendChild(e1);
@@ -789,8 +791,8 @@
     h.setAttribute('data-skin', temaActual.skin);
     estilosTema.push({ estilo: e2, host: h });
     var cuerpo = document.createElement('div'); s.appendChild(cuerpo);
-    s.addEventListener('click', alClicIcj);
-    s.addEventListener('change', alCambioIcj);
+    s.addEventListener('click', alClic || alClicIcj);
+    if (alCambio !== false) { s.addEventListener('change', alCambio || alCambioIcj); }
     return { host: h, cuerpo: cuerpo, sombra: s };
   }
   function alClicIcj(e) {
@@ -849,6 +851,31 @@
       icj.panel.cuerpo.replaceChildren(limpiarHtml(d.panel));
     }
     return { pintado: true };
+  }
+  // 2.3.0 · Registro de Canjes: la barra de Mi PJ debajo de tus peticiones aprobadas («Llevar a PAM», «Aplicar cambio
+  // a la ficha»). PAM arma lo que se ve; aquí solo se pinta (limpio) y los clics vuelven a PAM con «canje.accion».
+  var cjHosts = {};
+  function alClicCanje(e) {
+    var b = e.target.closest && e.target.closest('[data-cj]');
+    if (!b || b.disabled) { return; }
+    canal.pedir('canje.accion', { accion: b.getAttribute('data-cj'), p: b.getAttribute('data-p') }, 30 * 60000).catch(function () {});
+  }
+  function pintarCanje(d) {
+    var css = String(d.css || '');
+    Object.keys(d.barras || {}).forEach(function (id) {
+      var post = document.getElementById('p' + parseInt(id, 10));
+      var cont = post && post.querySelector('.content');
+      if (!cont) { return; }
+      var c = cjHosts[id];
+      if (!c || !c.host.isConnected) { c = cjHosts[id] = cajaIcj(css, alClicCanje, false); c.host.className = 'pam-agente-canje'; cont.parentNode.insertBefore(c.host, cont.nextSibling); }
+      c.cuerpo.replaceChildren(limpiarHtml(String(d.barras[id] || '')));
+    });
+    return { pintado: true };
+  }
+  function quitarCanje() {
+    Object.keys(cjHosts).forEach(function (id) { cjHosts[id].host.remove(); });
+    cjHosts = {};
+    return { quitado: true };
   }
   function quitarInspector() {
     Object.keys(icj.hosts).forEach(function (id) { icj.hosts[id].host.remove(); });

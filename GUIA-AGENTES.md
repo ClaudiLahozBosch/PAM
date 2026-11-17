@@ -85,7 +85,8 @@ js/reglas/                Lógica pura, sin leer ni escribir: Combate, Canjes (t
 js/servicios/             Hablan con el foro a través del agente: FichaDelForo, BovedaDelForo, ActividadDelForo,
                           BibliotecaDelForo, CanjesDelForo, MiPj, MigracionLegado (lee los datos antiguos, no borra).
 js/servicios/agente/      protocolo.js (el contrato) y ClienteAgente.js (postMessage con id y respuesta).
-js/paginas/panel/         El panel Mi PJ: main.js, MiPjPanel.js (moduloMiPJ portado), CanjesPanel.js, BibliotecaPanel.js.
+js/paginas/panel/         El panel Mi PJ: main.js, MiPjPanel.js (moduloMiPJ portado), CanjesPanel.js, BibliotecaPanel.js,
+                          CanjesEnRegistro.js (2.3.0: «Llevar a PAM» y «Aplicar cambio a la ficha» bajo tus peticiones aprobadas).
 js/paginas/inicio/        Fase 8e: portada.js (portada y navegación, window.showSection), temas.js (window.aplicarTema),
                           foroAntiguo.js («Datos del foro → PAM», FOROS_PRUEBA). Cada uno exporta montar(ventana).
                           (js/paginas/pam/, donde la 8a dejó las páginas antiguas, ya no existe.)
