@@ -1,7 +1,7 @@
 // @ts-check
-import { Trasfondo } from './Trasfondo.js?v=2.2.3';
-import { Arcano } from './Arcano.js?v=2.2.3';
-import { huella } from '../core/huella.js?v=2.2.3';
+import { Trasfondo } from './Trasfondo.js?v=2.2.4';
+import { Arcano } from './Arcano.js?v=2.2.4';
+import { huella } from '../core/huella.js?v=2.2.4';
 
 /**
  * Una parte de la ficha: un mensaje del foro.
