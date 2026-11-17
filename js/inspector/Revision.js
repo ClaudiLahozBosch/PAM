@@ -10,6 +10,7 @@
 //   · leerSaldos es el de Mi PJ (js/lectores/LectorBoveda.js), que era una copia (F17).
 import { leerSaldos } from '../lectores/LectorBoveda.js?v=2.3.1';
 import { partesVigentes } from '../lectores/PartesFicha.js?v=2.3.1';
+import { autorDeMensaje } from '../lectores/LectorTema.js?v=2.3.1';
 
 /**
  * @param {{ leer: (ruta: string) => Promise<Document> }} dep
@@ -578,14 +579,11 @@ export function crearRevision({ leer }) {
   /* ============================== bóveda ============================== */
   /* El lector de movimientos de bóveda es el de Mi PJ (js/lectores/LectorBoveda.js: leerSaldos, F17). */
 
-  /* 2.3.1 · El autor de un mensaje. El foro no enlaza el perfil (ni con sesión): entonces se usa el nombre de
-     «por <strong>…», con «@» delante para que dos mensajes del mismo autor se reconozcan igual. */
+  /* 2.3.1 · El autor de un mensaje, con el lector de Mi PJ (LectorTema.autorDeMensaje): el foro no siempre enlaza el
+     perfil, y entonces solo hay nombre. `autor` es una clave para comparar: «/u<id>» o «@nombre». */
   function autorDe(p) {
-    var a = p.querySelector('.author a[href^="/u"]');
-    if (a) { return { autor: a.getAttribute('href'), nombre: a.textContent.trim() }; }
-    var n = p.querySelector('p.author strong') || p.querySelector('p.author .usr_grp_clr');
-    var nombre = n ? n.textContent.trim() : '';
-    return { autor: nombre ? '@' + norm(nombre) : null, nombre: nombre };
+    var A = autorDeMensaje(p);
+    return { autor: A.autorId != null ? '/u' + A.autorId : (A.autor ? '@' + norm(A.autor) : null), nombre: A.autor };
   }
   function postsDe(doc) {
     return mensajesDe(doc).map(function (p) {

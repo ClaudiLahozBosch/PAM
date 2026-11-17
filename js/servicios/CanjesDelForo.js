@@ -14,6 +14,7 @@ import { revisar } from '../reglas/RevisorBoveda.js?v=2.3.1';
 import { leerFichaDelForo } from './FichaDelForo.js?v=2.3.1';
 import { EditorFicha } from '../bbcode/EditorFicha.js?v=2.3.1';
 import { aplicarCanje, yaAvisado } from '../reglas/CambiosFicha.js?v=2.3.1';
+import { autorDeMensaje, mismoAutor, esDeCuenta } from '../lectores/LectorTema.js?v=2.3.1';
 
 export const CLAVE_APROBACION = 'pam.aprobacion';
 const aNum = v => (typeof v === 'number' ? v : NaN);
@@ -49,15 +50,13 @@ export function lineasDe(elemento) {
 /** Mensajes de una página de tema, como los leían los canjes de Mi PJ. @param {Document} doc */
 export function postsDe(doc) {
   return [...doc.querySelectorAll('.post')].map(p => {
-    const a = p.querySelector('.author a[href^="/u"], .postprofile a[href^="/u"]');
+    const { autorId, autor: nombre } = autorDeMensaje(p); // 2.3.1: id si el foro enlaza el perfil; si no, el nombre
     const autor = p.querySelector('p.author');
-    // 2.3.1: el foro no enlaza el perfil del autor de cada mensaje (ni con sesión): entonces el nombre sale de «por <strong>…»
-    const nombre = ((a ? a.textContent : null) || autor?.querySelector('strong')?.textContent || autor?.querySelector('.usr_grp_clr')?.textContent || '').trim();
     let fecha = autor ? (autor.textContent ?? '').replace(/\s+/g, ' ').replace(/^.*?por\s*/i, '') : '';
     if (nombre && fecha.indexOf(nombre) === 0) fecha = fecha.substring(nombre.length);
     return {
       id: (p.id || '').replace(/\D/g, ''),
-      autorId: a ? parseInt(((a.getAttribute('href') ?? '').match(/^\/u(\d+)/) || [])[1], 10) : null,
+      autorId,
       autorNombre: nombre,
       fecha: fecha.trim(),
       contenido: p.querySelector('.content')
@@ -76,8 +75,8 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
   // (el agente solo acepta letras, números, «.», «_» y «-» en las claves: un foro con puerto, como el banco local, lleva «:»)
   const CLAVE_CUENTA = claveCuenta(foroHost, cuenta.id);
   const enlace = id => enlacePost(origen, id);
-  /** 2.3.1 · ¿Es tuyo el mensaje? Por id si el foro lo enlaza; si no, por el nombre (como LectorTema.mismoAutor). */
-  const esMio = p => (p.autorId != null && !isNaN(p.autorId) ? p.autorId === cuenta.id : !!p.autorNombre && normNombre(p.autorNombre) === normNombre(cuenta.nombre));
+  /** ¿Es tuyo el mensaje? (LectorTema: por id si el foro enlaza el perfil; si no, por el nombre) */
+  const esMio = p => esDeCuenta({ autorId: p.autorId, autor: p.autorNombre }, cuenta);
 
   /** La primera página y, si hay más, la última (y la anteúltima). */
   async function leerTema(urlTema) {
@@ -260,10 +259,8 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
   async function buscarAprobacion(revisores, pet, op = {}) {
     const g = revisores && revisores.grupos && revisores.grupos.canjes;
     const conGrupo = Array.isArray(g) && g.length > 0;
-    const idsRev = conGrupo ? g.map(m => m.id) : [];
-    // 2.3.1: sin enlace al perfil, el Inspector se reconoce por el nombre
-    const nombresRev = conGrupo ? g.map(m => normNombre(m.nombre)) : [];
-    const esRevisor = p => (p.autorId ? idsRev.indexOf(p.autorId) !== -1 : nombresRev.indexOf(normNombre(p.autorNombre)) !== -1);
+    // ¿Es de un Inspector del grupo? (LectorTema.mismoAutor: por id, o por el nombre si el foro no enlaza el perfil)
+    const esRevisor = p => g.some(m => mismoAutor({ autorId: p.autorId, autor: p.autorNombre }, { autorId: m.id, autor: m.nombre }));
     const nombre = normNombre(pet.pj);
     const pila = nombre.split(' ')[0];
     const posts = await postsTrasPeticion(pet.post);
@@ -279,7 +276,7 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
     let cand = null, sinNombre = false, otrosPorMedio = false, fuera = null;
     for (let k = 0; k < posts.length && !cand; k++) {
       const p = posts[k];
-      if ((!p.autorId && !p.autorNombre) || esMio(p)) continue;
+      if ((p.autorId == null && !p.autorNombre) || esMio(p)) continue;
       if (conGrupo && !esRevisor(p)) {
         if (op.fueraDelGrupo && !fuera && (pet.descartadas || []).indexOf(p.id) === -1 && teNombra(p) && ['aprobada', 'corregida'].includes(clasificarRespuesta(lineasDe(p.contenido).join(' ')).clase)) fuera = p;
         otrosPorMedio = true; continue;
@@ -342,7 +339,7 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
     };
     t.posts.slice(1).forEach(p => {
       let esRevision = false;
-      if (!esMio(p) && (p.autorId || p.autorNombre)) esRevision = /Revisi[oó]n\s+de\s+B[oó]veda/i.test(lineasDe(p.contenido).join(' '));
+      if (!esMio(p) && (p.autorId != null || p.autorNombre)) esRevision = /Revisi[oó]n\s+de\s+B[oó]veda/i.test(lineasDe(p.contenido).join(' '));
       if (esMio(p) || esRevision) {
         const s2 = leerSaldos(lineasDe(p.contenido).join('\n'));
         if (s2.gr) { saldo.gr.act = s2.gr.fin; if (s2.gr.tot != null) saldo.gr.tot = s2.gr.tot; }
@@ -462,6 +459,8 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
       ? { tipo: 'publicar', tema: temaNumero(urlFicha), texto: 'Ficha actualizada con los canjes aprobados.\nMovimiento en la bóveda: [url=«enlace del paso 2»]enlace[/url]', descripcion: 'aviso en la ficha («enlace del paso 2» se cambia por el enlace real del movimiento al publicar)' }
       : { tipo: 'publicar', descripcion: 'aviso en la ficha', omitido: 'Sin movimiento de bóveda no hay enlace que poner.' });
     if (pet.cambiosFicha) {
+      // 2.3.1 · lo que PAM no pudo sumar a su ficha al «Llevar a PAM» (tampoco va a estar en el cambio)
+      if (pet.manualFicha && pet.manualFicha.length) avisos.push('PAM no pudo sumar esto a la ficha: ' + pet.manualFicha.join(' · ') + '. Agregalo a mano («Modificar» en el paso de la ficha, o editándola después).');
       pasos.push(...await pasosFichaPorMensajes(pet, urlFicha, avisos));
       pasos.push(pasoAviso = aviso());
     } else if (pet.ficha && fic) {

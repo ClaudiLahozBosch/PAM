@@ -26,13 +26,25 @@ export function leerPaginaTema(doc) {
   return { tema, foro: ruta.length ? ruta[ruta.length - 1] : null, titulo, posts, paginas };
 }
 
+/**
+ * Quién escribió un mensaje: el id si el foro enlaza su perfil y el nombre que se ve. Sin sesión (y en algunos temas, como
+ * el Registro de Canjes, también con ella) el foro no enlaza el perfil: entonces solo hay nombre, el de «por <strong>…».
+ * Es el único sitio de Mi PJ que lo lee (2.3.1: los canjes y el Inspector lo usan también); para comparar, `mismoAutor`.
+ * @param {Element} p el mensaje (`.post`) @returns {{ autorId: number|null, autor: string }}
+ */
+export function autorDeMensaje(p) {
+  const autorP = p.querySelector('p.author');
+  const enlace = p.querySelector('.author a[href^="/u"], .postprofile a[href^="/u"]');
+  const autorId = numero(enlace?.getAttribute('href')?.match(/^\/u(\d+)/)?.[1]);
+  const autor = (enlace?.textContent || autorP?.querySelector('strong')?.textContent || autorP?.querySelector('.usr_grp_clr')?.textContent || '').trim();
+  return { autorId, autor };
+}
+
 /** @param {Element} p */
 function leerMensaje(p) {
   const id = numero(p.id.replace(/\D/g, '')) ?? 0;
   const autorP = p.querySelector('p.author');
-  const enlace = p.querySelector('.author a[href^="/u"], .postprofile a[href^="/u"]');
-  const autorId = numero(enlace?.getAttribute('href')?.match(/^\/u(\d+)/)?.[1]);
-  const autor = (enlace?.textContent || autorP?.querySelector('strong')?.textContent || '').trim();
+  const { autorId, autor } = autorDeMensaje(p);
   let fecha = (autorP?.textContent ?? '').replace(/\s+/g, ' ').replace(/^.*?\bpor\s*/i, '').trim();
   if (autor && fecha.startsWith(autor)) fecha = fecha.slice(autor.length).trim();
   const contenido = p.querySelector('.content');
@@ -54,6 +66,9 @@ export function mismoAutor(a, b) {
   const n = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
   return !!a.autor && n(a.autor) === n(b.autor);
 }
+
+/** ¿Es el mensaje de esta cuenta? (`mismoAutor` con la cuenta) @param {{ autorId: number|null, autor: string }} m @param {{ id: number, nombre: string }} cuenta */
+export const esDeCuenta = (m, cuenta) => !!cuenta && mismoAutor(m, { autorId: cuenta.id ?? null, autor: cuenta.nombre });
 
 function numero(s) { const n = Number(s); return s != null && s !== '' && Number.isFinite(n) ? n : null; }
 

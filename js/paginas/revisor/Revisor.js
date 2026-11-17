@@ -1171,51 +1171,67 @@ function fichaBBCode(){
 /* ============ Calculadora <-> ficha ============ */
 /* R07 (8c): la traducción de nombres (Esquivar → Esquiva…) sale de data/sistema.json (SK_MAP de datos.js) */
 const SK_BACK = Object.fromEntries(Object.entries(SK_MAP).map(([k,v])=>[v,k]));
+/* 2.3.1 · LA regla para sumar canjes a la ficha: la usan «Traer de la calculadora» (el carrito de la Tabla de Canjes) y
+   «Llevar a PAM» desde el Registro de Canjes (js/pam/LlevarCanjePam.js, con lo que dice la petición del foro; los tipos,
+   en js/reglas/LlevarCanje.js). Los niveles solo suben y lo que ya está no se repite (sumar dos veces da lo mismo).
+   cambios: [{ tipo: 'stat'|'skill'|'arte'|'vent'|'esp'|'bg'|'arcano'|'idioma'|'titulo'|'raza'|'talento'|'lazo'|'pd', …, texto? }]
+   Devuelve { hechos, manual }: los textos de lo que cambió y de lo que no se pudo (no toca el guardado ni la pantalla). */
+function sumarCanje(cambios){
+  const hechos=[], manual=[];
+  const hecho=c=>hechos.push(c.texto||c.tipo);
+  const subir=(o,k,v,c)=>{ if(num(o[k])>=v) return; o[k]=v; hecho(c); };
+  (cambios||[]).forEach(c=>{
+    const txt=c.texto||'';
+    if(c.tipo==='stat'){ if(ATTRS.includes(c.nombre)) subir(ficha.attrs,c.nombre,c.hasta,c); else manual.push(txt); }
+    else if(c.tipo==='skill'){ const k=SK_MAP[c.habilidad]||c.habilidad; if(k in ficha.skills) subir(ficha.skills,k,c.hasta,c); else manual.push(txt); }
+    else if(c.tipo==='arte'){ const ex=ficha.artes.find(x=>norm(x.n)===norm(c.nombre)); if(ex) subir(ex,'v',c.hasta,c); else { ficha.artes.push({n:c.nombre,v:c.hasta}); hecho(c); } }
+    else if(c.tipo==='vent'){ if(c.nombre in ficha.adv) subir(ficha.adv,c.nombre,c.hasta,c); else manual.push(txt); }
+    else if(c.tipo==='esp'){ if(ESP_RAMAS.includes(c.rama)) subir(ficha.esp,c.rama,Math.min(3,c.hasta),c); else manual.push(txt); }
+    else if(c.tipo==='bg'){ const ex=ficha.bgs.find(b=>norm(b.t)===norm(c.bgTipo)&&norm(b.c)===norm(c.bgCat)&&norm(b.e)===norm(c.bgEsp)); if(ex) subir(ex,'v',c.hasta,c); else { ficha.bgs.push({t:c.bgTipo,c:c.bgCat,e:c.bgEsp||'',v:c.hasta,nota:''}); hecho(c); } }
+    else if(c.tipo==='arcano'){ if(!hasArc(c.nombre)){ ficha.arcanos.push({type:c.type, tier:c.tier, name:c.nombre, nota:''}); hecho(c); } }
+    else if(c.tipo==='idioma'){ const orden=['Bajo','Medio','Alto','Nativo'], ex=ficha.idiomas.find(x=>norm(x.n)===norm(c.nombre));
+      if(ex){ if(orden.indexOf(ex.nivel)<orden.indexOf(c.nivel)){ ex.nivel=c.nivel; hecho(c); } } else { ficha.idiomas.push({n:c.nombre, nivel:c.nivel||'Bajo', nota:''}); hecho(c); } }
+    else if(c.tipo==='titulo'){ if(!ficha.titulos.split('\n').some(l=>norm(l)===norm(c.texto))){ ficha.titulos=(ficha.titulos?ficha.titulos+'\n':'')+c.texto; hecho(c); } }
+    else if(c.tipo==='raza'){ if(norm(ficha.d.raza)!==norm(c.nombre)){ ficha.d.raza=c.nombre; hecho(c); } }
+    else if(c.tipo==='talento'){ if(!ficha.talentos.some(t=>norm(t.n)===norm(c.nombre)&&norm(t.nota)===norm(c.detalle||''))){ ficha.talentos.push({n:c.nombre, nota:c.detalle||''}); hecho(c); } }
+    else if(c.tipo==='lazo'){ if(!ficha.vinculos.some(v=>norm(v.pj)===norm(c.pj))){ ficha.vinculos.push({tipo:c.vinculo, pj:c.pj, nota:''}); hecho(c); } }
+    else if(c.tipo==='pd'){ subir(ficha.extra,'pd',c.hasta,c); }
+    else manual.push(txt);
+  });
+  return {hechos, manual};
+}
+/* «Traer de la calculadora»: el carrito de la Tabla de Canjes (y sus niveles) → la lista de sumarCanje. */
+function cambiosDeCalculadora(){
+  const S=TC.state, L=[];
+  ATTRS.forEach(a=>{ if(S.statsBase[a]!==undefined) L.push({tipo:'stat', nombre:a, hasta:S.statsBase[a]}); });
+  Object.entries(S.skillsBase).forEach(([s,v])=>{ if((SK_MAP[s]||s) in ficha.skills) L.push({tipo:'skill', habilidad:s, hasta:v}); });
+  Object.entries(S.ventBase).forEach(([v,n])=>{ if(v in ficha.adv) L.push({tipo:'vent', nombre:v, hasta:n}); });
+  if(typeof TC.espLevel==='function') ESP_RAMAS.forEach(r=>L.push({tipo:'esp', rama:r, hasta:TC.espLevel(r)}));
+  S.cart.forEach(i=>{
+    const m=i.meta||{};
+    if(m.kind==='arte') L.push({tipo:'arte', nombre:m.name.replace(/^(Arte|Artesanía) \((.*)\)$/,'$2'), hasta:m.to});
+    if(m.kind==='trasf' && m.tipo) L.push({tipo:'bg', bgTipo:m.tipo, bgCat:m.cat, bgEsp:m.esp, hasta:m.to});
+    if(m.kind==='arcano') L.push({tipo:'arcano', type:m.type, tier:m.tier, nombre:m.name});
+    if(m.talent && m.kind!=='lazo') L.push({tipo:'talento', nombre:m.talent, detalle:m.detalle||''});
+    if(m.kind==='lazo') L.push({tipo:'lazo', vinculo:m.talent, pj:m.detalle});
+    if(i.cat==='IDIOMAS') L.push({tipo:'idioma', nombre:m.name, nivel:(i.line.match(/→ (\w+) —/)||[])[1]||'Bajo'});
+    if(i.cat==='TÍTULOS ACADÉMICOS') L.push({tipo:'titulo', texto:i.line.split(' — ')[0]});
+    if(i.cat==='RAZA' && m.raza) L.push({tipo:'raza', nombre:m.name});
+  });
+  if(S.pdActuales) L.push({tipo:'pd', hasta:S.pdActuales});
+  return L;
+}
 function traerCalculadora(){
   if(typeof TC.state==='undefined'){ toast('No encuentro la calculadora'); return; }
-  ATTRS.forEach(a=>{ if(TC.state.statsBase[a]!==undefined) ficha.attrs[a]=Math.max(num(ficha.attrs[a]), TC.state.statsBase[a]); });
-  Object.entries(TC.state.skillsBase).forEach(([s,v])=>{ const k=SK_MAP[s]||s; if(k in ficha.skills) ficha.skills[k]=Math.max(num(ficha.skills[k]),v); });
-  Object.entries(TC.state.ventBase).forEach(([v,n])=>{ if(v in ficha.adv) ficha.adv[v]=Math.max(num(ficha.adv[v]),n); });
-  if(typeof TC.espLevel==='function') ESP_RAMAS.forEach(r=>{ ficha.esp[r]=Math.max(num(ficha.esp[r]), Math.min(3, TC.espLevel(r))); });
-  TC.state.cart.forEach(i=>{
-    const m=i.meta||{};
-    if(m.kind==='arte'){ const n=m.name.replace(/^(Arte|Artesanía) \((.*)\)$/,'$2'); const ex=ficha.artes.find(x=>norm(x.n)===norm(n)); if(ex) ex.v=Math.max(num(ex.v),m.to); else ficha.artes.push({n,v:m.to}); }
-    if(m.kind==='trasf' && m.tipo){ const ex=ficha.bgs.find(b=>norm(b.t)===norm(m.tipo)&&norm(b.c)===norm(m.cat)&&norm(b.e)===norm(m.esp)); if(ex) ex.v=Math.max(num(ex.v),m.to); else ficha.bgs.push({t:m.tipo,c:m.cat,e:m.esp,v:m.to,nota:''}); }
-    if(m.kind==='arcano' && !hasArc(m.name)) ficha.arcanos.push({type:m.type, tier:m.tier, name:m.name, nota:''});
-    if(m.talent && m.kind!=='lazo' && !ficha.talentos.some(t=>norm(t.n)===norm(m.talent) && norm(t.nota)===norm(m.detalle||''))) ficha.talentos.push({n:m.talent, nota:m.detalle||''});
-    if(m.kind==='lazo' && !ficha.vinculos.some(v=>norm(v.pj)===norm(m.detalle))) ficha.vinculos.push({tipo:m.talent, pj:m.detalle, nota:''});
-    if(i.cat==='IDIOMAS'){ const nv=(i.line.match(/→ (\w+) —/)||[])[1]; const ex=ficha.idiomas.find(x=>norm(x.n)===norm(m.name)); if(ex){ if(nv) ex.nivel=nv; } else ficha.idiomas.push({n:m.name, nivel:nv||'Bajo', nota:''}); }
-    if(i.cat==='TÍTULOS ACADÉMICOS'){ const t=i.line.split(' — ')[0]; if(!ficha.titulos.includes(t)) ficha.titulos=(ficha.titulos?ficha.titulos+'\n':'')+t; }
-    if(i.cat==='RAZA' && m.raza) ficha.d.raza=m.name;
-  });
-  if(TC.state.pdActuales) ficha.extra.pd=Math.max(num(ficha.extra.pd), TC.state.pdActuales);
+  sumarCanje(cambiosDeCalculadora());
   persist(); renderFicha(); toast('Niveles traídos de la calculadora');
 }
 $('#f-sync').onclick=()=>traerCalculadora();
-/* 2.3.0 · «Llevar a PAM» desde el Registro de Canjes (js/pam/LlevarCanjePam.js): lo que dice una petición aprobada,
-   ya reconocido (js/reglas/LlevarCanje.js), se suma a la ficha con las reglas de «Traer de la calculadora»: los niveles
-   solo suben y lo que ya está no se repite (llevarlo dos veces da lo mismo). Devuelve qué se hizo y qué no se pudo. */
+/* «Llevar a PAM» (Registro de Canjes): la misma regla, con lo que dice la petición; se guarda enseguida. */
 function aplicarCanje(cambios){
-  const hechos=[], manual=[];
-  const subir=(o,k,v,txt)=>{ if(num(o[k])>=v){ return; } o[k]=v; hechos.push(txt); };
-  (cambios||[]).forEach(c=>{
-    const txt=c.texto||'';
-    if(c.tipo==='stat'){ if(ATTRS.includes(c.nombre)) subir(ficha.attrs,c.nombre,c.hasta,txt); else manual.push(txt); }
-    else if(c.tipo==='skill'){ const k=SK_MAP[c.habilidad]||c.habilidad; if(k in ficha.skills) subir(ficha.skills,k,c.hasta,txt); else manual.push(txt); }
-    else if(c.tipo==='arte'){ const ex=ficha.artes.find(x=>norm(x.n)===norm(c.nombre)); if(ex){ if(num(ex.v)<c.hasta){ ex.v=c.hasta; hechos.push(txt); } } else { ficha.artes.push({n:c.nombre,v:c.hasta}); hechos.push(txt); } }
-    else if(c.tipo==='vent'){ if(c.nombre in ficha.adv) subir(ficha.adv,c.nombre,c.hasta,txt); else manual.push(txt); }
-    else if(c.tipo==='esp'){ if(ESP_RAMAS.includes(c.rama)) subir(ficha.esp,c.rama,Math.min(3,c.hasta),txt); else manual.push(txt); }
-    else if(c.tipo==='bg'){ const ex=ficha.bgs.find(b=>norm(b.t)===norm(c.bgTipo)&&norm(b.c)===norm(c.bgCat)&&norm(b.e)===norm(c.bgEsp)); if(ex){ if(num(ex.v)<c.hasta){ ex.v=c.hasta; hechos.push(txt); } } else { ficha.bgs.push({t:c.bgTipo,c:c.bgCat,e:c.bgEsp||'',v:c.hasta,nota:''}); hechos.push(txt); } }
-    else if(c.tipo==='arcano'){ if(!hasArc(c.nombre)){ ficha.arcanos.push({type:c.type, tier:c.tier, name:c.nombre, nota:''}); hechos.push(txt); } }
-    else if(c.tipo==='idioma'){ const orden=['Bajo','Medio','Alto','Nativo'], ex=ficha.idiomas.find(x=>norm(x.n)===norm(c.nombre));
-      if(ex){ if(orden.indexOf(ex.nivel)<orden.indexOf(c.nivel)){ ex.nivel=c.nivel; hechos.push(txt); } } else { ficha.idiomas.push({n:c.nombre, nivel:c.nivel, nota:''}); hechos.push(txt); } }
-    else if(c.tipo==='titulo'){ if(!ficha.titulos.split('\n').some(l=>norm(l)===norm(c.texto))){ ficha.titulos=(ficha.titulos?ficha.titulos+'\n':'')+c.texto; hechos.push(txt); } }
-    else if(c.tipo==='raza'){ if(norm(ficha.d.raza)!==norm(c.nombre)){ ficha.d.raza=c.nombre; hechos.push(txt); } }
-    else if(c.tipo==='talento'){ if(!ficha.talentos.some(t=>norm(t.n)===norm(c.nombre)&&norm(t.nota)===norm(c.detalle||''))){ ficha.talentos.push({n:c.nombre, nota:c.detalle||''}); hechos.push(txt); } }
-    else manual.push(txt);
-  });
-  if(hechos.length){ persist(); flushSave(); renderFicha(); }
-  return {hechos, manual};
+  const r=sumarCanje(cambios);
+  if(r.hechos.length){ persist(); flushSave(); renderFicha(); }
+  return r;
 }
 function llevarCalculadora(){
   if(typeof TC.state==='undefined'){ toast('No encuentro la calculadora'); return; }

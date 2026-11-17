@@ -82,10 +82,12 @@ async function arrancar() {
   // los canjes en el foro: la petición que preparó PAM, publicarla y la respuesta del Inspector (solo si el foro tiene registro)
   const servicioCanjes = cfg?.registroCanjes ? crearCanjesDelForo(agente, { foroHost: hola.foro || '', cuenta: hola.cuenta, cfg, memoria, ficha: { sistema, compendio, lector } }) : null;
   if (servicioCanjes) await traerPeticionesAntiguas(agente, servicioCanjes.clave, 'cuentas.' + hola.foro + '.' + hola.cuenta.id);
+  /** @type {any} */ let enRegistro = null; // la barra del Registro de Canjes (más abajo)
   const canjes = servicioCanjes ? crearTarjetaCanjes({
     documento: document, servicio: servicioCanjes, datos: () => panel?.datos,
     actualizar: () => panel.actualizar(), abrirPanel: () => panel.abrir(), irA: ruta => agente.ir(ruta),
-    puerta: accion => agente.puerta(accion), enviarAPam: op => panel.enviarAPam(op)
+    puerta: accion => agente.puerta(accion), enviarAPam: op => panel.enviarAPam(op),
+    alCambiar: () => { if (enRegistro) enRegistro.refrescar(); }
   }) : null;
   // el modo Inspector: en el Registro de Canjes, para los Inspectores de Canjes y los desarrolladores (en el foro de pruebas, todos)
   const inspector = modoInspector(agente, { hola, cfg, servicioCanjes, memoria, repintar: () => panel && panel.pintar(), permitido: () => on('foro', 'inspector') });
@@ -108,8 +110,9 @@ async function arrancar() {
   if (canjes) canjes.recargar();
   inspector.comprobar();
   // 2.3.0 · en el Registro de Canjes, bajo tus peticiones aprobadas: «Llevar a PAM» y «Aplicar cambio a la ficha»
-  const enRegistro = crearCanjesEnRegistro({
-    agente, hola, cfg, servicio: servicioCanjes, datos: () => panel?.datos, actualizar: () => panel.actualizar(), memoria,
+  // (2.3.1: el mismo camino que la tarjeta «⚖ Canjes»: sus botones «Aplicar» y «Terminar en PAM» son los de la tarjeta)
+  enRegistro = crearCanjesEnRegistro({
+    agente, hola, cfg, servicio: servicioCanjes, tarjeta: canjes, memoria,
     cargarDatos: f => cargarDatosTabla(f), permitido: () => on('foro', 'canjes')
   });
   enRegistro.iniciar();
