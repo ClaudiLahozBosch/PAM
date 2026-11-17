@@ -1,7 +1,7 @@
 // @ts-check
 // «Configurar Mi PJ» dentro del foro: el panel lee la copia que PAM deja en el almacén del agente (`pam.mipj`,
 // js/pam/ConfigMiPjAlForo.js). Sin copia (PAM todavía no se abrió con el script), todo como siempre.
-import { normalizarConfig } from '../reglas/ConfigMiPj.js?v=2.3.1';
+import { normalizarConfig } from '../reglas/ConfigMiPj.js?v=2.3.2';
 
 /**
  * @param {{ leerDato: (k: string) => Promise<any> }} agente
