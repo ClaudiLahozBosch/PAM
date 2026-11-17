@@ -9,10 +9,10 @@
 // Recibe la ventana: así las pruebas lo montan en una página de prueba junto al antiguo y comparan.
 // 0.7.0: sin el «Personalizada» antiguo (el «Código para el foro» usa solo el editor nuevo) y con los cálculos de
 // combate y puntos de js/reglas/Combate.js (buscar «0.7.0»).
-import { RANKS, RANK_SHORT, SKILL_LV, SKILL_NAME, ATTRS, ART, SKILLS, ALL_SKILLS, BG_TYPES, ADVS, cats, SUELDOS, SK_MAP } from './datos.js?v=2.2.4';
-import { ETAPAS, ESP_RAMAS, IDIOMA_NIV, VINC, emptyFicha, normFicha, exampleFicha } from './modelo.js?v=2.2.4';
-import { A, S, sanador, parseEmpleosDSL } from './empleos.js?v=2.2.4';
-import { combate as combateReglas, puntos as puntosReglas } from '../../reglas/Combate.js?v=2.2.4';
+import { RANKS, RANK_SHORT, SKILL_LV, SKILL_NAME, ATTRS, ART, SKILLS, ALL_SKILLS, BG_TYPES, ADVS, cats, SUELDOS, SK_MAP } from './datos.js?v=2.3.0';
+import { ETAPAS, ESP_RAMAS, IDIOMA_NIV, VINC, emptyFicha, normFicha, exampleFicha } from './modelo.js?v=2.3.0';
+import { A, S, sanador, parseEmpleosDSL } from './empleos.js?v=2.3.0';
+import { combate as combateReglas, puntos as puntosReglas } from '../../reglas/Combate.js?v=2.3.0';
 
 /**
  * @param {Window} w la ventana de PAM
@@ -1192,6 +1192,31 @@ function traerCalculadora(){
   persist(); renderFicha(); toast('Niveles traídos de la calculadora');
 }
 $('#f-sync').onclick=()=>traerCalculadora();
+/* 2.3.0 · «Llevar a PAM» desde el Registro de Canjes (js/pam/LlevarCanjePam.js): lo que dice una petición aprobada,
+   ya reconocido (js/reglas/LlevarCanje.js), se suma a la ficha con las reglas de «Traer de la calculadora»: los niveles
+   solo suben y lo que ya está no se repite (llevarlo dos veces da lo mismo). Devuelve qué se hizo y qué no se pudo. */
+function aplicarCanje(cambios){
+  const hechos=[], manual=[];
+  const subir=(o,k,v,txt)=>{ if(num(o[k])>=v){ return; } o[k]=v; hechos.push(txt); };
+  (cambios||[]).forEach(c=>{
+    const txt=c.texto||'';
+    if(c.tipo==='stat'){ if(ATTRS.includes(c.nombre)) subir(ficha.attrs,c.nombre,c.hasta,txt); else manual.push(txt); }
+    else if(c.tipo==='skill'){ const k=SK_MAP[c.habilidad]||c.habilidad; if(k in ficha.skills) subir(ficha.skills,k,c.hasta,txt); else manual.push(txt); }
+    else if(c.tipo==='arte'){ const ex=ficha.artes.find(x=>norm(x.n)===norm(c.nombre)); if(ex){ if(num(ex.v)<c.hasta){ ex.v=c.hasta; hechos.push(txt); } } else { ficha.artes.push({n:c.nombre,v:c.hasta}); hechos.push(txt); } }
+    else if(c.tipo==='vent'){ if(c.nombre in ficha.adv) subir(ficha.adv,c.nombre,c.hasta,txt); else manual.push(txt); }
+    else if(c.tipo==='esp'){ if(ESP_RAMAS.includes(c.rama)) subir(ficha.esp,c.rama,Math.min(3,c.hasta),txt); else manual.push(txt); }
+    else if(c.tipo==='bg'){ const ex=ficha.bgs.find(b=>norm(b.t)===norm(c.bgTipo)&&norm(b.c)===norm(c.bgCat)&&norm(b.e)===norm(c.bgEsp)); if(ex){ if(num(ex.v)<c.hasta){ ex.v=c.hasta; hechos.push(txt); } } else { ficha.bgs.push({t:c.bgTipo,c:c.bgCat,e:c.bgEsp||'',v:c.hasta,nota:''}); hechos.push(txt); } }
+    else if(c.tipo==='arcano'){ if(!hasArc(c.nombre)){ ficha.arcanos.push({type:c.type, tier:c.tier, name:c.nombre, nota:''}); hechos.push(txt); } }
+    else if(c.tipo==='idioma'){ const orden=['Bajo','Medio','Alto','Nativo'], ex=ficha.idiomas.find(x=>norm(x.n)===norm(c.nombre));
+      if(ex){ if(orden.indexOf(ex.nivel)<orden.indexOf(c.nivel)){ ex.nivel=c.nivel; hechos.push(txt); } } else { ficha.idiomas.push({n:c.nombre, nivel:c.nivel, nota:''}); hechos.push(txt); } }
+    else if(c.tipo==='titulo'){ if(!ficha.titulos.split('\n').some(l=>norm(l)===norm(c.texto))){ ficha.titulos=(ficha.titulos?ficha.titulos+'\n':'')+c.texto; hechos.push(txt); } }
+    else if(c.tipo==='raza'){ if(norm(ficha.d.raza)!==norm(c.nombre)){ ficha.d.raza=c.nombre; hechos.push(txt); } }
+    else if(c.tipo==='talento'){ if(!ficha.talentos.some(t=>norm(t.n)===norm(c.nombre)&&norm(t.nota)===norm(c.detalle||''))){ ficha.talentos.push({n:c.nombre, nota:c.detalle||''}); hechos.push(txt); } }
+    else manual.push(txt);
+  });
+  if(hechos.length){ persist(); flushSave(); renderFicha(); }
+  return {hechos, manual};
+}
 function llevarCalculadora(){
   if(typeof TC.state==='undefined'){ toast('No encuentro la calculadora'); return; }
   if(TC.state.cart.length && !window.confirm('Esto pone en la calculadora los niveles de tu ficha como «nivel actual». El carrito no se toca. ¿Seguir?')) return;
@@ -1628,6 +1653,8 @@ window.pamFicha = {
     persist(); flushSave(); refreshAll(); return {id, resumen:p.resumen}; },
   /* canjes (Mi PJ): pasar el carrito a la ficha, como el botón «Traer de la calculadora» */
   traerCalculadora: () => traerCalculadora(),
+  /* 2.3.0 · «Llevar a PAM» (Registro de Canjes): suma a la ficha lo de una petición aprobada → { hechos, manual } */
+  aplicarCanje: cambios => aplicarCanje(cambios),
   /* canjes (Mi PJ): poner la ficha en la Tabla de Canjes, como el botón «Llevar a la calculadora» */
   llevarCalculadora: () => llevarCalculadora(),
   /* canjes (Mi PJ): el código del foro actualizado en modo «Personalizada» (null si la ficha no lo tiene guardado) */

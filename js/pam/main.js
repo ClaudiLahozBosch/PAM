@@ -1,13 +1,14 @@
 // @ts-check
 // Arranque de lo nuevo dentro de PAM (index.html lo carga con una sola línea). Si el script de PAM (el agente) no
 // está instalado, no hace nada y PAM funciona como siempre.
-import { ClienteAgente } from '../servicios/agente/ClienteAgente.js?v=2.2.4';
-import { PROTOCOLO } from '../servicios/agente/protocolo.js?v=2.2.4';
-import { crearPamActual } from './PamActual.js?v=2.2.4';
-import { crearControladorForo } from './ControladorForo.js?v=2.2.4';
-import { cargarForos } from '../datos/cargar.js?v=2.2.4';
-import { publicarColoreador } from './ColoreadorAlForo.js?v=2.2.4';
-import { publicarConfigMiPj } from './ConfigMiPjAlForo.js?v=2.2.4';
+import { ClienteAgente } from '../servicios/agente/ClienteAgente.js?v=2.3.0';
+import { PROTOCOLO } from '../servicios/agente/protocolo.js?v=2.3.0';
+import { crearPamActual } from './PamActual.js?v=2.3.0';
+import { crearControladorForo } from './ControladorForo.js?v=2.3.0';
+import { cargarForos } from '../datos/cargar.js?v=2.3.0';
+import { publicarColoreador } from './ColoreadorAlForo.js?v=2.3.0';
+import { publicarConfigMiPj } from './ConfigMiPjAlForo.js?v=2.3.0';
+import { crearLlevarCanjePam } from './LlevarCanjePam.js?v=2.3.0';
 
 const esperar = ms => new Promise(r => setTimeout(r, ms));
 
@@ -35,6 +36,12 @@ async function arrancar() {
   ctl.canjes.revisarPendientes();
   window.addEventListener('focus', () => ctl.canjes.revisarPendientes());
   window.addEventListener('hashchange', () => ctl.canjes.revisarPendientes());
+  // 2.3.0 · «Llevar a PAM» desde el Registro de Canjes: si el foro dejó un canje aprobado, se abre sola su puerta
+  const llevar = crearLlevarCanjePam({ agente, pam: crearPamActual(window), doc: document });
+  const revisarLlevar = () => setTimeout(() => { llevar.revisar().catch(e => console.warn('[PAM] llevar el canje:', e)); }, 700);
+  revisarLlevar();
+  window.addEventListener('focus', revisarLlevar);
+  window.addEventListener('hashchange', revisarLlevar);
 }
 
 arrancar().catch(e => console.warn('[PAM] puente con el foro:', e));

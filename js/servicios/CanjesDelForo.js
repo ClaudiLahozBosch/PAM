@@ -8,12 +8,12 @@
 //   «pam.cuentas.<foro>.<id de cuenta>»   { peticiones } de esa cuenta (Mi PJ lo guardaba en «cuentas.<foro>.<id>»).
 // Los Inspectores de cada grupo se guardan un día en la memoria del panel («grupos.<foro>»).
 import { numero, formato, esNumero, mismoTexto, enlacePost, temaNumero, peticionCapturada, textoPeticion, avisosPeticion, clasificarRespuesta, normNombre,
-  claveCuenta, paqueteCierre, cambiarNumeroTras, descuadres, codigoConEnlaces } from '../reglas/Canjes.js?v=2.2.4';
-import { leerSaldos } from '../lectores/LectorBoveda.js?v=2.2.4';
-import { revisar } from '../reglas/RevisorBoveda.js?v=2.2.4';
-import { leerFichaDelForo } from './FichaDelForo.js?v=2.2.4';
-import { EditorFicha } from '../bbcode/EditorFicha.js?v=2.2.4';
-import { aplicarCanje, yaAvisado } from '../reglas/CambiosFicha.js?v=2.2.4';
+  claveCuenta, paqueteCierre, cambiarNumeroTras, descuadres, codigoConEnlaces } from '../reglas/Canjes.js?v=2.3.0';
+import { leerSaldos } from '../lectores/LectorBoveda.js?v=2.3.0';
+import { revisar } from '../reglas/RevisorBoveda.js?v=2.3.0';
+import { leerFichaDelForo } from './FichaDelForo.js?v=2.3.0';
+import { EditorFicha } from '../bbcode/EditorFicha.js?v=2.3.0';
+import { aplicarCanje, yaAvisado } from '../reglas/CambiosFicha.js?v=2.3.0';
 
 export const CLAVE_APROBACION = 'pam.aprobacion';
 const aNum = v => (typeof v === 'number' ? v : NaN);
@@ -502,6 +502,8 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
   return {
     clave: CLAVE_CUENTA, enlace, accionAplicarCanje, marcarAplicada, dejarCierre,
     leerCaptura, datosCuenta, publicar, accionPublicarPeticion, buscarPeticionPublicada, registrarPeticion,
-    descartarCaptura, confirmar, actualizarAprobaciones, buscarAprobacion, leerGruposRevisores
+    descartarCaptura, confirmar, actualizarAprobaciones, buscarAprobacion, leerGruposRevisores,
+    // 2.3.0 · «Aplicar cambio a la ficha» desde el Registro de Canjes (js/paginas/panel/CanjesEnRegistro.js)
+    pasosFichaPorMensajes
   };
 }
