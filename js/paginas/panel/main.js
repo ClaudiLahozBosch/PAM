@@ -1,26 +1,26 @@
 // @ts-check
 // Arranque del panel «Mi PJ» dentro del foro (el agente lo muestra en un iframe sin marco).
-import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=2.2.3';
-import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=2.2.3';
-import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=2.2.3';
-import { LectorFicha } from '../../lectores/LectorFicha.js?v=2.2.3';
-import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=2.2.3';
-import { crearPanelMiPj } from './MiPjPanel.js?v=2.2.3';
-import { temaDeRuta } from '../../reglas/RevisorBoveda.js?v=2.2.3';
-import { crearActividad } from '../../servicios/ActividadDelForo.js?v=2.2.3';
-import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=2.2.3';
-import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=2.2.3';
-import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=2.2.3';
-import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=2.2.3';
-import { crearTarjetaCanjes } from './CanjesPanel.js?v=2.2.3';
-import { crearRevision } from '../../inspector/Revision.js?v=2.2.3';
-import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=2.2.3';
-import { crearInspector } from '../../inspector/Inspector.js?v=2.2.3';
-import { normNombre } from '../../core/texto.js?v=2.2.3';
-import { crearColoreadorDelForo } from '../../servicios/ColoreadorDelForo.js?v=2.2.3';
-import { crearConfigDelForo } from '../../servicios/ConfigMiPjDelForo.js?v=2.2.3';
-import { atenderEditor } from '../../servicios/EditorDelForo.js?v=2.2.3';
-import { activo as estaActivo } from '../../reglas/ConfigMiPj.js?v=2.2.3';
+import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=2.2.4';
+import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=2.2.4';
+import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=2.2.4';
+import { LectorFicha } from '../../lectores/LectorFicha.js?v=2.2.4';
+import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=2.2.4';
+import { crearPanelMiPj } from './MiPjPanel.js?v=2.2.4';
+import { temaDeRuta } from '../../reglas/RevisorBoveda.js?v=2.2.4';
+import { crearActividad } from '../../servicios/ActividadDelForo.js?v=2.2.4';
+import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=2.2.4';
+import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=2.2.4';
+import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=2.2.4';
+import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=2.2.4';
+import { crearTarjetaCanjes } from './CanjesPanel.js?v=2.2.4';
+import { crearRevision } from '../../inspector/Revision.js?v=2.2.4';
+import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=2.2.4';
+import { crearInspector } from '../../inspector/Inspector.js?v=2.2.4';
+import { normNombre } from '../../core/texto.js?v=2.2.4';
+import { crearColoreadorDelForo } from '../../servicios/ColoreadorDelForo.js?v=2.2.4';
+import { crearConfigDelForo } from '../../servicios/ConfigMiPjDelForo.js?v=2.2.4';
+import { atenderEditor } from '../../servicios/EditorDelForo.js?v=2.2.4';
+import { activo as estaActivo } from '../../reglas/ConfigMiPj.js?v=2.2.4';
 
 const root = /** @type {HTMLElement} */ (document.getElementById('mipj'));
 

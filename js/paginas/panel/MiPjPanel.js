@@ -7,10 +7,10 @@
 //   · los enlaces abren la página del foro (<base target="_top"> en panel.html).
 // Las tarjetas que aún no están en PAM (canjes) lo dicen en vez de «Tocá Actualizar».
 // Arreglos: R09 (los oficiales cerrados ya no salen en curso) y R10 (✕ para ocultar un oficial hasta volver a escribir en él).
-import { aFecha } from '../../lectores/FechaForo.js?v=2.2.3';
-import { estadoSueldo } from '../../reglas/Sueldo.js?v=2.2.3';
-import { grageasOf } from '../../reglas/Oficiales.js?v=2.2.3';
-import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=2.2.3';
+import { aFecha } from '../../lectores/FechaForo.js?v=2.2.4';
+import { estadoSueldo } from '../../reglas/Sueldo.js?v=2.2.4';
+import { grageasOf, sinMarcaOficial } from '../../reglas/Oficiales.js?v=2.2.4';
+import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=2.2.4';
 
 const TEMA_AVADENSE = { skin: 'avadense', ink: '#171a2b', panel: '#1e2236', 'panel-2': '#262a42', parchment: '#F1EADF', 'parchment-dim': '#a7a1b6', gold: '#B49768',
   'gold-bright': '#d6bd8f', 'arcane-bright': '#cf94a3', good: '#93b8a0', bad: '#d98377', 'line-strong': 'rgba(241,234,223,.16)', 'accent-ink': '#1b1e30',
@@ -223,7 +223,7 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
     Object.keys(C).forEach(uid => { if (String(uid) === String(UID)) return; const d = gv('mipj.' + uid, null); ((d && d.oficiales) || []).filter(vivo).forEach(O => otras.push({ O, cuenta: (d && d.pj) || C[uid].nombre })); });
     if (!mios.length && !otras.length) return '';
     const fila = (O, quien) => { const r = O.parts.find(p => norm(p.autor) === norm(quien)) || { posts: 0, cuentan: 0, fuera: {}, ultimoId: 0 }; const d = O.ultimo ? Math.floor((Date.now() - O.ultimo) / 864e5) : null;
-      return `<div class="rol"><div class="rt"><a href="${esc(O.url)}">${esc(O.titulo.replace(/\s*\[\s*oficial\s*\]\s*/i, ' ').trim())}</a><div class="dim">${quien !== YO ? '<b>' + esc(quien) + '</b> · ' : ''}${r.posts} posts · ${r.cuentan} cuentan → <b class="of-g">${fmt(grageasOf(O, quien, marcas))} grageas</b></div>${d != null && d >= 21 ? `<div class="of-av">${d} días sin posts: quedan ${30 - d} para que se dé por abandonado</div>` : ''}</div>${quien === YO ? `<button class="x" data-a="ocultar-of" data-t="${O.tid}" data-l="${r.ultimoId || 0}" title="Ocultar hasta que vuelvas a escribir en él">✕</button>` : ''}</div>`; };
+      return `<div class="rol"><div class="rt"><a href="${esc(O.url)}">${esc(sinMarcaOficial(O.titulo))}</a><div class="dim">${quien !== YO ? '<b>' + esc(quien) + '</b> · ' : ''}${r.posts} posts · ${r.cuentan} cuentan → <b class="of-g">${fmt(grageasOf(O, quien, marcas))} grageas</b></div>${d != null && d >= 21 ? `<div class="of-av">${d} días sin posts: quedan ${30 - d} para que se dé por abandonado</div>` : ''}</div>${quien === YO ? `<button class="x" data-a="ocultar-of" data-t="${O.tid}" data-l="${r.ultimoId || 0}" title="Ocultar hasta que vuelvas a escribir en él">✕</button>` : ''}</div>`; };
     return `<div class="card"><div class="ct">🎓 Oficiales en curso</div>${mios.map(O => fila(O, YO)).join('')}${otras.map(x => fila(x.O, x.cuenta)).join('')}<div class="dim" style="margin-top:4px">Abrí el tema para ver a todos los participantes.</div></div>`;
   }
 

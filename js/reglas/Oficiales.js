@@ -2,11 +2,14 @@
 // Oficiales: posts que cuentan y recompensas. De Mi PJ (pam-mi-pj.user.js 1.7.1) tal cual, más el arreglo R09.
 // 20 grageas por post, con tope de 3 por día, 15 por semana (lunes a domingo) y 45 por mes, por usuario y en hora
 // de España; +60 por el Suceso de cierre. Un segundo oficial (suceso de más de dos años) se cobra a un cuarto.
-import { normPalabras as norm, fmtForo as fmt } from '../core/texto.js?v=2.2.3';
-import { clavesMadrid } from '../lectores/FechaForo.js?v=2.2.3';
-import { esBot } from './Misiones.js?v=2.2.3';
+import { normPalabras as norm, fmtForo as fmt } from '../core/texto.js?v=2.2.4';
+import { clavesMadrid } from '../lectores/FechaForo.js?v=2.2.4';
+import { esBot } from './Misiones.js?v=2.2.4';
 
-export const ES_OFICIAL = /\[\s*(?:rol(?:eo)?\s+)?oficial\s*\]|\boficial\b\s*[\]|:·•-]/i;
+// 2.2.4: también con corchetes japoneses, como «「OFICIAL」Lacrimae aurorae • Woojin» (antes no se reconocían).
+export const ES_OFICIAL = /[\[「『【〔]\s*(?:rol(?:eo)?\s+)?oficial\s*[\]」』】〕]|\boficial\b\s*[\]」』】〕|:·•-]/i;
+/** El título sin la marca «[Oficial]» / «「OFICIAL」», para enseñarlo en las listas. @param {string} t */
+export const sinMarcaOficial = t => String(t || '').replace(/\s*[\[「『【〔]\s*(?:rol(?:eo)?\s+)?oficial\s*[\]」』】〕]\s*/i, ' ').trim();
 export const TOPE = { dia: 3, semana: 15, mes: 45 };
 /** Cuentas de staff que abren y cierran temas: no cobran ni cuentan como actividad. */
 const NO_COBRAN = ['tramas'];
