@@ -12,13 +12,14 @@
 import { abrirPuerta, crearEl, estilos } from './ui/Puerta.js?v=2.3.1';
 import { claveCuenta } from '../reglas/Canjes.js?v=2.3.1';
 import { cambiosDeCanje } from '../reglas/CambiosFicha.js?v=2.3.1';
+import { esMovimientoDe } from '../reglas/LlevarCanje.js?v=2.3.1';
 
 const CLAVE_PAQUETE = 'pam.paquete', CLAVE_PETICION = 'pam.peticion', CLAVE_APROBACION = 'pam.aprobacion';
 const numero = txt => { const l = String(txt == null ? '' : txt).replace(/[^\d-]/g, ''); return l === '' || l === '-' ? NaN : parseInt(l, 10); };
 const normNombre = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
 const ahoraISO = () => new Date().toISOString();
 /** Números del «Formulario» de la Bóveda de PAM. */
-function numerosFormulario(form) {
+export function numerosFormulario(form) { // (2.3.1: también LlevarCanjePam)
   const v = et => { const m = String(form).match(new RegExp('\\{Grageas ' + et + '»\\s*([+-]?\\d+)', 'i')); return m ? parseInt(m[1], 10) : NaN; };
   return { iniciales: v('iniciales'), cambio: v('que se añaden/quitan'), actuales: v('actuales'), totales: v('totales') };
 }
@@ -146,7 +147,9 @@ export function crearCanjesPam({ agente, pam, doc, foros }) {
     const busca = pam.pjBoveda(paq.pj);
     if (busca.omitido) return { titulo: 'Canje publicado → PAM', pasos: [{ tipo: 'pam', titulo: titulo1, omitido: busca.omitido }] };
     const pj = busca.pj, bv = pj.boveda || {};
-    const yaAplicado = String(bv.act) === String(paq.actuales) && !String(bv.delta || '').trim();
+    // ya cerrado: con los mismos números, o (2.3.1) un movimiento del historial con el enlace de esta petición
+    const conEnlace = paq.peticion && (pam.bovedaDe(pj.id).log || []).some(m => esMovimientoDe(m, paq.peticion));
+    const yaAplicado = conEnlace || (String(bv.act) === String(paq.actuales) && !String(bv.delta || '').trim());
     let paso1, paso2;
     if (yaAplicado) {
       paso1 = { tipo: 'pam', titulo: titulo1, igual: 'El movimiento ya está aplicado en la Bóveda de PAM.' };

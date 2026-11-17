@@ -9,9 +9,9 @@ import { formato, numero, describirAprobacion } from '../../reglas/Canjes.js?v=2
 /**
  * @param {{ documento: Document, servicio: ReturnType<typeof import('../../servicios/CanjesDelForo.js').crearCanjesDelForo> | null,
  *   datos: () => any, actualizar: () => Promise<any>, abrirPanel: () => void, irA: (ruta: string) => Promise<any>,
- *   puerta: (accion: any) => Promise<any>, enviarAPam: (op: { esperarCierre: boolean }) => void }} dep
+ *   puerta: (accion: any) => Promise<any>, enviarAPam: (op: { esperarCierre: boolean }) => void, alCambiar?: () => void }} dep
  */
-export function crearTarjetaCanjes({ documento, servicio, datos, actualizar, abrirPanel, irA, puerta, enviarAPam }) {
+export function crearTarjetaCanjes({ documento, servicio, datos, actualizar, abrirPanel, irA, puerta, enviarAPam, alCambiar = () => {} }) {
   /** Lo guardado (se lee del agente): la petición preparada en PAM y las peticiones de la cuenta. */
   let captura = null, peticiones = [];
   let msgCanje = null;
@@ -36,6 +36,7 @@ export function crearTarjetaCanjes({ documento, servicio, datos, actualizar, abr
     if (c.status === 'fulfilled') captura = c.value;
     if (d.status === 'fulfilled') peticiones = d.value.peticiones || [];
     repintar();
+    alCambiar(); // 2.3.1: la barra del Registro de Canjes muestra lo mismo
   }
   const repintar = () => { if (caja && caja.isConnected) pintar(caja); };
 
@@ -115,18 +116,32 @@ export function crearTarjetaCanjes({ documento, servicio, datos, actualizar, abr
    */
   async function aplicar(p, b, aviso) {
     b.disabled = true;
+    const err = await aplicarCanje(p);
+    if (err) aviso(err, true);
+    await recargar();
+  }
+
+  /**
+   * El «Aplicar el canje» de verdad (2.3.1: también lo usa la barra del Registro de Canjes, CanjesEnRegistro):
+   * la puerta y, si se acepta, la petición queda aplicada; con «Terminar en PAM» en la misma puerta se sigue en PAM.
+   * @returns {Promise<string|null>} el error, o null
+   */
+  async function aplicarCanje(p) {
     try {
-      const accion = await servicio.accionAplicarCanje(p, datos());
+      let d = datos();
+      if (!d || !d.boveda || !d.ficha) { await actualizar(); d = datos(); } // la barra puede llegar sin haber leído
+      const accion = await servicio.accionAplicarCanje(p, d);
       accion.enlaceFinal = { texto: 'Terminar en PAM' };
       const res = await puerta(accion);
+      let err = null;
       if (res.resultado === 'aceptada' || res.resultado === 'igual') {
         await servicio.marcarAplicada(p, res.pasos && res.pasos[1] && res.pasos[1].post);
         // primero PAM (el navegador solo deja abrir la pestaña justo después del clic) y después se relee el foro
-        if (res.siguiente) { const err = await terminar(p); if (err) aviso(err, true); }
+        if (res.siguiente) err = await terminar(p);
         actualizar();
       }
-    } catch (e) { aviso(e instanceof Error ? e.message : String(e), true); }
-    await recargar();
+      return err;
+    } catch (e) { return e instanceof Error ? e.message : String(e); }
   }
 
   /** «Terminar en PAM»: le deja a PAM lo que necesita para cerrar el canje y lo abre; los datos nuevos van después. */
@@ -155,5 +170,5 @@ export function crearTarjetaCanjes({ documento, servicio, datos, actualizar, abr
     if (captura) await publicar(captura, el('button'), aviso);
   }
 
-  return { pintar, recargar, alCargarForo, terminar, get captura() { return captura; }, get peticiones() { return peticiones; } };
+  return { pintar, recargar, alCargarForo, terminar, aplicarCanje, get captura() { return captura; }, get peticiones() { return peticiones; } };
 }

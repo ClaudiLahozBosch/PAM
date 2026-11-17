@@ -1,16 +1,15 @@
 // @ts-check
 // 2.3.0 · «Llevar a PAM» desde el Registro de Canjes. Una petición ya aprobada, tal como está escrita en el foro (la
 // haya armado PAM o no), se lee con el lector del Inspector (js/inspector/Revision.js: leerPedido + clasificar) y se
-// pasa a una lista de cambios que entiende Mi Ficha (js/paginas/revisor/Revisor.js, pamFicha.aplicarCanje). Lo que no
-// se reconoce va a «hacelo a mano»: nunca se inventa.
+// pasa a una lista de cambios que entiende Mi Ficha (js/paginas/revisor/Revisor.js, sumarCanje: la misma regla que
+// «Traer de la calculadora»). Lo que no se reconoce va a «hacelo a mano»: nunca se inventa.
 // Lógica pura: sin leer ni escribir.
 
 /** Lo que el foro deja para PAM (almacén del agente; solo [\w.-] en las claves). */
 export const CLAVE_LLEVAR = 'pam.llevar';
-/** Las peticiones ya llevadas a PAM de una cuenta: { posts: { <post>: { fecha, cambiosFicha, ficha? } } } */
-export const claveLlevados = (foroHost, id) => 'pam.llevados.' + String(foroHost).replace(/[^\w.-]/g, '_') + '.' + id;
 
 const NIVEL_IDIOMA = ['', 'Bajo', 'Medio', 'Alto', 'Nativo'];
+const VINCULO = { lazo: 'Lazo', union: 'Unión', vinculo: 'Vínculo' };
 const sinPrecio = s => String(s || '').replace(/\s*[—–-]\s*$/, '').trim();
 
 /**
@@ -18,7 +17,9 @@ const sinPrecio = s => String(s || '').replace(/\s*[—–-]\s*$/, '').trim();
  *   | { tipo: 'arte', nombre: string, hasta: number } | { tipo: 'vent', nombre: string, hasta: number }
  *   | { tipo: 'esp', rama: string, hasta: number } | { tipo: 'bg', bgTipo: string, bgCat: string, bgEsp: string, hasta: number }
  *   | { tipo: 'arcano', type: string, tier: string, nombre: string } | { tipo: 'idioma', nombre: string, nivel: string }
- *   | { tipo: 'titulo', texto: string } | { tipo: 'raza', nombre: string } | { tipo: 'talento', nombre: string, detalle: string }} Cambio
+ *   | { tipo: 'titulo', texto: string } | { tipo: 'raza', nombre: string } | { tipo: 'talento', nombre: string, detalle: string }
+ *   | { tipo: 'lazo', vinculo: string, pj: string }} Cambio
+ * (Un Punto de Destino va «a mano»: sumar 1 no da lo mismo si se lleva dos veces.)
  */
 
 /**
@@ -44,6 +45,10 @@ export function cambiosDePedido(clasificados) {
     else if (x.tipo === 'idioma' && NIVEL_IDIOMA[n]) c = { tipo: 'idioma', nombre: x.nombre, nivel: NIVEL_IDIOMA[n] };
     else if (x.tipo === 'tit' && texto) c = { tipo: 'titulo', texto };
     else if (x.tipo === 'raza' && x.nombre && !/licantrop/i.test(x.nombre)) c = { tipo: 'raza', nombre: x.nombre };
+    else if (x.tipo === 'tal' && /^(lazo|uni[oó]n|v[ií]nculo)\b/i.test(texto)) { // «Lazo con Fulano», «Unión: Fulano»
+      const v = texto.match(/^(lazo|uni[oó]n|v[ií]nculo)\b\s*(?:con|:|[-—–])?\s*([^()]+?)\s*(?:\(|$)/i);
+      if (v && v[2]) c = { tipo: 'lazo', vinculo: VINCULO[v[1].normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()], pj: v[2].trim() };
+    }
     else if (x.tipo === 'tal' && x.talento) c = { tipo: 'talento', nombre: x.talento, detalle: ((texto.match(/\(([^)]+)\)\s*$/) || [])[1] || '').trim() };
     // «Coreano - Nativo» (idioma escrito a mano, sin «→»)
     if (!c && !x.tipo && x.item && x.item.cat === 'idi') { const m = texto.match(/^(.+?)\s*(?:\((?:muggle|m[aá]gico)\))?\s*[-—–:]\s*(Bajo|Medio|Alto|Nativo)$/i); if (m) c = { tipo: 'idioma', nombre: m[1].trim(), nivel: m[2].charAt(0).toUpperCase() + m[2].slice(1).toLowerCase() }; }
@@ -54,12 +59,13 @@ export function cambiosDePedido(clasificados) {
 }
 
 /**
- * El paquete que el foro deja para PAM con «Llevar a PAM».
- * @param {{ foro: string, cuenta: { id: number, nombre: string }, post: string, enlacePet: string, enlaceAce: string,
+ * El paquete que el foro deja para PAM con «Llevar a PAM». `aprobacion` es la respuesta del Inspector
+ * (CanjesDelForo.buscarAprobacion): PAM la guarda con la petición, para que la tarjeta y la barra sigan el mismo camino.
+ * @param {{ foro: string, cuenta: { id: number, nombre: string }, post: string, enlacePet: string, aprobacion: any,
  *   total: number, cambios: any[], aMano: string[], ahora?: string }} d
  */
-export function paqueteLlevar({ foro, cuenta, post, enlacePet, enlaceAce, total, cambios, aMano, ahora = new Date().toISOString() }) {
-  return { v: 1, creado: ahora, foro, cuenta: { id: cuenta.id, nombre: cuenta.nombre, foro }, pj: cuenta.nombre, post: String(post), enlacePet, enlaceAce, total, cambios, aMano };
+export function paqueteLlevar({ foro, cuenta, post, enlacePet, aprobacion, total, cambios, aMano, ahora = new Date().toISOString() }) {
+  return { v: 2, creado: ahora, foro, cuenta: { id: cuenta.id, nombre: cuenta.nombre, foro }, pj: cuenta.nombre, post: String(post), enlacePet, enlaceAce: aprobacion.enlace, aprobacion, total, cambios, aMano };
 }
 
 /** ¿Este movimiento de la Bóveda de PAM es el de esta petición? (su enlace de petición apunta a ese mensaje) */
