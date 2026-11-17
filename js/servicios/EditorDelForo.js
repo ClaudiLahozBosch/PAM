@@ -4,7 +4,7 @@
 // apagar en «Configurar Mi PJ» (`on(grupo, id)`, js/reglas/ConfigMiPj.js):
 //   · sin revisión de la bóveda: `formulario: false` y sin avisos (el agente no pinta la barra ni para el envío);
 //   · sin un botón: el agente no lo enseña (cambiaria / colores en false) y, si igual llega el pedido, el texto no cambia.
-import { revisarEditor } from '../reglas/RevisorBoveda.js?v=2.3.0';
+import { revisarEditor } from '../reglas/RevisorBoveda.js?v=2.3.1';
 
 /**
  * @param {{ atender: (tipo: string, fn: (d: any) => any) => any }} agente

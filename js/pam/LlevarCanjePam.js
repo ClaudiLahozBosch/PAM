@@ -6,10 +6,10 @@
 //   2. Bóveda de PAM: se descuentan las grageas con los enlaces de la petición y de la aprobación, y «Ya lo publiqué».
 //      Si ya hay un movimiento con el enlace de esta petición (p. ej. de «Terminar en PAM»), no se descuenta otra vez.
 // Todo por PamActual (las funciones de las páginas), nunca pulsando botones.
-import { abrirPuerta, crearEl } from './ui/Puerta.js?v=2.3.0';
-import { cambiosDeCanje } from '../reglas/CambiosFicha.js?v=2.3.0';
-import { claveCuenta } from '../reglas/Canjes.js?v=2.3.0';
-import { CLAVE_LLEVAR, claveLlevados, esMovimientoDe } from '../reglas/LlevarCanje.js?v=2.3.0';
+import { abrirPuerta, crearEl } from './ui/Puerta.js?v=2.3.1';
+import { cambiosDeCanje } from '../reglas/CambiosFicha.js?v=2.3.1';
+import { claveCuenta } from '../reglas/Canjes.js?v=2.3.1';
+import { CLAVE_LLEVAR, claveLlevados, esMovimientoDe } from '../reglas/LlevarCanje.js?v=2.3.1';
 
 const ahoraISO = () => new Date().toISOString();
 const fmt = n => (typeof n === 'number' && !isNaN(n) ? String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '—');

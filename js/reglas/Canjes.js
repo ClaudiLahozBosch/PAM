@@ -80,7 +80,8 @@ export function avisosPeticion(pet, { actForo, nombreFicha }) {
 export function clasificarRespuesta(texto) {
   const t = normNombre(texto);
   const neg = /no son correct|no es correct|no esta correct|no estan correct|incorrect|denegad|rechazad|no se puede|no pueden|no podeis|te falta|os falta/.test(t);
-  const pos = /son correct|es correct|esta correct|estan correct|pueden? anadir|podeis anadir|puedes anadir|aprobad|aceptad/.test(t);
+  // 2.3.1: también «todo correcto» y «puedes agregarlos» (así responden en el Registro de Canjes)
+  const pos = /son correct|es correct|esta correct|estan correct|todo correct|pueden? anadir|podeis anadir|puedes anadir|pueden? agregar|podeis agregar|puedes agregar|aprobad|aceptad/.test(t);
   const m = t.match(/(?:suma correcta es de|dara un total de|total correcto es de|el total es de|un total de)\s*(\d[\d.\s]*\d|\d)/);
   const importe = m ? numero(m[1]) : null;
   if (neg && pos) return { clase: 'dudosa', importe };

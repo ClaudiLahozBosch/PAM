@@ -7,11 +7,11 @@
 //     mensaje (el mismo editor que «Aplicar el canje», CanjesDelForo.pasosFichaPorMensajes), por la puerta del agente:
 //     nada se edita sin «Aceptar» viendo exactamente qué cambia.
 // Solo lee el foro; lo que se pinta lo pone el agente («canje.pintar») y los clics vuelven aquí («canje.accion»).
-import { crearRevision } from '../../inspector/Revision.js?v=2.3.0';
-import { tablaDeDatos, prepararTabla } from '../../inspector/Tabla.js?v=2.3.0';
-import { CSS_INSPECTOR } from '../../inspector/estilosInspector.js?v=2.3.0';
-import { CLAVE_LLEVAR, claveLlevados, cambiosDePedido, paqueteLlevar, importeCanje } from '../../reglas/LlevarCanje.js?v=2.3.0';
-import { enlacePost, formato } from '../../reglas/Canjes.js?v=2.3.0';
+import { crearRevision } from '../../inspector/Revision.js?v=2.3.1';
+import { tablaDeDatos, prepararTabla } from '../../inspector/Tabla.js?v=2.3.1';
+import { CSS_INSPECTOR } from '../../inspector/estilosInspector.js?v=2.3.1';
+import { CLAVE_LLEVAR, claveLlevados, cambiosDePedido, paqueteLlevar, importeCanje } from '../../reglas/LlevarCanje.js?v=2.3.1';
+import { enlacePost, formato, normNombre } from '../../reglas/Canjes.js?v=2.3.1';
 
 const CSS_EXTRA = '.icj .cj-msg{flex-basis:100%;font-size:12.5px;color:var(--x-dim)}.icj .cj-msg.err{color:var(--x-bad)}.icj .cj-msg.ok{color:var(--x-good)}';
 const APROBADA = ['aprobada', 'corregida'];
@@ -74,8 +74,15 @@ export function crearCanjesEnRegistro({ agente, hola, cfg, servicio, datos, actu
     puesto = true;
     cargarTabla().catch(() => {}); // ya cargada al tocar «Llevar a PAM» (así PAM se abre enseguida tras el clic)
     const doc = await agente.leer(hola.ruta);
-    const autorId = post => parseInt(((R.datosDelPost(post).autor || '').match(/^\/u(\d+)/) || [])[1], 10);
-    const propios = R.mensajesDe(doc).filter(post => autorId(post) === hola.cuenta.id);
+    // 2.3.1: el foro no enlaza el perfil del autor de cada mensaje (ni con sesión): si no hay enlace, por el nombre
+    const yo = normNombre(hola.cuenta.nombre);
+    const esMio = post => {
+      const a = post.querySelector('p.author a[href^="/u"]');
+      if (a) return parseInt(((a.getAttribute('href') || '').match(/^\/u(\d+)/) || [])[1], 10) === hola.cuenta.id;
+      const n = post.querySelector('p.author strong') || post.querySelector('p.author .usr_grp_clr');
+      return !!n && normNombre(n.textContent) === yo;
+    };
+    const propios = R.mensajesDe(doc).filter(esMio);
     for (const post of propios) {
       const id = post.id.replace(/\D/g, '');
       const pedido = R.leerPedido(post.querySelector('.content'));
@@ -88,7 +95,7 @@ export function crearCanjesEnRegistro({ agente, hola, cfg, servicio, datos, actu
       const k = 'mipj.cj.apr.' + p.id, guardada = memoria.gv(k, null);
       if (guardada && guardada.confirmada) { p.aprobacion = guardada; continue; }
       try {
-        const a = await servicio.buscarAprobacion(revisores, { post: p.id, pj: hola.cuenta.nombre, descartadas: [] });
+        const a = await servicio.buscarAprobacion(revisores, { post: p.id, pj: hola.cuenta.nombre, descartadas: [] }, { fueraDelGrupo: true });
         if (a && a.post && APROBADA.includes(a.clase)) { p.aprobacion = a; memoria.sv(k, a); }
       } catch { /* se reintenta al volver a abrir la página */ }
       if (!puesto) return;
