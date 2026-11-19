@@ -10,11 +10,11 @@
 // del Registro («pam.cuentas.<foro>.<cuenta>»): las dos siguen con «Aplicar el canje» → «Terminar en PAM».
 // Si la Bóveda de PAM ya tiene un movimiento con el enlace de esta petición, el canje ya se cerró: no se toca.
 // Todo por PamActual (las funciones de las páginas), nunca pulsando botones.
-import { abrirPuerta, crearEl } from './ui/Puerta.js?v=2.3.2';
-import { cambiosDeCanje } from '../reglas/CambiosFicha.js?v=2.3.2';
-import { claveCuenta } from '../reglas/Canjes.js?v=2.3.2';
-import { CLAVE_LLEVAR, esMovimientoDe } from '../reglas/LlevarCanje.js?v=2.3.2';
-import { numerosFormulario } from './CanjesPam.js?v=2.3.2';
+import { abrirPuerta, crearEl } from './ui/Puerta.js?v=2.4.0';
+import { cambiosDeCanje } from '../reglas/CambiosFicha.js?v=2.4.0';
+import { claveCuenta } from '../reglas/Canjes.js?v=2.4.0';
+import { CLAVE_LLEVAR, esMovimientoDe } from '../reglas/LlevarCanje.js?v=2.4.0';
+import { numerosFormulario } from './CanjesPam.js?v=2.4.0';
 
 const ahoraISO = () => new Date().toISOString();
 const fmt = n => (typeof n === 'number' && !isNaN(n) ? String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '—');

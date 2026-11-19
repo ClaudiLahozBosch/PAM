@@ -7,7 +7,7 @@
    "pruebas": false,
    "campoFicha": "profile_field_3_-10",
    "campoBoveda": "profile_field_3_24",
-   "registroCanjes": "/t34430-registro-de-canjes",
+   "registroCanjes": "/t34430-registro-de-canjes", "veterania": { "como_se_edita": "El Registro de Veteranía y el anterior (cerrado; se lee si la cuenta puede abrirlo).", "registro": "/t35613-registro-de-veterania", "anterior": "/t23263-registro-de-veterania" },
    "desarrolladores": { "como_se_edita": "Cuentas que siempre pueden activar el modo Inspector (además de las del grupo de Inspectores de Canjes). Un nombre por línea, entre comillas y separados por comas, tal como sale en el foro.", "cuentas": ["Hana Park", "Mortimer Gaunt", "Robert Stevenson", "Seokjin Moon"] },
    "forosFicha": [21, 29, 30, 31, 32, 263, 296, 33, 297, 298, 299, 300, 301, 34],
    "foroBovedas": 175,

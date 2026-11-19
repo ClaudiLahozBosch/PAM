@@ -23,6 +23,7 @@ export const OPCIONES = {
     { id: 'viejos', glifo: '◷', titulo: 'Roles viejos', desc: 'El aviso «y N roles viejos» de los roles quietos hace mucho.' },
     { id: 'oficiales', glifo: '🎓', titulo: 'Oficiales en curso', desc: 'Tus oficiales abiertos y cuántas grageas llevan.' },
     { id: 'sueldo', glifo: '⚜', titulo: 'Sueldo', desc: 'Si ya cobraste el sueldo del mes.' },
+    { id: 'veterania', glifo: '✶', titulo: 'Veteranía', desc: 'Cuántos años lleva tu personaje, cuántas veteranías cobraste y cuándo toca la próxima.' },
     { id: 'ficha', glifo: '❖', titulo: 'Ficha', desc: 'Enlace a tu ficha, si está revisada y el último sello.' },
     { id: 'boveda', glifo: '⛁', titulo: 'Bóveda', desc: 'Grageas, últimos movimientos y la última revisión.' },
     { id: 'biblioteca', glifo: '📜', titulo: 'Biblioteca de oficiales', desc: 'Los sucesos de El Profeta libres, en curso o abandonados.' },
@@ -33,6 +34,7 @@ export const OPCIONES = {
     { id: 'roles', glifo: '✒', titulo: 'Roles pendientes', desc: 'El número de roles donde te toca responder.' },
     { id: 'misiones', glifo: '⚔', titulo: 'Turnos que vencen', desc: 'Los turnos de misión que vencen en menos de 24 h.' },
     { id: 'sueldo', glifo: '⚜', titulo: 'Sueldo sin cobrar', desc: 'El aviso de que todavía no pediste el sueldo.' },
+    { id: 'veterania', glifo: '✶', titulo: 'Veteranía sin cobrar', desc: 'El aviso de que te corresponde una veteranía que no pediste.' },
     { id: 'ficha', glifo: '●', titulo: 'Ficha pendiente', desc: 'El punto de «ficha pendiente de revisión».' }
   ]
 };

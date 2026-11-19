@@ -3,11 +3,12 @@
 // cuenta → perfil (enlaces a ficha y bóveda), roles y sueldo → ficha (con el lector nuevo) → bóveda → stats de combate
 // → oficiales en curso (salen de los temas de tus roles). El mismo orden que Mi PJ.
 // Cada paso que falla se apunta en `errores` y los demás siguen.
-import { leerPerfil, rutaTema, RUTA_PERFIL } from '../lectores/LectorPerfil.js?v=2.3.2';
-import { leerFichaDelForo } from './FichaDelForo.js?v=2.3.2';
-import { leerBovedaDelForo } from './BovedaDelForo.js?v=2.3.2';
-import { combate, puntos } from '../reglas/Combate.js?v=2.3.2';
-import { crearActividad } from './ActividadDelForo.js?v=2.3.2';
+import { leerPerfil, rutaTema, RUTA_PERFIL } from '../lectores/LectorPerfil.js?v=2.4.0';
+import { leerFichaDelForo } from './FichaDelForo.js?v=2.4.0';
+import { leerBovedaDelForo } from './BovedaDelForo.js?v=2.4.0';
+import { combate, puntos } from '../reglas/Combate.js?v=2.4.0';
+import { crearActividad } from './ActividadDelForo.js?v=2.4.0';
+import { crearVeteraniaDelForo } from './VeteraniaDelForo.js?v=2.4.0';
 
 /**
  * @param {import('./agente/ClienteAgente.js').ClienteAgente} agente
@@ -36,6 +37,10 @@ export async function leerMiPj(agente, { sistema, compendio, lector, foros, memo
   const rutaF = rutaTema(perfil.ficha, hola.foro), rutaB = rutaTema(perfil.boveda, hola.foro);
   if (!rutaF) errores.push(cfg.campoFicha ? 'Tu perfil no tiene el enlace a la ficha.' : 'En este foro no sé dónde está el enlace a la ficha.');
 
+  // 2.4.0 · la veteranía, a la vez que la ficha y la bóveda (la primera vez cuenta el registro entero)
+  const vet = cfg.veterania && memoria ? crearVeteraniaDelForo(agente, { cfg: cfg.veterania, memoria }) : null;
+  const leyendoVet = vet ? vet.leer({ pj: hola.cuenta.nombre, rutaFicha: rutaF }).catch(e => { console.warn('[Mi PJ] veteranía', e); return null; }) : Promise.resolve(null);
+
   let ficha = null, stats = null;
   if (rutaF) {
     try {
@@ -49,7 +54,12 @@ export async function leerMiPj(agente, { sistema, compendio, lector, foros, memo
 
   // null = no se pudo leer (el panel conserva los de la vez anterior, como Mi PJ)
   const oficiales = act && rolesYFilas ? await act.leerMisOficiales(rolesYFilas.filas).catch(e => { console.warn('[Mi PJ] oficiales', e); return null; }) : null;
-  return { ...base, estado: 'ok', perfil, ficha, stats, boveda, roles: rolesYFilas ? rolesYFilas.roles : null, sueldo, oficiales };
+  const veterania = await leyendoVet;
+  // ¿está la última veteranía aprobada en la bóveda? (algún movimiento tuyo enlaza la aprobación)
+  if (veterania && veterania.ultima && boveda && Array.isArray(boveda.propios)) {
+    veterania.ultima.enBoveda = boveda.propios.some(m => new RegExp('(^|\\D)' + veterania.ultima.post + '(\\D|$)').test(m.enl || ''));
+  }
+  return { ...base, estado: 'ok', perfil, ficha, stats, boveda, roles: rolesYFilas ? rolesYFilas.roles : null, sueldo, oficiales, veterania };
 }
 
 const mensaje = e => (e instanceof Error ? e.message : String(e));
@@ -72,7 +82,7 @@ export function aDatosMiPj(r, sistema) {
     v: 2, cuenta: r.cuenta?.nombre ?? '', pj: (f?.nombre || F?.titulo || r.cuenta?.nombre || ''), uid: r.cuenta?.id ?? null, leido: r.leido,
     ficha: F ? { url: `${foro}/t${F.tema}-`, titulo: F.titulo, estado: F.estado, sello: F.sello, codigo: f.partes.map(p => p.bbcode).join('\n') } : null,
     boveda,
-    roles: r.roles ?? null, sueldo: r.sueldo ?? null, oficiales: r.oficiales ?? null,
+    roles: r.roles ?? null, sueldo: r.sueldo ?? null, oficiales: r.oficiales ?? null, veterania: r.veterania ?? null,
     // todavía no está en PAM (fase 6): el panel lo dice en lugar de «Tocá Actualizar»
     pendientes: ['canjes'],
     rapido: f && r.stats ? rapidoDeFicha(f, r.stats, sistema, r.leido) : null,

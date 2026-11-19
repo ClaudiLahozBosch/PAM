@@ -2,8 +2,8 @@
 // «Configurar Mi PJ»: PAM guarda la configuración en `grimorio.mipj.config` y el panel de Mi PJ, dentro del foro, no
 // la ve (GUIA-AGENTES §5.2). Igual que el Coloreador (ColoreadorAlForo.js), PAM deja una copia en el almacén del
 // agente, `pam.mipj`, al abrir PAM y cada vez que se cambia algo en la página (evento `pam:mipj`).
-import { Almacen } from '../core/Almacen.js?v=2.3.2';
-import { normalizarConfig } from '../reglas/ConfigMiPj.js?v=2.3.2';
+import { Almacen } from '../core/Almacen.js?v=2.4.0';
+import { normalizarConfig } from '../reglas/ConfigMiPj.js?v=2.4.0';
 
 export const CLAVE_PAM = 'grimorio.mipj.config';
 /** La versión de PAM (la del ?v= con que se cargó este archivo), para avisar si el script de Tampermonkey es más viejo. */
