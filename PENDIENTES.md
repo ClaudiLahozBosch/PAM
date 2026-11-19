@@ -40,6 +40,20 @@ También en la 2.0.2: la prueba F10 (`sesion-nube.test.mjs`) cargaba `Nube.js` s
 
 **2.3.2 (17/11/2026):** solo cambia el número de versión. La segunda parte de la 2.3.1 se publicó con la misma etiqueta `?v=2.3.1` que la primera, así que un navegador que ya tenía guardados esos archivos podía seguir usándolos. Con 2.3.2 cambian todas las direcciones, y Tampermonkey ofrece la actualización.
 
+**2.4.0 (19/11/2026):** tarjeta «✶ Veteranía» en el panel Mi PJ, con aviso en la pastilla y un interruptor para cada uno en «Configurar Mi PJ» (`panel.veterania` y `pastilla.veterania`).
+- **Te corresponden:** los años cumplidos desde la «Fecha de Activación» del perfil, o la de inscripción si no está. Se lee del perfil de tu primer mensaje de la ficha.
+- **Cobraste:** se cuenta en el Registro de Veteranía (`data/foros.json` → `veterania.registro`).
+- **Las reglas** están en `js/reglas/Veterania.js`:
+  - el staff felicita por el nombre de pila o un apodo, así que cada aprobación se empareja con el mensaje anterior, todavía sin respuesta, de esa persona;
+  - en el registro, todo lo que no es una aprobación es un pedido;
+  - «4.000 grageas» son 2 veteranías;
+  - las citas no cuentan.
+- **Prueba con el registro real (47 páginas):** 234 aprobaciones con dueño y 3 sueltas.
+- **Lectura** (`js/servicios/VeteraniaDelForo.js`): la primera vez cuenta el registro entero; después, solo las páginas nuevas (`mipj.vet.<tema>`). El registro anterior (`veterania.anterior`, t23263) se lee una vez, si la cuenta puede abrirlo; si no, la tarjeta lo avisa cuando el personaje es de antes.
+- **Sin el registro no hay tarjeta:** si no se puede leer, no se muestran números a medias.
+- **Pendiente:** confirmar con el staff qué fecha cuenta (por ahora, la de activación).
+- **Pruebas:** `tests/unit/veterania.test.mjs`.
+
 **2.2.2 (16/11/2026):** seguía sin verse en el foro lo que se cambiaba en PAM. Visto en un banco local (PAM y un foro de prueba con el agente real y un almacén compartido): la configuración sí llegaba al panel, pero **el agente solo volvía a preguntar al panel cuando cambiaba el texto del editor**, así que los botones y la barra no cambiaban hasta escribir algo. Ahora el agente pregunta cada 1,5 s aunque el texto sea el mismo (con la pestaña visible). Además, el cartel «Este oficial» se quita al apagarlo y se vuelve a leer al encenderlo (`foro.oficial` con `estado: 'quitar'`), y el modo Inspector se quita o se pone solo. **Cambia el script de Tampermonkey**: hay que tener la 2.2.2. Pruebas: `tests/agente/config-mipj.test.mjs`, `tests/agente/oficial.test.mjs`.
 
 **2.2.1 (16/11/2026):** los cambios de «Configurar Mi PJ» tardaban en llegar al foro: el panel releía la configuración cada 15 s. Ahora la relee cada 2 s y enseguida al volver a la pestaña del foro (`visibilitychange`). Y la página tiene «✦ Enviar a Mi PJ ahora» (la vuelve a copiar al agente aunque no haya cambiado nada) y dice a qué hora se envió. El cartel del oficial sigue cambiando solo al recargar el tema. Prueba: `tests/unit/config-mipj.test.mjs`.

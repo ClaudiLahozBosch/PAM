@@ -7,10 +7,10 @@
 //   · los enlaces abren la página del foro (<base target="_top"> en panel.html).
 // Las tarjetas que aún no están en PAM (canjes) lo dicen en vez de «Tocá Actualizar».
 // Arreglos: R09 (los oficiales cerrados ya no salen en curso) y R10 (✕ para ocultar un oficial hasta volver a escribir en él).
-import { aFecha } from '../../lectores/FechaForo.js?v=2.3.2';
-import { estadoSueldo } from '../../reglas/Sueldo.js?v=2.3.2';
-import { grageasOf, sinMarcaOficial } from '../../reglas/Oficiales.js?v=2.3.2';
-import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=2.3.2';
+import { aFecha } from '../../lectores/FechaForo.js?v=2.4.0';
+import { estadoSueldo } from '../../reglas/Sueldo.js?v=2.4.0';
+import { grageasOf, sinMarcaOficial } from '../../reglas/Oficiales.js?v=2.4.0';
+import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=2.4.0';
 
 const TEMA_AVADENSE = { skin: 'avadense', ink: '#171a2b', panel: '#1e2236', 'panel-2': '#262a42', parchment: '#F1EADF', 'parchment-dim': '#a7a1b6', gold: '#B49768',
   'gold-bright': '#d6bd8f', 'arcane-bright': '#cf94a3', good: '#93b8a0', bad: '#d98377', 'line-strong': 'rgba(241,234,223,.16)', 'accent-ink': '#1b1e30',
@@ -127,7 +127,7 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
     const B = datos && datos.boveda, F = datos && datos.ficha, R = rolesVisibles();
     const pendF = F && F.estado === 'pendiente';
     if (!ui.abierto) {
-      root.innerHTML = `<div class="pill" data-a="abrir" title="Abrir Mi PJ"><span class="brand"><i>✦</i>Mi PJ</span>${ver('pastilla', 'grageas') && B && B.act != null ? `<b>${fmt(B.act)}</b>` : ''}${ver('pastilla', 'roles') && R.length ? `<span class="n" title="Roles donde te toca responder">${R.length}</span>` : ''}${(() => { if (!ver('pastilla', 'misiones')) return ''; const u = R.filter(r => r.mision && r.mision.vence && r.mision.vence - Date.now() < 864e5).length + misionesOtras().filter(x => x.r.mision.vence && x.r.mision.vence - Date.now() < 864e5 && x.r.mision.vence > Date.now()).length; return u ? `<span class="ms" title="Turnos de misión que vencen en menos de 24 h">⚔${u}</span>` : ''; })()}${ver('pastilla', 'sueldo') && sueldoPendiente() ? `<span class="sd" title="${SUELDO_TXT[sueldoPendiente()]}">⚜</span>` : ''}${ver('pastilla', 'ficha') && pendF ? '<span class="dot" title="Ficha pendiente de revisión"></span>' : ''}</div>`;
+      root.innerHTML = `<div class="pill" data-a="abrir" title="Abrir Mi PJ"><span class="brand"><i>✦</i>Mi PJ</span>${ver('pastilla', 'grageas') && B && B.act != null ? `<b>${fmt(B.act)}</b>` : ''}${ver('pastilla', 'roles') && R.length ? `<span class="n" title="Roles donde te toca responder">${R.length}</span>` : ''}${(() => { if (!ver('pastilla', 'misiones')) return ''; const u = R.filter(r => r.mision && r.mision.vence && r.mision.vence - Date.now() < 864e5).length + misionesOtras().filter(x => x.r.mision.vence && x.r.mision.vence - Date.now() < 864e5 && x.r.mision.vence > Date.now()).length; return u ? `<span class="ms" title="Turnos de misión que vencen en menos de 24 h">⚔${u}</span>` : ''; })()}${ver('pastilla', 'sueldo') && sueldoPendiente() ? `<span class="sd" title="${SUELDO_TXT[sueldoPendiente()]}">⚜</span>` : ''}${ver('pastilla', 'veterania') && veteraniaPendiente() ? `<span class="sd" title="Veteranía sin cobrar">✶</span>` : ''}${ver('pastilla', 'ficha') && pendF ? '<span class="dot" title="Ficha pendiente de revisión"></span>' : ''}</div>`;
       sincronizarTamano();
       return;
     }
@@ -155,6 +155,7 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
       }
       if (ver('panel', 'oficiales')) h += tarjetaOficiales();
       if (ver('panel', 'sueldo')) h += tarjetaSueldo();
+      if (ver('panel', 'veterania')) h += tarjetaVeterania();
       if (ver('panel', 'ficha')) h += `<div class="card"><div class="ct">❖ Ficha</div>${F ? `<a class="tl" href="${esc(F.url)}">${esc(F.titulo)}</a><br>
         <span class="badge ${pendF ? 'warn' : 'ok'}">${pendF ? '◷ Pendiente de revisión' : '✓ Revisada'}</span>
         <div class="row">${F.sello ? `Último sello: ${esc(F.sello.fecha)}${F.sello.autor ? ` <span class="dim">· ${esc(F.sello.autor)}</span>` : ''}` : 'Todavía sin sello'}</div>
@@ -209,6 +210,36 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
     else h += `<span class="badge ok">✓ Cobrado</span><div class="row">Aprobado por ${esc(S.resp.autor)} y sumado a tu bóveda${monto}.</div>`;
     return h + '</div>';
   }
+  /* ---------------- 2.4.0 · veteranía ---------------- */
+  // Solo si ya se leyó (así el panel de antes, sin estos datos, sale igual que siempre).
+  function tarjetaVeterania() {
+    const V = datos && datos.veterania;
+    if (!V) return '';
+    const enForo = r => (foroHost ? new URL(r, 'https://' + foroHost).href : r);
+    const reg = esc(enForo(V.registro));
+    let h = `<div class="card"><div class="ct">✶ Veteranía<span class="sp"></span><a href="${reg}">registro</a></div>`;
+    if (!V.activacion) return h + `<div class="dim">No encontré la «Fecha de Activación» en tu perfil, así que no sé cuántas te corresponden.${V.cobradas ? ` Cobradas: ${V.cobradas}.` : ''}</div></div>`;
+    const anios = V.anios === 1 ? '1 año' : `${V.anios} años`;
+    h += V.faltan > 0
+      ? `<span class="badge warn">◷ Te ${V.faltan === 1 ? 'falta cobrar 1' : `faltan cobrar ${V.faltan}`}</span>`
+      : `<span class="badge ok">✓ Al día</span>`;
+    h += `<div class="row">Activo desde el ${esc(V.activacion)} · ${anios} · ${V.cobradas === 1 ? 'cobraste 1' : `cobraste ${V.cobradas}`}</div>`;
+    if (V.faltan > 0) h += `<div class="row"><a href="${reg}">Ir a pedirla</a> <span class="dim">· no hace falta pedirla justo al cumplir el año: se acumula</span></div>`;
+    const U = V.ultima;
+    if (U) {
+      const f = aFecha(U.fecha), reciente = f && Date.now() - f.getTime() < 60 * 864e5;
+      h += `<div class="row dim">Última: aprobada por ${esc(U.aprobo)}, ${esc(String(U.fecha).replace(/\s*-\s*\d{1,2}:\d{2}.*$/, ''))} · <a href="${esc(enForo('/viewtopic?p=' + U.post + '#' + U.post))}">ver</a></div>`;
+      if (reciente && U.enBoveda === false) h += `<div class="nota">Todavía no la veo en tu bóveda: sumá las grageas con el enlace de la aprobación.</div>`;
+    }
+    if (V.proxima) h += `<div class="row dim">La próxima: ${esc(new Date(V.proxima).toLocaleDateString('es-AR'))}${V.dias != null ? ` (en ${V.dias === 1 ? '1 día' : V.dias + ' días'})` : ''}</div>`;
+    const viejo = new Date(2024, 9, 14);
+    const act = (String(V.activacion).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/) || []);
+    if (V.sinAnterior && act.length && new Date(+act[3], +act[2] - 1, +act[1]) < new Date(viejo.getFullYear() - 1, viejo.getMonth(), viejo.getDate())) {
+      h += `<div class="dim">Antes de octubre de 2024 se pedían en otro registro que tu cuenta no puede abrir: lo que cobraste ahí no lo cuento.</div>`;
+    }
+    return h + '</div>';
+  }
+  function veteraniaPendiente() { const V = datos && datos.veterania; return !!(V && V.faltan > 0); }
   function sueldoPendiente() { const E = !ui.sinSueldo && datos && estadoSueldo(datos.sueldo, datos.boveda); return E && ['sinPedir', 'corregir', 'aprobado'].includes(E.k) ? E.k : null; }
 
   /* ---------------- oficiales en curso ---------------- */
