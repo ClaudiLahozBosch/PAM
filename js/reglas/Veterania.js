@@ -15,24 +15,37 @@ export const norm = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, ''
 const palabras = s => norm(s).split(' ').filter(Boolean);
 const numero = t => parseInt(String(t).replace(/[.,\s]/g, ''), 10);
 
+const APROBACION = /corresponden?\s+(\d{1,2}[.,]\d{3}|\d{3,6})\s+grageas\s+por\s+(?:tu|tus|las?|los)\s+(?:\w+\s+)?veteran[ií]as?/gi;
+
 /**
- * ¿Es una aprobación de veteranía? «¡Felicidades, Hazael! Te corresponden 2.000 grageas por tu veteranía…»
+ * Las aprobaciones de veteranía de un mensaje. El staff a veces aprueba a varios en el mismo mensaje
+ * («¡Felicidades, Anastasia! Te corresponden 4.000… ¡Felicidades, Alain! Te corresponden 2.000…»): cada una, con el
+ * nombre que va entre «¡» y «!» después de la aprobación anterior.
  * @param {string} texto el mensaje SIN las citas (si alguien cita una aprobación, no es otra aprobación)
- * @returns {{ nombre: string, cantidad: number, grageas: number } | null}
+ * @returns {{ nombre: string, cantidad: number, grageas: number }[]}
  */
-export function aprobacionDeVeterania(texto) {
+export function aprobacionesDeVeterania(texto) {
   const t = String(texto || '').replace(/\s+/g, ' ');
-  const m = t.match(/corresponden?\s+(\d{1,2}[.,]\d{3}|\d{3,6})\s+grageas\s+por\s+(?:tu|tus|las?|los)\s+(?:\w+\s+)?veteran[ií]as?/i);
-  if (!m) return null;
-  const grageas = numero(m[1]);
-  if (!(grageas > 0)) return null;
-  // el nombre: lo que va entre «¡» y «!» antes del importe, sin «Felicidades», «Enhorabuena» ni «por tu primer año»
-  const antes = t.slice(0, m.index);
-  const ex = antes.match(/¡([^!¡]*)!/g);
-  let nombre = ex ? ex[ex.length - 1].slice(1, -1) : '';
-  nombre = nombre.replace(/^\s*(felicidades|enhorabuena|felicitaciones|feliz\s+\w+)\b\s*,?/i, '')
-    .replace(/\bpor\s+tu\s+\w+\s+a[ñn]o\b/i, '').replace(/[@,]/g, ' ').replace(/\s+/g, ' ').trim();
-  return { nombre, cantidad: Math.max(1, Math.round(grageas / GRAGEAS_POR_ANIO)), grageas };
+  const out = [];
+  let desde = 0;
+  for (const m of t.matchAll(APROBACION)) {
+    const grageas = numero(m[1]);
+    const antes = t.slice(desde, m.index);
+    desde = (m.index ?? 0) + m[0].length;
+    if (!(grageas > 0)) continue;
+    // el nombre: lo que va entre «¡» y «!» antes del importe, sin «Felicidades», «Enhorabuena» ni «por tu primer año»
+    const ex = antes.match(/¡([^!¡]*)!/g);
+    let nombre = ex ? ex[ex.length - 1].slice(1, -1) : '';
+    nombre = nombre.replace(/^\s*(felicidades|enhorabuena|felicitaciones|feliz\s+\w+)\b\s*,?/i, '')
+      .replace(/\bpor\s+tu\s+\w+\s+a[ñn]o\b/i, '').replace(/[@,]/g, ' ').replace(/\s+/g, ' ').trim();
+    out.push({ nombre, cantidad: Math.max(1, Math.round(grageas / GRAGEAS_POR_ANIO)), grageas });
+  }
+  return out;
+}
+
+/** La primera aprobación del mensaje, o null. */
+export function aprobacionDeVeterania(texto) {
+  return aprobacionesDeVeterania(texto)[0] || null;
 }
 
 /** ¿Pide la veteranía? (cualquier mensaje que la nombra y no es una aprobación) */
@@ -48,11 +61,13 @@ export function esElNombre(nombre, autor) {
 
 /**
  * @typedef {{ post: number, fecha: string, cantidad: number, aprobo: string }} Cobro
- * @typedef {{ v: 1, ultimo: number, porPj: Record<string, Cobro[]>, sueltas: (Cobro & { nombre: string })[], pendientes: { autor: string, post: number }[] }} Cuentas
+ * @typedef {{ v: number, ultimo: number, porPj: Record<string, Cobro[]>, sueltas: (Cobro & { nombre: string })[], pendientes: { autor: string, post: number }[] }} Cuentas
  */
 
+/** 2: un mensaje puede aprobar a varios (antes solo se contaba el primero; lo guardado con 1 se vuelve a contar). */
+export const VERSION_CUENTAS = 2;
 /** @returns {Cuentas} */
-export const cuentasVacias = () => ({ v: 1, ultimo: 0, porPj: {}, sueltas: [], pendientes: [] });
+export const cuentasVacias = () => ({ v: VERSION_CUENTAS, ultimo: 0, porPj: {}, sueltas: [], pendientes: [] });
 
 /**
  * Suma a lo ya contado los mensajes nuevos del registro (en orden; los de id ≤ `ultimo` ya se contaron).
@@ -60,12 +75,12 @@ export const cuentasVacias = () => ({ v: 1, ultimo: 0, porPj: {}, sueltas: [], p
  * @returns {Cuentas}
  */
 export function contarVeteranias(previo, posts) {
-  const c = previo && previo.v === 1 ? JSON.parse(JSON.stringify(previo)) : cuentasVacias();
+  const c = previo && previo.v === VERSION_CUENTAS ? JSON.parse(JSON.stringify(previo)) : cuentasVacias();
   for (const p of posts) {
     if (!p.id || p.id <= c.ultimo) continue;
     c.ultimo = p.id;
-    const a = aprobacionDeVeterania(p.texto);
-    if (a) {
+    const aps = aprobacionesDeVeterania(p.texto);
+    for (const a of aps) {
       // el pedido más reciente, todavía sin respuesta, de alguien con ese nombre (y que no sea quien aprueba): primero con
       // el nombre entero; si no, con alguna palabra («¡Enhorabuena, Doctora Corazón Claire!»); sin nombre, el último pedido
       const otros = c.pendientes.map((x, i) => ({ x, i })).filter(({ x }) => norm(x.autor) !== norm(p.autor)).reverse();
@@ -76,7 +91,8 @@ export function contarVeteranias(previo, posts) {
       const cobro = { post: p.id, fecha: p.fecha, cantidad: a.cantidad, aprobo: p.autor };
       if (k !== -1) { const quien = norm(c.pendientes[k].autor); (c.porPj[quien] ||= []).push(cobro); c.pendientes.splice(k, 1); }
       else c.sueltas.push({ ...cobro, nombre: a.nombre });
-    } else if (p.autor) {
+    }
+    if (!aps.length && p.autor) {
       // en el registro, todo lo que no es una aprobación es un pedido («Un año más para la pelirroja. Arcanos: …»)
       c.pendientes = c.pendientes.filter(x => norm(x.autor) !== norm(p.autor)); // un pedido nuevo de la misma persona reemplaza al anterior
       c.pendientes.push({ autor: p.autor, post: p.id });
