@@ -40,6 +40,8 @@ También en la 2.0.2: la prueba F10 (`sesion-nube.test.mjs`) cargaba `Nube.js` s
 
 **2.3.2 (17/11/2026):** solo cambia el número de versión. La segunda parte de la 2.3.1 se publicó con la misma etiqueta `?v=2.3.1` que la primera, así que un navegador que ya tenía guardados esos archivos podía seguir usándolos. Con 2.3.2 cambian todas las direcciones, y Tampermonkey ofrece la actualización.
 
+**2.4.0, arreglo (20/11/2026):** el staff a veces aprueba a varios en un mismo mensaje («¡Felicidades, Anastasia! … ¡Felicidades, Alain! …») y solo se contaba al primero: a Alain D. Balsan le salía que no había cobrado. Ahora `aprobacionesDeVeterania` devuelve todas las del mensaje, cada una con el nombre que va después de la anterior. Con el registro real (48 páginas): 34 mensajes aprueban a varios, y las aprobaciones con dueño pasan de 235 a 280. Las cuentas guardadas pasan a `v: 2`, así que lo contado con la regla vieja se vuelve a contar entero una vez. Prueba: `tests/unit/veterania.test.mjs`.
+
 **2.4.0 (19/11/2026):** tarjeta «✶ Veteranía» en el panel Mi PJ, con aviso en la pastilla y un interruptor para cada uno en «Configurar Mi PJ» (`panel.veterania` y `pastilla.veterania`).
 - **Te corresponden:** los años cumplidos desde la «Fecha de Activación» del perfil, o la de inscripción si no está. Se lee del perfil de tu primer mensaje de la ficha.
 - **Cobraste:** se cuenta en el Registro de Veteranía (`data/foros.json` → `veterania.registro`).

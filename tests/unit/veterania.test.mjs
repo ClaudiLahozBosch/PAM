@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
-import { aprobacionDeVeterania, contarVeteranias, cobrosDe, cuentasVacias, resumenVeterania, fechaDMA, esElNombre } from '../../js/reglas/Veterania.js';
+import { aprobacionDeVeterania, aprobacionesDeVeterania, contarVeteranias, cobrosDe, cuentasVacias, resumenVeterania, fechaDMA, esElNombre } from '../../js/reglas/Veterania.js';
 import { crearVeteraniaDelForo, activacionDelPerfil } from '../../js/servicios/VeteraniaDelForo.js';
 
 test('aprobación: el nombre, y cuántas veteranías son por las grageas', () => {
@@ -39,6 +39,18 @@ test('contar: cada aprobación va al pedido anterior de esa persona (por nombre 
   // lo ya contado no se cuenta otra vez (al volver a leer la última página)
   const otra = contarVeteranias(c, REGISTRO);
   assert.deepEqual(otra, c);
+});
+
+test('un mensaje del staff que aprueba a varios: cuenta a cada uno (como el del registro real, 20/11/2026)', () => {
+  const VARIOS = '¡Felicidades, Ana! Te corresponden 4.000 grageas por tus veteranías y, desde ahora, tienes derecho a 2 Punto de Destino extra. Además, te corresponden 600 grageas que puedes intercambiar por arcanos en este mismo tema.¡Felicidades, Teo! Te corresponden 2.000 grageas por tu veteranía y, desde ahora, tienes derecho a 1 Punto de Destino extra.¡Felicidades, Iván! Te corresponden 2.000 grageas por tu veteranía. Además, tus arcanos de veteranía son correctos y puedes agregarlos. ¡Enhorabuena!¡Felicidades, Gus! Te corresponden 4.000 grageas por tus veteranías y, desde ahora, tienes derecho a 2 Punto de Destino extra.';
+  assert.deepEqual(aprobacionesDeVeterania(VARIOS).map(a => [a.nombre, a.cantidad]), [['Ana', 2], ['Teo', 1], ['Iván', 1], ['Gus', 2]]);
+  const c = contarVeteranias(cuentasVacias(), [
+    m(30, 'Teo Brac', 'Vengo por mi veteranía'), m(31, 'Ana Lis', 'Las dos de 2025 y 2026'), m(32, 'Gus Rye', 'Veteranías, por favor'),
+    m(33, 'Iván Mor', 'La de este año'), m(34, 'Staff Uno', VARIOS)]);
+  assert.deepEqual(['Ana Lis', 'Teo Brac', 'Iván Mor', 'Gus Rye'].map(pj => cobrosDe(c, pj).map(x => [x.post, x.cantidad])), [[[34, 2]], [[34, 1]], [[34, 1]], [[34, 2]]]);
+  assert.deepEqual(c.pendientes, []);
+  // lo contado con la versión anterior de las reglas (v 1) se vuelve a contar
+  assert.equal(contarVeteranias({ v: 1, ultimo: 99, porPj: {}, sueltas: [], pendientes: [] }, [m(30, 'Teo Brac', 'x')]).ultimo, 30);
 });
 
 test('resumen: años cumplidos, las que faltan y la próxima', () => {
