@@ -51,7 +51,9 @@ export function crearVeteraniaDelForo(agente, { cfg, memoria, ahora = () => Date
   async function contarRegistro(ruta, cerrado) {
     const t = tema(ruta);
     const clave = 'mipj.vet.' + t;
-    const previo = memoria.gv(clave, null);
+    const guardado = memoria.gv(clave, null);
+    // lo contado con otra versión de las reglas se vuelve a contar desde el principio
+    const previo = guardado && guardado.cuentas && guardado.cuentas.v !== cuentasVacias().v ? null : guardado;
     if (cerrado && previo && previo.completo) return previo;
     if (cerrado && previo && previo.sinAcceso && ahora() - previo.cuando < DIA) return previo; // se reintenta una vez al día
     const d1 = await agente.leer(ruta);
