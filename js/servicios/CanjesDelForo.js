@@ -8,13 +8,13 @@
 //   «pam.cuentas.<foro>.<id de cuenta>»   { peticiones } de esa cuenta (Mi PJ lo guardaba en «cuentas.<foro>.<id>»).
 // Los Inspectores de cada grupo se guardan un día en la memoria del panel («grupos.<foro>»).
 import { numero, formato, esNumero, mismoTexto, enlacePost, temaNumero, peticionCapturada, textoPeticion, avisosPeticion, clasificarRespuesta, normNombre,
-  claveCuenta, paqueteCierre, cambiarNumeroTras, descuadres, codigoConEnlaces } from '../reglas/Canjes.js?v=2.4.0';
-import { leerSaldos } from '../lectores/LectorBoveda.js?v=2.4.0';
-import { revisar } from '../reglas/RevisorBoveda.js?v=2.4.0';
-import { leerFichaDelForo } from './FichaDelForo.js?v=2.4.0';
-import { EditorFicha } from '../bbcode/EditorFicha.js?v=2.4.0';
-import { aplicarCanje, yaAvisado } from '../reglas/CambiosFicha.js?v=2.4.0';
-import { autorDeMensaje, mismoAutor, esDeCuenta } from '../lectores/LectorTema.js?v=2.4.0';
+  claveCuenta, paqueteCierre, cambiarNumeroTras, descuadres, codigoConEnlaces, movimientoGrageas } from '../reglas/Canjes.js?v=2.5.0';
+import { leerSaldos } from '../lectores/LectorBoveda.js?v=2.5.0';
+import { revisar } from '../reglas/RevisorBoveda.js?v=2.5.0';
+import { leerFichaDelForo } from './FichaDelForo.js?v=2.5.0';
+import { EditorFicha } from '../bbcode/EditorFicha.js?v=2.5.0';
+import { aplicarCanje, yaAvisado } from '../reglas/CambiosFicha.js?v=2.5.0';
+import { autorDeMensaje, mismoAutor, esDeCuenta } from '../lectores/LectorTema.js?v=2.5.0';
 
 export const CLAVE_APROBACION = 'pam.aprobacion';
 const aNum = v => (typeof v === 'number' ? v : NaN);
@@ -404,6 +404,58 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
   }
 
   /**
+   * El paso «primer mensaje de la bóveda»: «Grageas Actuales» (y «Grageas Totales» si cambian) con los números nuevos.
+   * (2.5.0: sacado de «Aplicar el canje» para que lo use también el sueldo.)
+   */
+  function pasoPrimerMensaje(bov, bbBov, n, motivo) {
+    if (bbBov === null) throw new Error('No puedo leer el primer mensaje de tu bóveda.');
+    let nuevoBov = cambiarNumeroTras(bbBov, 'Grageas Actuales', n.actuales);
+    if (nuevoBov && n.totales !== bov.cabecera.totales) {
+      const t2 = cambiarNumeroTras(nuevoBov.texto, 'Grageas Totales', n.totales);
+      nuevoBov = t2 ? { texto: t2.texto, antes: t2.antes } : null;
+    }
+    return nuevoBov
+      ? { tipo: 'editar', post: bov.post, original: bbBov, nuevo: nuevoBov.texto, motivo, descripcion: 'primer mensaje de la bóveda' }
+      : { tipo: 'editar', post: bov.post, original: bbBov, nuevo: bbBov, descripcion: 'primer mensaje de la bóveda', omitido: 'No encuentro «Grageas Actuales» en el primer mensaje de la bóveda: ponelo a mano (' + formato(n.actuales) + ').' };
+  }
+
+  /**
+   * 2.5.0 · La puerta para sumar (o restar) grageas en la bóveda del foro sin nada preparado en PAM (el sueldo):
+   * el primer mensaje y el movimiento, con el mismo código que la Bóveda de PAM y los enlaces «Petición ✦ Aceptación».
+   * Los números salen de la bóveda del foro de ahora (el último movimiento), como al aplicar un canje.
+   * Si el movimiento ya está publicado (mismo texto, o uno tuyo que enlaza la aprobación), ese paso queda «igual».
+   * @param {{ delta: number, enlacePet: string, enlaceAce: string, divisor?: string, motivo: string, titulo: string, explicacion: string }} op
+   * @param {any} datos lo que leyó el panel (dónde está la bóveda)
+   * @returns {Promise<{ accion: any, numeros: { iniciales: number, actuales: number, totales: number } }>}
+   */
+  async function accionSumarABoveda({ delta, enlacePet, enlaceAce, divisor = '✦', motivo, titulo, explicacion }, datos) {
+    if (!datos || !datos.boveda) throw new Error('Tocá «Actualizar»: necesito tu bóveda.');
+    const urlBov = new URL(datos.boveda.url, origen).pathname;
+    const bov = await leerBoveda(urlBov);
+    const ini = bov.grageas.actuales, tot = bov.grageas.totales;
+    if (!esNumero(ini) || !esNumero(tot)) throw new Error('No encuentro las grageas actuales y totales de tu bóveda. No se tocó nada.');
+    const mov = movimientoGrageas({ ini, d: delta }, tot);
+    const n = { iniciales: ini, actuales: mov.act, totales: mov.tot };
+    const texto = codigoConEnlaces(mov.html, enlacePet, enlaceAce, divisor);
+    if (!texto) throw new Error('No pude armar el movimiento de la bóveda.');
+    const avisos = [];
+    try {
+      const probs = revisar(texto, { act: ini, tot, pla: bov.pl && bov.pl.actuales, plt: bov.pl && bov.pl.totales });
+      if (probs && probs.length) avisos.push('La revisión de bóveda de Mi PJ ve: ' + probs.map(t => String(t).replace(/<[^>]+>/g, '')).join(' · '));
+    } catch { /* sin revisor: no pasa nada */ }
+    /** @type {any} */ const pasoMov = { tipo: 'publicar', tema: temaNumero(urlBov), texto, descripcion: 'movimiento en la bóveda' };
+    /** @type {any} */ let pasoCab = pasoPrimerMensaje(bov, await leerBBCode(bov.post), n, motivo);
+    // ¿ya está? un movimiento tuyo con el mismo texto o que enlaza la aprobación: entonces la bóveda ya lo tiene
+    const idAce = (String(enlaceAce).match(/[?&]p=(\d+)/) || [])[1];
+    const ya = await buscarMensajePropio(urlBov, bb => mismoTexto(bb, texto) || (!!idAce && new RegExp('[?&]p=' + idAce + '\\b').test(bb)));
+    if (ya) {
+      pasoMov.igual = 'El movimiento ya está publicado en tu bóveda.'; pasoMov.postExistente = ya.id;
+      pasoCab = { tipo: 'editar', descripcion: 'primer mensaje de la bóveda', omitido: 'El movimiento ya está publicado: el primer mensaje no se toca.' };
+    }
+    return { accion: { titulo, explicacion, avisos, pasos: [pasoCab, pasoMov] }, numeros: n, yaPublicado: !!ya };
+  }
+
+  /**
    * La puerta «Aplicar el canje aprobado»: primer mensaje de la bóveda, movimiento, ficha (uno o más mensajes) y aviso.
    * La bóveda, con los textos que preparó PAM. La ficha, desde la 0.5.2, con el editor por mensajes sobre la ficha de
    * ahora (`pet.cambiosFicha`, N07); las peticiones preparadas antes llevan el código «Personalizada» entero (`pet.ficha`)
@@ -430,15 +482,7 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
       if (bov.grageas.actuales !== n.iniciales && bov.grageas.actuales !== n.actuales) {
         throw new Error('Tu bóveda del foro dice ' + formato(bov.grageas.actuales) + ' grageas actuales, pero el movimiento que preparó PAM empieza en ' + formato(n.iniciales) + '. ¿Hubo otro movimiento desde entonces? No se tocó nada: volvé a preparar el canje en PAM.');
       }
-      if (bbBov === null) throw new Error('No puedo leer el primer mensaje de tu bóveda.');
-      let nuevoBov = cambiarNumeroTras(bbBov, 'Grageas Actuales', n.actuales);
-      if (nuevoBov && n.totales !== bov.cabecera.totales) {
-        const t2 = cambiarNumeroTras(nuevoBov.texto, 'Grageas Totales', n.totales);
-        nuevoBov = t2 ? { texto: t2.texto, antes: t2.antes } : null;
-      }
-      pasos.push(nuevoBov
-        ? { tipo: 'editar', post: bov.post, original: bbBov, nuevo: nuevoBov.texto, motivo: 'Canje aprobado', descripcion: 'primer mensaje de la bóveda' }
-        : { tipo: 'editar', post: bov.post, original: bbBov, nuevo: bbBov, descripcion: 'primer mensaje de la bóveda', omitido: 'No encuentro «Grageas Actuales» en el primer mensaje de la bóveda: ponelo a mano (' + formato(n.actuales) + ').' });
+      pasos.push(pasoPrimerMensaje(bov, bbBov, n, 'Canje aprobado'));
       const mov = codigoConEnlaces(pet.boveda.html, pet.enlace, a.enlace, pet.boveda.divisor);
       if (!mov) throw new Error('No encuentro la línea «{Enlaces»» en el código de bóveda de PAM.');
       pasos.push({ tipo: 'publicar', tema: temaNumero(urlBov), texto: mov, descripcion: 'movimiento en la bóveda' });
@@ -519,6 +563,8 @@ export function crearCanjesDelForo(agente, { foroHost, cuenta, cfg, memoria, fic
     leerCaptura, datosCuenta, publicar, accionPublicarPeticion, buscarPeticionPublicada, registrarPeticion,
     descartarCaptura, confirmar, actualizarAprobaciones, buscarAprobacion, leerGruposRevisores,
     // 2.3.0 · «Aplicar cambio a la ficha» desde el Registro de Canjes (js/paginas/panel/CanjesEnRegistro.js)
-    pasosFichaPorMensajes
+    pasosFichaPorMensajes,
+    // 2.5.0 · el sueldo aprobado, a la bóveda (js/paginas/panel/SueldoPanel.js)
+    accionSumarABoveda
   };
 }

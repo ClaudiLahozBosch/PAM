@@ -1,11 +1,12 @@
 // @ts-check
 // Carga los datos del sistema. En el navegador, con fetch relativo a este archivo (funciona igual en
 // producción y en el staging); en las pruebas se le pasa el lector de archivos.
-import { Sistema } from './Sistema.js?v=2.4.0';
-import { Compendio } from './Compendio.js?v=2.4.0';
+import { Sistema } from './Sistema.js?v=2.5.0';
+import { Compendio } from './Compendio.js?v=2.5.0';
+import { catalogoEmpleos } from '../reglas/Sueldo.js?v=2.5.0';
 
 // La pone scripts/versionar.mjs en cada versión: así el navegador nunca usa datos de la anterior.
-const VERSION_DATOS = '2.4.0';
+const VERSION_DATOS = '2.5.0';
 const RAIZ = new URL('../../data/', import.meta.url);
 const porRed = url => fetch(url).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} en ${url}`); return r.json(); });
 const dato = f => new URL(`${f}?v=${VERSION_DATOS}`, RAIZ);
@@ -43,4 +44,14 @@ export async function cargarForos(leerJson = porRed) {
 export async function cargarCierresOficial(leerJson = porRed) {
   try { const j = await leerJson(dato('cierres-oficial.json')); return Array.isArray(j.avisos) ? j.avisos : []; }
   catch (e) { console.warn('[Mi PJ] data/cierres-oficial.json no se pudo leer (¿falta o sobra una coma?):', e); return []; }
+}
+
+/**
+ * 2.5.0 · La lista de empleos del foro (data/empleos-foro.txt, la del Revisor de Empleos), para la categoría de sueldo.
+ * Si no se puede leer, lista vacía: el panel deja elegir la categoría a mano.
+ * @returns {Promise<{ nombre: string, categoria: string }[]>}
+ */
+export async function cargarEmpleosForo(leerTexto = url => fetch(url).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} en ${url}`); return r.text(); })) {
+  try { return catalogoEmpleos(await leerTexto(dato('empleos-foro.txt'))); }
+  catch (e) { console.warn('[Mi PJ] data/empleos-foro.txt no se pudo leer:', e); return []; }
 }

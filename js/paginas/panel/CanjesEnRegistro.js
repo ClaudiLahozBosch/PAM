@@ -11,12 +11,12 @@
 //   3. «Terminar en PAM»: el de la tarjeta: PAM pone los enlaces y hace «Ya lo publiqué» en su Bóveda.
 //   Hecho todo (por la barra o por la tarjeta): «✓ Canje terminado».
 // Solo lee el foro; lo que se pinta lo pone el agente («canje.pintar») y los clics vuelven aquí («canje.accion»).
-import { crearRevision } from '../../inspector/Revision.js?v=2.4.0';
-import { tablaDeDatos, prepararTabla } from '../../inspector/Tabla.js?v=2.4.0';
-import { CSS_INSPECTOR } from '../../inspector/estilosInspector.js?v=2.4.0';
-import { CLAVE_LLEVAR, cambiosDePedido, paqueteLlevar, importeCanje } from '../../reglas/LlevarCanje.js?v=2.4.0';
-import { enlacePost, formato } from '../../reglas/Canjes.js?v=2.4.0';
-import { autorDeMensaje, esDeCuenta } from '../../lectores/LectorTema.js?v=2.4.0';
+import { crearRevision } from '../../inspector/Revision.js?v=2.5.0';
+import { tablaDeDatos, prepararTabla } from '../../inspector/Tabla.js?v=2.5.0';
+import { CSS_INSPECTOR } from '../../inspector/estilosInspector.js?v=2.5.0';
+import { CLAVE_LLEVAR, cambiosDePedido, paqueteLlevar, importeCanje } from '../../reglas/LlevarCanje.js?v=2.5.0';
+import { enlacePost, formato } from '../../reglas/Canjes.js?v=2.5.0';
+import { autorDeMensaje, esDeCuenta } from '../../lectores/LectorTema.js?v=2.5.0';
 
 const CSS_EXTRA = '.icj .cj-msg{flex-basis:100%;font-size:12.5px;color:var(--x-dim)}.icj .cj-msg.err{color:var(--x-bad)}.icj .cj-msg.ok{color:var(--x-good)}';
 const APROBADA = ['aprobada', 'corregida'];

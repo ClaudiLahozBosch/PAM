@@ -6,8 +6,8 @@
 //     puede abrir, el registro anterior (veterania.anterior).
 // El registro se cuenta entero una vez y queda en la memoria del panel («mipj.vet.<tema>»); después solo se leen las
 // páginas nuevas (lo ya contado se salta por el número de mensaje). El anterior está cerrado: se lee una sola vez.
-import { leerPaginaTema } from '../lectores/LectorTema.js?v=2.4.0';
-import { contarVeteranias, cobrosDe, fechaDMA, resumenVeterania, cuentasVacias } from '../reglas/Veterania.js?v=2.4.0';
+import { leerPaginaTema } from '../lectores/LectorTema.js?v=2.5.0';
+import { contarVeteranias, cobrosDe, fechaDMA, resumenVeterania, cuentasVacias } from '../reglas/Veterania.js?v=2.5.0';
 
 const POR_PAGINA = 15;
 const DIA = 864e5;

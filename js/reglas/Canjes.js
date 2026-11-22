@@ -170,3 +170,16 @@ export function codigoConEnlaces(html, enlacePet, enlaceAce, divisor) {
   });
   return hecho ? t : null;
 }
+
+/**
+ * 2.5.0 · El código de un movimiento de grageas, igual que el «Código para la bóveda» de la Bóveda de PAM
+ * (`bovCodesGr` en js/paginas/registro/RegistroRoles.js; lo comprueba tests/caracterizacion/sueldo.test.mjs), con la
+ * línea «{Enlaces»» vacía: los enlaces los pone `codigoConEnlaces`. Lo usa el sueldo, que no se prepara en PAM.
+ * @param {{ ini: number, d: number }} n las grageas actuales antes del movimiento y lo que se suma (o resta)
+ * @param {number} totales las grageas totales antes del movimiento
+ */
+export function movimientoGrageas({ ini, d }, totales) {
+  const signo = x => (x >= 0 ? '+' : '') + x, act = ini + d, tot = totales + Math.max(d, 0);
+  const f = t => `<span class="scaja-form">{${t}»</span>`;
+  return { ini, d, act, tot, html: `<div class="scaja-content">${f('Grageas iniciales')} ${ini}\n${f('Grageas que se añaden/quitan')} ${signo(d)}\n${f('Grageas actuales')} ${act}\n${f('Grageas totales')} ${tot}\n${f('Enlaces')} \n</div>` };
+}

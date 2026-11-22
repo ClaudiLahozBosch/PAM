@@ -44,6 +44,8 @@ export function crearPamActual(w) {
     /** «Traer de la calculadora»: los canjes del carrito pasan a la ficha de PAM. */
     traerCalculadora: () => w.pamFicha.traerCalculadora(),
     /** 2.3.0 · ¿Tiene este PAM «sumar un canje a la ficha»? (Mi Ficha, para «Llevar a PAM» desde el Registro de Canjes) */
+    /** 2.5.0 · ¿Puede PAM apuntar el sueldo en su Bóveda? (js/pam/SueldoPam.js) */
+    haySueldo: () => !!(w.rrBoveda && w.rrBoveda.get && w.rrBoveda.cerrar),
     hayLlevar: () => !!(w.pamFicha && w.pamFicha.aplicarCanje && w.pamFicha.buscar && w.pamPjs && w.pamPjs.cambiar && w.rrBoveda && w.rrBoveda.preparar && w.rrBoveda.cerrar),
     /** 2.3.0 · Suma a la ficha activa lo de una petición aprobada (js/reglas/LlevarCanje.js): { hechos, manual }. */
     aplicarCanjeFicha: cambios => w.pamFicha.aplicarCanje(cambios),
