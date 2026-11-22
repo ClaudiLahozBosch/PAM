@@ -1,14 +1,15 @@
 // @ts-check
 // Arranque de lo nuevo dentro de PAM (index.html lo carga con una sola línea). Si el script de PAM (el agente) no
 // está instalado, no hace nada y PAM funciona como siempre.
-import { ClienteAgente } from '../servicios/agente/ClienteAgente.js?v=2.4.0';
-import { PROTOCOLO } from '../servicios/agente/protocolo.js?v=2.4.0';
-import { crearPamActual } from './PamActual.js?v=2.4.0';
-import { crearControladorForo } from './ControladorForo.js?v=2.4.0';
-import { cargarForos } from '../datos/cargar.js?v=2.4.0';
-import { publicarColoreador } from './ColoreadorAlForo.js?v=2.4.0';
-import { publicarConfigMiPj } from './ConfigMiPjAlForo.js?v=2.4.0';
-import { crearLlevarCanjePam } from './LlevarCanjePam.js?v=2.4.0';
+import { ClienteAgente } from '../servicios/agente/ClienteAgente.js?v=2.5.0';
+import { PROTOCOLO } from '../servicios/agente/protocolo.js?v=2.5.0';
+import { crearPamActual } from './PamActual.js?v=2.5.0';
+import { crearControladorForo } from './ControladorForo.js?v=2.5.0';
+import { cargarForos } from '../datos/cargar.js?v=2.5.0';
+import { publicarColoreador } from './ColoreadorAlForo.js?v=2.5.0';
+import { publicarConfigMiPj } from './ConfigMiPjAlForo.js?v=2.5.0';
+import { crearLlevarCanjePam } from './LlevarCanjePam.js?v=2.5.0';
+import { crearSueldoPam } from './SueldoPam.js?v=2.5.0';
 
 const esperar = ms => new Promise(r => setTimeout(r, ms));
 
@@ -42,6 +43,12 @@ async function arrancar() {
   revisarLlevar();
   window.addEventListener('focus', revisarLlevar);
   window.addEventListener('hashchange', revisarLlevar);
+  // 2.5.0 · «Terminar en PAM» del sueldo: si el foro dejó un sueldo aplicado, se abre sola su puerta
+  const sueldo = crearSueldoPam({ agente, pam: crearPamActual(window), doc: document });
+  const revisarSueldo = () => setTimeout(() => { sueldo.revisar().catch(e => console.warn('[PAM] el sueldo:', e)); }, 900);
+  revisarSueldo();
+  window.addEventListener('focus', revisarSueldo);
+  window.addEventListener('hashchange', revisarSueldo);
 }
 
 arrancar().catch(e => console.warn('[PAM] puente con el foro:', e));

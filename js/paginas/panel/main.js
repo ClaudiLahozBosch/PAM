@@ -1,27 +1,30 @@
 // @ts-check
 // Arranque del panel «Mi PJ» dentro del foro (el agente lo muestra en un iframe sin marco).
-import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=2.4.0';
-import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=2.4.0';
-import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla } from '../../datos/cargar.js?v=2.4.0';
-import { LectorFicha } from '../../lectores/LectorFicha.js?v=2.4.0';
-import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=2.4.0';
-import { crearPanelMiPj } from './MiPjPanel.js?v=2.4.0';
-import { temaDeRuta } from '../../reglas/RevisorBoveda.js?v=2.4.0';
-import { crearActividad } from '../../servicios/ActividadDelForo.js?v=2.4.0';
-import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=2.4.0';
-import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=2.4.0';
-import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=2.4.0';
-import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=2.4.0';
-import { crearTarjetaCanjes } from './CanjesPanel.js?v=2.4.0';
-import { crearCanjesEnRegistro } from './CanjesEnRegistro.js?v=2.4.0';
-import { crearRevision } from '../../inspector/Revision.js?v=2.4.0';
-import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=2.4.0';
-import { crearInspector } from '../../inspector/Inspector.js?v=2.4.0';
-import { normNombre } from '../../core/texto.js?v=2.4.0';
-import { crearColoreadorDelForo } from '../../servicios/ColoreadorDelForo.js?v=2.4.0';
-import { crearConfigDelForo } from '../../servicios/ConfigMiPjDelForo.js?v=2.4.0';
-import { atenderEditor } from '../../servicios/EditorDelForo.js?v=2.4.0';
-import { activo as estaActivo } from '../../reglas/ConfigMiPj.js?v=2.4.0';
+import { ClienteAgente } from '../../servicios/agente/ClienteAgente.js?v=2.5.0';
+import { PROTOCOLO } from '../../servicios/agente/protocolo.js?v=2.5.0';
+import { cargarSistema, cargarCompendio, cargarForos, cargarCierresOficial, cargarDatosTabla, cargarEmpleosForo } from '../../datos/cargar.js?v=2.5.0';
+import { LectorFicha } from '../../lectores/LectorFicha.js?v=2.5.0';
+import { leerMiPj, aDatosMiPj } from '../../servicios/MiPj.js?v=2.5.0';
+import { crearPanelMiPj } from './MiPjPanel.js?v=2.5.0';
+import { temaDeRuta } from '../../reglas/RevisorBoveda.js?v=2.5.0';
+import { crearActividad } from '../../servicios/ActividadDelForo.js?v=2.5.0';
+import { crearLectorBiblioteca } from '../../servicios/BibliotecaDelForo.js?v=2.5.0';
+import { CLAVES_BIBLIOTECA } from './BibliotecaPanel.js?v=2.5.0';
+import { ES_OFICIAL, barraDeOficial, marcarCuarto } from '../../reglas/Oficiales.js?v=2.5.0';
+import { crearCanjesDelForo } from '../../servicios/CanjesDelForo.js?v=2.5.0';
+import { crearTarjetaCanjes } from './CanjesPanel.js?v=2.5.0';
+import { crearCanjesEnRegistro } from './CanjesEnRegistro.js?v=2.5.0';
+import { crearRevision } from '../../inspector/Revision.js?v=2.5.0';
+import { crearInspectorUI } from '../../inspector/InspectorUI.js?v=2.5.0';
+import { crearInspector } from '../../inspector/Inspector.js?v=2.5.0';
+import { normNombre } from '../../core/texto.js?v=2.5.0';
+import { crearColoreadorDelForo } from '../../servicios/ColoreadorDelForo.js?v=2.5.0';
+import { crearConfigDelForo } from '../../servicios/ConfigMiPjDelForo.js?v=2.5.0';
+import { atenderEditor } from '../../servicios/EditorDelForo.js?v=2.5.0';
+import { activo as estaActivo } from '../../reglas/ConfigMiPj.js?v=2.5.0';
+import { crearSueldoDelForo } from '../../servicios/SueldoDelForo.js?v=2.5.0';
+import { crearSueldoPanel } from './SueldoPanel.js?v=2.5.0';
+import { DIV } from '../registro/datos.js?v=2.5.0';
 
 const root = /** @type {HTMLElement} */ (document.getElementById('mipj'));
 
@@ -90,9 +93,17 @@ async function arrancar() {
     alCambiar: () => { if (enRegistro) enRegistro.refrescar(); }
   }) : null;
   // el modo Inspector: en el Registro de Canjes, para los Inspectores de Canjes y los desarrolladores (en el foro de pruebas, todos)
+  // 2.5.0 · en la tarjeta del sueldo: «Pedir el sueldo con este rol» (en un rol cerrado) y «Aplicar a la bóveda»
+  const sueldo = cfg?.actividad?.sueldos ? crearSueldoPanel({
+    documento: document, agente, ruta: hola.ruta || '', foro: hola.foro || '', cuenta: hola.cuenta, memoria,
+    servicio: crearSueldoDelForo(agente, { origen: 'https://' + hola.foro, cuenta: hola.cuenta, cfg: cfg.actividad, memoria }),
+    canjes: servicioCanjes, catalogo: () => cargarEmpleosForo(), tabla: (sistema.datos.empleos && sistema.datos.empleos.sueldos) || {},
+    divisor: () => DIV[document.documentElement.dataset.mipjSkin || ''] || '✦', // el de la Bóveda de PAM con ese tema
+    datos: () => panel?.datos, actualizar: () => panel.actualizar()
+  }) : null;
   const inspector = modoInspector(agente, { hola, cfg, servicioCanjes, memoria, repintar: () => panel && panel.pintar(), permitido: () => on('foro', 'inspector') });
   panel = crearPanelMiPj({
-    root, documento: document, guardado, agente, ventana: hola.ventana, cuenta: hola.cuenta, foroHost: hola.foro || '', canjes, inspector,
+    root, documento: document, guardado, agente, ventana: hola.ventana, cuenta: hola.cuenta, foroHost: hola.foro || '', canjes, inspector, sueldo,
     config: () => config.actual(),
     pamUrl: new URL('index.html', location.href).href,
     biblioteca: cfg?.actividad?.biblioteca ? (() => {

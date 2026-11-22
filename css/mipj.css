@@ -153,3 +153,14 @@ html,body{margin:0;padding:0;background:transparent;overflow:hidden}
   #mipj-modal .bt{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
   html[data-mipj-skin="pixel"] #mipj .box,html[data-mipj-skin="pixel"] #mipj .card,html[data-mipj-skin="pixel"] #mipj .stat,html[data-mipj-skin="pixel"] #mipj button.b,html[data-mipj-skin="pixel"] #mipj .pill,html[data-mipj-skin="pixel"] #mipj-modal .mb{border-radius:0}
   #mipj.estrecho{right:8px;bottom:8px}
+  /* 2.5.0 · tarjeta del sueldo: «Pedir el sueldo con este rol» (js/paginas/panel/SueldoPanel.js) */
+  #mipj .sd-bt{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:8px}
+  #mipj .sd-rol{margin-top:8px}
+  #mipj .sd-form{margin-top:10px;padding-top:8px;border-top:1px solid var(--m-line-strong)}
+  #mipj .sd-campo{display:flex;flex-direction:column;gap:3px;margin:8px 0 0;font-size:12.5px}
+  #mipj .sd-campo>span{color:var(--m-gold-bright);font-weight:700}
+  #mipj .sd-campo select,#mipj .sd-campo textarea{width:100%;box-sizing:border-box;padding:6px 10px;border-radius:10px;border:1px solid var(--m-line-strong);background:color-mix(in srgb,var(--m-panel-2) 80%,transparent);color:var(--m-parchment);font:13px var(--m-sans);outline:none}
+  #mipj .sd-campo textarea{resize:vertical;min-height:70px}
+  #mipj .sd-campo select:focus,#mipj .sd-campo textarea:focus{border-color:var(--m-gold)}
+  #mipj .sd-campo option{background:var(--m-panel);color:var(--m-parchment)}
+  #mipj .sd-falta{margin-top:6px;min-height:1em}

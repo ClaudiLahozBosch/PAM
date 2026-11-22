@@ -7,10 +7,10 @@
 //   · los enlaces abren la página del foro (<base target="_top"> en panel.html).
 // Las tarjetas que aún no están en PAM (canjes) lo dicen en vez de «Tocá Actualizar».
 // Arreglos: R09 (los oficiales cerrados ya no salen en curso) y R10 (✕ para ocultar un oficial hasta volver a escribir en él).
-import { aFecha } from '../../lectores/FechaForo.js?v=2.4.0';
-import { estadoSueldo } from '../../reglas/Sueldo.js?v=2.4.0';
-import { grageasOf, sinMarcaOficial } from '../../reglas/Oficiales.js?v=2.4.0';
-import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=2.4.0';
+import { aFecha } from '../../lectores/FechaForo.js?v=2.5.0';
+import { estadoSueldo } from '../../reglas/Sueldo.js?v=2.5.0';
+import { grageasOf, sinMarcaOficial } from '../../reglas/Oficiales.js?v=2.5.0';
+import { crearBibliotecaOficiales } from './BibliotecaPanel.js?v=2.5.0';
 
 const TEMA_AVADENSE = { skin: 'avadense', ink: '#171a2b', panel: '#1e2236', 'panel-2': '#262a42', parchment: '#F1EADF', 'parchment-dim': '#a7a1b6', gold: '#B49768',
   'gold-bright': '#d6bd8f', 'arcane-bright': '#cf94a3', good: '#93b8a0', bad: '#d98377', 'line-strong': 'rgba(241,234,223,.16)', 'accent-ink': '#1b1e30',
@@ -74,7 +74,7 @@ function bgsDe(R) {
  *   ventana: { ancho: number, alto: number }, pamUrl: string, cuenta?: { id: number, nombre: string } | null, ahora?: () => number,
  *   biblioteca?: { escanear: (op: any, log: (m: string) => void) => Promise<any>, origen: string, guardarEnAgente?: (k: string, v: any) => Promise<any> } | null }} dep
  */
-export function crearPanelMiPj({ root, documento, guardado = null, cargar, agente = null, ventana, pamUrl, cuenta = null, biblioteca = null, foroHost = '', canjes = null, inspector = null, config = () => null }) {
+export function crearPanelMiPj({ root, documento, guardado = null, cargar, agente = null, ventana, pamUrl, cuenta = null, biblioteca = null, foroHost = '', canjes = null, inspector = null, config = () => null, sueldo = null }) {
   // 2.2.0: «Configurar Mi PJ» en PAM: qué tarjetas y qué marcas de la pastilla se ven (sin configuración, todas)
   const ver = (g, id) => { const c = config(); return !c || !c[g] || c[g][id] !== false; };
   const gv = (k, d) => { try { const v = guardado?.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
@@ -186,6 +186,7 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
       <button class="b pri" data-a="pam" ${datos ? '' : 'disabled'} title="Abre PAM y te muestra qué se va a cambiar antes de aplicarlo">Enviar a PAM</button></div></div>`;
     root.innerHTML = h;
     if (canjes && root.querySelector('#mipj-canjes')) canjes.pintar(root.querySelector('#mipj-canjes'));
+    if (sueldo && root.querySelector('#mipj-sueldo')) sueldo.pintar(root.querySelector('#mipj-sueldo'));
     if (ui.rapido && ui.rapidoQ) filtrarRapido(ui.rapidoQ);
     aplicarTam();
   }
@@ -208,6 +209,8 @@ export function crearPanelMiPj({ root, documento, guardado = null, cargar, agent
     else if (E.k === 'aprobado') h += `<span class="badge warn">✓ Aprobado · falta sumarlo</span><div class="row">Lo aprobó ${esc(S.resp.autor)}${S.resp.fecha ? ', ' + esc(S.resp.fecha) : ''}. ${E.sinBoveda ? 'No encontré tu bóveda para ver si ya lo sumaste.' : `Todavía no lo veo en tu bóveda: sumá${monto ? ' las' + monto.replace(/[()]/g, '') : ' el sueldo'}.`}</div>
       <div class="row"><a href="${yo(S.resp.id)}">Aprobación</a>${datos.boveda ? ` <span class="dim">·</span> <a href="${esc(datos.boveda.url.split('#')[0])}">Tu bóveda</a>` : ''}</div>`;
     else h += `<span class="badge ok">✓ Cobrado</span><div class="row">Aprobado por ${esc(S.resp.autor)} y sumado a tu bóveda${monto}.</div>`;
+    // 2.5.0 · «Pedir el sueldo con este rol» y «Aplicar a la bóveda» (los pinta SueldoPanel; sin él, la tarjeta de siempre)
+    if (sueldo) h += '<div id="mipj-sueldo"></div>';
     return h + '</div>';
   }
   /* ---------------- 2.4.0 · veteranía ---------------- */

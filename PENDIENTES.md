@@ -40,6 +40,36 @@ También en la 2.0.2: la prueba F10 (`sesion-nube.test.mjs`) cargaba `Nube.js` s
 
 **2.3.2 (17/11/2026):** solo cambia el número de versión. La segunda parte de la 2.3.1 se publicó con la misma etiqueta `?v=2.3.1` que la primera, así que un navegador que ya tenía guardados esos archivos podía seguir usándolos. Con 2.3.2 cambian todas las direcciones, y Tampermonkey ofrece la actualización.
 
+**2.5.0 (22/11/2026):** el sueldo de un rol de empleo, desde Mi PJ. Todo en la tarjeta «⚜ Sueldo» y siempre por la puerta (Aceptar / Modificar / Denegar). El script de Tampermonkey solo cambia de número: la puerta ya sabía publicar y editar.
+- **«Pedir el sueldo con este rol».** Sale en un rol de la zona de rol que está cerrado y donde escribiste, mientras el tema de sueldos del mes está abierto.
+  - **Qué se lee** (`js/servicios/SueldoDelForo.js`):
+    - el candado del foro («Este tema está cerrado…»);
+    - la ruta de navegación: pasa por «Zona del rol» y por ningún subforo de `noRol` (Sueldos Mensuales y Gringotts también cuelgan de esa categoría);
+    - tus «Empleos roleros», el campo del perfil que pone el staff y que el foro enseña junto a cada mensaje tuyo.
+    - Un rol cerrado se guarda una semana; uno abierto se vuelve a mirar.
+  - **El formulario se rellena solo:**
+    - el empleo (un desplegable si tenés varios);
+    - el nivel del perfil, que se puede cambiar, porque cuenta el que tenías al terminar el rol;
+    - la categoría, de `data/empleos-foro.txt`; si el empleo no está o no tiene categoría, se elige a mano;
+    - el sueldo, de la tabla de `data/sistema.json`.
+  - **Lo único que escribís es el resumen**, y se guarda como borrador. Se publica el formulario oficial «Empleo rolero» (`formularioEmpleo`, js/reglas/Sueldo.js).
+  - **No deja publicar si:**
+    - este mes ya pediste un rol de empleo (salvo si te pidieron corregir);
+    - ya pediste este rol, este mes o en un tema de sueldos con mensajes posteriores al final del rol.
+  - **Avisa (sin bloquear)** si cambiás el nivel del perfil, si el empleo no está en la lista o si ya tenés un pedido de cargo este mes.
+- **«Aplicar a la bóveda»**, con el sueldo aprobado. Es la puerta de «Aplicar el canje»: edita el primer mensaje de la bóveda (Grageas Actuales y Totales) y publica el movimiento.
+  - Lo hace `CanjesDelForo.accionSumarABoveda`; el paso del primer mensaje se sacó de `accionAplicarCanje` para que lo usen los dos.
+  - El movimiento tiene el mismo código que la Bóveda de PAM (`movimientoGrageas`, comparado con `bovCodesGr` de verdad) y los enlaces «Petición ✦ Aceptación».
+  - Así la tarjeta pasa sola a «✓ Cobrado».
+  - Si el movimiento ya está (mismo texto, o uno tuyo que enlaza la aprobación), sale «Ya está igual».
+- **«Terminar en PAM»**, desde la misma puerta: el foro deja `pam.sueldo` y PAM abre su puerta (`js/pam/SueldoPam.js`). La Bóveda de PAM apunta el movimiento con los dos enlaces (`rrBoveda.cerrar`), para que el próximo canje no se encuentre otro saldo.
+  - No se apunta dos veces.
+  - Si PAM tenía otro saldo antes del sueldo, no lo suma y propone «Enviar a PAM».
+- **Sin la pieza del sueldo** (las pruebas que comparan con el Mi PJ antiguo), la tarjeta es la misma de antes.
+- **Pruebas:** `tests/unit/sueldo.test.mjs` y `tests/caracterizacion/sueldo.test.mjs` (PAM de verdad y el panel).
+- **Falta:** probarlo en Chrome con el foro real. La petición de Mortimer de octubre (aprobada el 21/11) todavía no está en su bóveda: sirve para probar «Aplicar a la bóveda», con permiso.
+- **Queda a mano:** el resumen, los formularios de cargo y de profesor, y revisar el nivel si subiste después de terminar el rol.
+
 **2.4.0, arreglo (20/11/2026):** el staff a veces aprueba a varios en un mismo mensaje («¡Felicidades, Anastasia! … ¡Felicidades, Alain! …») y solo se contaba al primero: a Alain D. Balsan le salía que no había cobrado. Ahora `aprobacionesDeVeterania` devuelve todas las del mensaje, cada una con el nombre que va después de la anterior. Con el registro real (48 páginas): 34 mensajes aprueban a varios, y las aprobaciones con dueño pasan de 235 a 280. Las cuentas guardadas pasan a `v: 2`, así que lo contado con la regla vieja se vuelve a contar entero una vez. Prueba: `tests/unit/veterania.test.mjs`.
 
 **2.4.0 (19/11/2026):** tarjeta «✶ Veteranía» en el panel Mi PJ, con aviso en la pastilla y un interruptor para cada uno en «Configurar Mi PJ» (`panel.veterania` y `pastilla.veterania`).
