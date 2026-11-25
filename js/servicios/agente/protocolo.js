@@ -22,7 +22,7 @@
 //   panel.tema     { tema }                el tema de Mi PJ para las puertas
 // agente → PAM:
 //   editor.revisar { texto, ruta }         → { avisos: string[], encabezado? }   («Antes de publicar»)
-//                                          2.1.0: y colorear { dialogos, coloreado, cambiaria, sinConfig, quien } (el botón)
+//                                          2.1.0: y colorear { dialogos, coloreado, cambiaria, sinConfig, quien } (el botón; 2.5.1: y nombres, marcas)
 //   editor.colorear { texto }              → { texto, tramos, quien, sinConfig }   («Colorear diálogos», 2.1.0)
 //   editor.descolorear { texto }           → { texto }   («Quitar colores» sin el texto de antes, 2.1.3)
 //   ventana.cambio { ancho, alto }         cambió el tamaño de la ventana del foro

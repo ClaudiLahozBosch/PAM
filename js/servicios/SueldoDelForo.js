@@ -5,10 +5,10 @@
 //     (el campo del perfil que el foro enseña junto a cada mensaje; lo pone el staff);
 //   · el tema de sueldos del mes y los de antes: si ya pidió un rol de empleo este mes y si ya pidió este rol.
 // Lo que se publica va siempre por la puerta del agente (Aceptar / Modificar / Denegar).
-import { leerPaginaTema, esDeCuenta } from '../lectores/LectorTema.js?v=2.5.0';
-import { lineasDe } from './CanjesDelForo.js?v=2.5.0';
-import { enlacePost } from '../reglas/Canjes.js?v=2.5.0';
-import { empleosDelPerfil, formularioEmpleo, ES_PEDIDO_DE_ROL, enlazaTema } from '../reglas/Sueldo.js?v=2.5.0';
+import { leerPaginaTema, esDeCuenta } from '../lectores/LectorTema.js?v=2.5.1';
+import { lineasDe } from './CanjesDelForo.js?v=2.5.1';
+import { enlacePost } from '../reglas/Canjes.js?v=2.5.1';
+import { empleosDelPerfil, formularioEmpleo, ES_PEDIDO_DE_ROL, enlazaTema } from '../reglas/Sueldo.js?v=2.5.1';
 
 /** La marca de «tema cerrado» del foro (el candado de los botones: «Este tema está cerrado y no puedes…»). */
 export const temaCerrado = doc => [...doc.querySelectorAll('img[alt]')].some(i => /tema\s+est[aá]\s+cerrado/i.test(i.getAttribute('alt') || ''));

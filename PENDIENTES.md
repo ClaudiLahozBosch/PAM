@@ -40,6 +40,8 @@ También en la 2.0.2: la prueba F10 (`sesion-nube.test.mjs`) cargaba `Nube.js` s
 
 **2.3.2 (17/11/2026):** solo cambia el número de versión. La segunda parte de la 2.3.1 se publicó con la misma etiqueta `?v=2.3.1` que la primera, así que un navegador que ya tenía guardados esos archivos podía seguir usándolos. Con 2.3.2 cambian todas las direcciones, y Tampermonkey ofrece la actualización.
 
+**2.5.1 (25/11/2026):** «Colorear diálogos» en el editor del foro también sale cuando el mensaje no tiene diálogos pero sí nombres o marcas del Coloreador (antes solo miraba los diálogos y el botón no salía, aunque al pulsarlo habría pintado los nombres). Sale si al pulsarlo cambiaría algo; si no hay nada que pintar, sigue sin salir. El título dice qué pinta («Colorea 2 nombres y 1 marca…»). El número de nombres y marcas lo da PAM (`contar`, js/servicios/ColoreadorDelForo.js); el script de Tampermonkey cambia para mirarlo. Con un PAM anterior el botón funciona como antes. Prueba: `tests/agente/colorear.test.mjs`.
+
 **2.5.0 (22/11/2026):** el sueldo de un rol de empleo, desde Mi PJ. Todo en la tarjeta «⚜ Sueldo» y siempre por la puerta (Aceptar / Modificar / Denegar). El script de Tampermonkey solo cambia de número: la puerta ya sabía publicar y editar.
 - **«Pedir el sueldo con este rol».** Sale en un rol de la zona de rol que está cerrado y donde escribiste, mientras el tema de sueldos del mes está abierto.
   - **Qué se lee** (`js/servicios/SueldoDelForo.js`):

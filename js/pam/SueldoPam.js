@@ -6,9 +6,9 @@
 // No se toca si la Bóveda de PAM ya tiene ese movimiento (el enlace del pedido) o ya tiene las grageas de después.
 // Si PAM tenía otro saldo antes del sueldo, no se adivina: se dice y se propone «Enviar a PAM» desde el foro.
 // Como «Llevar a PAM» (LlevarCanjePam.js): todo por PamActual, nunca pulsando botones.
-import { abrirPuerta, crearEl } from './ui/Puerta.js?v=2.5.0';
-import { CLAVE_SUELDO } from '../reglas/Sueldo.js?v=2.5.0';
-import { esMovimientoDe } from '../reglas/LlevarCanje.js?v=2.5.0';
+import { abrirPuerta, crearEl } from './ui/Puerta.js?v=2.5.1';
+import { CLAVE_SUELDO } from '../reglas/Sueldo.js?v=2.5.1';
+import { esMovimientoDe } from '../reglas/LlevarCanje.js?v=2.5.1';
 
 const ahoraISO = () => new Date().toISOString();
 const fmt = n => (typeof n === 'number' && !isNaN(n) ? String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '—');

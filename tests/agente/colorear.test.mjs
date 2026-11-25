@@ -15,7 +15,8 @@ const pagina = `<!doctype html><html><head><title>Foro</title><script>var _userd
 const dom = new JSDOM(pagina, { url: FORO + '/post?t=5&mode=reply', runScripts: 'outside-only', pretendToBeVisual: true });
 const W = dom.window;
 W.fetch = async u => ({ status: 200, ok: true, url: String(u), text: async () => '<html></html>' });
-const CFG = { tag: '#A3000D', dlgf: {}, opts: { raya: true, guion: true, comillas: true }, names: [], marks: [] };
+const CFG = { tag: '#A3000D', dlgf: {}, opts: { raya: true, guion: true, comillas: true },
+  names: [{ name: 'Mortimer', g: 'custom', c: '#2E7D32', f: {} }], marks: [{ m: 0, g: 'custom', c: '#B9A6D9', f: { i: true }, strip: true }] };
 const gm = { 'pam.coloreador': { v: 1, general: { ...CFG, tag: '#111111' }, pjs: [{ nombre: 'Himmel Reich Bils.', config: CFG }] } };
 W.GM_getValue = (k, d) => (k in gm ? gm[k] : d);
 W.GM_setValue = (k, v) => { gm[k] = v; };
@@ -84,6 +85,24 @@ test('2.1.4: con colores puestos a mano salen los dos; «Colorear» los respeta 
   assert.deepEqual(visibles(), ['quitar']);
   quitar().click(); await espera(80);
   assert.equal(ta.value, 'Narración.\n—Hola.');
+});
+
+test('2.5.1: sin diálogos pero con nombres o marcas, «Colorear» también sale (y pinta solo eso)', async () => {
+  await escribir('Mortimer miró la puerta y no dijo nada.');
+  assert.deepEqual(visibles(), ['colorear']);
+  assert.equal(btn().title, 'Colorea 1 nombre con tu Coloreador de PAM (Himmel Reich Bils)');
+  btn().click(); await espera(80);
+  assert.equal(ta.value, '[color=#2E7D32]Mortimer[/color] miró la puerta y no dijo nada.');
+  await espera(1700);
+  assert.deepEqual(visibles(), ['quitar'], 'ya está pintado: «Colorear» no haría nada');
+  await escribir('Mortimer pensó: *otra vez no*. Y Mortimer se fue.');
+  assert.equal(btn().title, 'Colorea 2 nombres y 1 marca con tu Coloreador de PAM (Himmel Reich Bils)');
+  btn().click(); await espera(80);
+  assert.equal(ta.value, '[color=#2E7D32]Mortimer[/color] pensó: [color=#B9A6D9][i]otra vez no[/i][/color]. Y [color=#2E7D32]Mortimer[/color] se fue.');
+  await escribir('Entró Mortimer.\n—Buenas —dijo.');
+  assert.equal(btn().title, 'Colorea 1 diálogo y 1 nombre con tu Coloreador de PAM (Himmel Reich Bils)');
+  await escribir('Narración sin nadie conocido.');
+  assert.deepEqual(visibles(), [], 'sin diálogos, nombres ni marcas, no sale nada');
 });
 
 test('sin nada de PAM, avisa en lugar de colorear', async () => {

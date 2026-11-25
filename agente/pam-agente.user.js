@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PAM · Agente (staging)
 // @namespace    https://claudilahozbosch.github.io/PAM/staging
-// @version      2.5.0
+// @version      2.5.1
 // @description  El script mínimo de PAM: lee el foro con tu sesión, publica y edita SOLO tras tu «Aceptar» y muestra el panel «Mi PJ» de PAM. Toda la lógica está en PAM.
 // @updateURL    https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
 // @downloadURL  https://claudilahozbosch.github.io/PAM/agente/pam-agente.user.js
@@ -30,7 +30,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.5.0';
+  var VERSION = '2.5.1';
   var PROTOCOLO = 1;
   // Staging: el fork de pruebas (otro dominio que PAM real, así no ve los datos de los jugadores).
   var PAM = { origen: 'https://claudilahozbosch.github.io', ruta: '/PAM/' };
@@ -382,7 +382,7 @@
     '.mipj-check small{color:var(--m-parchment-dim);font-weight:500;margin-left:auto;font-size:11px}',
     ':host([data-skin="pixel"]) .mipj-check{border-radius:0}'
   ].join('\n');
-  // 2.1.0: el botón «Colorear diálogos», junto a los botones del foro del editor (solo si hay algún diálogo)
+  // 2.1.0: el botón «Colorear diálogos», junto a los botones del foro del editor (solo si hay algún diálogo; 2.5.1: o algún nombre o marca)
   var CSS_COL = [
     ':host{display:inline-block;vertical-align:middle;margin:0 10px 0 4px}',
     '.mipj-col{display:inline-flex;gap:6px;align-items:center;padding:4px 11px;border-radius:999px;cursor:pointer;font:600 12px var(--m-sans);',
@@ -676,7 +676,7 @@
   // ---------------------------------------------------------------
   // Panel «Mi PJ» (página de PAM en un iframe que ocupa justo lo que ocupa el panel)
   // ---------------------------------------------------------------
-  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=2.5.0' });
+  var iframe = el('iframe', { clase: 'marco', title: 'Mi PJ', allowtransparency: 'true', allow: 'clipboard-write', src: PAM.origen + PAM.ruta + 'panel.html?foro=' + encodeURIComponent(location.origin) + '&v=2.5.1' });
   raiz.appendChild(iframe);
   // Si el panel no arranca (no pide tamaño), se enseña al menos su pastilla, para que nunca quede invisible.
   var panelVivo = false;
@@ -986,13 +986,22 @@
     if (prev) { prev.insertAdjacentElement('beforebegin', colHost); } else { caja.insertAdjacentElement('afterend', colHost); }
     function pintarColor(r) {
       var c = r && r.colorear;
-      var verColorear = !!(c && c.dialogos && c.cambiaria), verQuitar = !!(c && c.colores);
+      // 2.5.1: también sin diálogos, si hay nombres o marcas que pintar (PAM 2.5.1 los cuenta; uno anterior, no)
+      var verColorear = !!(c && (c.dialogos || c.nombres || c.marcas) && c.cambiaria), verQuitar = !!(c && c.colores);
       colBtn.style.display = verColorear ? '' : 'none'; quitarBtn.style.display = verQuitar ? '' : 'none';
       colHost.style.display = verColorear || verQuitar ? '' : 'none';
       if (!verColorear) { return; }
       colBtn.replaceChildren.apply(colBtn, [el('span', { clase: 'ic', texto: '✦' }), document.createTextNode('Colorear diálogos')].concat(c.quien ? [el('small', { texto: c.quien })] : []));
       colBtn.title = c.sinConfig ? 'Primero abrí PAM con el script instalado: así Mi PJ conoce tu Coloreador'
-        : 'Colorea ' + (c.dialogos === 1 ? 'el diálogo' : 'los ' + c.dialogos + ' diálogos') + ' sin color con tu Coloreador de PAM' + (c.quien ? ' (' + c.quien + ')' : ' (la configuración general)');
+        : 'Colorea ' + queColorea(c) + ' con tu Coloreador de PAM' + (c.quien ? ' (' + c.quien + ')' : ' (la configuración general)');
+    }
+    function queColorea(c) {
+      if (!c.nombres && !c.marcas) { return (c.dialogos === 1 ? 'el diálogo' : 'los ' + c.dialogos + ' diálogos') + ' sin color'; }
+      var partes = [];
+      if (c.dialogos) { partes.push(c.dialogos + (c.dialogos === 1 ? ' diálogo' : ' diálogos')); }
+      if (c.nombres) { partes.push(c.nombres + (c.nombres === 1 ? ' nombre' : ' nombres')); }
+      if (c.marcas) { partes.push(c.marcas + (c.marcas === 1 ? ' marca' : ' marcas')); }
+      return partes.length > 1 ? partes.slice(0, -1).join(', ') + ' y ' + partes[partes.length - 1] : partes[0];
     }
     function pedirTexto(boton, tipo) {
       var t = textoEditor(ta);

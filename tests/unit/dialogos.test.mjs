@@ -80,7 +80,7 @@ test('Mi PJ en el foro: la configuración del personaje con el nombre de la cuen
   const C = crearColoreadorDelForo(agente, { cuenta: () => cuenta });
   let r = await C.colorear('—Hola.');
   assert.deepEqual([r.texto, r.quien, r.tramos, r.sinConfig], ['[color=#222222]—Hola.[/color]', 'Himmel Reich Bils', 1, false]);
-  assert.deepEqual(await C.contar('—Hola.\n—Adiós.'), { dialogos: 2, colores: false, cambiaria: true, sinConfig: false, quien: 'Himmel Reich Bils' });
+  assert.deepEqual(await C.contar('—Hola.\n—Adiós.'), { dialogos: 2, nombres: 0, marcas: 0, colores: false, cambiaria: true, sinConfig: false, quien: 'Himmel Reich Bils' });
   const ya = await C.contar(r.texto);
   assert.deepEqual([ya.colores, ya.cambiaria], [true, false], 'ya coloreado: solo «Quitar colores»');
   // después de previsualizar (\r\n, colores en minúsculas) se ve igual
@@ -98,6 +98,6 @@ test('Mi PJ en el foro: la configuración del personaje con el nombre de la cuen
 
 test('Mi PJ en el foro: sin nada de PAM, cuenta los diálogos pero no colorea', async () => {
   const C = crearColoreadorDelForo({ leerDato: async () => undefined }, { cuenta: () => 'TEST' });
-  assert.deepEqual(await C.contar('—Hola.'), { dialogos: 1, colores: false, cambiaria: true, sinConfig: true, quien: null });
+  assert.deepEqual(await C.contar('—Hola.'), { dialogos: 1, nombres: 0, marcas: 0, colores: false, cambiaria: true, sinConfig: true, quien: null });
   assert.deepEqual(await C.colorear('—Hola.'), { sinConfig: true, texto: '—Hola.', tramos: 0, quien: null });
 });

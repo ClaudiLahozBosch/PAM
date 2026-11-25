@@ -2,8 +2,8 @@
 // 2.1.0: el botón «Colorear diálogos» de Mi PJ en el editor del foro. Usa la configuración del Coloreador de PAM que
 // PAM deja en el almacén del agente (`pam.coloreador`, js/pam/ColoreadorAlForo.js): la del personaje que tiene el
 // nombre de la cuenta con la que se escribe y, si no tiene, la general.
-import { colorearConConfig, descolorear, quitarColores } from '../bbcode/Dialogos.js?v=2.5.0';
-import { normNombre } from '../core/texto.js?v=2.5.0';
+import { colorearConConfig, descolorear, quitarColores } from '../bbcode/Dialogos.js?v=2.5.1';
+import { normNombre } from '../core/texto.js?v=2.5.1';
 
 /** Solo para contar diálogos cuando PAM todavía no pasó ninguna configuración. */
 const POR_DEFECTO = { tag: '#ffffff', names: [], marks: [], dlgf: {}, opts: { raya: true, guion: true, comillas: true } };
@@ -42,8 +42,10 @@ export function crearColoreadorDelForo(agente, { cuenta }) {
       const limpio = descolorear(t, config);
       const r = colorearConConfig(limpio, config);
       // 2.1.4: los dos botones pueden salir a la vez. colores: hay algún [color] (sale «Quitar colores», que los quita
-      // todos); cambiaria: «Colorear» pintaría algo (un diálogo sin color; lo coloreado a mano se respeta)
-      return { dialogos: r.count, colores: /\[color=/i.test(t), cambiaria: r.count > 0 && r.code.toLowerCase() !== t.toLowerCase(), sinConfig: !g, quien };
+      // todos); cambiaria: «Colorear» pintaría algo (lo coloreado a mano se respeta).
+      // 2.5.1: «algo» es un diálogo, un nombre o una marca: un mensaje sin diálogos pero con nombres también se colorea.
+      const tramos = r.count + r.names + r.marks;
+      return { dialogos: r.count, nombres: r.names, marcas: r.marks, colores: /\[color=/i.test(t), cambiaria: tramos > 0 && r.code.toLowerCase() !== t.toLowerCase(), sinConfig: !g, quien };
     },
     /**
      * «Quitar colores» (2.1.4): todos los [color] del texto, los del Coloreador (con sus formatos) y los puestos a mano.

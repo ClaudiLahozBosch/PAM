@@ -5,7 +5,7 @@
 //     sueldos (data/sistema.json); vos elegís el empleo, revisás el nivel y escribís el resumen. Se publica por la puerta.
 //   · con el sueldo aprobado: «Aplicar a la bóveda» (el primer mensaje y el movimiento, como «Aplicar el canje») y,
 //     desde la misma puerta, «Terminar en PAM» para que la Bóveda de PAM lo apunte también (js/pam/SueldoPam.js).
-import { estadoSueldo, NIVELES, buscarEmpleo, sueldoDe, CLAVE_SUELDO, paqueteSueldo } from '../../reglas/Sueldo.js?v=2.5.0';
+import { estadoSueldo, NIVELES, buscarEmpleo, sueldoDe, CLAVE_SUELDO, paqueteSueldo } from '../../reglas/Sueldo.js?v=2.5.1';
 
 /**
  * @param {{ documento: Document, servicio: ReturnType<typeof import('../../servicios/SueldoDelForo.js').crearSueldoDelForo>,

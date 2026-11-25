@@ -1,15 +1,15 @@
 // @ts-check
 // Arranque de lo nuevo dentro de PAM (index.html lo carga con una sola línea). Si el script de PAM (el agente) no
 // está instalado, no hace nada y PAM funciona como siempre.
-import { ClienteAgente } from '../servicios/agente/ClienteAgente.js?v=2.5.0';
-import { PROTOCOLO } from '../servicios/agente/protocolo.js?v=2.5.0';
-import { crearPamActual } from './PamActual.js?v=2.5.0';
-import { crearControladorForo } from './ControladorForo.js?v=2.5.0';
-import { cargarForos } from '../datos/cargar.js?v=2.5.0';
-import { publicarColoreador } from './ColoreadorAlForo.js?v=2.5.0';
-import { publicarConfigMiPj } from './ConfigMiPjAlForo.js?v=2.5.0';
-import { crearLlevarCanjePam } from './LlevarCanjePam.js?v=2.5.0';
-import { crearSueldoPam } from './SueldoPam.js?v=2.5.0';
+import { ClienteAgente } from '../servicios/agente/ClienteAgente.js?v=2.5.1';
+import { PROTOCOLO } from '../servicios/agente/protocolo.js?v=2.5.1';
+import { crearPamActual } from './PamActual.js?v=2.5.1';
+import { crearControladorForo } from './ControladorForo.js?v=2.5.1';
+import { cargarForos } from '../datos/cargar.js?v=2.5.1';
+import { publicarColoreador } from './ColoreadorAlForo.js?v=2.5.1';
+import { publicarConfigMiPj } from './ConfigMiPjAlForo.js?v=2.5.1';
+import { crearLlevarCanjePam } from './LlevarCanjePam.js?v=2.5.1';
+import { crearSueldoPam } from './SueldoPam.js?v=2.5.1';
 
 const esperar = ms => new Promise(r => setTimeout(r, ms));
 
